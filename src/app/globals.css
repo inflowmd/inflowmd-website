@@ -1,26 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: #F7F6F3;
+  --color-foreground: #1A1A2E;
+  --color-accent: #2D6CDF;
+  --color-accent-light: #4A8AF4;
+  --color-dark: #1A1A2E;
+  --color-dark-card: #232340;
+  --color-dark-surface: #1E1E36;
+  --color-warm-bg: #F7F6F3;
+  --color-warm-bg-alt: #EFEEE9;
+  --font-sans: 'Outfit', system-ui, sans-serif;
+  --font-serif: 'Source Serif 4', Georgia, serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-warm-bg);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+/* Mesh gradient animation for hero */
+@keyframes meshMove1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(80px, -60px) scale(1.1); }
+  50% { transform: translate(-40px, 40px) scale(0.95); }
+  75% { transform: translate(60px, 20px) scale(1.05); }
+}
+@keyframes meshMove2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-70px, 50px) scale(1.05); }
+  50% { transform: translate(50px, -30px) scale(1.1); }
+  75% { transform: translate(-30px, -50px) scale(0.95); }
+}
+@keyframes meshMove3 {
+  0%, 100% { transform: translate(0, 0) scale(1.05); }
+  33% { transform: translate(60px, 40px) scale(0.95); }
+  66% { transform: translate(-50px, -20px) scale(1.1); }
+}
+
+.mesh-blob-1 {
+  animation: meshMove1 20s ease-in-out infinite;
+}
+.mesh-blob-2 {
+  animation: meshMove2 25s ease-in-out infinite;
+}
+.mesh-blob-3 {
+  animation: meshMove3 18s ease-in-out infinite;
+}
+
+/* Rotating words */
+@keyframes rotateWords {
+  0%, 16% { transform: translateY(0); }
+  20%, 36% { transform: translateY(-100%); }
+  40%, 56% { transform: translateY(-200%); }
+  60%, 76% { transform: translateY(-300%); }
+  80%, 96% { transform: translateY(-400%); }
+}
+
+.rotating-words {
+  animation: rotateWords 10s ease-in-out infinite;
+}
+
+/* Glow effects */
+.glow-blue {
+  box-shadow: 0 0 20px rgba(45, 108, 223, 0.4), 0 0 60px rgba(45, 108, 223, 0.1);
+}
+
+.glow-blue-sm {
+  box-shadow: 0 0 12px rgba(45, 108, 223, 0.3);
+}
+
+/* Timeline center line glow */
+.timeline-line {
+  background: linear-gradient(180deg, transparent, var(--color-accent), transparent);
+  box-shadow: 0 0 15px rgba(45, 108, 223, 0.4), 0 0 30px rgba(45, 108, 223, 0.2);
+}
+
+/* Card hover lift */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* Dashboard card */
+.dashboard-shadow {
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3), 0 0 40px rgba(45, 108, 223, 0.1);
+}
+
+/* Pill scroll */
+@keyframes scrollPills {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-scroll-pills {
+  animation: scrollPills 30s linear infinite;
+}
+
+/* Star rating */
+.star-filled {
+  color: #F59E0B;
+}
+
+/* Floating bob animation for stat badges */
+@keyframes floatBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float-bob {
+  animation: floatBob 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.animate-float-bob-delayed {
+  animation: floatBob 3s cubic-bezier(0.4, 0, 0.2, 1) infinite 1.5s;
+}
+
+/* Shine sweep across browser frame */
+@keyframes shineSweep {
+  0%, 85% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-shine-sweep {
+  animation: shineSweep 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* CTA pulsing glow */
+@keyframes ctaGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(45, 108, 223, 0.4); }
+  50% { box-shadow: 0 0 25px rgba(45, 108, 223, 0.7), 0 0 40px rgba(45, 108, 223, 0.2); }
+}
+.animate-cta-glow {
+  animation: ctaGlow 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Pulsing glow orbs in mockup */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.15); }
+}
+.animate-pulse-glow {
+  animation: pulseGlow 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.animate-pulse-glow-delayed {
+  animation: pulseGlow 4s cubic-bezier(0.4, 0, 0.2, 1) infinite 2s;
+}
+
+/* Phone shimmer sweep */
+@keyframes phoneShimmer {
+  0%, 75% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+.animate-phone-shimmer {
+  animation: phoneShimmer 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Green pulse for live dot */
+@keyframes greenPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5); }
+  50% { box-shadow: 0 0 8px 3px rgba(74, 222, 128, 0.3); }
+}
+.animate-green-pulse {
+  animation: greenPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Browser mockup auto-scroll: down, pause, up, pause */
+@keyframes mockupScroll {
+  0%, 12% { transform: translateY(0); }
+  50%, 62% { transform: translateY(calc(-100% + 400px)); }
+  100% { transform: translateY(0); }
+}
+.animate-mockup-scroll {
+  animation: mockupScroll 20s ease-in-out infinite;
 }
