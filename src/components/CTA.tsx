@@ -23,13 +23,13 @@ export default function CTA() {
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <a
-              href="#"
+              href="/get-started"
               className="px-8 py-3.5 bg-accent text-white font-semibold rounded-lg glow-blue hover:bg-accent-light transition-colors text-lg"
             >
               Get Your Free AI Audit
             </a>
             <a
-              href="#"
+              href="/get-started"
               className="px-8 py-3.5 border border-white/20 text-white font-semibold rounded-lg hover:border-white/40 transition-colors text-lg"
             >
               Schedule a Call

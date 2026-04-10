@@ -42,7 +42,7 @@ function RotatingWord() {
 
 export default function Hero() {
   return (
-    <section className="relative md:h-screen overflow-hidden bg-dark pt-[100px] pb-12 md:pt-[72px] md:pb-0">
+    <section className="relative overflow-hidden bg-dark pt-28 pb-12 md:pt-32 md:pb-20">
       {/* Mesh gradient background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="mesh-blob-1 absolute top-1/4 left-1/4 w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full bg-[#1a2a6c]/60 blur-[120px]" />
@@ -51,7 +51,7 @@ export default function Hero() {
         <div className="absolute inset-0 bg-dark/40" />
       </div>
 
-      <div className="relative z-10 md:h-full md:flex md:items-center md:justify-center">
+      <div className="relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center w-full">
           {/* Left - Copy */}
           <div>
@@ -80,13 +80,13 @@ export default function Hero() {
             <FadeIn delay={0.3}>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 md:mb-0">
                 <a
-                  href="#cta"
+                  href="/get-started"
                   className="px-7 py-3 bg-accent text-white font-semibold rounded-lg glow-blue hover:bg-accent-light transition-colors text-center"
                 >
                   Book a Strategy Call
                 </a>
                 <a
-                  href="#process"
+                  href="/#process"
                   className="px-7 py-3 border border-white/20 text-white font-semibold rounded-lg hover:border-white/40 transition-colors text-center"
                 >
                   See Our Process

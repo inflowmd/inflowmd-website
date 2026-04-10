@@ -210,7 +210,7 @@ export default function PricingPage() {
               your practice.
             </p>
             <a
-              href="#"
+              href="/get-started"
               className="inline-block px-8 py-3.5 bg-accent text-white font-semibold rounded-lg glow-blue hover:bg-accent-light transition-colors text-lg"
             >
               Book a Strategy Call
@@ -344,7 +344,7 @@ function PricingCard({
       {/* CTA */}
       <div className="bg-white px-6 pb-6">
         <a
-          href="#"
+          href="/get-started"
           className={`block w-full text-center py-3 rounded-lg font-semibold text-sm transition-colors ${
             tier.popular
               ? "bg-accent text-white hover:bg-accent-light glow-blue-sm"

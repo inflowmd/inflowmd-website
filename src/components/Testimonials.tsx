@@ -21,7 +21,7 @@ const testimonials = [
 
 export default function Testimonials() {
   return (
-    <section className="py-20 bg-warm-bg">
+    <section id="results" className="py-20 bg-warm-bg">
       <div className="max-w-7xl mx-auto px-6">
         <FadeIn>
           <div className="text-center mb-14">
