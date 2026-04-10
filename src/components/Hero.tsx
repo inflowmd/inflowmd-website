@@ -42,7 +42,7 @@ function RotatingWord() {
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen md:h-screen overflow-hidden bg-dark pt-[100px] md:pt-[72px]">
+    <section className="relative md:h-screen overflow-hidden bg-dark pt-[100px] pb-12 md:pt-[72px] md:pb-0">
       {/* Mesh gradient background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="mesh-blob-1 absolute top-1/4 left-1/4 w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full bg-[#1a2a6c]/60 blur-[120px]" />
@@ -51,8 +51,8 @@ export default function Hero() {
         <div className="absolute inset-0 bg-dark/40" />
       </div>
 
-      <div className="relative z-10 h-full flex items-center justify-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-0 grid lg:grid-cols-2 gap-8 lg:gap-16 items-center w-full">
+      <div className="relative z-10 md:h-full md:flex md:items-center md:justify-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center w-full">
           {/* Left - Copy */}
           <div>
             <FadeIn>
@@ -70,7 +70,7 @@ export default function Hero() {
             </FadeIn>
 
             <FadeIn delay={0.2}>
-              <p className="text-gray-400 text-base sm:text-lg max-w-xl mb-8 leading-relaxed">
+              <p className="text-gray-400 text-base sm:text-lg max-w-xl mb-8 md:mb-8 leading-relaxed">
                 We combine AI-driven strategy with deep healthcare expertise to
                 help medical practices attract more patients, rank higher, and
                 grow predictably — without the guesswork.
@@ -78,7 +78,7 @@ export default function Hero() {
             </FadeIn>
 
             <FadeIn delay={0.3}>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 md:mb-0">
                 <a
                   href="#cta"
                   className="px-7 py-3 bg-accent text-white font-semibold rounded-lg glow-blue hover:bg-accent-light transition-colors text-center"
