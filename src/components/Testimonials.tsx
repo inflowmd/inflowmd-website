@@ -37,7 +37,7 @@ export default function Testimonials() {
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {testimonials.map((t, i) => (
             <FadeIn key={t.name} delay={i * 0.15}>
-              <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm h-full flex flex-col">
+              <div className="bg-white rounded-xl p-5 sm:p-8 border border-gray-100 shadow-sm h-full flex flex-col">
                 {/* Stars */}
                 <div className="flex gap-1 mb-4">
                   {Array.from({ length: t.stars }).map((_, j) => (

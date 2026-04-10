@@ -8,9 +8,9 @@ function BrowserMockup() {
   return (
     <div className="relative">
       {/* Floating stat badge with bob animation */}
-      <div className="absolute -top-5 -right-5 z-10 rounded-2xl px-6 py-4 shadow-xl animate-float-bob backdrop-blur-md border border-accent/30" style={{ backgroundColor: "rgba(26, 26, 46, 0.85)", boxShadow: "0 0 20px rgba(45, 108, 223, 0.3), 0 8px 32px rgba(0, 0, 0, 0.3)" }}>
-        <p className="text-2xl font-bold text-accent">+147%</p>
-        <p className="text-xs text-gray-400">Patient Inquiries</p>
+      <div className="absolute -top-3 -right-2 sm:-top-5 sm:-right-5 z-10 rounded-xl sm:rounded-2xl px-3 py-2 sm:px-6 sm:py-4 shadow-xl animate-float-bob backdrop-blur-md border border-accent/30" style={{ backgroundColor: "rgba(26, 26, 46, 0.85)", boxShadow: "0 0 20px rgba(45, 108, 223, 0.3), 0 8px 32px rgba(0, 0, 0, 0.3)" }}>
+        <p className="text-lg sm:text-2xl font-bold text-accent">+147%</p>
+        <p className="text-[10px] sm:text-xs text-gray-400">Patient Inquiries</p>
       </div>
 
       {/* Reflection/shadow under browser */}
@@ -37,7 +37,7 @@ function BrowserMockup() {
         </div>
 
         {/* Website preview - scrolling container */}
-        <div className="relative overflow-hidden" style={{ height: 400 }}>
+        <div className="relative overflow-hidden" style={{ height: 340 }}>
           <div className="animate-mockup-scroll">
 
             {/* === WARM MEDICAL PRACTICE WEBSITE === */}
@@ -254,8 +254,8 @@ function BrowserMockup() {
 
 export default function Showcase() {
   return (
-    <section className="py-20 bg-warm-bg-alt">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-12 sm:py-20 bg-warm-bg-alt overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <FadeIn>
           <div className="text-center mb-14">
             <p className="text-accent font-semibold text-sm tracking-wide uppercase mb-2">

@@ -23,6 +23,7 @@ body {
   background: var(--color-warm-bg);
   color: var(--color-foreground);
   font-family: var(--font-sans);
+  overflow-x: hidden;
 }
 
 /* Mesh gradient animation for hero */
@@ -173,7 +174,7 @@ body {
 /* Browser mockup auto-scroll: down, pause, up, pause */
 @keyframes mockupScroll {
   0%, 12% { transform: translateY(0); }
-  50%, 62% { transform: translateY(calc(-100% + 400px)); }
+  50%, 62% { transform: translateY(calc(-100% + 340px)); }
   100% { transform: translateY(0); }
 }
 .animate-mockup-scroll {

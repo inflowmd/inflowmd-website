@@ -79,7 +79,7 @@ export default function Visibility() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {channels.slice(0, 3).map((ch, i) => (
             <FadeIn key={ch.title} delay={i * 0.1}>
-              <div className="bg-dark-card border border-white/10 rounded-xl p-7 card-hover h-full">
+              <div className="bg-dark-card border border-white/10 rounded-xl p-5 sm:p-7 card-hover h-full">
                 <div className="w-14 h-14 rounded-lg bg-accent/10 text-accent flex items-center justify-center mb-5">
                   {ch.icon}
                 </div>
@@ -97,7 +97,7 @@ export default function Visibility() {
         <div className="grid sm:grid-cols-2 gap-6 mt-6 max-w-2xl mx-auto lg:max-w-none lg:grid-cols-2 lg:px-[16.67%]">
           {channels.slice(3).map((ch, i) => (
             <FadeIn key={ch.title} delay={(i + 3) * 0.1}>
-              <div className="bg-dark-card border border-white/10 rounded-xl p-7 card-hover h-full">
+              <div className="bg-dark-card border border-white/10 rounded-xl p-5 sm:p-7 card-hover h-full">
                 <div className="w-14 h-14 rounded-lg bg-accent/10 text-accent flex items-center justify-center mb-5">
                   {ch.icon}
                 </div>

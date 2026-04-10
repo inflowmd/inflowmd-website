@@ -68,7 +68,7 @@ export default function Process() {
                   }`}
                 >
                   {/* Card */}
-                  <div className="md:w-[calc(50%-2rem)] bg-dark-card border border-white/10 rounded-xl p-7">
+                  <div className="md:w-[calc(50%-2rem)] bg-dark-card border border-white/10 rounded-xl p-5 sm:p-7">
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-accent font-bold text-2xl font-mono">
                         {step.num}
