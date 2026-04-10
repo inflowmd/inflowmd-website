@@ -15,9 +15,10 @@ export default function Navbar() {
   }, []);
 
   const links = [
-    { label: "Services", href: "#services" },
-    { label: "Process", href: "#process" },
-    { label: "Results", href: "#results" },
+    { label: "Services", href: "/#services" },
+    { label: "Process", href: "/#process" },
+    { label: "Results", href: "/#results" },
+    { label: "Pricing", href: "/pricing" },
   ];
 
   return (
