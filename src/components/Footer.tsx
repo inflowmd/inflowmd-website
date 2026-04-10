@@ -2,22 +2,20 @@
 
 import Image from "next/image";
 
-const serviceLinks = [
-  "SEO & AI Visibility",
-  "Website Design",
-  "Google Ads",
-  "Local Presence",
-  "Reputation Management",
-  "Reporting & Analytics",
+const solutionLinks = [
+  { label: "SEO & AI Visibility", href: "/services/seo" },
+  { label: "Website Design", href: "/services/web-design" },
+  { label: "Google Ads", href: "/services/google-ads" },
+  { label: "Local Presence", href: "/services/local-presence" },
+  { label: "Reputation Management", href: "/services/reputation-management" },
+  { label: "Reporting & Analytics", href: "/services/reporting" },
 ];
 
 const companyLinks = [
-  "About Us",
-  "Our Process",
-  "Case Studies",
-  "Blog",
-  "Careers",
-  "Contact",
+  { label: "How It Works", href: "/#process" },
+  { label: "Results", href: "/#results" },
+  { label: "Growth Plans", href: "/pricing" },
+  { label: "Free Audit", href: "/get-started" },
 ];
 
 export default function Footer() {
@@ -57,17 +55,17 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Services */}
+          {/* Solutions */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Services</h4>
+            <h4 className="text-white font-semibold mb-4">Solutions</h4>
             <ul className="space-y-2.5">
-              {serviceLinks.map((link) => (
-                <li key={link}>
+              {solutionLinks.map((link) => (
+                <li key={link.href}>
                   <a
-                    href="#services"
+                    href={link.href}
                     className="text-gray-400 text-sm hover:text-white transition-colors"
                   >
-                    {link}
+                    {link.label}
                   </a>
                 </li>
               ))}
@@ -79,12 +77,12 @@ export default function Footer() {
             <h4 className="text-white font-semibold mb-4">Company</h4>
             <ul className="space-y-2.5">
               {companyLinks.map((link) => (
-                <li key={link}>
+                <li key={link.href}>
                   <a
-                    href="#"
+                    href={link.href}
                     className="text-gray-400 text-sm hover:text-white transition-colors"
                   >
-                    {link}
+                    {link.label}
                   </a>
                 </li>
               ))}

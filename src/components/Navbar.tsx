@@ -64,7 +64,7 @@ export default function Navbar() {
             onMouseLeave={closeServices}
           >
             <button className="text-gray-300 hover:text-white transition-colors text-sm font-medium flex items-center gap-1">
-              Services
+              Solutions
               <svg
                 className={`w-3.5 h-3.5 transition-transform ${servicesOpen ? "rotate-180" : ""}`}
                 viewBox="0 0 20 20"
@@ -107,7 +107,7 @@ export default function Navbar() {
             href="/#process"
             className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
           >
-            Process
+            How It Works
           </a>
           <a
             href="/#results"
@@ -119,13 +119,13 @@ export default function Navbar() {
             href="/pricing"
             className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
           >
-            Pricing
+            Growth Plans
           </a>
           <a
             href="/get-started"
             className="px-5 py-2 bg-accent text-white text-sm font-semibold rounded-lg glow-blue-sm hover:bg-accent-light transition-colors"
           >
-            Get Started
+            Free Audit
           </a>
         </div>
 
@@ -166,7 +166,7 @@ export default function Navbar() {
                 onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
                 className="text-gray-300 hover:text-white transition-colors text-sm font-medium text-left flex items-center justify-between"
               >
-                Services
+                Solutions
                 <svg
                   className={`w-3.5 h-3.5 transition-transform ${mobileServicesOpen ? "rotate-180" : ""}`}
                   viewBox="0 0 20 20"
@@ -208,7 +208,7 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(false)}
                 className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
               >
-                Process
+                How It Works
               </a>
               <a
                 href="/#results"
@@ -222,14 +222,14 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(false)}
                 className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
               >
-                Pricing
+                Growth Plans
               </a>
               <a
                 href="/get-started"
                 onClick={() => setMobileOpen(false)}
                 className="px-5 py-2 bg-accent text-white text-sm font-semibold rounded-lg text-center glow-blue-sm"
               >
-                Get Started
+                Free Audit
               </a>
             </div>
           </motion.div>
