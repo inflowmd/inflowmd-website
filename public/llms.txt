@@ -1,0 +1,22 @@
+# InflowMD - AI-Powered Medical Practice Marketing
+
+> InflowMD is a digital marketing agency built exclusively for medical practices. We provide healthcare SEO, website design, Google Ads management, local presence optimization, reputation management, and reporting & analytics.
+
+## Pages
+
+- [Homepage](https://inflowmd.vercel.app): Overview of InflowMD's AI-powered marketing services for medical practices.
+- [Healthcare SEO & AI Visibility](https://inflowmd.vercel.app/services/seo): SEO and AI visibility services to help medical practices rank on Google and get found by AI assistants.
+- [Medical Website Design](https://inflowmd.vercel.app/services/web-design): High-converting, mobile-first website design for healthcare practices with ADA compliance and HIPAA-aware forms.
+- [Google Ads for Doctors](https://inflowmd.vercel.app/services/google-ads): AI-optimized pay-per-click campaigns that drive qualified patient leads for medical practices.
+- [Local Presence Management](https://inflowmd.vercel.app/services/local-presence): Local SEO, Google Maps optimization, and directory management across 60+ platforms.
+- [Reputation Management](https://inflowmd.vercel.app/services/reputation-management): Online review monitoring, generation, and sentiment analysis for healthcare providers.
+- [Reporting & Analytics](https://inflowmd.vercel.app/services/reporting): AI-powered dashboards, call tracking, and lead attribution for medical marketing.
+- [Pricing](https://inflowmd.vercel.app/pricing): Transparent pricing plans starting at $350/mo for medical practice marketing.
+- [Get Started](https://inflowmd.vercel.app/get-started): Book a free 15-minute strategy call and get a free AI audit of your practice's online presence.
+
+## Key Information
+
+- **Industry Focus**: Medical practices, healthcare providers, physicians, specialists
+- **Services**: SEO, Web Design, Google Ads, Local SEO, Reputation Management, Analytics
+- **Pricing**: Plans from $350/mo (Web Essentials) to $1,200/mo (Growth + Visibility)
+- **Contact**: inflowmd@gmail.com

@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import FadeIn from "./FadeIn";
+import FAQSchema from "./FAQSchema";
 
 interface ServiceFeature {
   title: string;
@@ -96,6 +96,7 @@ export default function ServicePageTemplate({
   }
   return (
     <>
+      <FAQSchema faqs={faqs} />
       {/* Hero */}
       <section className="relative bg-dark pt-[100px] md:pt-[120px] pb-16 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 overflow-hidden">

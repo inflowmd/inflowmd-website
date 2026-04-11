@@ -1,31 +1,13 @@
-"use client";
+import type { Metadata } from "next";
+import HomeClient from "./HomeClient";
 
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import Specialties from "@/components/Specialties";
-import Services from "@/components/Services";
-import Showcase from "@/components/Showcase";
-import Visibility from "@/components/Visibility";
-import Process from "@/components/Process";
-import Stats from "@/components/Stats";
-import Testimonials from "@/components/Testimonials";
-import CTA from "@/components/CTA";
-import Footer from "@/components/Footer";
+export const metadata: Metadata = {
+  title: "InflowMD | Medical Practice Marketing Agency",
+  description:
+    "AI-powered digital marketing built for medical practices. Healthcare SEO, website design, Google Ads, and reputation management that drives real patient growth.",
+  alternates: { canonical: "https://inflowmd.vercel.app" },
+};
 
 export default function Home() {
-  return (
-    <>
-      <Navbar />
-      <Hero />
-      <Specialties />
-      <Services />
-      <Showcase />
-      <Visibility />
-      <Process />
-      <Stats />
-      <Testimonials />
-      <CTA />
-      <Footer />
-    </>
-  );
+  return <HomeClient />;
 }
