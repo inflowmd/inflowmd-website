@@ -99,7 +99,10 @@ export async function fetchGbpData(): Promise<GBPData> {
   const location = requireLocation();
   const token = await getAccessToken(SCOPES);
 
+  // Performance API has up to ~7 days of latency; use yesterday as the upper bound
+  // so we don't ask for a window that's still being populated.
   const end = new Date();
+  end.setUTCDate(end.getUTCDate() - 1);
   const start = new Date(end);
   start.setUTCMonth(start.getUTCMonth() - 6);
   start.setUTCDate(1);
