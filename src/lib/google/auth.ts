@@ -11,20 +11,38 @@ export class MissingCredentialsError extends Error {
   }
 }
 
+function normalizePrivateKey(raw: string): string {
+  let key = raw.trim();
+  // Strip a surrounding pair of double or single quotes if the value was pasted with them.
+  if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+    key = key.slice(1, -1);
+  }
+  // Vercel/CI panels often store newlines as the literal two characters \ + n.
+  key = key.replace(/\\n/g, "\n");
+  // Some panels mangle to \r\n; normalize.
+  key = key.replace(/\r\n/g, "\n");
+  return key;
+}
+
 function readCredentials(): JWTInput {
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const base64Key = process.env.GOOGLE_PRIVATE_KEY_BASE64;
   const rawKey = process.env.GOOGLE_PRIVATE_KEY;
   const projectId = process.env.GOOGLE_PROJECT_ID;
 
   const missing: string[] = [];
   if (!email) missing.push("GOOGLE_SERVICE_ACCOUNT_EMAIL");
-  if (!rawKey) missing.push("GOOGLE_PRIVATE_KEY");
+  if (!base64Key && !rawKey) missing.push("GOOGLE_PRIVATE_KEY");
   if (!projectId) missing.push("GOOGLE_PROJECT_ID");
   if (missing.length) throw new MissingCredentialsError(missing);
 
+  const privateKey = base64Key
+    ? Buffer.from(base64Key, "base64").toString("utf8").trim()
+    : normalizePrivateKey(rawKey!);
+
   return {
     client_email: email,
-    private_key: rawKey!.replace(/\\n/g, "\n"),
+    private_key: privateKey,
     project_id: projectId,
   };
 }
