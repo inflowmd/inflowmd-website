@@ -17,7 +17,7 @@ export interface GADevice {
   value: number;
 }
 
-export interface GABlogPost {
+export interface GATopPage {
   title: string;
   pagePath: string;
   sessions: number;
@@ -37,7 +37,7 @@ export interface GAOverview {
 export interface AnalyticsData {
   traffic: { months: GATrafficMonth[]; totals: { sessions: number; change: number | null } };
   devices: GADevice[];
-  blogPosts: GABlogPost[];
+  topPages: GATopPage[];
   overview: GAOverview;
 }
 
@@ -103,14 +103,8 @@ export async function fetchAnalyticsData(): Promise<AnalyticsData> {
         { name: "averageSessionDuration" },
         { name: "bounceRate" },
       ],
-      dimensionFilter: {
-        filter: {
-          fieldName: "pagePath",
-          stringFilter: { matchType: "CONTAINS", value: "/blog/" },
-        },
-      },
       orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
-      limit: 20,
+      limit: 50,
     }),
     client.runReport({
       property,
@@ -163,8 +157,8 @@ export async function fetchAnalyticsData(): Promise<AnalyticsData> {
     .map((d) => ({ name: d.name, value: Math.round((d.sessions / deviceSum) * 100) }))
     .sort((a, b) => b.value - a.value);
 
-  // Blog posts
-  const blogPosts: GABlogPost[] = (blogResp[0].rows ?? []).map((r) => {
+  // Top pages — caller decides how to slice (blog vs page) using isBlogPath
+  const topPages: GATopPage[] = (blogResp[0].rows ?? []).map((r) => {
     const pagePath = r.dimensionValues?.[0]?.value ?? "";
     const pageTitle = r.dimensionValues?.[1]?.value ?? "";
     const sessions = Number(r.metricValues?.[0]?.value ?? 0);
@@ -209,7 +203,7 @@ export async function fetchAnalyticsData(): Promise<AnalyticsData> {
   return {
     traffic: { months, totals: { sessions: cur.sessions, change: sessionsChange } },
     devices,
-    blogPosts,
+    topPages,
     overview,
   };
 }

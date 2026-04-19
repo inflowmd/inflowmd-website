@@ -7,6 +7,7 @@ import { isAuthenticated } from "@/lib/cvc/session";
 import { fetchSearchConsoleData, type SearchConsoleData } from "@/lib/google/searchConsole";
 import { fetchAnalyticsData, type AnalyticsData } from "@/lib/google/analytics";
 import { fetchGbpData, type GBPData } from "@/lib/google/gbp";
+import { isBlogPath } from "@/lib/google/pageNames";
 
 export const metadata: Metadata = {
   title: "CVC Dashboard",
@@ -112,7 +113,8 @@ function assembleDashboardProps(
     page: k.page,
   }));
 
-  // Merge GA blog posts with GSC page-level impressions for CTR calculation
+  // Merge GA top pages with GSC page-level impressions for CTR calculation,
+  // then filter to blog posts only.
   const gscByPath = new Map<string, { impressions: number; clicks: number }>();
   for (const p of gsc?.topPages ?? []) {
     try {
@@ -122,18 +124,20 @@ function assembleDashboardProps(
       gscByPath.set(p.pageUrl, { impressions: p.impressions, clicks: p.clicks });
     }
   }
-  const blogPosts = (ga?.blogPosts ?? []).map((p) => {
-    const gscInfo = gscByPath.get(p.pagePath) ?? { impressions: 0, clicks: 0 };
-    const ctr = gscInfo.impressions > 0 ? Math.round((gscInfo.clicks / gscInfo.impressions) * 1000) / 10 : 0;
-    return {
-      title: p.title,
-      pagePath: p.pagePath,
-      sessions: p.sessions,
-      avgTime: p.avgTime,
-      impressions: gscInfo.impressions,
-      ctr,
-    };
-  });
+  const blogPosts = (ga?.topPages ?? [])
+    .filter((p) => isBlogPath(p.pagePath))
+    .map((p) => {
+      const gscInfo = gscByPath.get(p.pagePath) ?? { impressions: 0, clicks: 0 };
+      const ctr = gscInfo.impressions > 0 ? Math.round((gscInfo.clicks / gscInfo.impressions) * 1000) / 10 : 0;
+      return {
+        title: p.title,
+        pagePath: p.pagePath,
+        sessions: p.sessions,
+        avgTime: p.avgTime,
+        impressions: gscInfo.impressions,
+        ctr,
+      };
+    });
 
   const overview = ga?.overview ?? {
     sessions: 0,
@@ -169,7 +173,20 @@ function assembleDashboardProps(
 
   const periodLabel = describePeriod(traffic.map((m) => m.month));
 
-  const blogPostsLive = countPathsStartingWith(gsc?.topPages ?? [], "/blog/");
+  // Count blog posts seen across both data sources (deduped by path)
+  const blogPathSet = new Set<string>();
+  for (const p of ga?.topPages ?? []) {
+    if (isBlogPath(p.pagePath)) blogPathSet.add(p.pagePath);
+  }
+  for (const p of gsc?.topPages ?? []) {
+    try {
+      const path = new URL(p.pageUrl).pathname;
+      if (isBlogPath(path)) blogPathSet.add(path);
+    } catch {
+      if (isBlogPath(p.pageUrl)) blogPathSet.add(p.pageUrl);
+    }
+  }
+  const blogPostsLive = blogPathSet.size;
 
   return {
     overview,
@@ -196,19 +213,6 @@ function describePeriod(monthLabels: string[]): string {
   if (monthLabels.length === 0) return "Last 7 months";
   if (monthLabels.length === 1) return monthLabels[0];
   return `${monthLabels[0]} — ${monthLabels[monthLabels.length - 1]}`;
-}
-
-function countPathsStartingWith(pages: { pageUrl: string }[], prefix: string): number {
-  const paths = new Set<string>();
-  for (const p of pages) {
-    try {
-      const path = new URL(p.pageUrl).pathname;
-      if (path.startsWith(prefix)) paths.add(path);
-    } catch {
-      if (p.pageUrl.startsWith(prefix)) paths.add(p.pageUrl);
-    }
-  }
-  return paths.size;
 }
 
 function SetupError({ messages }: { messages: string[] }) {
