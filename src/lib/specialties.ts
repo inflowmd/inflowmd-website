@@ -26,6 +26,21 @@ export type FAQ = {
   a: string;
 };
 
+export type ApproachStage = {
+  label: string;
+  title: string;
+  description: string;
+};
+
+export type ApproachSection = {
+  eyebrow: string;
+  heading: string;
+  headingHighlight?: string;
+  lead: string;
+  stages: ApproachStage[];
+  kicker?: string;
+};
+
 export type SpecialtyData = {
   slug: string;
   specialty: string;
@@ -44,6 +59,7 @@ export type SpecialtyData = {
     text: string;
     points: string[];
   };
+  approach?: ApproachSection;
   solutions: Solution[];
   steps?: Step[];
   proof: {
@@ -99,6 +115,40 @@ const varicoseVeinDoctors: SpecialtyData = {
       "Google Ads is a bidding war with no real differentiation — you're paying rising CPCs to compete on price against aggregators, not on the surgical authority you actually have",
       "Your Google Business Profile and local presence are underbuilt — and vein is a local search game, so every missing review, category, or citation is a patient going somewhere else",
     ],
+  },
+  approach: {
+    eyebrow: "Our Vein-Specific Approach",
+    heading: "We build your site around the stages of CVI",
+    headingHighlight: "stages of CVI",
+    lead: "Chronic Venous Insufficiency is a progressive disease, but most patients don't know that. They see spider veins as cosmetic, ignore the early symptoms, and only call a specialist once their legs hurt, swell, or ulcerate. We structure vein practice websites around CVI as a progression — so by the time a patient reaches your contact form, they already understand why an evaluation isn't optional.",
+    stages: [
+      {
+        label: "Stage 1",
+        title: "Spider & Reticular Veins",
+        description:
+          "Patients assume it's cosmetic. We position these as the first visible indicator that venous valves may already be failing — and why early evaluation matters.",
+      },
+      {
+        label: "Stage 2",
+        title: "Varicose Veins",
+        description:
+          "The bulging, ropey veins everyone recognizes. We explain the underlying venous pressure problem — not just the cosmetic outcome — so patients understand progression is already underway.",
+      },
+      {
+        label: "Stage 3",
+        title: "Chronic Symptoms",
+        description:
+          "Heaviness, aching, swelling, night cramps, restless legs. We educate patients that these aren't 'just aging' — they're signs CVI is advancing and needs a professional workup.",
+      },
+      {
+        label: "Stage 4",
+        title: "Skin Changes & Ulcers",
+        description:
+          "Discoloration, hardening, venous stasis, and ulcers. We make the stakes clear and position your practice as the specialist who intervenes before patients end up here.",
+      },
+    ],
+    kicker:
+      "The outcome: patients arrive pre-educated, already understand the urgency, and convert at a higher rate — because they know exactly why they need to see you.",
   },
   solutions: [
     {

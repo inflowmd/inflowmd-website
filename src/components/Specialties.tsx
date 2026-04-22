@@ -2,27 +2,32 @@
 
 import FadeIn from "./FadeIn";
 
-const specialties = [
-  "Cardiology",
-  "Vein & Vascular",
-  "Med Spa & Aesthetics",
-  "Longevity Medicine",
-  "Wound Care",
-  "Dermatology",
-  "Podiatry",
-  "Weight Loss & Wellness",
-  "Interventional Radiology",
-  "Diabetes & Endocrinology",
-  "Primary Care",
-  "Pain Management",
-  "Pediatric Urgent Care",
-  "Surgical Specialists",
-  "Obstetrics & Gynecology",
-  "Behavioral Health",
-  "Chiropractic",
-  "Psychiatry",
-  "Gastroenterology",
+type Specialty = { name: string; href?: string };
+
+const specialties: Specialty[] = [
+  { name: "Cardiology" },
+  { name: "Vein & Vascular", href: "/for/varicose-vein-doctors" },
+  { name: "Med Spa & Aesthetics" },
+  { name: "Longevity Medicine" },
+  { name: "Wound Care" },
+  { name: "Dermatology" },
+  { name: "Podiatry" },
+  { name: "Weight Loss & Wellness" },
+  { name: "Interventional Radiology" },
+  { name: "Diabetes & Endocrinology" },
+  { name: "Primary Care" },
+  { name: "Pain Management" },
+  { name: "Pediatric Urgent Care" },
+  { name: "Surgical Specialists" },
+  { name: "Obstetrics & Gynecology" },
+  { name: "Behavioral Health" },
+  { name: "Chiropractic" },
+  { name: "Psychiatry" },
+  { name: "Gastroenterology" },
 ];
+
+const pillBase =
+  "px-5 py-2.5 bg-white border border-gray-200 rounded-full text-sm font-medium text-dark hover:bg-accent hover:border-accent hover:text-white transition-all duration-200";
 
 export default function Specialties() {
   return (
@@ -41,14 +46,17 @@ export default function Specialties() {
       <FadeIn delay={0.1}>
         <div className="max-w-5xl mx-auto px-6">
           <div className="flex flex-wrap justify-center gap-3">
-            {specialties.map((name) => (
-              <span
-                key={name}
-                className="px-5 py-2.5 bg-white border border-gray-200 rounded-full text-sm font-medium text-dark cursor-default hover:bg-accent hover:border-accent hover:text-white transition-all duration-200"
-              >
-                {name}
-              </span>
-            ))}
+            {specialties.map(({ name, href }) =>
+              href ? (
+                <a key={name} href={href} className={pillBase}>
+                  {name}
+                </a>
+              ) : (
+                <span key={name} className={`${pillBase} cursor-default`}>
+                  {name}
+                </span>
+              )
+            )}
           </div>
         </div>
       </FadeIn>

@@ -32,7 +32,7 @@ function FAQItem({ faq, index }: { faq: FAQ; index: number }) {
 
 export default function SpecialtyPageTemplate({ data }: { data: SpecialtyData }) {
   const steps = data.steps ?? DEFAULT_STEPS;
-  const { hero, problem, solutions, proof, faqs, label } = data;
+  const { hero, problem, approach, solutions, proof, faqs, label } = data;
 
   function renderProblemHeading() {
     if (!problem.highlight) return problem.heading;
@@ -43,6 +43,22 @@ export default function SpecialtyPageTemplate({ data }: { data: SpecialtyData })
         {parts[0]}
         <span className="bg-gradient-to-r from-white via-red-300 to-red-400 bg-clip-text text-transparent">
           {problem.highlight}
+        </span>
+        {parts[1]}
+      </>
+    );
+  }
+
+  function renderApproachHeading() {
+    if (!approach) return null;
+    if (!approach.headingHighlight) return approach.heading;
+    const parts = approach.heading.split(approach.headingHighlight);
+    if (parts.length < 2) return approach.heading;
+    return (
+      <>
+        {parts[0]}
+        <span className="bg-gradient-to-r from-accent to-accent-light bg-clip-text text-transparent">
+          {approach.headingHighlight}
         </span>
         {parts[1]}
       </>
@@ -140,6 +156,69 @@ export default function SpecialtyPageTemplate({ data }: { data: SpecialtyData })
           </div>
         </div>
       </section>
+
+      {/* Approach — specialty-specific differentiator (e.g. CVI stages for vein) */}
+      {approach && (
+        <section className="py-16 sm:py-20 bg-warm-bg relative overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-accent/5 blur-[120px]" />
+          </div>
+          <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
+            <FadeIn>
+              <div className="text-center mb-10 sm:mb-14 max-w-3xl mx-auto">
+                <p className="text-accent font-semibold text-sm tracking-wide uppercase mb-3">
+                  {approach.eyebrow}
+                </p>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.5rem] font-extrabold text-dark leading-[1.15] mb-5">
+                  {renderApproachHeading()}
+                </h2>
+                <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
+                  {approach.lead}
+                </p>
+              </div>
+            </FadeIn>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 relative">
+              {approach.stages.map((stage, i) => (
+                <FadeIn key={stage.label} delay={i * 0.1}>
+                  <div className="group relative bg-white rounded-xl p-5 sm:p-6 border border-gray-200/80 h-full transition-all duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-[0_8px_30px_rgba(45,108,223,0.1)]">
+                    <span
+                      aria-hidden="true"
+                      className="absolute top-3 right-4 text-5xl sm:text-6xl font-extrabold font-mono text-accent/[0.06] select-none leading-none"
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <div className="relative z-[1]">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="w-7 h-7 rounded-full bg-accent text-white font-bold text-xs flex items-center justify-center">
+                          {i + 1}
+                        </span>
+                        <span className="text-[11px] font-semibold tracking-[0.12em] uppercase text-accent">
+                          {stage.label}
+                        </span>
+                      </div>
+                      <h3 className="text-dark font-extrabold text-base sm:text-lg mb-2 leading-snug">
+                        {stage.title}
+                      </h3>
+                      <p className="text-gray-500 text-sm leading-relaxed">
+                        {stage.description}
+                      </p>
+                    </div>
+                  </div>
+                </FadeIn>
+              ))}
+            </div>
+
+            {approach.kicker && (
+              <FadeIn delay={0.45}>
+                <p className="text-center text-dark/75 text-base sm:text-lg mt-10 sm:mt-12 max-w-2xl mx-auto leading-relaxed">
+                  {approach.kicker}
+                </p>
+              </FadeIn>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Solutions — How We Solve It */}
       <section className="py-16 sm:py-20 bg-warm-bg-alt">
