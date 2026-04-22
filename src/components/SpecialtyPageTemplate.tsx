@@ -221,6 +221,14 @@ export default function SpecialtyPageTemplate({ data }: { data: SpecialtyData })
             ))}
           </div>
 
+          {proof.disclaimer && (
+            <FadeIn delay={0.4}>
+              <p className="mt-6 text-center text-white/50 text-xs italic">
+                {proof.disclaimer}
+              </p>
+            </FadeIn>
+          )}
+
           {proof.caseStudy && (
             <FadeIn delay={0.2}>
               <div className="mt-12 sm:mt-14 max-w-3xl mx-auto">

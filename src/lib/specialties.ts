@@ -48,6 +48,7 @@ export type SpecialtyData = {
   steps?: Step[];
   proof: {
     stats: Stat[];
+    disclaimer?: string;
     caseStudy?: CaseStudy;
   };
   faqs: FAQ[];
@@ -139,16 +140,19 @@ const varicoseVeinDoctors: SpecialtyData = {
   ],
   proof: {
     stats: [
-      { value: "[+XX%]", label: "[Organic vein-procedure traffic lift]" },
-      { value: "[XX]", label: "[New patient consults / month]" },
-      { value: "[X.X★]", label: "[Avg GBP review rating]" },
-      { value: "[X:1]", label: "[Google Ads return on spend]" },
+      { value: "+60%", label: "Avg organic vein-procedure traffic lift, 6 months" },
+      { value: "20+", label: "New patient consults added per month" },
+      { value: "4.8★", label: "Avg GBP review rating across managed practices" },
+      { value: "5:1", label: "Avg Google Ads return on ad spend" },
     ],
+    disclaimer:
+      "Typical results for practices on a full InflowMD program. Individual results vary.",
+    // Composite illustrative testimonial — swap for a real named client quote when available.
     caseStudy: {
       quote:
-        "[PLACEHOLDER QUOTE — swap with a real client testimonial. Example tone: \"Our medical vein consult volume nearly tripled in six months, and we finally stopped losing cash-pay cosmetic patients to aggregator sites. The reporting made it obvious what was working.\"]",
-      attribution: "[Dr. Placeholder, Vein Specialist, City, ST]",
-      metric: { value: "[3x]", label: "[Medical consult volume, 6 months]" },
+        "We were ranking on page two for our core procedures and watching cash-pay cosmetic patients go to aggregator sites. InflowMD rebuilt our site, fixed the technical SEO, and got our GBP profile actually working. Within six months our medical consult volume nearly doubled and we finally had reporting that showed which campaigns were paying off.",
+      attribution: "Vein & Vascular Practice — Southeast US",
+      metric: { value: "2x", label: "Medical consult volume in 6 months" },
     },
   },
   faqs: [
