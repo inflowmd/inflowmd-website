@@ -4,10 +4,12 @@ export default function ServiceSchema({
   name,
   description,
   url,
+  audienceType = "Medical Practices",
 }: {
   name: string;
   description: string;
   url: string;
+  audienceType?: string;
 }) {
   const schema = {
     "@context": "https://schema.org",
@@ -23,7 +25,7 @@ export default function ServiceSchema({
     areaServed: "United States",
     audience: {
       "@type": "Audience",
-      audienceType: "Medical Practices",
+      audienceType,
     },
   };
 
