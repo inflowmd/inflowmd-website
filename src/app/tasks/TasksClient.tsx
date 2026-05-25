@@ -65,7 +65,50 @@ function matchesFilter(client: Client, filter: string): boolean {
   return true;
 }
 
-export default function TasksClient({ data }: TasksClientProps) {
+export type Operation =
+  | { op: 'mark_task_done'; clientId: string; taskIndex: number }
+  | { op: 'unmark_task_done'; clientId: string; taskIndex: number }
+  | { op: 'add_task'; clientId: string; text: string; icon: IconType }
+  | { op: 'remove_task'; clientId: string; taskIndex: number }
+  | { op: 'update_task'; clientId: string; taskIndex: number; text?: string; icon?: IconType }
+  | { op: 'set_client_priority'; clientId: string; priority: PriorityType };
+
+function applyOperationLocal(data: TasksData, op: Operation): TasksData {
+  const next: TasksData = JSON.parse(JSON.stringify(data));
+  next.lastUpdated = new Date().toISOString().slice(0, 10);
+  for (const sec of next.sections) {
+    const c = sec.clients.find((c) => c.id === op.clientId);
+    if (!c) continue;
+    switch (op.op) {
+      case 'mark_task_done':
+        if (c.tasks[op.taskIndex]) c.tasks[op.taskIndex].done = true;
+        return next;
+      case 'unmark_task_done':
+        if (c.tasks[op.taskIndex]) c.tasks[op.taskIndex].done = false;
+        return next;
+      case 'add_task':
+        c.tasks.push({ icon: op.icon, txt: op.text });
+        return next;
+      case 'remove_task':
+        if (c.tasks[op.taskIndex]) c.tasks.splice(op.taskIndex, 1);
+        return next;
+      case 'update_task': {
+        const t = c.tasks[op.taskIndex];
+        if (!t) return next;
+        if (op.text !== undefined) t.txt = op.text;
+        if (op.icon !== undefined) t.icon = op.icon;
+        return next;
+      }
+      case 'set_client_priority':
+        c.pri = op.priority;
+        return next;
+    }
+  }
+  return next;
+}
+
+export default function TasksClient({ data: initialData }: TasksClientProps) {
+  const [data, setData] = useState<TasksData>(initialData);
   const sections: Section[] = data.sections;
 
   // Seed local done-state from persisted `done` fields in the data.
@@ -73,7 +116,7 @@ export default function TasksClient({ data }: TasksClientProps) {
   // persisted field and rehydrate on next page load.
   const initialDone = (() => {
     const s = new Set<string>();
-    for (const sec of sections) {
+    for (const sec of initialData.sections) {
       for (const c of sec.clients) {
         c.tasks.forEach((t, i) => {
           if (t.done) s.add(taskKey(c.id, i));
@@ -89,6 +132,20 @@ export default function TasksClient({ data }: TasksClientProps) {
   const allTasks = sections.flatMap(s => s.clients.flatMap(c => c.tasks));
   const youTasks = allTasks.filter(t => t.icon === 'you').length;
   const botTasks = allTasks.filter(t => t.icon === 'bot').length;
+
+  function handleAppliedOperation(op: Operation) {
+    setData((d) => applyOperationLocal(d, op));
+    // Keep the ephemeral checkbox set in sync with chat-applied changes
+    if (op.op === 'mark_task_done') {
+      setDone((s) => new Set(s).add(taskKey(op.clientId, op.taskIndex)));
+    } else if (op.op === 'unmark_task_done') {
+      setDone((s) => {
+        const n = new Set(s);
+        n.delete(taskKey(op.clientId, op.taskIndex));
+        return n;
+      });
+    }
+  }
 
   function toggleDone(key: string) {
     setDone(prev => {
@@ -264,7 +321,7 @@ export default function TasksClient({ data }: TasksClientProps) {
           InflowMD · Internal · Not indexed
         </p>
       </div>
-      <TasksChat data={data} />
+      <TasksChat data={data} onApplied={handleAppliedOperation} />
     </main>
   );
 }
