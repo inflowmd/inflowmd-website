@@ -34,7 +34,8 @@
             },
             {
               "icon": "you",
-              "txt": "Create Yext account"
+              "txt": "Create Yext account",
+              "done": true
             }
           ]
         },
