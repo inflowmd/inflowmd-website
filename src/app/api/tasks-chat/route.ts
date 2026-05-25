@@ -2,6 +2,11 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { convertToModelMessages, stepCountIs, streamText, tool, UIMessage } from "ai";
 import { z } from "zod";
 import { readTasks, writeOperation, type Operation } from "@/lib/tasksRepo";
+import {
+  readMemory,
+  writeMemoryOperation,
+  type MemoryOperation,
+} from "@/lib/memoryRepo";
 
 export const maxDuration = 60;
 export const runtime = "nodejs";
@@ -30,6 +35,19 @@ async function runOp(op: Operation, summary: string) {
   }
 }
 
+async function runMemoryOp(op: MemoryOperation, summary: string) {
+  try {
+    await writeMemoryOperation(op, summary);
+    return { ok: true as const, summary };
+  } catch (e) {
+    return {
+      ok: false as const,
+      summary,
+      error: e instanceof Error ? e.message : "Unknown error",
+    };
+  }
+}
+
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
@@ -40,8 +58,17 @@ export async function POST(req: Request) {
     );
   }
 
-  const { data: currentTasks } = await readTasks();
+  const [{ data: currentTasks }, currentMemory] = await Promise.all([
+    readTasks(),
+    readMemory(),
+  ]);
   const today = new Date().toISOString().slice(0, 10);
+  const memoryBlock =
+    currentMemory.notes.length === 0
+      ? "(no memory notes yet)"
+      : currentMemory.notes
+          .map((n) => `- [${n.id}] ${n.text}`)
+          .join("\n");
 
   const systemBase = `You are an assistant embedded in Clayton's internal InflowMD task board. Today is ${today}.
 
@@ -62,7 +89,21 @@ Tool usage rules:
 Task model:
 - Tasks are { icon, txt, done? }. icon is one of: 'you' (manual work), 'bot' (Cowork agent), 'wait' (waiting on someone), 'note' (informational).
 - "Mark as done" means set done: true, NOT remove. Completed tasks stay in the list (struck through) as a running record.
-- Use remove_task only for tasks that were a mistake or are truly no longer relevant.`;
+- Use remove_task only for tasks that were a mistake or are truly no longer relevant.
+
+Memory:
+- You have a persistent memory file of facts and patterns about Clayton's clients and workflow.
+- Read current memory below — refer to it naturally when relevant ("you mentioned earlier that…").
+- PROACTIVELY save anything that would be useful to remember in future conversations: client preferences, response patterns, decisions made, ongoing context. Call add_memory.
+- Keep notes terse and factual (one sentence each). Examples:
+  • "Dr. Datta typically takes 5-7 days to respond to blog approvals"
+  • "Brian prefers email over phone"
+  • "MĒLA's contract runs through August 2026"
+- Don't save trivia or things that are already in the task list.
+- If Clayton corrects something, update the memory (update_memory) or remove the stale one (remove_memory).
+
+Current memory notes:
+${memoryBlock}`;
 
   const result = streamText({
     model: anthropic("claude-sonnet-4-6"),
@@ -141,6 +182,32 @@ Task model:
         }),
         execute: async ({ clientId, priority, summary }) =>
           runOp({ op: "set_client_priority", clientId, priority }, summary),
+      }),
+      add_memory: tool({
+        description:
+          "Save a terse, factual note to long-term memory. Use for facts/patterns/preferences that should outlive this conversation.",
+        inputSchema: z.object({
+          text: z.string().min(1).max(500).describe("The note to remember. Keep it one sentence."),
+        }),
+        execute: async ({ text }) =>
+          runMemoryOp({ op: "add_memory", text }, `add note: ${text.slice(0, 80)}`),
+      }),
+      remove_memory: tool({
+        description: "Delete a memory note by its id (shown in brackets in the Current memory notes section).",
+        inputSchema: z.object({
+          id: z.string(),
+        }),
+        execute: async ({ id }) =>
+          runMemoryOp({ op: "remove_memory", id }, `remove note ${id}`),
+      }),
+      update_memory: tool({
+        description: "Replace the text of an existing memory note (by id) with a new version. Use when a fact has changed.",
+        inputSchema: z.object({
+          id: z.string(),
+          text: z.string().min(1).max(500),
+        }),
+        execute: async ({ id, text }) =>
+          runMemoryOp({ op: "update_memory", id, text }, `update note ${id}`),
       }),
     },
   });
