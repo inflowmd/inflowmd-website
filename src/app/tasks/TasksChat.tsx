@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useState } from "react";
-import type { TasksData } from "./TasksClient";
+import type { TasksData, Operation } from "./TasksClient";
 
 type ToolName =
   | "mark_task_done"
@@ -127,7 +127,13 @@ function SuggestedEditCard({
   );
 }
 
-export default function TasksChat({ data }: { data: TasksData }) {
+export default function TasksChat({
+  data,
+  onApplied,
+}: {
+  data: TasksData;
+  onApplied: (op: Operation) => void;
+}) {
   const [editStates, setEditStates] = useState<Record<string, EditStatus>>({});
   const [open, setOpen] = useState(true);
   const [input, setInput] = useState("");
@@ -154,6 +160,9 @@ export default function TasksChat({ data }: { data: TasksData }) {
       });
       if (!res.ok) throw new Error(await res.text());
       setEditStates((s) => ({ ...s, [toolCallId]: "applied" }));
+      // Mutate the on-screen board immediately so the user sees the change
+      // without waiting for the Vercel redeploy.
+      onApplied(operation as Operation);
     } catch (e) {
       console.error("Apply failed:", e);
       setEditStates((s) => ({ ...s, [toolCallId]: "error" }));
