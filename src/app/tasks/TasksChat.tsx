@@ -138,7 +138,7 @@ export default function TasksChat({
   const [open, setOpen] = useState(true);
   const [input, setInput] = useState("");
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, status, error, addToolOutput } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/tasks-chat",
       credentials: "include",
@@ -160,17 +160,33 @@ export default function TasksChat({
       });
       if (!res.ok) throw new Error(await res.text());
       setEditStates((s) => ({ ...s, [toolCallId]: "applied" }));
+      // Resolve the tool call so the next chat turn has a complete history.
+      addToolOutput({
+        tool: operation.op,
+        toolCallId,
+        output: { applied: true },
+      });
       // Mutate the on-screen board immediately so the user sees the change
       // without waiting for the Vercel redeploy.
       onApplied(operation as Operation);
     } catch (e) {
       console.error("Apply failed:", e);
       setEditStates((s) => ({ ...s, [toolCallId]: "error" }));
+      addToolOutput({
+        tool: operation.op,
+        toolCallId,
+        output: { applied: false, error: e instanceof Error ? e.message : "unknown" },
+      });
     }
   }
 
-  function rejectEdit(toolCallId: string) {
+  function rejectEdit(toolCallId: string, toolName: ToolName) {
     setEditStates((s) => ({ ...s, [toolCallId]: "rejected" }));
+    addToolOutput({
+      tool: toolName,
+      toolCallId,
+      output: { applied: false, reason: "rejected by user" },
+    });
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -276,7 +292,7 @@ export default function TasksChat({
                       summary={summary}
                       status={state}
                       onApply={() => applyEdit(id, operation, summary)}
-                      onReject={() => rejectEdit(id)}
+                      onReject={() => rejectEdit(id, toolName)}
                     />
                   );
                 }
