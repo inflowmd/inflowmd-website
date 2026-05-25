@@ -57,14 +57,43 @@ function taskKey(clientId: string, i: number) {
   return `${clientId}-${i}`;
 }
 
-function matchesFilter(client: Client, filter: string): boolean {
-  if (filter === 'all') return true;
-  if (filter === 'you') return client.tasks.some(t => t.icon === 'you');
-  if (filter === 'bot') return client.tasks.some(t => t.icon === 'bot');
-  if (filter === 'urgent') return client.pri === 'high';
-  if (filter === 'biz') return client.tags.includes('biz');
-  if (filter === 'waiting') return client.tags.includes('waiting') || client.tasks.every(t => t.icon === 'wait');
-  return true;
+/**
+ * Decide whether an individual task should be visible under a given filter.
+ * - 'you'/'bot'/'note'/'waiting' icon filters: match the icon AND hide done items
+ *   (since "Needs me" / "Cowork" implies remaining work).
+ * - 'urgent' / 'biz': these are client-level filters; all tasks visible.
+ * - 'all': everything visible.
+ */
+function taskMatchesFilter(
+  task: { icon: IconType },
+  filter: string,
+  isDone: boolean
+): boolean {
+  switch (filter) {
+    case 'you':
+      return task.icon === 'you' && !isDone;
+    case 'bot':
+      return task.icon === 'bot' && !isDone;
+    case 'waiting':
+      return task.icon === 'wait';
+    case 'urgent':
+    case 'biz':
+    case 'all':
+    default:
+      return true;
+  }
+}
+
+/** Client-level gate (must pass before any tasks are considered). */
+function clientPassesFilter(client: Client, filter: string): boolean {
+  switch (filter) {
+    case 'urgent':
+      return client.pri === 'high';
+    case 'biz':
+      return client.tags.includes('biz');
+    default:
+      return true;
+  }
 }
 
 export type Operation =
@@ -257,8 +286,21 @@ export default function TasksClient({ data: initialData }: TasksClientProps) {
 
         {/* Sections */}
         {sections.map(section => {
-          const visibleClients = section.clients.filter(c => matchesFilter(c, filter));
-          if (!visibleClients.length) return null;
+          // Build per-client list of visible task indices for the active filter.
+          const clientsWithVisible = section.clients
+            .filter(c => clientPassesFilter(c, filter))
+            .map(client => {
+              const visibleIndices = client.tasks
+                .map((t, i) => ({ t, i }))
+                .filter(({ t, i }) =>
+                  taskMatchesFilter(t, filter, done.has(taskKey(client.id, i)))
+                )
+                .map(({ i }) => i);
+              return { client, visibleIndices };
+            })
+            .filter(x => x.visibleIndices.length > 0);
+
+          if (!clientsWithVisible.length) return null;
 
           return (
             <div key={section.section} className="mb-6">
@@ -267,7 +309,7 @@ export default function TasksClient({ data: initialData }: TasksClientProps) {
               </h2>
 
               <div className="space-y-2">
-                {visibleClients.map(client => {
+                {clientsWithVisible.map(({ client, visibleIndices }) => {
                   const isCollapsed = collapsed.has(client.id);
                   const doneCount = client.tasks.filter((_, i) => done.has(taskKey(client.id, i))).length;
                   const pct = client.tasks.length ? Math.round((doneCount / client.tasks.length) * 100) : 0;
@@ -302,7 +344,8 @@ export default function TasksClient({ data: initialData }: TasksClientProps) {
                       {/* Tasks */}
                       {!isCollapsed && (
                         <div>
-                          {client.tasks.map((task, i) => {
+                          {visibleIndices.map((i) => {
+                            const task = client.tasks[i];
                             const key = taskKey(client.id, i);
                             const isDone = done.has(key);
                             return (
