@@ -8,14 +8,26 @@ export function proxy(req: NextRequest) {
   // Login page itself must be accessible unauthenticated
   if (pathname === "/tasks/login") return NextResponse.next();
 
-  // Only gate /tasks/*
-  if (!pathname.startsWith("/tasks")) return NextResponse.next();
+  const isGated =
+    pathname.startsWith("/tasks") ||
+    pathname.startsWith("/api/tasks-chat") ||
+    pathname.startsWith("/api/tasks-update");
+
+  if (!isGated) return NextResponse.next();
 
   const token = req.cookies.get(COOKIE_NAME)?.value;
   const expected = process.env.TASKS_AUTH_TOKEN;
 
   if (expected && token && token === expected) {
     return NextResponse.next();
+  }
+
+  // For API routes return 401 instead of redirecting to a login page
+  if (pathname.startsWith("/api/")) {
+    return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "content-type": "application/json" },
+    });
   }
 
   const loginUrl = req.nextUrl.clone();
@@ -25,5 +37,5 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/tasks/:path*"],
+  matcher: ["/tasks/:path*", "/api/tasks-chat", "/api/tasks-update"],
 };
