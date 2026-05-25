@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /tasks
+Disallow: /tasks/
+Disallow: /onboarding
+Disallow: /why-nextjs
 
 Sitemap: https://inflowmd.vercel.app/sitemap.xml
