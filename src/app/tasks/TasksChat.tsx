@@ -3,22 +3,84 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useState } from "react";
+import type { TasksData } from "./TasksClient";
 
-interface ProposedUpdate {
-  summary: string;
-  newTasks: unknown;
+type ToolName =
+  | "mark_task_done"
+  | "unmark_task_done"
+  | "add_task"
+  | "remove_task"
+  | "update_task"
+  | "set_client_priority";
+
+interface BaseInput {
+  clientId: string;
+}
+interface IndexInput extends BaseInput {
+  taskIndex: number;
+}
+interface AddTaskInput extends BaseInput {
+  text: string;
+  icon: "you" | "bot" | "wait" | "note";
+}
+interface UpdateTaskInput extends BaseInput {
+  taskIndex: number;
+  text?: string;
+  icon?: "you" | "bot" | "wait" | "note";
+}
+interface SetPriorityInput extends BaseInput {
+  priority: "high" | "med" | "low";
+}
+
+type AnyInput = IndexInput | AddTaskInput | UpdateTaskInput | SetPriorityInput;
+
+type EditStatus = "pending" | "applying" | "applied" | "rejected" | "error";
+
+function describeOperation(
+  toolName: ToolName,
+  input: AnyInput,
+  data: TasksData
+): string {
+  const client = data.sections
+    .flatMap((s) => s.clients)
+    .find((c) => c.id === input.clientId);
+  const clientName = client?.name ?? `(unknown client: ${input.clientId})`;
+
+  const taskAt = (i: number) => client?.tasks[i]?.txt ?? `(task ${i})`;
+
+  switch (toolName) {
+    case "mark_task_done":
+      return `Mark "${taskAt((input as IndexInput).taskIndex)}" as done — ${clientName}`;
+    case "unmark_task_done":
+      return `Reopen "${taskAt((input as IndexInput).taskIndex)}" — ${clientName}`;
+    case "add_task": {
+      const i = input as AddTaskInput;
+      return `Add task to ${clientName}: "${i.text}" (${i.icon})`;
+    }
+    case "remove_task":
+      return `Remove "${taskAt((input as IndexInput).taskIndex)}" — ${clientName}`;
+    case "update_task": {
+      const u = input as UpdateTaskInput;
+      const parts: string[] = [];
+      if (u.text) parts.push(`text → "${u.text}"`);
+      if (u.icon) parts.push(`icon → ${u.icon}`);
+      return `Update "${taskAt(u.taskIndex)}" — ${clientName} (${parts.join(", ")})`;
+    }
+    case "set_client_priority":
+      return `Set ${clientName} priority → ${(input as SetPriorityInput).priority}`;
+  }
 }
 
 function SuggestedEditCard({
-  input,
+  summary,
   onApply,
   onReject,
   status,
 }: {
-  input: ProposedUpdate;
+  summary: string;
   onApply: () => void;
   onReject: () => void;
-  status: "pending" | "applying" | "applied" | "rejected" | "error";
+  status: EditStatus;
 }) {
   const statusBadge =
     status === "applied" ? (
@@ -42,9 +104,7 @@ function SuggestedEditCard({
           Proposed change
         </span>
       </div>
-      <p className="text-sm text-gray-800 dark:text-gray-200 mb-3">
-        {input.summary}
-      </p>
+      <p className="text-sm text-gray-800 dark:text-gray-200 mb-3">{summary}</p>
       {status === "pending" ? (
         <div className="flex gap-2">
           <button
@@ -67,9 +127,7 @@ function SuggestedEditCard({
   );
 }
 
-type EditStatus = "pending" | "applying" | "applied" | "rejected" | "error";
-
-export default function TasksChat() {
+export default function TasksChat({ data }: { data: TasksData }) {
   const [editStates, setEditStates] = useState<Record<string, EditStatus>>({});
   const [open, setOpen] = useState(true);
   const [input, setInput] = useState("");
@@ -81,13 +139,18 @@ export default function TasksChat() {
     }),
   });
 
-  async function applyEdit(toolCallId: string, payload: ProposedUpdate) {
+  async function applyEdit(
+    toolCallId: string,
+    operation: { op: ToolName } & AnyInput,
+    summary: string
+  ) {
     setEditStates((s) => ({ ...s, [toolCallId]: "applying" }));
     try {
       const res = await fetch("/api/tasks-update", {
         method: "POST",
+        credentials: "include",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ operation, summary }),
       });
       if (!res.ok) throw new Error(await res.text());
       setEditStates((s) => ({ ...s, [toolCallId]: "applied" }));
@@ -178,24 +241,32 @@ export default function TasksChat() {
                     </div>
                   );
                 }
-                if (part.type === "tool-propose_tasks_update") {
-                  const id = part.toolCallId;
+                if (part.type.startsWith("tool-")) {
+                  // Each tool call becomes a suggestion card.
+                  // Cast: AI SDK types this as a discriminated union of all tools;
+                  // we treat them uniformly via the same shape.
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  const p = part as any;
+                  const toolName = (p.type as string).replace("tool-", "") as ToolName;
+                  const id = p.toolCallId as string;
                   const state = editStates[id] ?? "pending";
-                  // Only render when the tool input is fully streamed in.
-                  if (part.state !== "input-available" && part.state !== "output-available") {
+
+                  if (p.state !== "input-available" && p.state !== "output-available") {
                     return (
                       <div key={i} className="text-xs text-gray-400 italic">
                         Composing change…
                       </div>
                     );
                   }
-                  const input = part.input as ProposedUpdate;
+                  const opInput = p.input as AnyInput;
+                  const summary = describeOperation(toolName, opInput, data);
+                  const operation = { op: toolName, ...opInput };
                   return (
                     <SuggestedEditCard
                       key={i}
-                      input={input}
+                      summary={summary}
                       status={state}
-                      onApply={() => applyEdit(id, input)}
+                      onApply={() => applyEdit(id, operation, summary)}
                       onReject={() => rejectEdit(id)}
                     />
                   );
