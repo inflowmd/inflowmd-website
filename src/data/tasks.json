@@ -15,7 +15,7 @@
             {
               "icon": "you",
               "txt": "Deploy new bio and logo to site",
-              "done": true
+              "done": false
             },
             {
               "icon": "bot",
