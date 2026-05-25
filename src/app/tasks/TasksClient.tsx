@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { logout } from './login/actions';
+import TasksChat from './TasksChat';
 
 type IconType = 'you' | 'bot' | 'wait' | 'note';
 type PriorityType = 'high' | 'med' | 'low';
@@ -9,6 +10,7 @@ type PriorityType = 'high' | 'med' | 'low';
 interface Task {
   icon: IconType;
   txt: string;
+  done?: boolean;
 }
 
 interface Client {
@@ -64,11 +66,26 @@ function matchesFilter(client: Client, filter: string): boolean {
 }
 
 export default function TasksClient({ data }: TasksClientProps) {
-  const [done, setDone] = useState<Set<string>>(new Set());
+  const sections: Section[] = data.sections;
+
+  // Seed local done-state from persisted `done` fields in the data.
+  // Local clicks toggle ephemerally on top; chat-driven updates flip the
+  // persisted field and rehydrate on next page load.
+  const initialDone = (() => {
+    const s = new Set<string>();
+    for (const sec of sections) {
+      for (const c of sec.clients) {
+        c.tasks.forEach((t, i) => {
+          if (t.done) s.add(taskKey(c.id, i));
+        });
+      }
+    }
+    return s;
+  })();
+
+  const [done, setDone] = useState<Set<string>>(initialDone);
   const [filter, setFilter] = useState('all');
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
-
-  const sections: Section[] = data.sections;
   const allTasks = sections.flatMap(s => s.clients.flatMap(c => c.tasks));
   const youTasks = allTasks.filter(t => t.icon === 'you').length;
   const botTasks = allTasks.filter(t => t.icon === 'bot').length;
@@ -243,10 +260,11 @@ export default function TasksClient({ data }: TasksClientProps) {
           );
         })}
 
-        <p className="text-center text-xs text-gray-400 dark:text-gray-600 mt-10">
+        <p className="text-center text-xs text-gray-400 dark:text-gray-600 mt-10 mb-24 lg:mb-10">
           InflowMD · Internal · Not indexed
         </p>
       </div>
+      <TasksChat />
     </main>
   );
 }
