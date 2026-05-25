@@ -24,7 +24,8 @@
             },
             {
               "icon": "bot",
-              "txt": "Redesign '5 Stages of Vein Disease' section (Claude Design)"
+              "txt": "Redesign '5 Stages of Vein Disease' section (Claude Design)",
+              "done": true
             },
             {
               "icon": "you",
