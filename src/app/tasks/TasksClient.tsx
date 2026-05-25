@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import tasksData from '@/data/tasks.json';
+import { logout } from './login/actions';
 
 type IconType = 'you' | 'bot' | 'wait' | 'note';
 type PriorityType = 'high' | 'med' | 'low';
@@ -22,6 +22,15 @@ interface Client {
 interface Section {
   section: string;
   clients: Client[];
+}
+
+export interface TasksData {
+  lastUpdated: string;
+  sections: Section[];
+}
+
+interface TasksClientProps {
+  data: TasksData;
 }
 
 const ICONS: Record<IconType, string> = { you: '👤', bot: '🤖', wait: '⏸', note: '📝' };
@@ -54,12 +63,12 @@ function matchesFilter(client: Client, filter: string): boolean {
   return true;
 }
 
-export default function TasksClient() {
+export default function TasksClient({ data }: TasksClientProps) {
   const [done, setDone] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState('all');
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
-  const sections: Section[] = tasksData.sections as Section[];
+  const sections: Section[] = data.sections;
   const allTasks = sections.flatMap(s => s.clients.flatMap(c => c.tasks));
   const youTasks = allTasks.filter(t => t.icon === 'you').length;
   const botTasks = allTasks.filter(t => t.icon === 'bot').length;
@@ -96,13 +105,23 @@ export default function TasksClient() {
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
-            InflowMD Task Board
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Updated {tasksData.lastUpdated} · Internal use only
-          </p>
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
+              InflowMD Task Board
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Updated {data.lastUpdated} · Internal use only
+            </p>
+          </div>
+          <form action={logout}>
+            <button
+              type="submit"
+              className="text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+            >
+              Sign out
+            </button>
+          </form>
         </div>
 
         {/* Stats */}
