@@ -1,0 +1,204 @@
+{
+  "lastUpdated": "2026-05-25",
+  "sections": [
+    {
+      "section": "URGENT — This Week",
+      "clients": [
+        {
+          "id": "fvc",
+          "name": "Florida Vascular Care",
+          "pri": "high",
+          "tags": ["urgent"],
+          "tasks": [
+            { "icon": "you", "txt": "Deploy new bio and logo to site" },
+            { "icon": "bot", "txt": "Build out remaining site pages" },
+            { "icon": "bot", "txt": "Redesign '5 Stages of Vein Disease' section (Claude Design)" },
+            { "icon": "you", "txt": "Final review-ready deployment by end of week" }
+          ]
+        },
+        {
+          "id": "derm",
+          "name": "Dermatology & Skin Care Associates",
+          "pri": "high",
+          "tags": ["urgent"],
+          "tasks": [
+            { "icon": "bot", "txt": "Finish site build (Claude Code)" },
+            { "icon": "you", "txt": "Polish all pages" },
+            { "icon": "you", "txt": "Send to client for review by end of week" },
+            { "icon": "bot", "txt": "Implement SEO post-approval" },
+            { "icon": "you", "txt": "Deploy" }
+          ]
+        },
+        {
+          "id": "paul",
+          "name": "The Bluffs / AIM — Paul Call Tomorrow",
+          "pri": "high",
+          "tags": ["urgent"],
+          "tasks": [
+            { "icon": "you", "txt": "Check Vercel analytics for live site traffic data" },
+            { "icon": "you", "txt": "Install Google Analytics on live site" },
+            { "icon": "you", "txt": "Review project manager chat for negotiation strategy" },
+            { "icon": "you", "txt": "Negotiate free work contingent on AIM Training Academy contract ($1,300/mo through August)" }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "High Priority — This Week",
+      "clients": [
+        {
+          "id": "icc",
+          "name": "ICC / Vein / WCAC",
+          "pri": "med",
+          "tags": [],
+          "tasks": [
+            { "icon": "you", "txt": "Deploy bio page to live site" },
+            { "icon": "you", "txt": "Draft Next.js upgrade proposal + email to Brian" }
+          ]
+        },
+        {
+          "id": "mela",
+          "name": "MĒLA Med Spa — Pace",
+          "pri": "med",
+          "tags": [],
+          "tasks": [
+            { "icon": "you", "txt": "Finalize Google Ads (resolve flags)" },
+            { "icon": "you", "txt": "Launch campaigns" }
+          ]
+        },
+        {
+          "id": "cvc",
+          "name": "CVC — Dr. Datta Upsell",
+          "pri": "med",
+          "tags": [],
+          "tasks": [
+            { "icon": "you", "txt": "Write 2 additional blogs" },
+            { "icon": "you", "txt": "Send all 4 blogs + Next.js pitch to Dr. Datta" },
+            { "icon": "you", "txt": "Nudge Dr. Datta for upsell call" },
+            { "icon": "wait", "txt": "Waiting on Dr. Datta blog approval" }
+          ]
+        },
+        {
+          "id": "anton",
+          "name": "Dr. Hany Anton — Florida Vascular Care",
+          "pri": "med",
+          "tags": [],
+          "tasks": [
+            { "icon": "bot", "txt": "Build new Next.js site (Vercel + GitHub)" },
+            { "icon": "you", "txt": "Set up reputation management, directory, Google Analytics" },
+            { "icon": "you", "txt": "Kick off onboarding chat in new project" },
+            { "icon": "wait", "txt": "Waiting on GBP manager access" }
+          ]
+        },
+        {
+          "id": "mde2",
+          "name": "Dr. Aldo Gonzales — MDE / Provectus Health",
+          "pri": "med",
+          "tags": [],
+          "tasks": [
+            { "icon": "you", "txt": "Draft and send proposal: $800/mo upgrade — Next.js for both sites + 12 months blogs + SEO" }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "Business Development",
+      "clients": [
+        {
+          "id": "freimann",
+          "name": "Dr. Jacob Freimann — Plastic Surgeon",
+          "pri": "med",
+          "tags": ["biz"],
+          "tasks": [
+            { "icon": "you", "txt": "Send pricing options email — follow up from phone call" }
+          ]
+        },
+        {
+          "id": "sos",
+          "name": "Dr. Sos",
+          "pri": "med",
+          "tags": ["biz"],
+          "tasks": [
+            { "icon": "you", "txt": "Follow-up email — prompt on Next.js site build (SEO already contracted 12 months)" }
+          ]
+        },
+        {
+          "id": "walker",
+          "name": "Dr. Allison Walker — Vein-ity",
+          "pri": "med",
+          "tags": ["biz"],
+          "tasks": [
+            { "icon": "you", "txt": "Circle back — pitch Next.js site upgrade + better service model" },
+            { "icon": "note", "txt": "Note: Mobile PageSpeed 70, Desktop 98. Next.js would push mobile to 85-95+, better Core Web Vitals" }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "Client Offboarding",
+      "clients": [
+        {
+          "id": "evolve",
+          "name": "Evolve Medical — Separation",
+          "pri": "med",
+          "tags": [],
+          "tasks": [
+            { "icon": "you", "txt": "Send separation agreement via DocuSign for review and signature" },
+            { "icon": "you", "txt": "Follow-up email: next steps — $3,500 fee + website asset transfer" }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "Backlog / On Hold",
+      "clients": [
+        {
+          "id": "oasis",
+          "name": "Oasis Vein & Vitality",
+          "pri": "low",
+          "tags": ["waiting"],
+          "tasks": [
+            { "icon": "wait", "txt": "Final polish done — sent to Dr. Mehta and adviser for feedback" }
+          ]
+        },
+        {
+          "id": "mde",
+          "name": "MDE / MDE Wellness",
+          "pri": "low",
+          "tags": ["waiting"],
+          "tasks": [
+            { "icon": "wait", "txt": "On hold — waiting on Dr. Gonzalez" }
+          ]
+        },
+        {
+          "id": "bluffs",
+          "name": "The Bluffs",
+          "pri": "low",
+          "tags": [],
+          "tasks": [
+            { "icon": "bot", "txt": "Reviews on internal pages" },
+            { "icon": "bot", "txt": "CTA buttons site-wide (after consult page approved)" }
+          ]
+        },
+        {
+          "id": "inflow",
+          "name": "InflowMD (inflowmd.com)",
+          "pri": "low",
+          "tags": [],
+          "tasks": [
+            { "icon": "wait", "txt": "Paused — resume after client priorities clear" }
+          ]
+        },
+        {
+          "id": "agape",
+          "name": "Agape Aesthetics",
+          "pri": "low",
+          "tags": ["waiting"],
+          "tasks": [
+            { "icon": "wait", "txt": "Waiting on Priscilla — onboarding form + domain confirmation" }
+          ]
+        }
+      ]
+    }
+  ]
+}
