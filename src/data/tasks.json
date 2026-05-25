@@ -19,7 +19,8 @@
             },
             {
               "icon": "bot",
-              "txt": "Build out remaining site pages"
+              "txt": "Build out remaining site pages",
+              "done": true
             },
             {
               "icon": "bot",
