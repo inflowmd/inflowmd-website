@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { readTasks, writeTasks } from "@/lib/tasksRepo";
+import { writeOperation, type Operation } from "@/lib/tasksRepo";
 
 export const runtime = "nodejs";
 
@@ -27,62 +27,6 @@ const RequestSchema = z.object({
   summary: z.string().min(1).max(300),
 });
 
-type Task = { icon: string; txt: string; done?: boolean };
-type Client = { id: string; name: string; pri: string; tags: string[]; tasks: Task[] };
-type Section = { section: string; clients: Client[] };
-type TasksData = { lastUpdated: string; sections: Section[] };
-
-function findClient(data: TasksData, clientId: string): Client | null {
-  for (const sec of data.sections) {
-    const c = sec.clients.find((c) => c.id === clientId);
-    if (c) return c;
-  }
-  return null;
-}
-
-function applyOperation(data: TasksData, op: z.infer<typeof OperationSchema>): TasksData {
-  const today = new Date().toISOString().slice(0, 10);
-  const next: TasksData = JSON.parse(JSON.stringify(data));
-  next.lastUpdated = today;
-
-  const client = findClient(next, op.clientId);
-  if (!client) throw new Error(`Client not found: ${op.clientId}`);
-
-  switch (op.op) {
-    case "mark_task_done": {
-      if (!client.tasks[op.taskIndex]) throw new Error("Task index out of range");
-      client.tasks[op.taskIndex].done = true;
-      break;
-    }
-    case "unmark_task_done": {
-      if (!client.tasks[op.taskIndex]) throw new Error("Task index out of range");
-      client.tasks[op.taskIndex].done = false;
-      break;
-    }
-    case "add_task": {
-      client.tasks.push({ icon: op.icon, txt: op.text });
-      break;
-    }
-    case "remove_task": {
-      if (!client.tasks[op.taskIndex]) throw new Error("Task index out of range");
-      client.tasks.splice(op.taskIndex, 1);
-      break;
-    }
-    case "update_task": {
-      const t = client.tasks[op.taskIndex];
-      if (!t) throw new Error("Task index out of range");
-      if (op.text !== undefined) t.txt = op.text;
-      if (op.icon !== undefined) t.icon = op.icon;
-      break;
-    }
-    case "set_client_priority": {
-      client.pri = op.priority;
-      break;
-    }
-  }
-  return next;
-}
-
 export async function POST(req: NextRequest) {
   let body: unknown;
   try {
@@ -99,12 +43,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { operation, summary } = parsed.data;
-
   try {
-    const { data, sha } = await readTasks();
-    const newData = applyOperation(data as TasksData, operation);
-    await writeTasks(newData, `tasks: ${summary}\n\nApplied via /tasks chat assistant`, sha);
+    await writeOperation(parsed.data.operation as Operation, parsed.data.summary);
     return NextResponse.json({ ok: true });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
