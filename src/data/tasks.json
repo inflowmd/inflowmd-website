@@ -29,7 +29,8 @@
             },
             {
               "icon": "you",
-              "txt": "Final review-ready deployment by end of week"
+              "txt": "Final review-ready deployment by end of week",
+              "done": true
             },
             {
               "icon": "you",
