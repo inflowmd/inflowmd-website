@@ -2,127 +2,25 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { TasksData, Operation } from "./TasksClient";
 
-type ToolName =
-  | "mark_task_done"
-  | "unmark_task_done"
-  | "add_task"
-  | "remove_task"
-  | "update_task"
-  | "set_client_priority";
-
-interface BaseInput {
-  clientId: string;
-}
-interface IndexInput extends BaseInput {
-  taskIndex: number;
-}
-interface AddTaskInput extends BaseInput {
-  text: string;
-  icon: "you" | "bot" | "wait" | "note";
-}
-interface UpdateTaskInput extends BaseInput {
-  taskIndex: number;
-  text?: string;
-  icon?: "you" | "bot" | "wait" | "note";
-}
-interface SetPriorityInput extends BaseInput {
-  priority: "high" | "med" | "low";
-}
-
-type AnyInput = IndexInput | AddTaskInput | UpdateTaskInput | SetPriorityInput;
-
-type EditStatus = "pending" | "applying" | "applied" | "rejected" | "error";
-
-function describeOperation(
-  toolName: ToolName,
-  input: AnyInput,
-  data: TasksData
-): string {
-  const client = data.sections
-    .flatMap((s) => s.clients)
-    .find((c) => c.id === input.clientId);
-  const clientName = client?.name ?? `(unknown client: ${input.clientId})`;
-
-  const taskAt = (i: number) => client?.tasks[i]?.txt ?? `(task ${i})`;
-
-  switch (toolName) {
-    case "mark_task_done":
-      return `Mark "${taskAt((input as IndexInput).taskIndex)}" as done — ${clientName}`;
-    case "unmark_task_done":
-      return `Reopen "${taskAt((input as IndexInput).taskIndex)}" — ${clientName}`;
-    case "add_task": {
-      const i = input as AddTaskInput;
-      return `Add task to ${clientName}: "${i.text}" (${i.icon})`;
-    }
-    case "remove_task":
-      return `Remove "${taskAt((input as IndexInput).taskIndex)}" — ${clientName}`;
-    case "update_task": {
-      const u = input as UpdateTaskInput;
-      const parts: string[] = [];
-      if (u.text) parts.push(`text → "${u.text}"`);
-      if (u.icon) parts.push(`icon → ${u.icon}`);
-      return `Update "${taskAt(u.taskIndex)}" — ${clientName} (${parts.join(", ")})`;
-    }
-    case "set_client_priority":
-      return `Set ${clientName} priority → ${(input as SetPriorityInput).priority}`;
-  }
-}
-
-function SuggestedEditCard({
-  summary,
-  onApply,
-  onReject,
-  status,
-}: {
-  summary: string;
-  onApply: () => void;
-  onReject: () => void;
-  status: EditStatus;
-}) {
-  const statusBadge =
-    status === "applied" ? (
-      <span className="text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
-        ✓ Applied — deploying
-      </span>
-    ) : status === "rejected" ? (
-      <span className="text-gray-500 text-xs">✕ Rejected</span>
-    ) : status === "applying" ? (
-      <span className="text-gray-500 text-xs">Applying…</span>
-    ) : status === "error" ? (
-      <span className="text-red-600 dark:text-red-400 text-xs font-semibold">
-        Error — see console
-      </span>
-    ) : null;
-
-  return (
-    <div className="my-2 p-3 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30">
-      <div className="flex items-start gap-2 mb-2">
-        <span className="text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mt-0.5">
-          Proposed change
-        </span>
+function AppliedCard({ summary, ok, error }: { summary: string; ok: boolean; error?: string }) {
+  if (ok) {
+    return (
+      <div className="my-2 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/20">
+        <p className="text-sm text-emerald-900 dark:text-emerald-200">
+          <span className="font-semibold">✓</span> {summary}
+        </p>
       </div>
-      <p className="text-sm text-gray-800 dark:text-gray-200 mb-3">{summary}</p>
-      {status === "pending" ? (
-        <div className="flex gap-2">
-          <button
-            onClick={onApply}
-            className="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors"
-          >
-            Apply
-          </button>
-          <button
-            onClick={onReject}
-            className="px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            Reject
-          </button>
-        </div>
-      ) : (
-        statusBadge
-      )}
+    );
+  }
+  return (
+    <div className="my-2 px-3 py-2 rounded-lg border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/20">
+      <p className="text-sm text-red-700 dark:text-red-300">
+        <span className="font-semibold">✕ Failed:</span> {summary}
+        {error && <span className="block text-xs opacity-70 mt-1">{error}</span>}
+      </p>
     </div>
   );
 }
@@ -134,60 +32,39 @@ export default function TasksChat({
   data: TasksData;
   onApplied: (op: Operation) => void;
 }) {
-  const [editStates, setEditStates] = useState<Record<string, EditStatus>>({});
   const [open, setOpen] = useState(true);
   const [input, setInput] = useState("");
+  const seenToolIds = useRef<Set<string>>(new Set());
 
-  const { messages, sendMessage, status, error, addToolOutput } = useChat({
+  const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/tasks-chat",
       credentials: "include",
     }),
   });
 
-  async function applyEdit(
-    toolCallId: string,
-    operation: { op: ToolName } & AnyInput,
-    summary: string
-  ) {
-    setEditStates((s) => ({ ...s, [toolCallId]: "applying" }));
-    try {
-      const res = await fetch("/api/tasks-update", {
-        method: "POST",
-        credentials: "include",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ operation, summary }),
-      });
-      if (!res.ok) throw new Error(await res.text());
-      setEditStates((s) => ({ ...s, [toolCallId]: "applied" }));
-      // Resolve the tool call so the next chat turn has a complete history.
-      addToolOutput({
-        tool: operation.op,
-        toolCallId,
-        output: { applied: true },
-      });
-      // Mutate the on-screen board immediately so the user sees the change
-      // without waiting for the Vercel redeploy.
-      onApplied(operation as Operation);
-    } catch (e) {
-      console.error("Apply failed:", e);
-      setEditStates((s) => ({ ...s, [toolCallId]: "error" }));
-      addToolOutput({
-        tool: operation.op,
-        toolCallId,
-        output: { applied: false, error: e instanceof Error ? e.message : "unknown" },
-      });
+  // When a tool result arrives (server already committed), apply optimistically
+  // to local state so the board updates without waiting for redeploy.
+  useEffect(() => {
+    for (const m of messages) {
+      for (const part of m.parts) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const p = part as any;
+        if (
+          typeof p.type === "string" &&
+          p.type.startsWith("tool-") &&
+          p.state === "output-available" &&
+          !seenToolIds.current.has(p.toolCallId)
+        ) {
+          seenToolIds.current.add(p.toolCallId);
+          const output = p.output;
+          if (output?.ok && output.operation) {
+            onApplied(output.operation as Operation);
+          }
+        }
+      }
     }
-  }
-
-  function rejectEdit(toolCallId: string, toolName: ToolName) {
-    setEditStates((s) => ({ ...s, [toolCallId]: "rejected" }));
-    addToolOutput({
-      tool: toolName,
-      toolCallId,
-      output: { applied: false, reason: "rejected by user" },
-    });
-  }
+  }, [messages, onApplied]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -196,6 +73,9 @@ export default function TasksChat({
     sendMessage({ text: trimmed });
     setInput("");
   }
+
+  // suppress unused-var lint for the data prop (used implicitly via onApplied target)
+  void data;
 
   if (!open) {
     return (
@@ -217,7 +97,7 @@ export default function TasksChat({
             Tasks assistant
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            Claude Sonnet · suggests changes for your approval
+            Claude Sonnet · auto-applies changes
           </div>
         </div>
         <button
@@ -266,34 +146,24 @@ export default function TasksChat({
                     </div>
                   );
                 }
-                if (part.type.startsWith("tool-")) {
-                  // Each tool call becomes a suggestion card.
-                  // Cast: AI SDK types this as a discriminated union of all tools;
-                  // we treat them uniformly via the same shape.
+                if (typeof part.type === "string" && part.type.startsWith("tool-")) {
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   const p = part as any;
-                  const toolName = (p.type as string).replace("tool-", "") as ToolName;
-                  const id = p.toolCallId as string;
-                  const state = editStates[id] ?? "pending";
-
-                  if (p.state !== "input-available" && p.state !== "output-available") {
+                  if (p.state === "output-available") {
+                    const out = p.output;
                     return (
-                      <div key={i} className="text-xs text-gray-400 italic">
-                        Composing change…
-                      </div>
+                      <AppliedCard
+                        key={i}
+                        summary={out?.summary ?? "(no summary)"}
+                        ok={!!out?.ok}
+                        error={out?.error}
+                      />
                     );
                   }
-                  const opInput = p.input as AnyInput;
-                  const summary = describeOperation(toolName, opInput, data);
-                  const operation = { op: toolName, ...opInput };
                   return (
-                    <SuggestedEditCard
-                      key={i}
-                      summary={summary}
-                      status={state}
-                      onApply={() => applyEdit(id, operation, summary)}
-                      onReject={() => rejectEdit(id, toolName)}
-                    />
+                    <div key={i} className="text-xs text-gray-400 italic">
+                      Applying…
+                    </div>
                   );
                 }
                 return null;
