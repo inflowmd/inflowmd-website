@@ -153,6 +153,10 @@
             {
               "icon": "wait",
               "txt": "Waiting on Dr. Datta blog approval"
+            },
+            {
+              "icon": "you",
+              "txt": "Follow up with Dr. Datta on blog approval Thursday"
             }
           ]
         },
