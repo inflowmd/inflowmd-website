@@ -1,43 +1,20 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { convertToModelMessages, stepCountIs, streamText, tool, UIMessage } from "ai";
-
-// Pin baseURL and apiKey explicitly. Some shells set ANTHROPIC_BASE_URL or
-// blank ANTHROPIC_API_KEY which would otherwise be picked up automatically.
-const anthropic = createAnthropic({
-  baseURL: "https://api.anthropic.com/v1",
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
 import { z } from "zod";
 import { readTasks } from "@/lib/tasksRepo";
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 export const runtime = "nodejs";
 
 const MAX_MESSAGES = 50;
 
-const TaskSchema = z.object({
-  icon: z.enum(["you", "bot", "wait", "note"]),
-  txt: z.string(),
-  done: z.boolean().optional(),
+const anthropic = createAnthropic({
+  baseURL: "https://api.anthropic.com/v1",
+  apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-const ClientSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  pri: z.enum(["high", "med", "low"]),
-  tags: z.array(z.string()),
-  tasks: z.array(TaskSchema),
-});
-
-const SectionSchema = z.object({
-  section: z.string(),
-  clients: z.array(ClientSchema),
-});
-
-const TasksDataSchema = z.object({
-  lastUpdated: z.string(),
-  sections: z.array(SectionSchema),
-});
+const IconEnum = z.enum(["you", "bot", "wait", "note"]);
+const PriorityEnum = z.enum(["high", "med", "low"]);
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
@@ -49,46 +26,38 @@ export async function POST(req: Request) {
     );
   }
 
-  // Load the current task data fresh on every request so the model is never stale.
   const { data: currentTasks } = await readTasks();
-
   const today = new Date().toISOString().slice(0, 10);
 
   const systemBase = `You are an assistant embedded in Clayton's internal InflowMD task board. Today is ${today}.
 
-You help him think through his client work, answer questions about his task list, and — when explicitly asked — propose updates to the task data.
+You help him think through his client work, answer questions about his task list, and — when explicitly asked — propose updates by calling tools.
 
 Style:
 - Conversational and concise. No fluff.
 - Reference clients by name, not by ID, when talking to Clayton.
 - When listing tasks, use short bullets.
-- Don't quote the full JSON unless he asks.
 
-When proposing changes:
-- Use the propose_tasks_update tool with the ENTIRE updated tasks object (not a diff).
-- Preserve the existing structure exactly. Only change what was requested.
-- Always set lastUpdated to today's date (${today}) on any change.
-- After calling the tool, briefly summarize what you changed in plain English.
-- Do not call the tool unless Clayton has clearly asked for a change. For questions, planning, or analysis, just respond conversationally.
+Tool usage rules:
+- When Clayton asks for a change, call the matching granular tool(s). You may call multiple tools in one turn (e.g. mark two tasks done at once).
+- Each tool call surfaces as an Apply/Reject card for Clayton. He approves each one.
+- Use the EXACT clientId (string, lowercase) and the zero-based taskIndex from the current data.
+- After calling tools, give a brief one-line confirmation in plain English.
+- For questions, planning, or analysis: do NOT call tools — just respond conversationally.
 
-Task completion:
-- Tasks have an optional \`done: boolean\` field. To "mark a task as done", set done: true on it. To "unmark" or "reopen", set done: false (or omit the field).
-- DO NOT remove a task when asked to mark it done. Removal is only for tasks that were entered by mistake or are no longer relevant.
-- Completed tasks stay in the list (struck through) so Clayton has a running record.`;
+Task model:
+- Tasks are { icon, txt, done? }. icon is one of: 'you' (manual work), 'bot' (Cowork agent), 'wait' (waiting on someone), 'note' (informational).
+- "Mark as done" means set done: true, NOT remove. Completed tasks stay in the list (struck through) as a running record.
+- Use remove_task only for tasks that were a mistake or are truly no longer relevant.`;
 
   const result = streamText({
     model: anthropic("claude-sonnet-4-6"),
     stopWhen: stepCountIs(5),
+    system: systemBase,
     messages: [
       {
         role: "system",
-        content: systemBase,
-      },
-      {
-        role: "system",
         content: `Current tasks.json:\n\n${JSON.stringify(currentTasks, null, 2)}`,
-        // Cache the (large, slow-changing) tasks payload so follow-ups in the same
-        // 5-min window are essentially free on the input side.
         providerOptions: {
           anthropic: { cacheControl: { type: "ephemeral" } },
         },
@@ -96,16 +65,50 @@ Task completion:
       ...(await convertToModelMessages(messages)),
     ],
     tools: {
-      propose_tasks_update: tool({
-        description:
-          "Propose a complete updated tasks.json. The user will review and click Apply or Reject. Only call this when the user has clearly asked for a change. Pass the FULL new tasks object, not a diff.",
+      mark_task_done: tool({
+        description: "Mark a task as done (sets done: true). Use when the user reports finishing a task.",
         inputSchema: z.object({
-          summary: z
-            .string()
-            .describe("One-sentence plain-English description of the change (shown on the Apply card)."),
-          newTasks: TasksDataSchema.describe("The complete updated tasks.json content."),
+          clientId: z.string(),
+          taskIndex: z.number().int().min(0),
         }),
-        // No execute function — this is a client-confirmed tool.
+      }),
+      unmark_task_done: tool({
+        description: "Reopen a previously-done task (sets done: false).",
+        inputSchema: z.object({
+          clientId: z.string(),
+          taskIndex: z.number().int().min(0),
+        }),
+      }),
+      add_task: tool({
+        description: "Add a new task to a client's task list.",
+        inputSchema: z.object({
+          clientId: z.string(),
+          text: z.string().min(1).max(500),
+          icon: IconEnum,
+        }),
+      }),
+      remove_task: tool({
+        description: "Remove a task entirely. Only use for mistakes or no-longer-relevant items. For finished work use mark_task_done.",
+        inputSchema: z.object({
+          clientId: z.string(),
+          taskIndex: z.number().int().min(0),
+        }),
+      }),
+      update_task: tool({
+        description: "Edit a task's text and/or icon. Provide only the fields to change.",
+        inputSchema: z.object({
+          clientId: z.string(),
+          taskIndex: z.number().int().min(0),
+          text: z.string().min(1).max(500).optional(),
+          icon: IconEnum.optional(),
+        }),
+      }),
+      set_client_priority: tool({
+        description: "Change a client's priority level (high, med, low).",
+        inputSchema: z.object({
+          clientId: z.string(),
+          priority: PriorityEnum,
+        }),
       }),
     },
   });

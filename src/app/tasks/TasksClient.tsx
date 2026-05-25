@@ -264,7 +264,7 @@ export default function TasksClient({ data }: TasksClientProps) {
           InflowMD · Internal · Not indexed
         </p>
       </div>
-      <TasksChat />
+      <TasksChat data={data} />
     </main>
   );
 }
