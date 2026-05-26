@@ -79,14 +79,14 @@ export async function writeTasks(
 export type Operation =
   | { op: "mark_task_done"; clientId: string; taskIndex: number }
   | { op: "unmark_task_done"; clientId: string; taskIndex: number }
-  | { op: "add_task"; clientId: string; text: string; icon: "you" | "bot" | "wait" | "note" }
+  | { op: "add_task"; clientId: string; text: string; icon: "you" | "bot" | "code" | "wait" | "note" }
   | { op: "remove_task"; clientId: string; taskIndex: number }
   | {
       op: "update_task";
       clientId: string;
       taskIndex: number;
       text?: string;
-      icon?: "you" | "bot" | "wait" | "note";
+      icon?: "you" | "bot" | "code" | "wait" | "note";
     }
   | { op: "set_client_priority"; clientId: string; priority: "high" | "med" | "low" };
 

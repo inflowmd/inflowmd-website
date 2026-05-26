@@ -6,7 +6,7 @@ import TasksChat from './TasksChat';
 
 const DONE_STORAGE_KEY = 'inflowmd:tasks:done';
 
-type IconType = 'you' | 'bot' | 'wait' | 'note';
+type IconType = 'you' | 'bot' | 'code' | 'wait' | 'note';
 type PriorityType = 'high' | 'med' | 'low';
 
 interface Task {
@@ -37,8 +37,8 @@ interface TasksClientProps {
   data: TasksData;
 }
 
-const ICONS: Record<IconType, string> = { you: '👤', bot: '🤖', wait: '⏸', note: '📝' };
-const ICON_LABELS: Record<IconType, string> = { you: 'You', bot: 'Cowork', wait: 'Waiting', note: 'Note' };
+const ICONS: Record<IconType, string> = { you: '👤', bot: '🤖', code: '💻', wait: '⏸', note: '📝' };
+const ICON_LABELS: Record<IconType, string> = { you: 'You', bot: 'Cowork', code: 'Code', wait: 'Waiting', note: 'Note' };
 
 const PRI_STYLES: Record<PriorityType, string> = {
   high: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
@@ -49,6 +49,7 @@ const PRI_STYLES: Record<PriorityType, string> = {
 const ICON_STYLES: Record<IconType, string> = {
   you: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200',
   bot: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200',
+  code: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200',
   wait: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300',
   note: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200',
 };
@@ -74,6 +75,8 @@ function taskMatchesFilter(
       return task.icon === 'you' && !isDone;
     case 'bot':
       return task.icon === 'bot' && !isDone;
+    case 'code':
+      return task.icon === 'code' && !isDone;
     case 'waiting':
       return task.icon === 'wait';
     case 'urgent':
@@ -223,6 +226,7 @@ export default function TasksClient({ data: initialData }: TasksClientProps) {
     { key: 'all', label: 'All' },
     { key: 'you', label: '👤 Needs me' },
     { key: 'bot', label: '🤖 Cowork' },
+    { key: 'code', label: '💻 Code' },
     { key: 'urgent', label: 'Urgent' },
     { key: 'biz', label: 'Biz dev' },
     { key: 'waiting', label: 'Waiting' },
