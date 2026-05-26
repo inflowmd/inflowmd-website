@@ -5,6 +5,36 @@
       "section": "URGENT — This Week",
       "clients": [
         {
+          "id": "derm",
+          "name": "Dermatology & Skin Care Associates",
+          "pri": "high",
+          "tags": [
+            "urgent"
+          ],
+          "tasks": [
+            {
+              "icon": "code",
+              "txt": "Finish site build (Claude Code)"
+            },
+            {
+              "icon": "you",
+              "txt": "Polish all pages"
+            },
+            {
+              "icon": "you",
+              "txt": "Send to client for review by end of week"
+            },
+            {
+              "icon": "code",
+              "txt": "Implement SEO post-approval"
+            },
+            {
+              "icon": "you",
+              "txt": "Deploy"
+            }
+          ]
+        },
+        {
           "id": "fvc",
           "name": "Florida Vascular Care",
           "pri": "high",
@@ -36,36 +66,6 @@
               "icon": "you",
               "txt": "Create Yext account",
               "done": false
-            }
-          ]
-        },
-        {
-          "id": "derm",
-          "name": "Dermatology & Skin Care Associates",
-          "pri": "high",
-          "tags": [
-            "urgent"
-          ],
-          "tasks": [
-            {
-              "icon": "code",
-              "txt": "Finish site build (Claude Code)"
-            },
-            {
-              "icon": "you",
-              "txt": "Polish all pages"
-            },
-            {
-              "icon": "you",
-              "txt": "Send to client for review by end of week"
-            },
-            {
-              "icon": "code",
-              "txt": "Implement SEO post-approval"
-            },
-            {
-              "icon": "you",
-              "txt": "Deploy"
             }
           ]
         },
