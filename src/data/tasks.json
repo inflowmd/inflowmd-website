@@ -326,6 +326,10 @@
             {
               "icon": "wait",
               "txt": "Paused — resume after client priorities clear"
+            },
+            {
+              "icon": "note",
+              "txt": "🧪 Demo task — testing Claude MCP connection (safe to delete)"
             }
           ]
         },
