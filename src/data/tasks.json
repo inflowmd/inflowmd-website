@@ -48,7 +48,7 @@
           ],
           "tasks": [
             {
-              "icon": "bot",
+              "icon": "code",
               "txt": "Finish site build (Claude Code)"
             },
             {
