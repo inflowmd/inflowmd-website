@@ -167,7 +167,7 @@
           "tags": [],
           "tasks": [
             {
-              "icon": "bot",
+              "icon": "code",
               "txt": "Build new Next.js site (Vercel + GitHub)"
             },
             {
