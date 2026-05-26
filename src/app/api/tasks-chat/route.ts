@@ -18,7 +18,7 @@ const anthropic = createAnthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-const IconEnum = z.enum(["you", "bot", "wait", "note"]);
+const IconEnum = z.enum(["you", "bot", "code", "wait", "note"]);
 const PriorityEnum = z.enum(["high", "med", "low"]);
 
 async function runOp(op: Operation, summary: string) {
@@ -87,7 +87,13 @@ Tool usage rules:
 - Be careful with destructive operations (remove_task, sweeping changes). When in doubt for ambiguous requests, ASK before acting.
 
 Task model:
-- Tasks are { icon, txt, done? }. icon is one of: 'you' (manual work), 'bot' (Cowork agent), 'wait' (waiting on someone), 'note' (informational).
+- Tasks are { icon, txt, done? }. icon is one of:
+  • 'you' — manual work Clayton does himself (calls, emails, decisions, meetings, reviews)
+  • 'code' — actual coding / build / deploy work (Next.js builds, schema migrations, refactors, infrastructure)
+  • 'bot' — Cowork agent / non-code AI workflows (research, content generation, summaries)
+  • 'wait' — blocked, waiting on someone external
+  • 'note' — informational reference, not a real to-do
+- Prefer 'code' over 'bot' for any technical build/deploy/programming work, even if Clayton is using an AI to help with it. 'bot' is reserved for non-code agent workflows.
 - "Mark as done" means set done: true, NOT remove. Completed tasks stay in the list (struck through) as a running record.
 - Use remove_task only for tasks that were a mistake or are truly no longer relevant.
 

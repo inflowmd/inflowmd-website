@@ -4,7 +4,7 @@ import { writeOperation, type Operation } from "@/lib/tasksRepo";
 
 export const runtime = "nodejs";
 
-const IconEnum = z.enum(["you", "bot", "wait", "note"]);
+const IconEnum = z.enum(["you", "bot", "code", "wait", "note"]);
 const PriorityEnum = z.enum(["high", "med", "low"]);
 
 const OperationSchema = z.discriminatedUnion("op", [
