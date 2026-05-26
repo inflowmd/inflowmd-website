@@ -88,7 +88,10 @@ export type Operation =
       text?: string;
       icon?: "you" | "bot" | "code" | "wait" | "note";
     }
-  | { op: "set_client_priority"; clientId: string; priority: "high" | "med" | "low" };
+  | { op: "set_client_priority"; clientId: string; priority: "high" | "med" | "low" }
+  | { op: "reorder_tasks"; clientId: string; order: number[] }
+  | { op: "reorder_clients"; sectionName: string; order: string[] }
+  | { op: "reorder_sections"; order: string[] };
 
 type Task = { icon: string; txt: string; done?: boolean };
 type Client = { id: string; name: string; pri: string; tags: string[]; tasks: Task[] };
@@ -103,40 +106,105 @@ function findClient(data: TasksData, clientId: string): Client | null {
   return null;
 }
 
+function requireClient(data: TasksData, clientId: string): Client {
+  const c = findClient(data, clientId);
+  if (!c) throw new Error(`Client not found: ${clientId}`);
+  return c;
+}
+
 export function applyOperation(data: TasksData, op: Operation): TasksData {
   const today = new Date().toISOString().slice(0, 10);
   const next: TasksData = JSON.parse(JSON.stringify(data));
   next.lastUpdated = today;
 
-  const client = findClient(next, op.clientId);
-  if (!client) throw new Error(`Client not found: ${op.clientId}`);
-
   switch (op.op) {
-    case "mark_task_done":
+    case "mark_task_done": {
+      const client = requireClient(next, op.clientId);
       if (!client.tasks[op.taskIndex]) throw new Error("Task index out of range");
       client.tasks[op.taskIndex].done = true;
       break;
-    case "unmark_task_done":
+    }
+    case "unmark_task_done": {
+      const client = requireClient(next, op.clientId);
       if (!client.tasks[op.taskIndex]) throw new Error("Task index out of range");
       client.tasks[op.taskIndex].done = false;
       break;
-    case "add_task":
+    }
+    case "add_task": {
+      const client = requireClient(next, op.clientId);
       client.tasks.push({ icon: op.icon, txt: op.text });
       break;
-    case "remove_task":
+    }
+    case "remove_task": {
+      const client = requireClient(next, op.clientId);
       if (!client.tasks[op.taskIndex]) throw new Error("Task index out of range");
       client.tasks.splice(op.taskIndex, 1);
       break;
+    }
     case "update_task": {
+      const client = requireClient(next, op.clientId);
       const t = client.tasks[op.taskIndex];
       if (!t) throw new Error("Task index out of range");
       if (op.text !== undefined) t.txt = op.text;
       if (op.icon !== undefined) t.icon = op.icon;
       break;
     }
-    case "set_client_priority":
+    case "set_client_priority": {
+      const client = requireClient(next, op.clientId);
       client.pri = op.priority;
       break;
+    }
+    case "reorder_tasks": {
+      const client = requireClient(next, op.clientId);
+      const { order } = op;
+      if (order.length !== client.tasks.length) {
+        throw new Error(`reorder_tasks: order length ${order.length} != tasks length ${client.tasks.length}`);
+      }
+      const seen = new Set<number>();
+      for (const i of order) {
+        if (i < 0 || i >= client.tasks.length) throw new Error(`reorder_tasks: index out of range: ${i}`);
+        if (seen.has(i)) throw new Error(`reorder_tasks: duplicate index: ${i}`);
+        seen.add(i);
+      }
+      client.tasks = order.map((i) => client.tasks[i]);
+      break;
+    }
+    case "reorder_clients": {
+      const section = next.sections.find((s) => s.section === op.sectionName);
+      if (!section) throw new Error(`Section not found: ${op.sectionName}`);
+      if (op.order.length !== section.clients.length) {
+        throw new Error(`reorder_clients: order length mismatch`);
+      }
+      const byId = new Map(section.clients.map((c) => [c.id, c]));
+      const reordered: Client[] = [];
+      const seen = new Set<string>();
+      for (const id of op.order) {
+        const c = byId.get(id);
+        if (!c) throw new Error(`reorder_clients: unknown client id ${id}`);
+        if (seen.has(id)) throw new Error(`reorder_clients: duplicate id ${id}`);
+        seen.add(id);
+        reordered.push(c);
+      }
+      section.clients = reordered;
+      break;
+    }
+    case "reorder_sections": {
+      if (op.order.length !== next.sections.length) {
+        throw new Error(`reorder_sections: order length mismatch`);
+      }
+      const byName = new Map(next.sections.map((s) => [s.section, s]));
+      const reordered: Section[] = [];
+      const seen = new Set<string>();
+      for (const name of op.order) {
+        const s = byName.get(name);
+        if (!s) throw new Error(`reorder_sections: unknown section ${name}`);
+        if (seen.has(name)) throw new Error(`reorder_sections: duplicate section ${name}`);
+        seen.add(name);
+        reordered.push(s);
+      }
+      next.sections = reordered;
+      break;
+    }
   }
   return next;
 }

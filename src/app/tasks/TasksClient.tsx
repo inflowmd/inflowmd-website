@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Reorder } from 'framer-motion';
 import { logout } from './login/actions';
 import TasksChat from './TasksChat';
 
@@ -105,11 +106,31 @@ export type Operation =
   | { op: 'add_task'; clientId: string; text: string; icon: IconType }
   | { op: 'remove_task'; clientId: string; taskIndex: number }
   | { op: 'update_task'; clientId: string; taskIndex: number; text?: string; icon?: IconType }
-  | { op: 'set_client_priority'; clientId: string; priority: PriorityType };
+  | { op: 'set_client_priority'; clientId: string; priority: PriorityType }
+  | { op: 'reorder_tasks'; clientId: string; order: number[] }
+  | { op: 'reorder_clients'; sectionName: string; order: string[] }
+  | { op: 'reorder_sections'; order: string[] };
 
 function applyOperationLocal(data: TasksData, op: Operation): TasksData {
   const next: TasksData = JSON.parse(JSON.stringify(data));
   next.lastUpdated = new Date().toISOString().slice(0, 10);
+
+  // Section-level ops first (no clientId)
+  if (op.op === 'reorder_sections') {
+    const byName = new Map(next.sections.map((s) => [s.section, s]));
+    next.sections = op.order.map((n) => byName.get(n)).filter((s): s is Section => !!s);
+    return next;
+  }
+  if (op.op === 'reorder_clients') {
+    const section = next.sections.find((s) => s.section === op.sectionName);
+    if (section) {
+      const byId = new Map(section.clients.map((c) => [c.id, c]));
+      section.clients = op.order.map((id) => byId.get(id)).filter((c): c is Client => !!c);
+    }
+    return next;
+  }
+
+  // Client-targeted ops
   for (const sec of next.sections) {
     const c = sec.clients.find((c) => c.id === op.clientId);
     if (!c) continue;
@@ -136,9 +157,20 @@ function applyOperationLocal(data: TasksData, op: Operation): TasksData {
       case 'set_client_priority':
         c.pri = op.priority;
         return next;
+      case 'reorder_tasks':
+        c.tasks = op.order.map((i) => c.tasks[i]).filter(Boolean);
+        return next;
     }
   }
   return next;
+}
+
+/* ---------------- Debounced persist ---------------- */
+function opKey(op: Operation): string {
+  if (op.op === 'reorder_tasks') return `reorder_tasks:${op.clientId}`;
+  if (op.op === 'reorder_clients') return `reorder_clients:${op.sectionName}`;
+  if (op.op === 'reorder_sections') return 'reorder_sections';
+  return `${op.op}:${Date.now()}`;
 }
 
 export default function TasksClient({ data: initialData }: TasksClientProps) {
@@ -163,6 +195,96 @@ export default function TasksClient({ data: initialData }: TasksClientProps) {
   const [done, setDone] = useState<Set<string>>(initialDone);
   const [filter, setFilter] = useState('all');
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+
+  // Debounce queue: latest op per scope wins. Flushed after 2s of quiet.
+  const pendingOpsRef = useRef<Map<string, Operation>>(new Map());
+  const pendingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function schedulePersist(op: Operation) {
+    pendingOpsRef.current.set(opKey(op), op);
+    if (pendingTimerRef.current) clearTimeout(pendingTimerRef.current);
+    pendingTimerRef.current = setTimeout(async () => {
+      const ops = Array.from(pendingOpsRef.current.values());
+      pendingOpsRef.current.clear();
+      for (const op of ops) {
+        try {
+          await fetch('/api/tasks-update', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ operation: op, summary: `reorder via UI (${op.op})` }),
+          });
+        } catch (e) {
+          console.error('reorder persist failed:', e);
+        }
+      }
+    }, 2000);
+  }
+
+  function handleTasksReorder(clientId: string, newOrderedTasks: Task[]) {
+    setData((d) => {
+      const next: TasksData = JSON.parse(JSON.stringify(d));
+      for (const sec of next.sections) {
+        const c = sec.clients.find((c) => c.id === clientId);
+        if (!c) continue;
+        // Compute the order in terms of original indices for the persisted op
+        const originalTasks = c.tasks;
+        const newOrderIndices: number[] = newOrderedTasks.map((nt) =>
+          originalTasks.findIndex((ot) => ot === nt)
+        );
+        // Bail if any task didn't map cleanly (shouldn't happen but safe)
+        if (newOrderIndices.some((i) => i < 0)) return d;
+        // Remap local done Set to new indices
+        setDone((prev) => {
+          const remap = new Set<string>();
+          for (const k of prev) {
+            const [cid, idxStr] = k.split('-');
+            if (cid !== clientId) {
+              remap.add(k);
+              continue;
+            }
+            const oldIdx = parseInt(idxStr, 10);
+            const newIdx = newOrderIndices.indexOf(oldIdx);
+            if (newIdx !== -1) remap.add(`${clientId}-${newIdx}`);
+          }
+          return remap;
+        });
+        c.tasks = newOrderedTasks;
+        schedulePersist({ op: 'reorder_tasks', clientId, order: newOrderIndices });
+        break;
+      }
+      return next;
+    });
+  }
+
+  function handleClientsReorder(sectionName: string, newClients: Client[]) {
+    setData((d) => {
+      const next: TasksData = JSON.parse(JSON.stringify(d));
+      const sec = next.sections.find((s) => s.section === sectionName);
+      if (!sec) return d;
+      const byId = new Map(sec.clients.map((c) => [c.id, c]));
+      sec.clients = newClients.map((nc) => byId.get(nc.id)).filter((c): c is Client => !!c);
+      schedulePersist({
+        op: 'reorder_clients',
+        sectionName,
+        order: newClients.map((c) => c.id),
+      });
+      return next;
+    });
+  }
+
+  function handleSectionsReorder(newSections: Section[]) {
+    setData((d) => {
+      const next: TasksData = JSON.parse(JSON.stringify(d));
+      const byName = new Map(next.sections.map((s) => [s.section, s]));
+      next.sections = newSections.map((ns) => byName.get(ns.section)).filter((s): s is Section => !!s);
+      schedulePersist({
+        op: 'reorder_sections',
+        order: newSections.map((s) => s.section),
+      });
+      return next;
+    });
+  }
 
   // On first client-side mount, overlay any locally-stored toggle state.
   // This persists manual check/uncheck clicks across refreshes (per browser).
@@ -288,106 +410,202 @@ export default function TasksClient({ data: initialData }: TasksClientProps) {
           ))}
         </div>
 
-        {/* Sections */}
-        {sections.map(section => {
-          // Build per-client list of visible task indices for the active filter.
-          const clientsWithVisible = section.clients
-            .filter(c => clientPassesFilter(c, filter))
-            .map(client => {
-              const visibleIndices = client.tasks
-                .map((t, i) => ({ t, i }))
-                .filter(({ t, i }) =>
-                  taskMatchesFilter(t, filter, done.has(taskKey(client.id, i)))
-                )
-                .map(({ i }) => i);
-              return { client, visibleIndices };
-            })
-            .filter(x => x.visibleIndices.length > 0);
+        {filter !== 'all' && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 italic">
+            Drag-to-reorder disabled while a filter is active. Switch to <strong>All</strong> to reorder.
+          </p>
+        )}
 
-          if (!clientsWithVisible.length) return null;
+        {/* Sections — draggable when filter === 'all', plain otherwise */}
+        {filter === 'all' ? (
+          <Reorder.Group
+            axis="y"
+            values={sections}
+            onReorder={handleSectionsReorder}
+            className="space-y-6"
+          >
+            {sections.map((section) => (
+              <Reorder.Item
+                key={section.section}
+                value={section}
+                className="cursor-default"
+                whileDrag={{ scale: 1.01, opacity: 0.95 }}
+              >
+                <div className="group/section">
+                  <div className="flex items-center gap-2 mb-3 px-1">
+                    <span className="text-gray-300 dark:text-gray-700 opacity-0 group-hover/section:opacity-100 transition-opacity cursor-grab active:cursor-grabbing select-none text-sm">
+                      ⋮⋮
+                    </span>
+                    <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                      {section.section}
+                    </h2>
+                  </div>
 
-          return (
-            <div key={section.section} className="mb-6">
-              <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1">
-                {section.section}
-              </h2>
-
-              <div className="space-y-2">
-                {clientsWithVisible.map(({ client, visibleIndices }) => {
-                  const isCollapsed = collapsed.has(client.id);
-                  const doneCount = client.tasks.filter((_, i) => done.has(taskKey(client.id, i))).length;
-                  const pct = client.tasks.length ? Math.round((doneCount / client.tasks.length) * 100) : 0;
-
-                  return (
-                    <div key={client.id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-
-                      {/* Client header */}
-                      <button
-                        onClick={() => toggleCollapse(client.id)}
-                        className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800/60 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
-                      >
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{client.name}</div>
-                          <div className="mt-1.5 h-1 w-16 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-green-500 rounded-full transition-all"
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PRI_STYLES[client.pri]}`}>
-                            {client.pri}
-                          </span>
-                          <span className={`text-gray-400 transition-transform ${isCollapsed ? '-rotate-90' : ''}`}>
-                            ▾
-                          </span>
-                        </div>
-                      </button>
-
-                      {/* Tasks */}
-                      {!isCollapsed && (
-                        <div>
-                          {visibleIndices.map((i) => {
-                            const task = client.tasks[i];
-                            const key = taskKey(client.id, i);
-                            const isDone = done.has(key);
-                            return (
-                              <button
-                                key={i}
-                                onClick={() => toggleDone(key)}
-                                className={`w-full flex items-start gap-3 px-4 py-3 border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors text-left ${isDone ? 'opacity-40' : ''}`}
-                              >
-                                {/* Checkbox */}
-                                <div className={`mt-0.5 w-4 h-4 rounded-full border flex-shrink-0 flex items-center justify-center transition-all ${
-                                  isDone
-                                    ? 'bg-green-500 border-green-500'
-                                    : 'border-gray-300 dark:border-gray-600'
-                                }`}>
-                                  {isDone && <span className="text-white text-xs">✓</span>}
+                  <Reorder.Group
+                    axis="y"
+                    values={section.clients}
+                    onReorder={(newClients) => handleClientsReorder(section.section, newClients)}
+                    className="space-y-2"
+                  >
+                    {section.clients.map((client) => {
+                      const isCollapsed = collapsed.has(client.id);
+                      const doneCount = client.tasks.filter((_, i) => done.has(taskKey(client.id, i))).length;
+                      const pct = client.tasks.length ? Math.round((doneCount / client.tasks.length) * 100) : 0;
+                      return (
+                        <Reorder.Item
+                          key={client.id}
+                          value={client}
+                          className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden group/client"
+                          whileDrag={{ scale: 1.01, opacity: 0.95, zIndex: 10 }}
+                        >
+                          {/* Client header */}
+                          <div className="flex items-center bg-gray-50 dark:bg-gray-800/60 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            <span className="px-2 py-3 text-gray-300 dark:text-gray-700 opacity-0 group-hover/client:opacity-100 transition-opacity cursor-grab active:cursor-grabbing select-none text-sm">
+                              ⋮⋮
+                            </span>
+                            <button
+                              onClick={() => toggleCollapse(client.id)}
+                              className="flex-1 flex items-center justify-between pr-4 py-3 text-left"
+                            >
+                              <div>
+                                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{client.name}</div>
+                                <div className="mt-1.5 h-1 w-16 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                  <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
                                 </div>
-
-                                {/* Icon badge */}
-                                <span className={`text-xs px-1.5 py-0.5 rounded font-medium flex-shrink-0 mt-0.5 ${ICON_STYLES[task.icon]}`}>
-                                  {ICONS[task.icon]} {ICON_LABELS[task.icon]}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PRI_STYLES[client.pri]}`}>
+                                  {client.pri}
                                 </span>
+                                <span className={`text-gray-400 transition-transform ${isCollapsed ? '-rotate-90' : ''}`}>▾</span>
+                              </div>
+                            </button>
+                          </div>
 
-                                {/* Task text */}
-                                <span className={`text-sm text-gray-800 dark:text-gray-200 ${isDone ? 'line-through' : ''}`}>
-                                  {task.txt}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                          {/* Tasks */}
+                          {!isCollapsed && (
+                            <Reorder.Group
+                              axis="y"
+                              values={client.tasks}
+                              onReorder={(newTasks) => handleTasksReorder(client.id, newTasks as Task[])}
+                            >
+                              {client.tasks.map((task, i) => {
+                                const key = taskKey(client.id, i);
+                                const isDone = done.has(key);
+                                return (
+                                  <Reorder.Item
+                                    key={key}
+                                    value={task}
+                                    className="flex items-start gap-2 px-2 py-3 border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors group/task"
+                                    whileDrag={{ scale: 1.005, opacity: 0.95, zIndex: 10 }}
+                                  >
+                                    <span className="pt-1 text-gray-300 dark:text-gray-700 opacity-0 group-hover/task:opacity-100 transition-opacity cursor-grab active:cursor-grabbing select-none text-sm">
+                                      ⋮⋮
+                                    </span>
+                                    <button
+                                      onClick={() => toggleDone(key)}
+                                      className={`flex-1 flex items-start gap-3 text-left ${isDone ? 'opacity-40' : ''}`}
+                                    >
+                                      <div className={`mt-0.5 w-4 h-4 rounded-full border flex-shrink-0 flex items-center justify-center transition-all ${
+                                        isDone ? 'bg-green-500 border-green-500' : 'border-gray-300 dark:border-gray-600'
+                                      }`}>
+                                        {isDone && <span className="text-white text-xs">✓</span>}
+                                      </div>
+                                      <span className={`text-xs px-1.5 py-0.5 rounded font-medium flex-shrink-0 mt-0.5 ${ICON_STYLES[task.icon]}`}>
+                                        {ICONS[task.icon]} {ICON_LABELS[task.icon]}
+                                      </span>
+                                      <span className={`text-sm text-gray-800 dark:text-gray-200 ${isDone ? 'line-through' : ''}`}>
+                                        {task.txt}
+                                      </span>
+                                    </button>
+                                  </Reorder.Item>
+                                );
+                              })}
+                            </Reorder.Group>
+                          )}
+                        </Reorder.Item>
+                      );
+                    })}
+                  </Reorder.Group>
+                </div>
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        ) : (
+          /* Filtered view — plain divs, no drag */
+          sections.map((section) => {
+            const clientsWithVisible = section.clients
+              .filter((c) => clientPassesFilter(c, filter))
+              .map((client) => {
+                const visibleIndices = client.tasks
+                  .map((t, i) => ({ t, i }))
+                  .filter(({ t, i }) => taskMatchesFilter(t, filter, done.has(taskKey(client.id, i))))
+                  .map(({ i }) => i);
+                return { client, visibleIndices };
+              })
+              .filter((x) => x.visibleIndices.length > 0);
+            if (!clientsWithVisible.length) return null;
+            return (
+              <div key={section.section} className="mb-6">
+                <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1">
+                  {section.section}
+                </h2>
+                <div className="space-y-2">
+                  {clientsWithVisible.map(({ client, visibleIndices }) => {
+                    const isCollapsed = collapsed.has(client.id);
+                    const doneCount = client.tasks.filter((_, i) => done.has(taskKey(client.id, i))).length;
+                    const pct = client.tasks.length ? Math.round((doneCount / client.tasks.length) * 100) : 0;
+                    return (
+                      <div key={client.id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                        <button
+                          onClick={() => toggleCollapse(client.id)}
+                          className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800/60 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+                        >
+                          <div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{client.name}</div>
+                            <div className="mt-1.5 h-1 w-16 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                              <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PRI_STYLES[client.pri]}`}>{client.pri}</span>
+                            <span className={`text-gray-400 transition-transform ${isCollapsed ? '-rotate-90' : ''}`}>▾</span>
+                          </div>
+                        </button>
+                        {!isCollapsed && (
+                          <div>
+                            {visibleIndices.map((i) => {
+                              const task = client.tasks[i];
+                              const key = taskKey(client.id, i);
+                              const isDone = done.has(key);
+                              return (
+                                <button
+                                  key={i}
+                                  onClick={() => toggleDone(key)}
+                                  className={`w-full flex items-start gap-3 px-4 py-3 border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors text-left ${isDone ? 'opacity-40' : ''}`}
+                                >
+                                  <div className={`mt-0.5 w-4 h-4 rounded-full border flex-shrink-0 flex items-center justify-center transition-all ${
+                                    isDone ? 'bg-green-500 border-green-500' : 'border-gray-300 dark:border-gray-600'
+                                  }`}>
+                                    {isDone && <span className="text-white text-xs">✓</span>}
+                                  </div>
+                                  <span className={`text-xs px-1.5 py-0.5 rounded font-medium flex-shrink-0 mt-0.5 ${ICON_STYLES[task.icon]}`}>
+                                    {ICONS[task.icon]} {ICON_LABELS[task.icon]}
+                                  </span>
+                                  <span className={`text-sm text-gray-800 dark:text-gray-200 ${isDone ? 'line-through' : ''}`}>{task.txt}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
 
         <p className="text-center text-xs text-gray-400 dark:text-gray-600 mt-10 mb-24 lg:mb-10">
           InflowMD · Internal · Not indexed

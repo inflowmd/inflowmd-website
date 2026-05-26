@@ -20,6 +20,20 @@ const OperationSchema = z.discriminatedUnion("op", [
     icon: IconEnum.optional(),
   }),
   z.object({ op: z.literal("set_client_priority"), clientId: z.string(), priority: PriorityEnum }),
+  z.object({
+    op: z.literal("reorder_tasks"),
+    clientId: z.string(),
+    order: z.array(z.number().int().min(0)).max(200),
+  }),
+  z.object({
+    op: z.literal("reorder_clients"),
+    sectionName: z.string(),
+    order: z.array(z.string()).max(100),
+  }),
+  z.object({
+    op: z.literal("reorder_sections"),
+    order: z.array(z.string()).max(50),
+  }),
 ]);
 
 const RequestSchema = z.object({
