@@ -35,6 +35,32 @@
           ]
         },
         {
+          "id": "paul",
+          "name": "The Bluffs / AIM — Paul Call Tomorrow",
+          "pri": "high",
+          "tags": [
+            "urgent"
+          ],
+          "tasks": [
+            {
+              "icon": "you",
+              "txt": "Check Vercel analytics for live site traffic data"
+            },
+            {
+              "icon": "you",
+              "txt": "Install Google Analytics on live site"
+            },
+            {
+              "icon": "you",
+              "txt": "Review project manager chat for negotiation strategy"
+            },
+            {
+              "icon": "you",
+              "txt": "Negotiate free work contingent on AIM Training Academy contract ($1,300/mo through August)"
+            }
+          ]
+        },
+        {
           "id": "fvc",
           "name": "Florida Vascular Care",
           "pri": "high",
@@ -66,32 +92,6 @@
               "icon": "you",
               "txt": "Create Yext account",
               "done": false
-            }
-          ]
-        },
-        {
-          "id": "paul",
-          "name": "The Bluffs / AIM — Paul Call Tomorrow",
-          "pri": "high",
-          "tags": [
-            "urgent"
-          ],
-          "tasks": [
-            {
-              "icon": "you",
-              "txt": "Check Vercel analytics for live site traffic data"
-            },
-            {
-              "icon": "you",
-              "txt": "Install Google Analytics on live site"
-            },
-            {
-              "icon": "you",
-              "txt": "Review project manager chat for negotiation strategy"
-            },
-            {
-              "icon": "you",
-              "txt": "Negotiate free work contingent on AIM Training Academy contract ($1,300/mo through August)"
             }
           ]
         }
