@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-25",
+  "lastUpdated": "2026-05-26",
   "sections": [
     {
       "section": "URGENT — This Week",
@@ -18,7 +18,7 @@
               "done": true
             },
             {
-              "icon": "bot",
+              "icon": "code",
               "txt": "Build out remaining site pages",
               "done": false
             },
