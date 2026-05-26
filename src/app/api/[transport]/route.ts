@@ -2,6 +2,7 @@ import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import { z } from "zod";
 import { readTasks, writeOperation } from "@/lib/tasksRepo";
 import { readMemory, writeMemoryOperation } from "@/lib/memoryRepo";
+import { verifyAccessToken } from "@/lib/oauth";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -217,16 +218,35 @@ const baseHandler = createMcpHandler(
 
 const verifyToken = async (_req: Request, bearerToken?: string) => {
   if (!bearerToken) return undefined;
-  const expected = process.env.MCP_AUTH_TOKEN;
-  if (!expected || bearerToken !== expected) return undefined;
-  return {
-    token: bearerToken,
-    scopes: ["tasks:read", "tasks:write"],
-    clientId: "inflowmd-owner",
-    extra: { userId: "clayton" },
-  };
+
+  // 1) Static long-lived token (Claude Desktop config path)
+  const staticToken = process.env.MCP_AUTH_TOKEN;
+  if (staticToken && bearerToken === staticToken) {
+    return {
+      token: bearerToken,
+      scopes: ["tasks:read", "tasks:write"],
+      clientId: "inflowmd-static",
+      extra: { userId: "clayton" },
+    };
+  }
+
+  // 2) OAuth-issued JWT access token (Claude.ai web / mobile path)
+  try {
+    const claims = await verifyAccessToken(bearerToken);
+    return {
+      token: bearerToken,
+      scopes: claims.scope.split(/\s+/),
+      clientId: claims.cid,
+      extra: { userId: claims.sub },
+    };
+  } catch {
+    return undefined;
+  }
 };
 
-const handler = withMcpAuth(baseHandler, verifyToken, { required: true });
+const handler = withMcpAuth(baseHandler, verifyToken, {
+  required: true,
+  resourceMetadataPath: "/.well-known/oauth-protected-resource",
+});
 
 export { handler as GET, handler as POST, handler as DELETE };

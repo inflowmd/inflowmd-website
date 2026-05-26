@@ -7,17 +7,19 @@ export const metadata: Metadata = {
 };
 
 interface LoginPageProps {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { error } = await searchParams;
+  const { error, next } = await searchParams;
   const errorMsg =
     error === "1"
       ? "Incorrect password."
       : error === "config"
       ? "Server not configured. Set TASKS_AUTH_TOKEN."
       : null;
+  // Only allow same-origin redirect targets
+  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "";
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center px-4">
@@ -30,6 +32,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Enter the password to view the task board.
           </p>
           <form action={login} className="space-y-3">
+            <input type="hidden" name="next" value={safeNext} />
             <input
               type="password"
               name="password"
