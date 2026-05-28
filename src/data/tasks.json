@@ -92,6 +92,10 @@
               "icon": "you",
               "txt": "Create Yext account",
               "done": false
+            },
+            {
+              "icon": "you",
+              "txt": "Add photos around the site"
             }
           ]
         }
