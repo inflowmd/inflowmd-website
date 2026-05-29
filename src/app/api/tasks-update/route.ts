@@ -34,6 +34,9 @@ const OperationSchema = z.discriminatedUnion("op", [
     op: z.literal("reorder_sections"),
     order: z.array(z.string()).max(50),
   }),
+  z.object({ op: z.literal("add_to_today"), taskId: z.string().min(1).max(64) }),
+  z.object({ op: z.literal("remove_from_today"), taskId: z.string().min(1).max(64) }),
+  z.object({ op: z.literal("clear_today") }),
 ]);
 
 const RequestSchema = z.object({

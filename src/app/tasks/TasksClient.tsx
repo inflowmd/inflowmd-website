@@ -11,6 +11,7 @@ type IconType = 'you' | 'bot' | 'code' | 'wait' | 'note';
 type PriorityType = 'high' | 'med' | 'low';
 
 interface Task {
+  id: string;
   icon: IconType;
   txt: string;
   done?: boolean;
@@ -31,6 +32,7 @@ interface Section {
 
 export interface TasksData {
   lastUpdated: string;
+  today: string[];
   sections: Section[];
 }
 
@@ -57,6 +59,25 @@ const ICON_STYLES: Record<IconType, string> = {
 
 function taskKey(clientId: string, i: number) {
   return `${clientId}-${i}`;
+}
+
+interface TaskLocation {
+  clientId: string;
+  clientName: string;
+  taskIndex: number;
+  task: Task;
+}
+
+function findTaskById(data: TasksData, taskId: string): TaskLocation | null {
+  for (const sec of data.sections) {
+    for (const c of sec.clients) {
+      const idx = c.tasks.findIndex((t) => t.id === taskId);
+      if (idx >= 0) {
+        return { clientId: c.id, clientName: c.name, taskIndex: idx, task: c.tasks[idx] };
+      }
+    }
+  }
+  return null;
 }
 
 /**
@@ -109,13 +130,31 @@ export type Operation =
   | { op: 'set_client_priority'; clientId: string; priority: PriorityType }
   | { op: 'reorder_tasks'; clientId: string; order: number[] }
   | { op: 'reorder_clients'; sectionName: string; order: string[] }
-  | { op: 'reorder_sections'; order: string[] };
+  | { op: 'reorder_sections'; order: string[] }
+  | { op: 'add_to_today'; taskId: string }
+  | { op: 'remove_from_today'; taskId: string }
+  | { op: 'clear_today' };
 
 function applyOperationLocal(data: TasksData, op: Operation): TasksData {
   const next: TasksData = JSON.parse(JSON.stringify(data));
+  if (!next.today) next.today = [];
   next.lastUpdated = new Date().toISOString().slice(0, 10);
 
-  // Section-level ops first (no clientId)
+  // Today-list ops
+  if (op.op === 'add_to_today') {
+    if (!next.today.includes(op.taskId)) next.today.push(op.taskId);
+    return next;
+  }
+  if (op.op === 'remove_from_today') {
+    next.today = next.today.filter((id) => id !== op.taskId);
+    return next;
+  }
+  if (op.op === 'clear_today') {
+    next.today = [];
+    return next;
+  }
+
+  // Section-level ops (no clientId)
   if (op.op === 'reorder_sections') {
     const byName = new Map(next.sections.map((s) => [s.section, s]));
     next.sections = op.order.map((n) => byName.get(n)).filter((s): s is Section => !!s);
@@ -142,7 +181,11 @@ function applyOperationLocal(data: TasksData, op: Operation): TasksData {
         if (c.tasks[op.taskIndex]) c.tasks[op.taskIndex].done = false;
         return next;
       case 'add_task':
-        c.tasks.push({ icon: op.icon, txt: op.text });
+        c.tasks.push({
+          id: Math.random().toString(16).slice(2, 10),
+          icon: op.icon,
+          txt: op.text,
+        });
         return next;
       case 'remove_task':
         if (c.tasks[op.taskIndex]) c.tasks.splice(op.taskIndex, 1);
@@ -354,9 +397,34 @@ export default function TasksClient({ data: initialData }: TasksClientProps) {
     { key: 'waiting', label: 'Waiting' },
   ];
 
+  /* -------- Today panel helpers -------- */
+  function todayDoneState(): { todayItems: TaskLocation[]; doneInToday: number } {
+    const items: TaskLocation[] = [];
+    for (const id of data.today) {
+      const loc = findTaskById(data, id);
+      if (loc) items.push(loc);
+    }
+    const doneInToday = items.filter((i) =>
+      i.task.done || done.has(taskKey(i.clientId, i.taskIndex))
+    ).length;
+    return { todayItems: items, doneInToday };
+  }
+
+  function removeFromToday(taskId: string) {
+    setData((d) => applyOperationLocal(d, { op: 'remove_from_today', taskId }));
+    schedulePersist({ op: 'remove_from_today', taskId });
+  }
+
+  function clearToday() {
+    setData((d) => applyOperationLocal(d, { op: 'clear_today' }));
+    schedulePersist({ op: 'clear_today' });
+  }
+
+  const { todayItems, doneInToday } = todayDoneState();
+
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-950 py-10 px-4">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-7xl mx-auto">
 
         {/* Header */}
         <div className="mb-8 flex items-start justify-between gap-4">
@@ -409,6 +477,87 @@ export default function TasksClient({ data: initialData }: TasksClientProps) {
             </button>
           ))}
         </div>
+
+        {/* Two-column layout: Today on left, Board on right */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* TODAY PANEL */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-6 lg:self-start">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">
+                    Today
+                  </h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    {todayItems.length === 0
+                      ? 'Stage tasks here'
+                      : `${doneInToday} / ${todayItems.length} done`}
+                  </p>
+                </div>
+                {todayItems.length > 0 && (
+                  <button
+                    onClick={clearToday}
+                    className="text-xs px-2 py-1 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              {todayItems.length === 0 ? (
+                <div className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed py-4 px-1">
+                  <p className="mb-2">No tasks staged for today yet.</p>
+                  <p className="text-xs">
+                    Ask the chat:
+                    <br />
+                    <em>&quot;Stage 3 things for today.&quot;</em>
+                  </p>
+                </div>
+              ) : (
+                <ul className="space-y-1">
+                  {todayItems.map((loc) => {
+                    const key = taskKey(loc.clientId, loc.taskIndex);
+                    const isDone = loc.task.done || done.has(key);
+                    return (
+                      <li key={loc.task.id} className="group/today flex items-start gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
+                        <button
+                          onClick={() => toggleDone(key)}
+                          className={`mt-0.5 w-4 h-4 rounded-full border flex-shrink-0 flex items-center justify-center transition-all ${
+                            isDone ? 'bg-green-500 border-green-500' : 'border-gray-300 dark:border-gray-600'
+                          }`}
+                          aria-label={isDone ? 'Mark not done' : 'Mark done'}
+                        >
+                          {isDone && <span className="text-white text-[10px]">✓</span>}
+                        </button>
+                        <div className={`flex-1 min-w-0 ${isDone ? 'opacity-40' : ''}`}>
+                          <div className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 truncate">
+                            {loc.clientName}
+                          </div>
+                          <div className={`text-sm text-gray-800 dark:text-gray-200 leading-snug ${isDone ? 'line-through' : ''}`}>
+                            <span className={`inline-block text-[10px] px-1 py-0.5 rounded font-medium mr-1.5 ${ICON_STYLES[loc.task.icon]}`}>
+                              {ICONS[loc.task.icon]}
+                            </span>
+                            {loc.task.txt}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => removeFromToday(loc.task.id)}
+                          className="opacity-0 group-hover/today:opacity-100 text-gray-300 hover:text-gray-600 dark:hover:text-gray-300 transition-opacity text-sm leading-none mt-1"
+                          aria-label="Remove from today"
+                          title="Remove from Today"
+                        >
+                          ×
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          </aside>
+
+          {/* MAIN BOARD */}
+          <div className="lg:col-span-8 min-w-0">
 
         {filter !== 'all' && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 italic">
@@ -606,6 +755,9 @@ export default function TasksClient({ data: initialData }: TasksClientProps) {
             );
           })
         )}
+
+          </div>{/* /MAIN BOARD col */}
+        </div>{/* /grid */}
 
         <p className="text-center text-xs text-gray-400 dark:text-gray-600 mt-10 mb-24 lg:mb-10">
           InflowMD · Internal · Not indexed
