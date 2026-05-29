@@ -91,12 +91,40 @@ export type Operation =
   | { op: "set_client_priority"; clientId: string; priority: "high" | "med" | "low" }
   | { op: "reorder_tasks"; clientId: string; order: number[] }
   | { op: "reorder_clients"; sectionName: string; order: string[] }
-  | { op: "reorder_sections"; order: string[] };
+  | { op: "reorder_sections"; order: string[] }
+  | { op: "add_to_today"; taskId: string }
+  | { op: "remove_from_today"; taskId: string }
+  | { op: "clear_today" };
 
-type Task = { icon: string; txt: string; done?: boolean };
+type Task = { id: string; icon: string; txt: string; done?: boolean };
 type Client = { id: string; name: string; pri: string; tags: string[]; tasks: Task[] };
 type Section = { section: string; clients: Client[] };
-type TasksData = { lastUpdated: string; sections: Section[] };
+type TasksData = { lastUpdated: string; today: string[]; sections: Section[] };
+
+import { randomBytes } from "crypto";
+
+function ensureIdsAndToday(data: TasksData): TasksData {
+  if (!data.today) data.today = [];
+  for (const sec of data.sections) {
+    for (const c of sec.clients) {
+      for (const t of c.tasks) {
+        if (!t.id) t.id = randomBytes(4).toString("hex");
+      }
+    }
+  }
+  return data;
+}
+
+function findTaskById(data: TasksData, taskId: string): boolean {
+  for (const sec of data.sections) {
+    for (const c of sec.clients) {
+      for (const t of c.tasks) {
+        if (t.id === taskId) return true;
+      }
+    }
+  }
+  return false;
+}
 
 function findClient(data: TasksData, clientId: string): Client | null {
   for (const sec of data.sections) {
@@ -113,9 +141,10 @@ function requireClient(data: TasksData, clientId: string): Client {
 }
 
 export function applyOperation(data: TasksData, op: Operation): TasksData {
-  const today = new Date().toISOString().slice(0, 10);
-  const next: TasksData = JSON.parse(JSON.stringify(data));
-  next.lastUpdated = today;
+  const todayDate = new Date().toISOString().slice(0, 10);
+  let next: TasksData = JSON.parse(JSON.stringify(data));
+  next = ensureIdsAndToday(next);
+  next.lastUpdated = todayDate;
 
   switch (op.op) {
     case "mark_task_done": {
@@ -132,7 +161,7 @@ export function applyOperation(data: TasksData, op: Operation): TasksData {
     }
     case "add_task": {
       const client = requireClient(next, op.clientId);
-      client.tasks.push({ icon: op.icon, txt: op.text });
+      client.tasks.push({ id: randomBytes(4).toString("hex"), icon: op.icon, txt: op.text });
       break;
     }
     case "remove_task": {
@@ -205,7 +234,30 @@ export function applyOperation(data: TasksData, op: Operation): TasksData {
       next.sections = reordered;
       break;
     }
+    case "add_to_today": {
+      if (!findTaskById(next, op.taskId)) throw new Error(`Task not found: ${op.taskId}`);
+      if (!next.today.includes(op.taskId)) next.today.push(op.taskId);
+      break;
+    }
+    case "remove_from_today": {
+      next.today = next.today.filter((id) => id !== op.taskId);
+      break;
+    }
+    case "clear_today": {
+      next.today = [];
+      break;
+    }
   }
+
+  // Clean orphaned today entries (e.g. after a task is removed)
+  const validIds = new Set<string>();
+  for (const sec of next.sections) {
+    for (const c of sec.clients) {
+      for (const t of c.tasks) validIds.add(t.id);
+    }
+  }
+  next.today = next.today.filter((id) => validIds.has(id));
+
   return next;
 }
 

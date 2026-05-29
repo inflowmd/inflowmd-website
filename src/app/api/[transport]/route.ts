@@ -156,6 +156,53 @@ const baseHandler = createMcpHandler(
       }
     );
 
+    server.registerTool(
+      "add_to_today",
+      {
+        title: "Add to Today list",
+        description: "Stage a task on Clayton's daily focus column. Pass the task's id (the stable .id field — NOT the taskIndex).",
+        inputSchema: {
+          taskId: z.string(),
+          summary: z.string(),
+        },
+      },
+      async ({ taskId, summary }) => {
+        await writeOperation({ op: "add_to_today", taskId }, summary);
+        return { content: [{ type: "text", text: `✓ ${summary}` }] };
+      }
+    );
+
+    server.registerTool(
+      "remove_from_today",
+      {
+        title: "Remove from Today list",
+        description: "Unstage a task from the daily focus column (does not mark it done).",
+        inputSchema: {
+          taskId: z.string(),
+          summary: z.string(),
+        },
+      },
+      async ({ taskId, summary }) => {
+        await writeOperation({ op: "remove_from_today", taskId }, summary);
+        return { content: [{ type: "text", text: `✓ ${summary}` }] };
+      }
+    );
+
+    server.registerTool(
+      "clear_today",
+      {
+        title: "Clear Today list",
+        description: "Empty the daily focus column.",
+        inputSchema: {
+          summary: z.string(),
+        },
+      },
+      async ({ summary }) => {
+        await writeOperation({ op: "clear_today" }, summary);
+        return { content: [{ type: "text", text: `✓ ${summary}` }] };
+      }
+    );
+
     /* -------- WRITE: memory -------- */
 
     server.registerTool(

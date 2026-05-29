@@ -97,6 +97,12 @@ Task model:
 - "Mark as done" means set done: true, NOT remove. Completed tasks stay in the list (struck through) as a running record.
 - Use remove_task only for tasks that were a mistake or are truly no longer relevant.
 
+Today list:
+- Clayton has a "Today" focus column on the left of his board. It holds a curated list of tasks he plans to work on today.
+- Use add_to_today with the task's stable id (the .id field of a task object) to stage tasks. taskIndex is for done/edit ops; taskId is for today ops.
+- Use clear_today only when explicitly asked (e.g. "wipe today's list" or "fresh start").
+- When Clayton asks something like "give me 3 things to focus on today", suggest specific tasks in prose AND call add_to_today for each.
+
 Memory:
 - You have a persistent memory file of facts and patterns about Clayton's clients and workflow.
 - Read current memory below — refer to it naturally when relevant ("you mentioned earlier that…").
@@ -188,6 +194,29 @@ ${memoryBlock}`;
         }),
         execute: async ({ clientId, priority, summary }) =>
           runOp({ op: "set_client_priority", clientId, priority }, summary),
+      }),
+      add_to_today: tool({
+        description: "Add a task to Clayton's Today list (the focused daily-work column). Pass the task's id (NOT taskIndex). Use this when he wants to stage something for today's work.",
+        inputSchema: z.object({
+          taskId: z.string().describe("The task's stable id (the `id` field of the task object)."),
+          summary: z.string(),
+        }),
+        execute: async ({ taskId, summary }) => runOp({ op: "add_to_today", taskId }, summary),
+      }),
+      remove_from_today: tool({
+        description: "Remove a task from the Today list (does not mark done, just unstages it).",
+        inputSchema: z.object({
+          taskId: z.string(),
+          summary: z.string(),
+        }),
+        execute: async ({ taskId, summary }) => runOp({ op: "remove_from_today", taskId }, summary),
+      }),
+      clear_today: tool({
+        description: "Empty the Today list. Use at end of day or when Clayton wants a fresh focus list.",
+        inputSchema: z.object({
+          summary: z.string(),
+        }),
+        execute: async ({ summary }) => runOp({ op: "clear_today" }, summary),
       }),
       add_memory: tool({
         description:

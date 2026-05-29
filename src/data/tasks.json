@@ -14,23 +14,28 @@
           "tasks": [
             {
               "icon": "code",
-              "txt": "Finish site build (Claude Code)"
+              "txt": "Finish site build (Claude Code)",
+              "id": "6aae74ff"
             },
             {
               "icon": "you",
-              "txt": "Polish all pages"
+              "txt": "Polish all pages",
+              "id": "4c517062"
             },
             {
               "icon": "you",
-              "txt": "Send to client for review by end of week"
+              "txt": "Send to client for review by end of week",
+              "id": "182622a4"
             },
             {
               "icon": "code",
-              "txt": "Implement SEO post-approval"
+              "txt": "Implement SEO post-approval",
+              "id": "04917c43"
             },
             {
               "icon": "you",
-              "txt": "Deploy"
+              "txt": "Deploy",
+              "id": "890cf51d"
             }
           ]
         },
@@ -44,19 +49,23 @@
           "tasks": [
             {
               "icon": "you",
-              "txt": "Check Vercel analytics for live site traffic data"
+              "txt": "Check Vercel analytics for live site traffic data",
+              "id": "f30fc3cf"
             },
             {
               "icon": "you",
-              "txt": "Install Google Analytics on live site"
+              "txt": "Install Google Analytics on live site",
+              "id": "d0b5f0fe"
             },
             {
               "icon": "you",
-              "txt": "Review project manager chat for negotiation strategy"
+              "txt": "Review project manager chat for negotiation strategy",
+              "id": "91344856"
             },
             {
               "icon": "you",
-              "txt": "Negotiate free work contingent on AIM Training Academy contract ($1,300/mo through August)"
+              "txt": "Negotiate free work contingent on AIM Training Academy contract ($1,300/mo through August)",
+              "id": "0b0948fc"
             }
           ]
         },
@@ -71,31 +80,37 @@
             {
               "icon": "you",
               "txt": "Deploy new bio and logo to site",
-              "done": true
+              "done": true,
+              "id": "746055ca"
             },
             {
               "icon": "code",
               "txt": "Build out remaining site pages",
-              "done": true
+              "done": true,
+              "id": "d65bb128"
             },
             {
               "icon": "bot",
               "txt": "Redesign '5 Stages of Vein Disease' section (Claude Design)",
-              "done": true
+              "done": true,
+              "id": "3703cddb"
             },
             {
               "icon": "you",
               "txt": "Final review-ready deployment by end of week",
-              "done": false
+              "done": false,
+              "id": "df41d434"
             },
             {
               "icon": "you",
               "txt": "Create Yext account",
-              "done": false
+              "done": false,
+              "id": "2d96d30d"
             },
             {
               "icon": "you",
-              "txt": "Add photos around the site"
+              "txt": "Add photos around the site",
+              "id": "3531e364"
             }
           ]
         }
@@ -112,11 +127,13 @@
           "tasks": [
             {
               "icon": "you",
-              "txt": "Deploy bio page to live site"
+              "txt": "Deploy bio page to live site",
+              "id": "56d3e23b"
             },
             {
               "icon": "you",
-              "txt": "Draft Next.js upgrade proposal + email to Brian"
+              "txt": "Draft Next.js upgrade proposal + email to Brian",
+              "id": "6e098402"
             }
           ]
         },
@@ -128,11 +145,13 @@
           "tasks": [
             {
               "icon": "you",
-              "txt": "Finalize Google Ads (resolve flags)"
+              "txt": "Finalize Google Ads (resolve flags)",
+              "id": "fd28aa68"
             },
             {
               "icon": "you",
-              "txt": "Launch campaigns"
+              "txt": "Launch campaigns",
+              "id": "c4eef57a"
             }
           ]
         },
@@ -144,23 +163,28 @@
           "tasks": [
             {
               "icon": "you",
-              "txt": "Write 2 additional blogs"
+              "txt": "Write 2 additional blogs",
+              "id": "daea2d80"
             },
             {
               "icon": "you",
-              "txt": "Send all 4 blogs + Next.js pitch to Dr. Datta"
+              "txt": "Send all 4 blogs + Next.js pitch to Dr. Datta",
+              "id": "44d2af38"
             },
             {
               "icon": "you",
-              "txt": "Nudge Dr. Datta for upsell call"
+              "txt": "Nudge Dr. Datta for upsell call",
+              "id": "29f9c56d"
             },
             {
               "icon": "wait",
-              "txt": "Waiting on Dr. Datta blog approval"
+              "txt": "Waiting on Dr. Datta blog approval",
+              "id": "348a0b92"
             },
             {
               "icon": "you",
-              "txt": "Follow up with Dr. Datta on blog approval Thursday"
+              "txt": "Follow up with Dr. Datta on blog approval Thursday",
+              "id": "eb6c7175"
             }
           ]
         },
@@ -172,19 +196,23 @@
           "tasks": [
             {
               "icon": "code",
-              "txt": "Build new Next.js site (Vercel + GitHub)"
+              "txt": "Build new Next.js site (Vercel + GitHub)",
+              "id": "cd07d2d8"
             },
             {
               "icon": "you",
-              "txt": "Set up reputation management, directory, Google Analytics"
+              "txt": "Set up reputation management, directory, Google Analytics",
+              "id": "94fc9300"
             },
             {
               "icon": "you",
-              "txt": "Kick off onboarding chat in new project"
+              "txt": "Kick off onboarding chat in new project",
+              "id": "ab2d6224"
             },
             {
               "icon": "wait",
-              "txt": "Waiting on GBP manager access"
+              "txt": "Waiting on GBP manager access",
+              "id": "1cf21ba9"
             }
           ]
         },
@@ -196,7 +224,8 @@
           "tasks": [
             {
               "icon": "you",
-              "txt": "Draft and send proposal: $800/mo upgrade — Next.js for both sites + 12 months blogs + SEO"
+              "txt": "Draft and send proposal: $800/mo upgrade — Next.js for both sites + 12 months blogs + SEO",
+              "id": "9abff1d3"
             }
           ]
         }
@@ -215,7 +244,8 @@
           "tasks": [
             {
               "icon": "you",
-              "txt": "Send pricing options email — follow up from phone call"
+              "txt": "Send pricing options email — follow up from phone call",
+              "id": "b959e08e"
             }
           ]
         },
@@ -229,7 +259,8 @@
           "tasks": [
             {
               "icon": "you",
-              "txt": "Follow-up email — prompt on Next.js site build (SEO already contracted 12 months)"
+              "txt": "Follow-up email — prompt on Next.js site build (SEO already contracted 12 months)",
+              "id": "c0c78001"
             }
           ]
         },
@@ -243,11 +274,13 @@
           "tasks": [
             {
               "icon": "you",
-              "txt": "Circle back — pitch Next.js site upgrade + better service model"
+              "txt": "Circle back — pitch Next.js site upgrade + better service model",
+              "id": "913cc473"
             },
             {
               "icon": "note",
-              "txt": "Note: Mobile PageSpeed 70, Desktop 98. Next.js would push mobile to 85-95+, better Core Web Vitals"
+              "txt": "Note: Mobile PageSpeed 70, Desktop 98. Next.js would push mobile to 85-95+, better Core Web Vitals",
+              "id": "f2358337"
             }
           ]
         }
@@ -264,11 +297,13 @@
           "tasks": [
             {
               "icon": "you",
-              "txt": "Send separation agreement via DocuSign for review and signature"
+              "txt": "Send separation agreement via DocuSign for review and signature",
+              "id": "8cb1d625"
             },
             {
               "icon": "you",
-              "txt": "Follow-up email: next steps — $3,500 fee + website asset transfer"
+              "txt": "Follow-up email: next steps — $3,500 fee + website asset transfer",
+              "id": "6ccd0bd1"
             }
           ]
         }
@@ -287,7 +322,8 @@
           "tasks": [
             {
               "icon": "wait",
-              "txt": "Final polish done — sent to Dr. Mehta and adviser for feedback"
+              "txt": "Final polish done — sent to Dr. Mehta and adviser for feedback",
+              "id": "768163b4"
             }
           ]
         },
@@ -301,7 +337,8 @@
           "tasks": [
             {
               "icon": "wait",
-              "txt": "On hold — waiting on Dr. Gonzalez"
+              "txt": "On hold — waiting on Dr. Gonzalez",
+              "id": "f44b764e"
             }
           ]
         },
@@ -313,11 +350,13 @@
           "tasks": [
             {
               "icon": "bot",
-              "txt": "Reviews on internal pages"
+              "txt": "Reviews on internal pages",
+              "id": "a41a9a1a"
             },
             {
               "icon": "bot",
-              "txt": "CTA buttons site-wide (after consult page approved)"
+              "txt": "CTA buttons site-wide (after consult page approved)",
+              "id": "0a1ae378"
             }
           ]
         },
@@ -329,7 +368,8 @@
           "tasks": [
             {
               "icon": "wait",
-              "txt": "Paused — resume after client priorities clear"
+              "txt": "Paused — resume after client priorities clear",
+              "id": "69c4b04b"
             }
           ]
         },
@@ -343,11 +383,13 @@
           "tasks": [
             {
               "icon": "wait",
-              "txt": "Waiting on Priscilla — onboarding form + domain confirmation"
+              "txt": "Waiting on Priscilla — onboarding form + domain confirmation",
+              "id": "09f8ac43"
             }
           ]
         }
       ]
     }
-  ]
+  ],
+  "today": []
 }
