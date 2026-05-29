@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-28",
+  "lastUpdated": "2026-05-29",
   "sections": [
     {
       "section": "URGENT — This Week",
@@ -391,5 +391,7 @@
       ]
     }
   ],
-  "today": []
+  "today": [
+    "6aae74ff"
+  ]
 }
