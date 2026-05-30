@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-29",
+  "lastUpdated": "2026-05-30",
   "sections": [
     {
       "section": "URGENT — This Week",
@@ -36,6 +36,11 @@
               "icon": "you",
               "txt": "Deploy",
               "id": "890cf51d"
+            },
+            {
+              "id": "bba89bd6",
+              "icon": "bot",
+              "txt": "Claude in Chrome design audit"
             }
           ]
         },
