@@ -40,7 +40,7 @@ export default function MediaUploadClient() {
         <section className="py-12 sm:py-16 bg-warm-bg">
           <div className="max-w-4xl mx-auto px-4 sm:px-6">
             <FadeIn>
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden py-6 sm:py-8">
                 <iframe
                   src="https://www.cognitoforms.com/f/_uaaiFEytEy94LxTIBfO1w/77"
                   title="InflowMD Media Upload Form"
