@@ -1150,6 +1150,253 @@ function RoiCalculator() {
 }
 
 /* ============================================================
+   ENGAGEMENT & INVESTMENT
+   ============================================================ */
+
+interface PhaseCardProps {
+  tag: string;
+  title: string;
+  price: React.ReactNode;
+  priceNote?: string;
+  description: string;
+  bullets: React.ReactNode[];
+  featured?: boolean;
+}
+
+function PhaseCard({ tag, title, price, priceNote, description, bullets, featured }: PhaseCardProps) {
+  return (
+    <div
+      className={`relative h-full rounded-2xl p-6 sm:p-7 flex flex-col ${
+        featured
+          ? "bg-gradient-to-br from-[#0b1633] to-dark text-white border border-accent/40 shadow-[0_0_40px_rgba(45,108,223,0.18)]"
+          : "bg-white text-dark border border-gray-200"
+      }`}
+    >
+      {featured && (
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-white text-[10px] font-bold tracking-[0.22em] uppercase shadow">
+          Core engine
+        </span>
+      )}
+      <div
+        className={`text-[10px] sm:text-xs font-bold tracking-[0.22em] uppercase mb-3 ${
+          featured ? "text-accent-light" : "text-accent"
+        }`}
+      >
+        {tag}
+      </div>
+      <h3
+        className={`text-xl sm:text-2xl font-extrabold tracking-tight mb-4 ${
+          featured ? "text-white" : "text-dark"
+        }`}
+      >
+        {title}
+      </h3>
+      <div className="mb-4">
+        <div
+          className={`text-4xl sm:text-5xl font-extrabold tabular-nums ${
+            featured ? "text-white" : "text-dark"
+          }`}
+        >
+          {price}
+        </div>
+        {priceNote && (
+          <div
+            className={`text-xs sm:text-sm mt-1 ${
+              featured ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
+            {priceNote}
+          </div>
+        )}
+      </div>
+      <p
+        className={`text-sm sm:text-base leading-relaxed mb-5 ${
+          featured ? "text-gray-300" : "text-gray-600"
+        }`}
+      >
+        {description}
+      </p>
+      <ul className="space-y-2.5 mt-auto">
+        {bullets.map((b, i) => (
+          <li key={i} className="flex items-start gap-2.5">
+            <span
+              className={`mt-1 w-1.5 h-1.5 rounded-full shrink-0 ${
+                featured ? "bg-accent-light" : "bg-accent"
+              }`}
+            />
+            <span
+              className={`text-sm leading-relaxed ${
+                featured ? "text-gray-200" : "text-gray-700"
+              }`}
+            >
+              {b}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function Engagement() {
+  return (
+    <section id="engagement" className="bg-white py-20 sm:py-28">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <SectionHeading
+          eyebrow="Engagement & Investment"
+          title={
+            <>
+              Exactly what I&apos;d do. Exactly{" "}
+              <span className="text-accent">what it costs</span>.
+            </>
+          }
+          subtitle="No packages-within-packages, no surprise fees. The work that actually moves your patient numbers, priced to be a clear value against what premium agencies in your space charge."
+        />
+
+        {/* Phase cards */}
+        <div className="grid lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-7 mt-8 lg:mt-12 items-stretch">
+          <FadeIn delay={0.0}>
+            <PhaseCard
+              tag="One-time · First 30–45 days"
+              title="Foundation Sprint"
+              price="$2,000"
+              priceNote="one-time"
+              description="The fixable gaps, fixed. Everything that's currently capping your visibility — corrected once, properly."
+              bullets={[
+                "Google Business Profile claim + full optimization (category, services, photos, posts, Q&A, booking)",
+                "NAP standardization across the web — lock one canonical phone/address everywhere",
+                "Build accurate listings on 20+ major directories where you're currently missing",
+                "Fix the Healthgrades miscategorization + claim Yelp, Vitals, Sharecare",
+                "Entity consolidation — teach Google that Prevosti Vein Center is THE vein specialist in Canton",
+                "On-site technical: schema suite, FAQ + FAQPage, sitemap, robots.txt, canonicals",
+                <>
+                  Website migration to a modern Next.js platform (details below) —{" "}
+                  <em>included, no separate fee</em>
+                </>,
+              ]}
+            />
+          </FadeIn>
+          <FadeIn delay={0.08}>
+            <PhaseCard
+              featured
+              tag="Monthly · Ongoing"
+              title="Growth Engine"
+              price="$1,800"
+              priceNote="per month"
+              description="The compounding work that drives 8 → 15–20. This replaces a traditional agency retainer — and does the local-search work most aren't doing."
+              bullets={[
+                "Managed listings subscription (real-time sync, stays accurate everywhere)",
+                "Review generation system — systematic growth from 15 toward 50+",
+                "Google Business Profile management (posts, Q&A, photos, monitoring)",
+                "Organic content that owns \"chronic venous insufficiency\" in your market",
+                "Full website management on the new platform — fast, complete changes on demand",
+                "Monthly reporting: Map Pack rank, review growth, GBP insights, new-patient attribution",
+              ]}
+            />
+          </FadeIn>
+          <FadeIn delay={0.16}>
+            <PhaseCard
+              tag="Monthly · Included"
+              title="Paid Search Bridge"
+              price="$500"
+              priceNote="per month management + ad spend"
+              description="The fast bridge while organic compounds. A small, precise CVI-focused campaign — see the calculator above for the realistic math."
+              bullets={[
+                "CVI-focused Google Ads campaign (tightly geo-targeted to your permitted territory)",
+                "HIPAA-aware conversion + call tracking",
+                "Ongoing optimization and reporting",
+                <span key="adspend" className="text-xs sm:text-sm text-gray-500">
+                  <strong className="text-dark">Note:</strong> Ad spend is paid directly to
+                  Google — typically <strong className="text-dark">$1,000–2,000/mo</strong> —
+                  and is separate from this management fee. You control the budget; it never
+                  flows through InflowMD as markup.
+                </span>,
+              ]}
+            />
+          </FadeIn>
+        </div>
+
+        {/* Investment summary */}
+        <FadeIn delay={0.12}>
+          <div className="mt-10 sm:mt-14 rounded-2xl border border-gray-200 bg-warm-bg-alt p-6 sm:p-8 md:p-10">
+            <div className="grid md:grid-cols-3 gap-6 md:gap-8 items-start">
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500 mb-2">
+                  First month
+                </div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-dark tabular-nums">
+                  $4,300
+                </div>
+                <div className="text-xs sm:text-sm text-gray-500 mt-1 leading-relaxed">
+                  $2,000 setup + $1,800 engine + $500 paid management
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500 mb-2">
+                  Ongoing monthly
+                </div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-dark tabular-nums">
+                  $2,300<span className="text-base text-gray-500 font-bold">/mo</span>
+                </div>
+                <div className="text-xs sm:text-sm text-gray-500 mt-1 leading-relaxed">
+                  + ad spend (paid directly to Google)
+                </div>
+              </div>
+              <div className="md:border-l md:border-gray-300 md:pl-8">
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent mb-2">
+                  The framing
+                </div>
+                <p className="text-dark text-sm sm:text-base leading-relaxed font-medium">
+                  Meaningfully less than the premium-agency tier — with the discoverability
+                  work that actually moves your numbers built in.
+                </p>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+
+        {/* Website migration callout — softer, reassuring */}
+        <FadeIn delay={0.16}>
+          <div className="mt-10 sm:mt-14 rounded-2xl border border-blue-100 bg-blue-50/60 p-6 sm:p-8 md:p-10">
+            <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-blue-700 mb-3">
+              About your website
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-dark tracking-tight mb-5 leading-tight">
+              You keep everything.
+            </h3>
+            <div className="space-y-4 text-gray-700 text-sm sm:text-base leading-relaxed max-w-3xl">
+              <p>
+                Your website is strong and you just built it. You&apos;re not losing it.
+                Here&apos;s what I&apos;d do: keep your design and content exactly as they
+                are, back up your current Webflow site so it&apos;s always yours, and move
+                the engine underneath to a modern Next.js platform.
+              </p>
+              <p>
+                Why? Not because your site is slow — it isn&apos;t. Because this gives us
+                direct control: faster, deeper changes on demand instead of working within
+                template limits. And it&apos;s built for where search is heading — AI-native,
+                schema-rich, and ready to expand into new location pages the moment your
+                non-compete lifts and you grow into new markets.
+              </p>
+              <p>
+                This migration is{" "}
+                <strong className="text-dark">included in your engagement</strong> — there&apos;s
+                no separate website fee.{" "}
+                <span className="text-gray-600">
+                  (If you&apos;d prefer I simply manage your existing Webflow site as-is,
+                  I can — though honestly that&apos;s the slower, more expensive option for
+                  both of us.)
+                </span>
+              </p>
+            </div>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
    CLOSING / CTA
    ============================================================ */
 
@@ -1220,6 +1467,7 @@ export default function PrevostiClient() {
       <PaidSearch />
       <PlanTimeline />
       <RoiCalculator />
+      <Engagement />
       <Closing />
     </main>
   );
