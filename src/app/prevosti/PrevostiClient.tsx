@@ -86,6 +86,54 @@ function HonestCallout({
   );
 }
 
+/**
+ * Reliable count-up: starts at target value (so it's correct even if the
+ * intersection observer never fires), then if/when the element enters the
+ * viewport it briefly resets to 0 and animates up. Suffix is a string
+ * (e.g. "k", "%"). Decimals controls how many digits after the point.
+ */
+function CountUpStat({
+  to,
+  suffix = "",
+  decimals = 0,
+  duration = 1400,
+}: {
+  to: number;
+  suffix?: string;
+  decimals?: number;
+  duration?: number;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.2 });
+  const [v, setV] = useState<number>(to); // safe default — shows the real number on render
+  const animated = useRef(false);
+
+  useEffect(() => {
+    if (!inView || animated.current) return;
+    animated.current = true;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setV(to * eased);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    setV(0);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [inView, to, duration]);
+
+  const formatted =
+    decimals > 0 ? v.toFixed(decimals) : Math.round(v).toLocaleString();
+  return (
+    <span ref={ref}>
+      {formatted}
+      {suffix}
+    </span>
+  );
+}
+
 function AnimatedNumber({
   to,
   prefix = "",
@@ -372,9 +420,9 @@ function OffSiteGap() {
   const cards = [
     {
       title: "Google Business Profile",
-      stat: "Under-optimized",
+      stat: "Needs verification",
       body:
-        "Your GBP under the new Prevosti Vein Center identity is weak and incomplete. It isn't even linked from your website. This is the #1 entry point for local patients searching today.",
+        "We couldn't find a fully-optimized Google Business Profile linked from your website. GBP is the #1 entry point for local patients searching today — confirming and optimizing it is the first thing we'd check together. If it's already claimed, we build from there.",
       tone: "warn" as const,
     },
     {
@@ -527,6 +575,10 @@ function ReviewGapChart() {
       </ul>
       <p className="text-xs sm:text-sm text-gray-500 mt-5">
         Closing the review gap from 15 → 50+ is the highest-leverage move on this page.
+      </p>
+      <p className="text-xs text-gray-400 mt-2 italic">
+        Competitor counts are approximate (aggregated, June 2026); your 15 and Vascular
+        Surgical&apos;s 6 are confirmed. We&apos;ll verify all live before any work begins.
       </p>
     </div>
   );
@@ -691,8 +743,8 @@ function Market() {
           <div className="lg:col-span-2 grid grid-cols-2 gap-4">
             <FadeIn delay={0.08}>
               <div className="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                <div className="text-3xl sm:text-4xl font-extrabold text-dark">
-                  <AnimatedNumber to={293000} format={(v) => `${Math.round(v / 1000)}k`} />
+                <div className="text-3xl sm:text-4xl font-extrabold text-dark tabular-nums">
+                  <CountUpStat to={293} suffix="k" />
                 </div>
                 <div className="text-xs sm:text-sm text-gray-500 mt-1 uppercase tracking-wider">
                   Cherokee Co. population
@@ -701,8 +753,8 @@ function Market() {
             </FadeIn>
             <FadeIn delay={0.14}>
               <div className="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                <div className="text-3xl sm:text-4xl font-extrabold text-dark">
-                  <AnimatedNumber to={41} />
+                <div className="text-3xl sm:text-4xl font-extrabold text-dark tabular-nums">
+                  <CountUpStat to={41} />
                 </div>
                 <div className="text-xs sm:text-sm text-gray-500 mt-1 uppercase tracking-wider">
                   Median age (older skew)
@@ -711,8 +763,8 @@ function Market() {
             </FadeIn>
             <FadeIn delay={0.2}>
               <div className="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                <div className="text-3xl sm:text-4xl font-extrabold text-dark">
-                  $<AnimatedNumber to={116500} format={(v) => `${Math.round(v / 1000)}k`} />
+                <div className="text-3xl sm:text-4xl font-extrabold text-dark tabular-nums">
+                  $<CountUpStat to={116.5} decimals={1} />k
                 </div>
                 <div className="text-xs sm:text-sm text-gray-500 mt-1 uppercase tracking-wider">
                   Median household (~1.4× US)
@@ -741,11 +793,11 @@ function Market() {
    ============================================================ */
 
 const KEYWORDS = [
-  { term: "chronic venous insufficiency", vol: 590, bid: "$0.14–$3.39", note: "Only term with durable local volume" },
-  { term: "venous insufficiency", vol: 320, bid: "$0.14–$3.39", note: "Family of related queries" },
-  { term: "VenaSeal", vol: "<10", bid: "up to $11.31", note: "High value, very low volume" },
-  { term: "vein doctor near me", vol: "<10", bid: "$2–$8", note: "Below Google's local reporting threshold" },
-  { term: "varicose vein treatment cost", vol: "<10", bid: "$3–$9", note: "Below reporting threshold" },
+  { term: "chronic venous insufficiency", vol: 590, bid: "—" },
+  { term: "venous insufficiency", vol: 260, bid: "$0.14–$3.39" },
+  { term: "VenaSeal", vol: 10, bid: "$0.55–$11.31" },
+  { term: "restless legs at night", vol: 10, bid: "—" },
+  { term: "heavy tired legs", vol: 10, bid: "—" },
 ];
 
 function PaidSearch() {
@@ -777,13 +829,10 @@ function PaidSearch() {
                     Keyword
                   </th>
                   <th className="px-5 py-4 text-xs font-bold tracking-wider uppercase text-gray-400">
-                    Monthly volume
+                    Avg monthly searches
                   </th>
-                  <th className="px-5 py-4 text-xs font-bold tracking-wider uppercase text-gray-400 hidden sm:table-cell">
+                  <th className="px-5 py-4 text-xs font-bold tracking-wider uppercase text-gray-400">
                     Top-of-page bid
-                  </th>
-                  <th className="px-5 py-4 text-xs font-bold tracking-wider uppercase text-gray-400 hidden md:table-cell">
-                    Note
                   </th>
                 </tr>
               </thead>
@@ -794,9 +843,8 @@ function PaidSearch() {
                     className={`border-b border-white/5 last:border-b-0 ${i === 0 ? "bg-accent/[0.06]" : ""}`}
                   >
                     <td className="px-5 py-4 font-semibold text-white">{k.term}</td>
-                    <td className="px-5 py-4 font-mono text-accent-light">{typeof k.vol === "number" ? k.vol.toLocaleString() : k.vol}</td>
-                    <td className="px-5 py-4 text-gray-300 hidden sm:table-cell">{k.bid}</td>
-                    <td className="px-5 py-4 text-gray-400 text-sm hidden md:table-cell">{k.note}</td>
+                    <td className="px-5 py-4 font-mono text-accent-light">{k.vol.toLocaleString()}</td>
+                    <td className="px-5 py-4 text-gray-300">{k.bid}</td>
                   </tr>
                 ))}
               </tbody>
@@ -804,14 +852,23 @@ function PaidSearch() {
           </div>
         </FadeIn>
 
+        <FadeIn delay={0.1}>
+          <p className="text-gray-400 text-xs sm:text-sm mt-4 max-w-3xl leading-relaxed">
+            Procedure terms (sclerotherapy, RFA, Varithena), &ldquo;near me&rdquo; terms, and cost
+            terms fell below Google&apos;s local reporting threshold in the permitted 7-county
+            territory — there isn&apos;t enough local search volume to register them. That thin
+            volume is itself the finding.
+          </p>
+        </FadeIn>
+
         <FadeIn delay={0.15}>
           <div className="mt-8 max-w-3xl mx-auto">
             <HonestCallout label="The honest conclusion" tone="amber">
               Paid search here is a <strong>small, precise CVI-focused bridge</strong> —
-              realistically <strong>2–5 new patients per month</strong> at a modest budget,
-              roughly <strong>$417 cost-per-patient</strong> and a <strong>~4.3× ROAS</strong>.
-              It is <strong>not a volume play</strong>. The real engine is GBP + reviews +
-              Map Pack + organic CVI content.
+              an estimated <strong>2–5 new patients per month</strong> at a modest budget,
+              a modeled <strong>~$417 cost-per-patient</strong> and a projected{" "}
+              <strong>~4.3× ROAS</strong>. It is <strong>not a volume play</strong>. The real
+              engine is GBP + reviews + Map Pack + organic CVI content.
             </HonestCallout>
           </div>
         </FadeIn>
@@ -1004,7 +1061,7 @@ function RoiCalculator() {
                 <input
                   type="range"
                   min={500}
-                  max={10000}
+                  max={4000}
                   step={100}
                   value={spend}
                   onChange={(e) => setSpend(Number(e.target.value))}
@@ -1012,7 +1069,7 @@ function RoiCalculator() {
                 />
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
                   <span>$500</span>
-                  <span>$10,000</span>
+                  <span>$4,000</span>
                 </div>
               </div>
               <div>
@@ -1051,6 +1108,16 @@ function RoiCalculator() {
 
           {/* Outputs */}
           <div className="bg-gradient-to-br from-dark to-[#0b1633] rounded-2xl p-6 sm:p-8 text-white">
+            {spend > 3000 && (
+              <div className="mb-5 flex items-start gap-3 rounded-lg border border-amber-400/40 bg-amber-500/10 px-4 py-3">
+                <span className="text-amber-300 text-lg leading-none mt-0.5">⚠</span>
+                <p className="text-amber-100 text-sm leading-relaxed">
+                  Above ~$3k/mo, local search volume likely can&apos;t supply enough clicks to
+                  hit these numbers — the model shows the math, but the market caps the
+                  impressions.
+                </p>
+              </div>
+            )}
             <Eyebrow tone="muted">Estimated monthly outcome</Eyebrow>
             <div className="text-5xl sm:text-6xl font-extrabold mb-2 bg-gradient-to-r from-accent-light to-white bg-clip-text text-transparent">
               {m.patients.toFixed(1)}
