@@ -9,86 +9,96 @@ import FAQSchema from "@/components/FAQSchema";
 
 /* ───────────────────────── Data ───────────────────────── */
 
-const tiers = [
+interface Tier {
+  name: string;
+  tagline: string;
+  monthlyPrice: number;
+  setupFee: number;
+  popular: boolean;
+  features: string[];
+  includesFrom: string | null;
+}
+
+const tiers: Tier[] = [
   {
-    name: "Web Essentials",
+    name: "Essentials",
     tagline: "Fast, secure & compliant website",
-    monthlyPrice: 400,
-    annualPrice: 350,
+    monthlyPrice: 500,
+    setupFee: 500,
     popular: false,
     features: [
-      "Google Business Profile (Set up / Optimization)",
-      "Responsive Website Development (Mobile-friendly & patient-focused)",
-      "Ultimate Website Hosting (Maximum performance & speed)",
-      "Website Security (Malware scans, firewall, SSL certificate, backups)",
-      "HIPAA Compliant Appointment Requests (Secure online patient forms)",
-      "Domain Registration (Managed renewals & DNS support)",
+      "Responsive website development (mobile-friendly & patient-focused)",
+      "Ultimate website hosting (maximum performance & speed)",
+      "Website security (malware scans, firewall, SSL, backups)",
+      "Google Business Profile setup / optimization",
+      "HIPAA-compliant appointment request forms",
+      "Domain registration (managed renewals & DNS support)",
     ],
     includesFrom: null,
   },
   {
-    name: "Visibility Boost",
-    tagline: "Reviews + Local visibility",
-    monthlyPrice: 575,
-    annualPrice: 500,
+    name: "Visibility",
+    tagline: "Reviews + local visibility",
+    monthlyPrice: 900,
+    setupFee: 1000,
     popular: false,
     features: [
-      "Google Business Profile Updates (Posts, photos, and service optimizations)",
-      "Reputation Management (Dashboard + Review Requests)",
-      "Local Search Engine Optimization (Targeted for your city & specialty)",
+      "Google Business Profile updates (posts, photos, services)",
+      "Reputation management (dashboard + review requests)",
+      "Local SEO targeted to your city & specialty",
     ],
     includesFrom: "Essentials",
   },
   {
-    name: "Foundational SEO",
-    tagline: "Enhanced Online Visibility",
-    monthlyPrice: 900,
-    annualPrice: 800,
+    name: "Growth",
+    tagline: "Enhanced visibility + content engine",
+    monthlyPrice: 1500,
+    setupFee: 1500,
     popular: true,
     features: [
-      "Keyword optimization for core services (Core service pages & local targets)",
-      "2 SEO blog posts per month (Engaging, patient-focused content)",
-      "Enhanced citation management (Professional-grade directory management)",
-      "Monthly SEO insights and next steps (Rankings, analytics, and next steps)",
+      "Keyword optimization for core service pages & local targets",
+      "2 SEO blog posts per month (patient-focused content)",
+      "Enhanced citation management across major directories",
+      "Monthly SEO insights with rankings, analytics, and next steps",
     ],
-    includesFrom: "Visibility Boost",
+    includesFrom: "Visibility",
   },
   {
-    name: "Growth + Visibility",
-    tagline: "SEO + Ads that drive results",
-    monthlyPrice: 1350,
-    annualPrice: 1200,
+    name: "Full Engine",
+    tagline: "SEO + Ads + everything, fully managed",
+    monthlyPrice: 2500,
+    setupFee: 2000,
     popular: false,
     features: [
-      "Google Ads setup & ongoing management (Targeted campaigns built for ROI)",
-      "Conversion tracking (Monitor calls, forms, & leads)",
-      "Landing page optimization (Boost conversions & ad performance)",
-      "Strategy review with actionable insights (Quarterly insights + actionable guidance)",
+      "Google Ads setup & ongoing management (targeted for ROI)",
+      "Conversion tracking (calls, forms, leads)",
+      "Landing page optimization for ad performance",
+      "Quarterly strategy review with actionable guidance",
     ],
-    includesFrom: "Foundational SEO",
+    includesFrom: "Growth",
   },
 ];
 
 const faqs = [
   {
     q: "Are there any setup fees?",
-    a: "No. Your website build, onboarding, and initial optimization are all included in your plan. No surprise invoices.",
+    a: "Yes — a one-time setup fee that scales by plan, ranging from $500 to $2,000. We waive it entirely on annual (12-month) commitments.",
   },
   {
-    q: "What\u2019s the contract commitment?",
-    a: "All plans start with a 12-month term that includes your custom website build and full onboarding. After the initial term, you can continue month-to-month or renew annually at your current rate.",
+    q: "What’s the contract commitment?",
+    a: "Two options: monthly is no-commitment, month-to-month, and includes the setup fee. Annual is a 12-month commitment billed monthly at the same rate — with the setup fee waived and two months free.",
   },
   {
     q: "Can I upgrade my plan later?",
-    a: "Absolutely. You can move up to a higher tier at any time. We\u2019ll apply the new services immediately and adjust your billing.",
+    a: "Absolutely. You can move up to a higher tier at any time. We’ll apply the new services immediately and adjust your billing.",
   },
   {
     q: "What happens if I cancel?",
-    a: "After your initial 12-month term, you can cancel with 30 days written notice per the terms of your agreement. Your website and all assets remain accessible through the end of your billing period.",
+    a: "On a monthly plan you can cancel any time with 30 days written notice. On an annual plan you can cancel at the end of your 12-month term, also with 30 days notice. Your data and content remain accessible through the end of your billing period.",
   },
   {
     q: "Do I own my website?",
-    a: "Yes. You own all content, images, and copy on your site. If you ever leave, we\u2019ll provide a full export of your site files.",
+    a: "Your content, copy, and images are always yours. The custom Next.js build runs on our managed platform as part of your plan — that’s how we keep it fast, secure, and continuously optimized while you’re with us. If you ever leave, we provide a full backup of your original site, and the custom build can be licensed for a one-time buyout if you want to take it with you.",
   },
 ];
 
@@ -135,8 +145,8 @@ export default function PricingClient() {
               </span>
             </h1>
             <p className="text-gray-400 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
-              Every plan is built to grow your practice&nbsp;&mdash; choose the
-              level that fits your goals.
+              Every plan we build is designed to grow your practice. Choose the
+              level that fits where you are today.
             </p>
           </FadeIn>
         </div>
@@ -150,14 +160,38 @@ export default function PricingClient() {
             <BillingToggle annual={annual} setAnnual={setAnnual} />
           </FadeIn>
 
+          {/* Website + platform callout */}
+          <FadeIn delay={0.05}>
+            <div className="mt-10 max-w-4xl mx-auto rounded-2xl border border-accent/20 bg-white p-5 sm:p-6 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg bg-accent/10 text-accent flex items-center justify-center shrink-0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+                  </svg>
+                </div>
+                <div className="text-sm sm:text-base text-foreground leading-relaxed">
+                  <span className="font-semibold">Every plan includes a fast, modern, AI-ready website built on Next.js</span>
+                  {" "}— engineered for performance, search visibility, and built to scale as your practice grows.
+                </div>
+              </div>
+            </div>
+          </FadeIn>
+
           {/* Cards */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
             {tiers.map((tier, i) => (
               <FadeIn key={tier.name} delay={0.08 * i}>
                 <PricingCard tier={tier} annual={annual} />
               </FadeIn>
             ))}
           </div>
+
+          {/* Platform / leasing transparency */}
+          <FadeIn delay={0.1}>
+            <p className="mt-8 max-w-3xl mx-auto text-center text-xs sm:text-sm text-gray-500 leading-relaxed">
+              Your website is built and hosted on our managed platform as part of your plan. If you ever leave, we provide your original site backup, and your custom build can be licensed for a one-time buyout. This keeps your site fast, secure, and continuously optimized while you&rsquo;re with us.
+            </p>
+          </FadeIn>
         </div>
       </section>
 
@@ -196,8 +230,8 @@ export default function PricingClient() {
                 See Your ROI
               </h2>
               <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-                Punch in your numbers and see how fast your marketing investment
-                pays for itself.
+                Punch in your own numbers. Nothing is pre-filled until you tell
+                us about your practice.
               </p>
             </div>
           </FadeIn>
@@ -245,31 +279,40 @@ function BillingToggle({
   setAnnual: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-center gap-4">
-      <span
-        className={`text-sm font-medium ${!annual ? "text-foreground" : "text-gray-400"}`}
-      >
-        Monthly
-      </span>
-      <button
-        onClick={() => setAnnual(!annual)}
-        className={`relative w-14 h-7 rounded-full transition-colors ${annual ? "bg-accent" : "bg-gray-300"}`}
-        aria-label="Toggle billing period"
-      >
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex items-center justify-center gap-4">
         <span
-          className={`absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${annual ? "translate-x-7" : ""}`}
-        />
-      </button>
-      <span
-        className={`text-sm font-medium ${annual ? "text-foreground" : "text-gray-400"}`}
-      >
-        Annual
-      </span>
-      {annual && (
-        <span className="ml-1 text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-          Save up to 13%
+          className={`text-sm font-medium ${!annual ? "text-foreground" : "text-gray-400"}`}
+        >
+          Monthly
         </span>
-      )}
+        <button
+          onClick={() => setAnnual(!annual)}
+          className={`relative w-14 h-7 rounded-full transition-colors ${annual ? "bg-accent" : "bg-gray-300"}`}
+          aria-label="Toggle billing period"
+        >
+          <span
+            className={`absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${annual ? "translate-x-7" : ""}`}
+          />
+        </button>
+        <span
+          className={`text-sm font-medium ${annual ? "text-foreground" : "text-gray-400"}`}
+        >
+          Annual (12-mo)
+        </span>
+      </div>
+      <p className="text-xs sm:text-sm text-gray-500 text-center max-w-md">
+        {annual ? (
+          <>
+            <span className="inline-block text-[10px] font-bold tracking-[0.18em] uppercase text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full mr-2">
+              Setup waived + 2 months free
+            </span>
+            12-month commitment, billed monthly.
+          </>
+        ) : (
+          <>Month-to-month, no commitment. Full setup fee applies.</>
+        )}
+      </p>
     </div>
   );
 }
@@ -280,14 +323,9 @@ function PricingCard({
   tier,
   annual,
 }: {
-  tier: (typeof tiers)[number];
+  tier: Tier;
   annual: boolean;
 }) {
-  const price = annual ? tier.annualPrice : tier.monthlyPrice;
-  const savePct = Math.round(
-    ((tier.monthlyPrice - tier.annualPrice) / tier.monthlyPrice) * 100,
-  );
-
   return (
     <div
       className={`relative flex flex-col rounded-2xl overflow-hidden transition-all h-full ${
@@ -308,21 +346,43 @@ function PricingCard({
         className={`px-6 pb-6 text-center bg-gradient-to-b from-[#1A1A2E] to-[#232340] ${tier.popular ? "pt-10" : "pt-6"}`}
       >
         <h3 className="text-white font-bold text-lg mb-1">{tier.name}</h3>
-        <p className="text-gray-400 text-sm mb-4">{tier.tagline}</p>
+        <p className="text-gray-400 text-sm mb-4 min-h-[2.5rem]">{tier.tagline}</p>
         <div className="flex items-end justify-center gap-1">
           <span className="text-white text-4xl font-extrabold">
-            ${price.toLocaleString()}
+            ${tier.monthlyPrice.toLocaleString()}
           </span>
           <span className="text-gray-400 text-sm mb-1">/mo</span>
         </div>
-        {annual && (
-          <p className="text-gray-500 text-xs mt-1">
-            billed annually&nbsp;&middot;&nbsp;
-            <span className="text-green-400 font-semibold">
-              save {savePct}%
-            </span>
-          </p>
-        )}
+
+        {/* Setup fee + commitment line */}
+        <div className="mt-3 text-xs leading-relaxed min-h-[2.75rem]">
+          {annual ? (
+            <>
+              <p className="text-gray-400">
+                <span className="line-through text-gray-500">
+                  ${tier.setupFee.toLocaleString()} setup
+                </span>{" "}
+                <span className="text-emerald-300 font-semibold">WAIVED</span>
+              </p>
+              <p className="text-emerald-300 font-semibold">+ 2 months free</p>
+              <p className="text-gray-500 mt-0.5">
+                12-month commitment, billed monthly
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-gray-300">
+                <span className="font-semibold text-white">
+                  ${tier.setupFee.toLocaleString()}
+                </span>{" "}
+                one-time setup
+              </p>
+              <p className="text-gray-500 mt-0.5">
+                Month-to-month, no commitment
+              </p>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Features */}
@@ -406,21 +466,21 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 
 function ROICalculator() {
   const specialtyKeys = Object.keys(specialties);
-  const [specialty, setSpecialty] = useState(specialtyKeys[0]);
-  const defaults = specialties[specialty];
-
-  const [revenue, setRevenue] = useState(defaults.revenue);
-  const [cost, setCost] = useState(defaults.cost);
-  const [fee, setFee] = useState(800);
-  const [patients, setPatients] = useState(4);
+  const [specialty, setSpecialty] = useState<string>(""); // no preset
+  const [revenue, setRevenue] = useState<number>(0);
+  const [cost, setCost] = useState<number>(0);
+  const [fee, setFee] = useState<number>(0);
+  const [patients, setPatients] = useState<number>(0);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [ltv, setLtv] = useState(1);
+  const [ltv, setLtv] = useState<number>(1);
 
-  /* When specialty changes, update revenue & cost */
+  /* When specialty changes, optionally pre-fill revenue & cost as a helper */
   const handleSpecialty = (key: string) => {
     setSpecialty(key);
-    setRevenue(specialties[key].revenue);
-    setCost(specialties[key].cost);
+    if (key && specialties[key]) {
+      setRevenue(specialties[key].revenue);
+      setCost(specialties[key].cost);
+    }
   };
 
   const calc = useMemo(() => {
@@ -442,6 +502,8 @@ function ROICalculator() {
     };
   }, [revenue, cost, fee, patients, ltv]);
 
+  const ready = revenue > 0 && cost >= 0 && fee > 0 && patients > 0;
+
   return (
     <div className="grid lg:grid-cols-2 gap-8 items-start">
       {/* LEFT — Inputs */}
@@ -456,46 +518,42 @@ function ROICalculator() {
             onChange={(e) => handleSpecialty(e.target.value)}
             className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
           >
+            <option value="">Select your specialty (optional preset)</option>
             {specialtyKeys.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
             ))}
           </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Picking a specialty pre-fills revenue and cost as a starting point. Adjust freely.
+          </p>
         </div>
 
-        {/* Revenue */}
         <InputField
           label="Average revenue per patient"
           value={revenue}
           onChange={setRevenue}
           prefix="$"
         />
-
-        {/* Cost */}
         <InputField
           label="Average cost per patient"
           value={cost}
           onChange={setCost}
           prefix="$"
         />
-
-        {/* Fee */}
         <InputField
           label="Monthly marketing fee"
           value={fee}
           onChange={setFee}
           prefix="$"
         />
-
-        {/* Patients */}
         <InputField
           label="New patients / month from marketing"
           value={patients}
           onChange={setPatients}
         />
 
-        {/* Advanced */}
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
           className="text-accent text-sm font-medium hover:underline"
@@ -520,7 +578,7 @@ function ROICalculator() {
         {/* Big number */}
         <div className="mb-8 text-center">
           <p className="text-5xl sm:text-6xl font-extrabold bg-gradient-to-r from-accent to-accent-light bg-clip-text text-transparent">
-            {calc.roiMultiple.toFixed(1)}x
+            {ready ? `${calc.roiMultiple.toFixed(1)}x` : "—"}
           </p>
           <p className="text-gray-400 text-sm mt-1">ROI Multiple</p>
         </div>
@@ -528,45 +586,67 @@ function ROICalculator() {
         <div className="grid grid-cols-2 gap-4">
           <ResultStat
             label="Net Profit / Month"
-            value={`$${calc.netProfit.toLocaleString()}`}
-            highlight={calc.netProfit > 0}
+            value={ready ? `$${calc.netProfit.toLocaleString()}` : "—"}
+            highlight={ready && calc.netProfit > 0}
           />
           <ResultStat
             label="Profit per Patient"
-            value={`$${calc.profitPerPatient.toLocaleString()}`}
+            value={
+              ready ? `$${calc.profitPerPatient.toLocaleString()}` : "—"
+            }
           />
           <ResultStat
             label="Monthly Patient Profit"
-            value={`$${calc.monthlyProfit.toLocaleString()}`}
+            value={ready ? `$${calc.monthlyProfit.toLocaleString()}` : "—"}
           />
-          <ResultStat label="ROI" value={`${calc.roiPct.toFixed(0)}%`} />
+          <ResultStat
+            label="ROI"
+            value={ready ? `${calc.roiPct.toFixed(0)}%` : "—"}
+          />
         </div>
 
         <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10">
           <p className="text-sm text-gray-400">
             <span className="text-white font-semibold">Break-even:</span>{" "}
-            {calc.breakEven} patient{calc.breakEven !== 1 && "s"} / month
+            {ready && calc.breakEven > 0
+              ? `${calc.breakEven} patient${calc.breakEven !== 1 ? "s" : ""} / month`
+              : "—"}
           </p>
         </div>
 
-        {/* Summary */}
-        <p className="mt-6 text-sm text-gray-400 leading-relaxed">
-          At <span className="text-white font-medium">{patients}</span> new
-          patients per month, your{" "}
-          <span className="text-white font-medium">
-            ${fee.toLocaleString()}/mo
-          </span>{" "}
-          investment generates{" "}
-          <span className="text-white font-medium">
-            ${calc.monthlyProfit.toLocaleString()}
-          </span>{" "}
-          in gross profit &mdash; a{" "}
-          <span className="text-accent font-semibold">
-            {calc.roiMultiple.toFixed(1)}x return
-          </span>
-          . You break even after just{" "}
-          <span className="text-white font-medium">{calc.breakEven}</span>{" "}
-          patient{calc.breakEven !== 1 && "s"}.
+        {/* Dynamic summary — only when inputs are meaningful */}
+        {ready ? (
+          <p className="mt-6 text-sm text-gray-400 leading-relaxed">
+            At <span className="text-white font-medium">{patients}</span> new
+            patients per month, a{" "}
+            <span className="text-white font-medium">
+              ${fee.toLocaleString()}/mo
+            </span>{" "}
+            investment generates{" "}
+            <span className="text-white font-medium">
+              ${calc.monthlyProfit.toLocaleString()}
+            </span>{" "}
+            in gross profit &mdash; a{" "}
+            <span className="text-accent font-semibold">
+              {calc.roiMultiple.toFixed(1)}x return
+            </span>
+            .{" "}
+            {calc.breakEven > 0 && (
+              <>
+                You break even after{" "}
+                <span className="text-white font-medium">{calc.breakEven}</span>{" "}
+                patient{calc.breakEven !== 1 && "s"}.
+              </>
+            )}
+          </p>
+        ) : (
+          <p className="mt-6 text-sm text-gray-500 leading-relaxed italic">
+            Enter your numbers on the left to see projected ROI.
+          </p>
+        )}
+
+        <p className="mt-4 text-xs text-gray-500 leading-relaxed">
+          Projections based on your inputs &mdash; not guarantees. Actual results vary by market, competition, and patient mix.
         </p>
       </div>
     </div>
@@ -601,9 +681,10 @@ function InputField({
         )}
         <input
           type="number"
-          value={value}
+          value={value === 0 ? "" : value}
           step={step}
-          onChange={(e) => onChange(Number(e.target.value))}
+          placeholder="0"
+          onChange={(e) => onChange(Number(e.target.value) || 0)}
           className={`w-full border border-gray-200 rounded-lg py-2.5 text-sm bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40 ${prefix ? "pl-7 pr-3" : "px-3"}`}
         />
       </div>
