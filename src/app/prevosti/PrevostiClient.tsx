@@ -251,6 +251,7 @@ function Hero() {
 const SECTIONS = [
   { id: "audit", label: "On-site audit" },
   { id: "offsite", label: "Off-site reality" },
+  { id: "mobile-perf", label: "Mobile performance" },
   { id: "compete", label: "Competitive" },
   { id: "market", label: "Market" },
   { id: "paid", label: "Paid-search reality" },
@@ -781,6 +782,179 @@ function CompetitorCards() {
         );
       })}
     </div>
+  );
+}
+
+/* ============================================================
+   SECTION — Mobile performance + conversion problem
+   ============================================================ */
+
+function MobilePerformance() {
+  return (
+    <section id="mobile-perf" className="bg-white py-20 sm:py-28 border-b border-gray-100">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <SectionHeading
+          eyebrow="Mobile performance"
+          title={
+            <>
+              This isn&apos;t a ranking problem.{" "}
+              <span className="text-accent">It&apos;s a conversion problem.</span>
+            </>
+          }
+          subtitle="Your site is fast on desktop. On a phone, where most patients actually search, it collapses — and that's where the money is going."
+        />
+
+        <FadeIn>
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 md:p-10">
+            <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent mb-3">
+              Fast on desktop. Slow on a phone.
+            </div>
+            <p className="text-sm text-gray-500 mb-7">
+              Google PageSpeed Insights · mobile · June 2026
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
+              {/* Current — Webflow */}
+              <div className="rounded-2xl border-2 border-red-200 bg-red-50/50 p-6 sm:p-7">
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-red-700 mb-2">
+                  Current · prevostivein.com (Webflow)
+                </div>
+                <div className="flex items-baseline gap-2 mb-5">
+                  <div className="text-6xl sm:text-7xl font-extrabold text-red-600 tabular-nums leading-none">
+                    44
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold text-red-400 tabular-nums">
+                    /100
+                  </div>
+                </div>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li className="flex justify-between gap-3">
+                    <span>Largest Contentful Paint</span>
+                    <span className="font-bold text-red-700 tabular-nums">15.7s</span>
+                  </li>
+                  <li className="flex justify-between gap-3">
+                    <span>First Contentful Paint</span>
+                    <span className="font-bold text-red-700 tabular-nums">11.4s</span>
+                  </li>
+                  <li className="flex justify-between gap-3">
+                    <span>Total page weight</span>
+                    <span className="font-bold text-red-700 tabular-nums">~4.7 MB</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Ours — Next.js */}
+              <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50/50 p-6 sm:p-7">
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-emerald-700 mb-2">
+                  Our platform · inflowmd.com (Next.js)
+                </div>
+                <div className="flex items-baseline gap-2 mb-5">
+                  <div className="text-6xl sm:text-7xl font-extrabold text-emerald-600 tabular-nums leading-none">
+                    95
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold text-emerald-400 tabular-nums">
+                    /100
+                  </div>
+                </div>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li className="flex justify-between gap-3">
+                    <span>Largest Contentful Paint</span>
+                    <span className="font-bold text-emerald-700 tabular-nums">2.9s</span>
+                  </li>
+                  <li className="flex justify-between gap-3">
+                    <span>Total Blocking Time</span>
+                    <span className="font-bold text-emerald-700 tabular-nums">0ms</span>
+                  </li>
+                  <li className="flex justify-between gap-3 invisible">
+                    <span>placeholder</span>
+                    <span>—</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+
+        {/* Conversion problem — standalone facts, no multiplied math */}
+        <FadeIn delay={0.1}>
+          <div className="mt-8 sm:mt-10 rounded-2xl border-2 border-amber-300 bg-amber-50/50 p-6 sm:p-8 md:p-10">
+            <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-amber-700 mb-3">
+              Why this matters more than the score
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-dark tracking-tight mb-6 leading-tight">
+              You&apos;re losing patients at{" "}
+              <span className="text-amber-700">your own front door</span>.
+            </h3>
+
+            <div className="grid sm:grid-cols-2 gap-4 sm:gap-5 mb-6">
+              <div className="bg-white rounded-xl border border-amber-200 p-5 sm:p-6">
+                <div className="text-3xl sm:text-4xl font-extrabold text-amber-700 tabular-nums mb-1">
+                  ~7%
+                </div>
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                  Studies consistently show even a{" "}
+                  <strong className="text-dark">one-second delay</strong> can cut conversions
+                  by roughly 7%.
+                </p>
+              </div>
+              <div className="bg-white rounded-xl border border-amber-200 p-5 sm:p-6">
+                <div className="text-3xl sm:text-4xl font-extrabold text-amber-700 tabular-nums mb-1">
+                  53%
+                </div>
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                  Of mobile visitors{" "}
+                  <strong className="text-dark">abandon a page that takes longer than 3
+                  seconds</strong> to load.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-amber-200 p-5 sm:p-6 mb-5">
+              <p className="text-sm sm:text-base text-dark leading-relaxed">
+                Your site takes <strong className="text-red-700">about 15 seconds</strong> to
+                load on mobile. You&apos;re spending{" "}
+                <strong className="text-dark">$3,327/month on ads</strong> — plus everything
+                you do to rank organically — to bring people to your site. Then a large share
+                of them leave before it finishes loading.{" "}
+                <strong className="text-dark">You&apos;re not losing patients at the search
+                result. You&apos;re losing them at your own front door</strong>, after
+                you&apos;ve already paid to bring them there.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-amber-200 p-5 sm:p-6">
+              <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-amber-700 mb-2">
+                The leak is already showing in your numbers
+              </div>
+              <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                Your own data tells this story. You have{" "}
+                <strong className="text-dark">281 organic sessions a month</strong> arriving
+                on the site and{" "}
+                <strong className="text-red-700">zero tracked conversions</strong> from them.
+                Your paid program produces{" "}
+                <strong className="text-dark">13 leads at $256 each</strong> — when the page
+                they land on is loading in 15 seconds, the real cost of every lead that
+                <em> almost</em> happened is hidden in the abandonment.
+              </p>
+            </div>
+
+            <p className="text-xs text-gray-500 mt-5 italic">
+              Mobile performance: Google PageSpeed Insights, June 2026. Conversion figures:
+              industry research. Verify your site at{" "}
+              <a
+                href="https://pagespeed.web.dev/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent underline-offset-2 hover:underline"
+              >
+                pagespeed.web.dev
+              </a>
+              .
+            </p>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
   );
 }
 
@@ -1677,106 +1851,6 @@ function Engagement() {
           </div>
         </FadeIn>
 
-        {/* Mobile Performance comparison — leads into the migration discussion */}
-        <FadeIn delay={0.14}>
-          <div className="mt-10 sm:mt-14 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 md:p-10">
-            <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent mb-3">
-              Mobile performance
-            </div>
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-dark tracking-tight mb-2 leading-tight">
-              Fast on desktop. <span className="text-amber-600">Slow on a phone.</span>
-            </h3>
-            <p className="text-sm text-gray-500 mb-7">
-              Google PageSpeed Insights · mobile · June 2026
-            </p>
-
-            <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
-              {/* Current — Webflow */}
-              <div className="rounded-2xl border-2 border-red-200 bg-red-50/50 p-6 sm:p-7">
-                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-red-700 mb-2">
-                  Current · prevostivein.com (Webflow)
-                </div>
-                <div className="flex items-baseline gap-2 mb-5">
-                  <div className="text-6xl sm:text-7xl font-extrabold text-red-600 tabular-nums leading-none">
-                    44
-                  </div>
-                  <div className="text-xl sm:text-2xl font-bold text-red-400 tabular-nums">
-                    /100
-                  </div>
-                </div>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex justify-between gap-3">
-                    <span>Largest Contentful Paint</span>
-                    <span className="font-bold text-red-700 tabular-nums">15.7s</span>
-                  </li>
-                  <li className="flex justify-between gap-3">
-                    <span>First Contentful Paint</span>
-                    <span className="font-bold text-red-700 tabular-nums">11.4s</span>
-                  </li>
-                  <li className="flex justify-between gap-3">
-                    <span>Total page weight</span>
-                    <span className="font-bold text-red-700 tabular-nums">~4.7 MB</span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Ours — Next.js */}
-              <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50/50 p-6 sm:p-7">
-                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-emerald-700 mb-2">
-                  Our platform · inflowmd.com (Next.js)
-                </div>
-                <div className="flex items-baseline gap-2 mb-5">
-                  <div className="text-6xl sm:text-7xl font-extrabold text-emerald-600 tabular-nums leading-none">
-                    95
-                  </div>
-                  <div className="text-xl sm:text-2xl font-bold text-emerald-400 tabular-nums">
-                    /100
-                  </div>
-                </div>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex justify-between gap-3">
-                    <span>Largest Contentful Paint</span>
-                    <span className="font-bold text-emerald-700 tabular-nums">2.9s</span>
-                  </li>
-                  <li className="flex justify-between gap-3">
-                    <span>Total Blocking Time</span>
-                    <span className="font-bold text-emerald-700 tabular-nums">0ms</span>
-                  </li>
-                  <li className="flex justify-between gap-3 invisible">
-                    <span>placeholder</span>
-                    <span>—</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <p className="text-sm sm:text-base text-gray-700 leading-relaxed max-w-3xl">
-              Your site is fast on desktop (~1 second) — but Google&apos;s mobile PageSpeed
-              test scores it <strong className="text-red-700">44 out of 100</strong>, with a
-              15-second load on a phone. That&apos;s{" "}
-              <strong className="text-dark">not your design</strong>, which is excellent and
-              stays exactly the same — it&apos;s the Webflow platform shipping 4.7MB of code
-              a phone can&apos;t process quickly. Since most patients search on mobile, and
-              most leave after 3 seconds, this is real lost traffic. Rebuilt on our platform,
-              the same site loads in under 3 seconds on mobile —{" "}
-              <strong className="text-emerald-700">a 95 on the same test.</strong>
-            </p>
-
-            <p className="text-xs text-gray-500 mt-5 italic">
-              Source: Google PageSpeed Insights, mobile, June 2026. Test it yourself at{" "}
-              <a
-                href="https://pagespeed.web.dev/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent underline-offset-2 hover:underline"
-              >
-                pagespeed.web.dev
-              </a>
-              .
-            </p>
-          </div>
-        </FadeIn>
-
         {/* Website migration callout — softer, reassuring */}
         <FadeIn delay={0.16}>
           <div className="mt-10 sm:mt-14 rounded-2xl border border-blue-100 bg-blue-50/60 p-6 sm:p-8 md:p-10">
@@ -1890,6 +1964,7 @@ export default function PrevostiClient() {
       <LiveData />
       <OnSiteAudit />
       <OffSiteGap />
+      <MobilePerformance />
       <Competitive />
       <Market />
       <PaidSearch />
