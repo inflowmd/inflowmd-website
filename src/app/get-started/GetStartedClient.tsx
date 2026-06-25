@@ -1,5 +1,6 @@
 "use client";
 
+import Script from "next/script";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeIn from "@/components/FadeIn";
@@ -144,6 +145,10 @@ export default function GetStartedClient() {
       </main>
 
       <Footer />
+      <Script
+        src="https://assets.calendly.com/assets/external/widget.js"
+        strategy="lazyOnload"
+      />
     </>
   );
 }

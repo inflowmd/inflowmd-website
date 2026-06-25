@@ -45,9 +45,13 @@ export default function Hero() {
     <section className="relative overflow-hidden bg-dark pt-28 pb-12 md:pt-32 md:pb-20">
       {/* Mesh gradient background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="mesh-blob-1 absolute top-1/4 left-1/4 w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full bg-[#1a2a6c]/60 blur-[120px]" />
-        <div className="mesh-blob-2 absolute top-1/3 right-1/4 w-[350px] h-[350px] md:w-[600px] md:h-[600px] rounded-full bg-[#2D6CDF]/30 blur-[140px]" />
-        <div className="mesh-blob-3 absolute bottom-1/4 left-1/3 w-[250px] h-[250px] md:w-[400px] md:h-[400px] rounded-full bg-[#4338ca]/40 blur-[100px]" />
+        {/* Mobile uses smaller blur radius (60px vs 120-140px) to keep the
+            compositor texture small. Combined with animation: none on
+            mobile in globals.css, these become cheap static color washes
+            on iPhones while remaining the full animated mesh on desktop. */}
+        <div className="mesh-blob-1 absolute top-1/4 left-1/4 w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full bg-[#1a2a6c]/60 blur-[60px] md:blur-[120px]" />
+        <div className="mesh-blob-2 absolute top-1/3 right-1/4 w-[350px] h-[350px] md:w-[600px] md:h-[600px] rounded-full bg-[#2D6CDF]/30 blur-[60px] md:blur-[140px]" />
+        <div className="mesh-blob-3 absolute bottom-1/4 left-1/3 w-[250px] h-[250px] md:w-[400px] md:h-[400px] rounded-full bg-[#4338ca]/40 blur-[60px] md:blur-[100px]" />
         <div className="absolute inset-0 bg-dark/40" />
       </div>
 

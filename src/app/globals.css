@@ -179,3 +179,77 @@ body {
 .animate-mockup-scroll {
   animation: mockupScroll 20s ease-in-out infinite;
 }
+
+/* ---------------------------------------------------------------
+   Mobile-Safari stability overrides.
+
+   Three huge animated blur orbs (mesh-blob-1..3) plus several
+   backdrop-blur-xl elements + many infinite-loop CSS animations
+   were thrashing the mobile compositor and triggering the
+   "A problem repeatedly occurred" reload crash on iPhone.
+
+   On narrow viewports we:
+     · drop the static blur radius dramatically and stop animating
+       the orbs (still visible as soft color washes, just stable)
+     · downgrade backdrop-blur-xl/2xl to plain solid backgrounds
+     · stop the always-on infinite decorative animations
+
+   prefers-reduced-motion gets the full safe treatment regardless
+   of viewport.
+   --------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  /* Stop animating the giant blurred gradient orbs */
+  .mesh-blob-1,
+  .mesh-blob-2,
+  .mesh-blob-3 {
+    animation: none !important;
+  }
+
+  /* Stop other always-on decorative animations on mobile */
+  .animate-scroll-pills,
+  .animate-float-bob,
+  .animate-float-bob-delayed,
+  .animate-shine-sweep,
+  .animate-cta-glow,
+  .animate-pulse-glow,
+  .animate-pulse-glow-delayed,
+  .animate-phone-shimmer,
+  .animate-green-pulse,
+  .animate-mockup-scroll {
+    animation: none !important;
+  }
+
+  /* Backdrop-filter is the worst memory offender on mobile Safari.
+     Replace blur layers with opaque fallbacks that look nearly
+     identical but cost zero compositor memory. */
+  .backdrop-blur-sm,
+  .backdrop-blur,
+  .backdrop-blur-md,
+  .backdrop-blur-lg,
+  .backdrop-blur-xl,
+  .backdrop-blur-2xl,
+  .backdrop-blur-3xl {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Honor user's motion preference everywhere, every viewport */
+  .mesh-blob-1,
+  .mesh-blob-2,
+  .mesh-blob-3,
+  .animate-scroll-pills,
+  .animate-float-bob,
+  .animate-float-bob-delayed,
+  .animate-shine-sweep,
+  .animate-cta-glow,
+  .animate-pulse-glow,
+  .animate-pulse-glow-delayed,
+  .animate-phone-shimmer,
+  .animate-green-pulse,
+  .animate-mockup-scroll {
+    animation: none !important;
+  }
+}
