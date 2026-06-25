@@ -275,20 +275,24 @@ function Thesis() {
               </h2>
               <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
                 Your site loads in ~1.2 seconds, your content depth on conditions is genuinely
-                strong, your credentials are best-in-class, and your Google Business Profile is
-                already claimed and actively managed. That&apos;s the foundation. The remaining
-                gap is the local-search infrastructure around it — review volume, citation
-                coverage, and entity consolidation. Google sees a strong profile but a thin
-                signal everywhere else.
+                strong, your credentials are best-in-class, and your Google Business Profile is{" "}
+                <strong className="font-semibold text-accent">already claimed and actively
+                managed</strong>. That&apos;s the foundation. The remaining gap is the
+                local-search infrastructure around it —{" "}
+                <strong className="font-semibold text-dark">review volume, citation coverage,
+                and entity consolidation</strong>.{" "}
+                <strong className="font-semibold text-dark">Google sees a strong profile but
+                a thin signal everywhere else.</strong>
               </p>
-              <p className="text-gray-600 text-base sm:text-lg leading-relaxed mt-4">
+              <p className="text-gray-600 text-base sm:text-lg leading-relaxed mt-5">
                 The path to more patients here is{" "}
                 <span className="font-semibold text-dark">discoverability</span>: growing
                 review volume, cleaning up the citation graph, consolidating the four
                 &ldquo;Dr. Prevosti&rdquo; identities online, and owning the
-                chronic-venous-insufficiency conversation organically. It&apos;s not a flood of
-                paid ads — local volume won&apos;t support that, and we&apos;ll show you why
-                on page seven.
+                chronic-venous-insufficiency conversation organically.{" "}
+                <strong className="font-semibold text-accent">It&apos;s not a flood of paid
+                ads</strong> — local volume won&apos;t support that, and we&apos;ll show you
+                why on page seven.
               </p>
             </FadeIn>
           </div>
@@ -359,21 +363,36 @@ function OnSiteAudit() {
         />
 
         <FadeIn delay={0.1}>
-          <div className="flex gap-2 justify-center mb-8">
-            {(["working", "fixable"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                  tab === t
-                    ? "bg-dark text-white shadow-md"
-                    : "bg-white text-gray-600 hover:text-dark border border-gray-200"
-                }`}
-              >
-                {t === "working" ? `✓ What's working (${AUDIT_WORKING.length})` : `⚠ What's fixable (${AUDIT_FIXABLE.length})`}
-              </button>
-            ))}
+          <div
+            role="tablist"
+            aria-label="On-site audit toggle"
+            className="flex flex-wrap gap-3 justify-center mb-3"
+          >
+            {(["working", "fixable"] as const).map((t) => {
+              const active = tab === t;
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setTab(t)}
+                  className={`cursor-pointer select-none px-5 py-2.5 rounded-full text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-accent/40 ${
+                    active
+                      ? "bg-dark text-white border-2 border-dark shadow-md"
+                      : "bg-white text-gray-700 border-2 border-gray-300 hover:border-dark hover:bg-gray-50 hover:shadow-sm"
+                  }`}
+                >
+                  {t === "working"
+                    ? `✓ What's working (${AUDIT_WORKING.length})`
+                    : `⚠ What's fixable (${AUDIT_FIXABLE.length})`}
+                </button>
+              );
+            })}
           </div>
+          <p className="text-center text-xs text-gray-500 mb-7">
+            Tap to switch views.
+          </p>
         </FadeIn>
 
         <motion.ul
@@ -585,7 +604,7 @@ function ReviewGapChart() {
                 {c.name}
                 {isYou && <span className="ml-1.5 text-accent">●</span>}
               </div>
-              <div className="flex-1 h-7 sm:h-8 bg-gray-100 rounded-md overflow-hidden relative">
+              <div className="flex-1 h-7 sm:h-8 bg-gray-100 rounded-md overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={inView ? { width: `${pct}%` } : { width: 0 }}
@@ -596,9 +615,13 @@ function ReviewGapChart() {
                       : "bg-gray-300"
                   }`}
                 />
-                <span className={`absolute inset-y-0 right-2 flex items-center text-xs sm:text-sm font-bold ${isYou ? "text-white" : "text-gray-700"}`}>
-                  {c.reviews}
-                </span>
+              </div>
+              <div
+                className={`w-12 text-right text-sm sm:text-base font-extrabold tabular-nums shrink-0 ${
+                  isYou ? "text-accent" : "text-dark"
+                }`}
+              >
+                {c.reviews}
               </div>
             </li>
           );
@@ -616,68 +639,58 @@ function ReviewGapChart() {
 }
 
 function CompetitorCards() {
-  const [open, setOpen] = useState<string | null>(PREVOSTI.id);
   const all = [PREVOSTI, ...COMPETITORS];
   return (
     <div className="grid lg:grid-cols-2 gap-4 sm:gap-5">
       {all.map((c) => {
         const isYou = c.id === "prev";
-        const isOpen = open === c.id;
         return (
           <div
             key={c.id}
-            className={`rounded-2xl border overflow-hidden transition-colors ${
+            className={`rounded-2xl border overflow-hidden ${
               isYou
                 ? "border-accent/40 bg-gradient-to-br from-blue-50 to-white"
                 : "border-gray-200 bg-white"
             }`}
           >
-            <button
-              onClick={() => setOpen(isOpen ? null : c.id)}
-              className="w-full flex items-start justify-between gap-4 p-5 sm:p-6 text-left"
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  {isYou && (
-                    <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent">
-                      You
-                    </span>
-                  )}
-                  <span className="text-xs text-gray-500 uppercase tracking-wider">{c.location}</span>
+            <div className="p-5 sm:p-6">
+              <div className="flex items-center gap-2 mb-1">
+                {isYou && (
+                  <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent">
+                    You
+                  </span>
+                )}
+                <span className="text-xs text-gray-500 uppercase tracking-wider">
+                  {c.location}
+                </span>
+              </div>
+              <h3 className="text-dark font-extrabold text-base sm:text-lg leading-tight">
+                {c.name}
+              </h3>
+              <div className="flex items-center gap-3 mt-2 text-sm text-gray-600">
+                <span className="font-bold text-dark">{c.rating.toFixed(1)}★</span>
+                <span>·</span>
+                <span>{c.reviews} reviews</span>
+              </div>
+            </div>
+            <div className="px-5 sm:px-6 pb-6 border-t border-gray-100 pt-4 space-y-4">
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-emerald-700 mb-1.5">
+                  Strength
                 </div>
-                <h3 className="text-dark font-extrabold text-base sm:text-lg leading-tight">
-                  {c.name}
-                </h3>
-                <div className="flex items-center gap-3 mt-2 text-sm text-gray-600">
-                  <span className="font-bold text-dark">{c.rating.toFixed(1)}★</span>
-                  <span>·</span>
-                  <span>{c.reviews} reviews</span>
+                <div className="text-sm sm:text-base text-dark leading-relaxed">
+                  {c.strength}
                 </div>
               </div>
-              <span className={`text-gray-400 text-xs transition-transform ${isOpen ? "rotate-180" : ""}`}>
-                ▾
-              </span>
-            </button>
-            {isOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="px-5 sm:px-6 pb-6 border-t border-gray-100 pt-4 space-y-3"
-              >
-                <div>
-                  <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-emerald-700 mb-1">
-                    Strength
-                  </div>
-                  <div className="text-sm sm:text-base text-dark">{c.strength}</div>
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-amber-700 mb-1.5">
+                  Weakness
                 </div>
-                <div>
-                  <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-amber-700 mb-1">
-                    Weakness
-                  </div>
-                  <div className="text-sm sm:text-base text-gray-700">{c.weakness}</div>
+                <div className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                  {c.weakness}
                 </div>
-              </motion.div>
-            )}
+              </div>
+            </div>
           </div>
         );
       })}
@@ -1450,7 +1463,7 @@ function Engagement() {
               title="Growth Engine"
               price="$1,800"
               priceNote="per month"
-              description="The compounding work that drives 8 → 15–20. This replaces a traditional agency retainer — and does the local-search work most aren't doing."
+              description="The compounding work behind realistic new-patient growth — a projection, not a guarantee (see Guarantees vs. Projections above). Replaces a traditional agency retainer and does the local-search work most aren't doing."
               bullets={[
                 "Managed listings subscription (real-time sync, stays accurate everywhere)",
                 "Review generation system — systematic growth from 15 toward 50+",
