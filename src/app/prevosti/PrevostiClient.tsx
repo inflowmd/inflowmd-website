@@ -1246,7 +1246,7 @@ function Engagement() {
           eyebrow="Engagement & Investment"
           title={
             <>
-              Exactly what I&apos;d do. Exactly{" "}
+              Exactly what we&apos;d do. Exactly{" "}
               <span className="text-accent">what it costs</span>.
             </>
           }
@@ -1362,14 +1362,15 @@ function Engagement() {
               About your website
             </div>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-dark tracking-tight mb-5 leading-tight">
-              You keep everything.
+              Your design and content — yours, kept.
             </h3>
             <div className="space-y-4 text-gray-700 text-sm sm:text-base leading-relaxed max-w-3xl">
               <p>
-                Your website is strong and you just built it. You&apos;re not losing it.
-                Here&apos;s what I&apos;d do: keep your design and content exactly as they
-                are, back up your current Webflow site so it&apos;s always yours, and move
-                the engine underneath to a modern Next.js platform.
+                Your website is strong and you just built it. You&apos;re not losing your
+                design or your content. Here&apos;s how we&apos;d handle it: we back up your
+                current Webflow site so it&apos;s always yours to keep, then we rebuild it on
+                our modern, managed Next.js platform — which we host and maintain as part of
+                the engagement.
               </p>
               <p>
                 Why? Not because your site is slow — it isn&apos;t. Because this gives us
@@ -1379,14 +1380,17 @@ function Engagement() {
                 non-compete lifts and you grow into new markets.
               </p>
               <p>
-                This migration is{" "}
-                <strong className="text-dark">included in your engagement</strong> — there&apos;s
-                no separate website fee.{" "}
-                <span className="text-gray-600">
-                  (If you&apos;d prefer I simply manage your existing Webflow site as-is,
-                  I can — though honestly that&apos;s the slower, more expensive option for
-                  both of us.)
-                </span>
+                <strong className="text-dark">Honest about the hosting:</strong> the site
+                runs on our managed platform as part of your plan. If you ever leave, you
+                receive your Webflow backup (always yours), and the custom Next.js build can
+                be licensed for a one-time buyout if you want to take it with you. This setup
+                is how we keep the site fast, secure, and continuously optimized while
+                you&apos;re with us.
+              </p>
+              <p className="text-gray-600">
+                (If you&apos;d prefer we simply manage your existing Webflow site as-is, we
+                can — though honestly that&apos;s the slower, more expensive option for both
+                sides.)
               </p>
             </div>
           </div>
