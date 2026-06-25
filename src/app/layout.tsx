@@ -17,7 +17,7 @@ const sourceSerif = Source_Serif_4({
   display: "swap",
 });
 
-const SITE_URL = "https://inflowmd.vercel.app";
+const SITE_URL = "https://www.inflowmd.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
