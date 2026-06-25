@@ -1677,6 +1677,106 @@ function Engagement() {
           </div>
         </FadeIn>
 
+        {/* Mobile Performance comparison — leads into the migration discussion */}
+        <FadeIn delay={0.14}>
+          <div className="mt-10 sm:mt-14 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 md:p-10">
+            <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent mb-3">
+              Mobile performance
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-dark tracking-tight mb-2 leading-tight">
+              Fast on desktop. <span className="text-amber-600">Slow on a phone.</span>
+            </h3>
+            <p className="text-sm text-gray-500 mb-7">
+              Google PageSpeed Insights · mobile · June 2026
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
+              {/* Current — Webflow */}
+              <div className="rounded-2xl border-2 border-red-200 bg-red-50/50 p-6 sm:p-7">
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-red-700 mb-2">
+                  Current · prevostivein.com (Webflow)
+                </div>
+                <div className="flex items-baseline gap-2 mb-5">
+                  <div className="text-6xl sm:text-7xl font-extrabold text-red-600 tabular-nums leading-none">
+                    44
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold text-red-400 tabular-nums">
+                    /100
+                  </div>
+                </div>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li className="flex justify-between gap-3">
+                    <span>Largest Contentful Paint</span>
+                    <span className="font-bold text-red-700 tabular-nums">15.7s</span>
+                  </li>
+                  <li className="flex justify-between gap-3">
+                    <span>First Contentful Paint</span>
+                    <span className="font-bold text-red-700 tabular-nums">11.4s</span>
+                  </li>
+                  <li className="flex justify-between gap-3">
+                    <span>Total page weight</span>
+                    <span className="font-bold text-red-700 tabular-nums">~4.7 MB</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Ours — Next.js */}
+              <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50/50 p-6 sm:p-7">
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-emerald-700 mb-2">
+                  Our platform · inflowmd.com (Next.js)
+                </div>
+                <div className="flex items-baseline gap-2 mb-5">
+                  <div className="text-6xl sm:text-7xl font-extrabold text-emerald-600 tabular-nums leading-none">
+                    95
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold text-emerald-400 tabular-nums">
+                    /100
+                  </div>
+                </div>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li className="flex justify-between gap-3">
+                    <span>Largest Contentful Paint</span>
+                    <span className="font-bold text-emerald-700 tabular-nums">2.9s</span>
+                  </li>
+                  <li className="flex justify-between gap-3">
+                    <span>Total Blocking Time</span>
+                    <span className="font-bold text-emerald-700 tabular-nums">0ms</span>
+                  </li>
+                  <li className="flex justify-between gap-3 invisible">
+                    <span>placeholder</span>
+                    <span>—</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <p className="text-sm sm:text-base text-gray-700 leading-relaxed max-w-3xl">
+              Your site is fast on desktop (~1 second) — but Google&apos;s mobile PageSpeed
+              test scores it <strong className="text-red-700">44 out of 100</strong>, with a
+              15-second load on a phone. That&apos;s{" "}
+              <strong className="text-dark">not your design</strong>, which is excellent and
+              stays exactly the same — it&apos;s the Webflow platform shipping 4.7MB of code
+              a phone can&apos;t process quickly. Since most patients search on mobile, and
+              most leave after 3 seconds, this is real lost traffic. Rebuilt on our platform,
+              the same site loads in under 3 seconds on mobile —{" "}
+              <strong className="text-emerald-700">a 95 on the same test.</strong>
+            </p>
+
+            <p className="text-xs text-gray-500 mt-5 italic">
+              Source: Google PageSpeed Insights, mobile, June 2026. Test it yourself at{" "}
+              <a
+                href="https://pagespeed.web.dev/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent underline-offset-2 hover:underline"
+              >
+                pagespeed.web.dev
+              </a>
+              .
+            </p>
+          </div>
+        </FadeIn>
+
         {/* Website migration callout — softer, reassuring */}
         <FadeIn delay={0.16}>
           <div className="mt-10 sm:mt-14 rounded-2xl border border-blue-100 bg-blue-50/60 p-6 sm:p-8 md:p-10">
@@ -1695,11 +1795,12 @@ function Engagement() {
                 the engagement.
               </p>
               <p>
-                Why? Not because your site is slow — it isn&apos;t. Because this gives us
-                direct control: faster, deeper changes on demand instead of working within
-                template limits. And it&apos;s built for where search is heading — AI-native,
-                schema-rich, and ready to expand into new location pages the moment your
-                non-compete lifts and you grow into new markets.
+                Why? The mobile-performance gap above is one direct reason — same design,
+                same content, but a platform that ships code a phone can actually run. The
+                other reason is direct control: faster, deeper changes on demand instead of
+                working within template limits. And it&apos;s built for where search is
+                heading — AI-native, schema-rich, and ready to expand into new location pages
+                the moment your non-compete lifts and you grow into new markets.
               </p>
               <p>
                 <strong className="text-dark">Honest about the hosting:</strong> the site
