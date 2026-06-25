@@ -273,16 +273,20 @@ function Thesis() {
               </h2>
               <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
                 Your site loads in ~1.2 seconds, your content depth on conditions is genuinely
-                strong, your credentials are best-in-class. But under your new identity,
-                Prevosti Vein Center has near-zero local-search infrastructure. Google doesn&apos;t
-                yet know who you are in Canton — and most patients searching today never see you.
+                strong, your credentials are best-in-class, and your Google Business Profile is
+                already claimed and actively managed. That&apos;s the foundation. The remaining
+                gap is the local-search infrastructure around it — review volume, citation
+                coverage, and entity consolidation. Google sees a strong profile but a thin
+                signal everywhere else.
               </p>
               <p className="text-gray-600 text-base sm:text-lg leading-relaxed mt-4">
                 The path to more patients here is{" "}
-                <span className="font-semibold text-dark">discoverability</span>: Google Business
-                Profile, reviews, the Map Pack, and owning the chronic-venous-insufficiency
-                conversation organically. It&apos;s not a flood of paid ads — local volume
-                won&apos;t support that, and we&apos;ll show you why on page seven.
+                <span className="font-semibold text-dark">discoverability</span>: growing
+                review volume, cleaning up the citation graph, consolidating the four
+                &ldquo;Dr. Prevosti&rdquo; identities online, and owning the
+                chronic-venous-insufficiency conversation organically. It&apos;s not a flood of
+                paid ads — local volume won&apos;t support that, and we&apos;ll show you why
+                on page seven.
               </p>
             </FadeIn>
           </div>
@@ -419,31 +423,31 @@ function OnSiteAudit() {
 function OffSiteGap() {
   const cards = [
     {
-      title: "Google Business Profile",
-      stat: "Needs verification",
-      body:
-        "We couldn't find a fully-optimized Google Business Profile linked from your website. GBP is the #1 entry point for local patients searching today — confirming and optimizing it is the first thing we'd check together. If it's already claimed, we build from there.",
-      tone: "warn" as const,
-    },
-    {
-      title: "Reviews — fragmented across identities",
+      title: "Review volume",
       stat: "15 / 5.0★",
       body:
-        "Your career reputation (77+ reviews, 4.7★ on Healthgrades) is attached to the wrong identity — Healthgrades miscategorizes you as Thoracic/Cardiovascular Surgery, not vein care. The 4.6★/188-review entity online belongs to your former Vein Atlanta practice.",
+        "Your reviews are exceptional — a perfect 5.0★. The problem is volume. Competitors in Canton sit at 57–109 reviews; you sit at 15. Closing this gap to 50+ is the single highest-impact move on this page — and it's a systems problem, not a quality problem.",
       tone: "warn" as const,
     },
     {
-      title: "NAP inconsistency",
-      stat: "3+ phone numbers",
+      title: "Citation gaps",
+      stat: "Missing from 20+",
       body:
-        "Your website lists (470) 873-8115. Your treatments page lists (470) 567-9047. Old listings still show Atlanta/Sandy Springs numbers. Google penalizes practices when name/address/phone don't agree across the web.",
+        "You're absent from many of the major medical directories that patients and AI tools cross-reference (Yelp, Vitals, Sharecare, and others). The listings you do have show inconsistent contact info. Each missing or mismatched listing is a vote of confusion to Google.",
+      tone: "warn" as const,
+    },
+    {
+      title: "Healthgrades miscategorization",
+      stat: "Wrong specialty",
+      body:
+        "Your career reputation on Healthgrades (77+ reviews, 4.7★) is attached to the wrong identity — listed as Thoracic / Cardiovascular Surgery, not vein care. Patients searching for a vein doctor never see your strongest external review profile.",
       tone: "warn" as const,
     },
     {
       title: "Entity confusion",
       stat: "4 identities",
       body:
-        "The web currently shows four distinct \"Dr. Prevosti\" entities — Vein Atlanta, the Center for Vein Restoration affiliation, a Sandy Springs cardiothoracic surgeon, and the new Canton practice. Google and AI don't yet know that Prevosti Vein Center is the vein specialist in Canton.",
+        "The web shows four distinct \"Dr. Prevosti\" entities — Vein Atlanta, the Center for Vein Restoration affiliation, a Sandy Springs cardiothoracic surgeon, and the new Canton practice. Google and AI haven't yet consolidated these into \"Prevosti Vein Center is the vein specialist in Canton.\"",
       tone: "warn" as const,
     },
   ];
@@ -451,15 +455,40 @@ function OffSiteGap() {
     <section id="offsite" className="bg-white py-20 sm:py-28">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <SectionHeading
-          eyebrow="Off-site gap"
+          eyebrow="Off-site reality"
           title={
             <>
-              This is where the{" "}
-              <span className="text-accent">real story</span> is.
+              Where the{" "}
+              <span className="text-accent">real lift</span> comes from.
             </>
           }
-          subtitle="Four interlocking gaps. Each is fixable. Together they are the reason patients in Canton can't find you yet."
+          subtitle="Your already well-managed Google Business Profile is the foundation. Around it, four interlocking gaps — each fixable, ranked here by lift."
         />
+
+        {/* Positive GBP callout — credits the strength explicitly */}
+        <FadeIn>
+          <div className="max-w-4xl mx-auto mb-8 sm:mb-10 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5 sm:p-6">
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0">
+                ✓
+              </span>
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-emerald-700 mb-1">
+                  Already in good shape
+                </div>
+                <p className="text-sm sm:text-base text-dark leading-relaxed">
+                  <span className="font-semibold">Your Google Business Profile is claimed,
+                  correctly categorized as a vascular surgeon in Canton, has photos and a
+                  booking link, and is actively maintained.</span>{" "}
+                  That&apos;s a real strength — better than most new practices in your market.
+                  The ongoing opportunity is keeping it active (regular posts, Q&amp;A,
+                  photos) and feeding review growth into it, not claiming or fixing it.
+                </p>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+
         <div className="grid sm:grid-cols-2 gap-5 sm:gap-6">
           {cards.map((c, i) => (
             <FadeIn key={c.title} delay={i * 0.08}>
@@ -884,35 +913,35 @@ function PaidSearch() {
 const PLAN = [
   {
     n: "01",
-    title: "Claim + fully optimize Google Business Profile",
+    title: "Review generation system",
     impact: "Highest",
-    effort: "Low",
+    effort: "Med",
     body:
-      "Category: Vein clinic. Photos, hours, services, posts, Q&A. The single best ROI move on this list.",
+      "Lift you from 15 reviews to 50+ — parity with Canton competitors. Post-procedure prompts, follow-up cadence, frictionless review link. This is the single highest-impact lever on this page.",
   },
   {
     n: "02",
-    title: "Review generation system",
+    title: "Citation cleanup + entity consolidation",
     impact: "High",
     effort: "Med",
     body:
-      "Lift you from 15 reviews to 50+ — parity with competitors. Post-procedure prompts, follow-up cadence, easy review link.",
+      "Build the missing 20+ directory listings, lock one canonical phone/address everywhere, fix the Healthgrades miscategorization, and unwind the Vein Atlanta / Sandy Springs / CVR identity confusion. Teach Google who you are now.",
   },
   {
     n: "03",
-    title: "NAP / citation cleanup + entity consolidation",
-    impact: "High",
-    effort: "Med",
-    body:
-      "One phone number everywhere. Fix the Healthgrades miscategorization. Unwind the Vein Atlanta confusion. Teach Google who you are now.",
-  },
-  {
-    n: "04",
     title: "Own \"chronic venous insufficiency\" organically",
     impact: "High",
     effort: "Med",
     body:
       "Content hub + schema + AI-citation-ready Q&A. Your surgeon credentials = maximum authority on CVI in your market.",
+  },
+  {
+    n: "04",
+    title: "Ongoing GBP management",
+    impact: "Medium",
+    effort: "Low",
+    body:
+      "Your profile is already in good shape. Keep it active: regular posts, Q&A, fresh photos, monitoring. Feed the growing review base into it. This is maintenance and compounding, not claim-and-fix.",
   },
   {
     n: "05",
@@ -1263,7 +1292,7 @@ function Engagement() {
               priceNote="one-time"
               description="The fixable gaps, fixed. Everything that's currently capping your visibility — corrected once, properly."
               bullets={[
-                "Google Business Profile claim + full optimization (category, services, photos, posts, Q&A, booking)",
+                "Google Business Profile enhancement — handover into ongoing management, optimize photos / posts / Q&A / services / booking on top of what's already there",
                 "NAP standardization across the web — lock one canonical phone/address everywhere",
                 "Build accurate listings on 20+ major directories where you're currently missing",
                 "Fix the Healthgrades miscategorization + claim Yelp, Vitals, Sharecare",
