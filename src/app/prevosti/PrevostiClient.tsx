@@ -211,9 +211,10 @@ function Hero() {
         </FadeIn>
         <FadeIn delay={0.24}>
           <p className="text-gray-300 text-base sm:text-lg md:text-xl max-w-3xl leading-relaxed mb-10">
-            Dr. Prevosti, this report is honest by design. You have an excellent clinical
-            foundation and a strong website. What&apos;s missing is the local-search
-            infrastructure under your new identity — and that gap is the entire opportunity.
+            Dr. Prevosti, this report is honest by design. You already have an excellent
+            clinical foundation, a strong website, and a well-managed Google Business Profile.
+            What&apos;s missing is the supporting infrastructure — review volume, citations,
+            and entity clarity — and that&apos;s exactly where we&apos;d work.
           </p>
         </FadeIn>
 
@@ -249,11 +250,12 @@ function Hero() {
 
 const SECTIONS = [
   { id: "audit", label: "On-site audit" },
-  { id: "offsite", label: "Off-site gap" },
+  { id: "offsite", label: "Off-site reality" },
   { id: "compete", label: "Competitive" },
   { id: "market", label: "Market" },
   { id: "paid", label: "Paid-search reality" },
-  { id: "plan", label: "Plan & target" },
+  { id: "plan", label: "The plan" },
+  { id: "commitments", label: "Guarantees vs. projections" },
   { id: "calc", label: "ROI calculator" },
 ];
 
@@ -966,7 +968,7 @@ function PlanTimeline() {
     <section id="plan" className="bg-warm-bg-alt py-20 sm:py-28">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <SectionHeading
-          eyebrow="Plan & realistic target"
+          eyebrow="The plan"
           title={
             <>
               Six moves, ranked by{" "}
@@ -999,32 +1001,168 @@ function PlanTimeline() {
           ))}
         </div>
 
-        {/* Realistic target callout */}
+        {/* Pointer to the honest projection in the next section */}
         <FadeIn delay={0.1}>
-          <div className="mt-12 grid md:grid-cols-2 gap-6">
-            <div className="rounded-2xl bg-gradient-to-br from-dark to-[#0b1633] text-white p-7 sm:p-9">
-              <Eyebrow tone="muted">Realistic 1–2 quarter target</Eyebrow>
-              <div className="text-5xl sm:text-6xl font-extrabold mb-3">
-                <span className="text-gray-400">8</span>
-                <span className="mx-3 text-gray-500">→</span>
-                <span className="bg-gradient-to-r from-accent-light to-white bg-clip-text text-transparent">
-                  15–20
+          <div className="mt-10 max-w-3xl mx-auto rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 text-center">
+            <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+              <span className="font-semibold text-dark">What this work may produce</span> — broken out honestly as
+              {" "}
+              <a href="#commitments" className="text-accent font-semibold underline-offset-4 hover:underline">
+                guarantees vs. projections
+              </a>
+              {" "}
+              in the next section. We don&apos;t promise patient counts. We promise the work.
+            </p>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   GUARANTEES vs. PROJECTIONS — the centerpiece reframe
+   ============================================================ */
+
+const GUARANTEES = [
+  "Optimize and actively maintain your Google Business Profile (you're already in good shape — we keep it that way and feed reviews into it).",
+  "Build and standardize accurate listings across 20+ medical directories.",
+  "Run a systematic, ongoing review-generation process to grow your 5.0★ base toward 50+.",
+  "Correct the Healthgrades miscategorization and consolidate the Vein Atlanta / Sandy Springs / CVR identities into a single Canton entity.",
+  "Publish CVI-focused organic content and run a managed, compliant paid-search campaign.",
+  "Migrate and manage your website on our modern, AI-ready Next.js platform.",
+  "Report transparently every month — exactly what we did, what moved, and what didn't.",
+];
+
+function GuaranteeVsProject() {
+  return (
+    <section id="commitments" className="relative bg-dark text-white py-20 sm:py-28 overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(45,108,223,0.10)_0%,_transparent_70%)]" />
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
+        <SectionHeading
+          invert
+          eyebrow="What we guarantee vs. what we project"
+          title={
+            <>
+              Honest about what we control —{" "}
+              <span className="bg-gradient-to-r from-accent-light to-white bg-clip-text text-transparent">
+                and what we don&apos;t
+              </span>
+              .
+            </>
+          }
+          subtitle="Two distinct commitments. The work, which we guarantee. The outcome, which we can only project. We won't blur the line between them."
+        />
+
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+          {/* GUARANTEE column */}
+          <FadeIn>
+            <div className="h-full rounded-2xl border border-emerald-400/30 bg-emerald-500/[0.06] backdrop-blur p-6 sm:p-8">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-lg font-bold">
+                  ✓
                 </span>
+                <div>
+                  <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-emerald-300">
+                    What we guarantee
+                  </div>
+                  <h3 className="text-white font-extrabold text-xl sm:text-2xl">The work.</h3>
+                </div>
               </div>
-              <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-                New vein patients per month, driven by discoverability — not ad spend. This
-                compounds over 1–2 quarters as GBP authority, reviews, and organic CVI content
-                gain traction.
+              <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-5">
+                These are within our control. We commit to doing them, doing them well, and
+                showing you the work every month.
               </p>
+              <ul className="space-y-3">
+                {GUARANTEES.map((g, i) => (
+                  <li key={i} className="flex items-start gap-3 text-gray-100 text-sm sm:text-base leading-relaxed">
+                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-emerald-300 shrink-0" />
+                    <span>{g}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <div>
-              <HonestCallout label="The economics caveat" tone="blue">
-                Per-patient economics in vein care have shifted: Medicare RFA reimbursement is
-                down ~40% since 2010 (now ~$990). Volume and mix matter more than ever, which
-                is why this plan focuses on patients who present with CVI severity that
-                supports a full course of care — not chasing every cosmetic spider-vein lead.
-              </HonestCallout>
+          </FadeIn>
+
+          {/* PROJECTION column */}
+          <FadeIn delay={0.1}>
+            <div className="h-full rounded-2xl border border-amber-400/30 bg-amber-500/[0.05] backdrop-blur p-6 sm:p-8 flex flex-col">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="w-10 h-10 rounded-full bg-amber-500/20 text-amber-300 flex items-center justify-center text-lg font-bold">
+                  ~
+                </span>
+                <div>
+                  <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-amber-300">
+                    What we project
+                  </div>
+                  <h3 className="text-white font-extrabold text-xl sm:text-2xl">The outcome.</h3>
+                </div>
+              </div>
+
+              <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-5">
+                Practices that close these specific gaps typically see meaningful new-patient
+                growth over 2–3 quarters. Based on your market and current position, we model a
+                trajectory in the range of:
+              </p>
+
+              <div className="rounded-xl bg-white/[0.04] border border-white/10 p-5 sm:p-6 mb-5">
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-400 mb-2">
+                  Modeled projection · 2–3 quarters
+                </div>
+                <div className="flex items-baseline gap-3 mb-2">
+                  <span className="text-gray-400 text-lg sm:text-xl font-bold tabular-nums">~8/mo</span>
+                  <span className="text-gray-500">→</span>
+                  <span className="text-3xl sm:text-4xl font-extrabold tabular-nums bg-gradient-to-r from-amber-200 to-white bg-clip-text text-transparent">
+                    10–15/mo
+                  </span>
+                </div>
+                <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                  New vein patients per month. <strong className="text-amber-200">10/mo is
+                  the lower end</strong> — what we honestly expect if the work performs and
+                  nothing major in your market shifts. <strong className="text-amber-200">15/mo
+                  is the upper end</strong> — possible if review velocity, CVI rankings, and
+                  Map Pack movement all come together favorably.
+                </p>
+              </div>
+
+              <div className="rounded-xl bg-amber-500/[0.08] border border-amber-400/30 p-4 sm:p-5 mb-5">
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-amber-300 mb-2">
+                  Read this carefully
+                </div>
+                <p className="text-amber-100 text-sm leading-relaxed">
+                  <strong>We do not guarantee specific patient numbers.</strong> No honest
+                  marketing partner can. Patient volume depends on market demand, competition,
+                  seasonality, insurance and pricing, and how your practice converts inquiries
+                  into booked appointments — much of which is outside any marketer&apos;s
+                  control. What we guarantee is the work and the transparency. The projection
+                  above is our honest best estimate, not a contractual outcome.
+                </p>
+              </div>
+
+              <div className="text-xs text-gray-500 leading-relaxed mt-auto">
+                <span className="font-semibold text-gray-400">Assumptions behind the model:
+                </span>{" "}
+                continued GBP velocity, a 50+ review base by quarter two, organic CVI gains
+                across two quarters, and a small CVI-focused paid bridge running in parallel.
+                Lower-end (10/mo) is achievable on the work alone; the upper end requires the
+                market to cooperate.
+              </div>
             </div>
+          </FadeIn>
+        </div>
+
+        {/* Economics caveat — moved here from PlanTimeline */}
+        <FadeIn delay={0.15}>
+          <div className="mt-8 sm:mt-10 max-w-4xl mx-auto rounded-2xl border border-blue-400/30 bg-blue-500/[0.06] p-5 sm:p-6">
+            <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-blue-300 mb-2">
+              The economics caveat
+            </div>
+            <p className="text-blue-100 text-sm sm:text-base leading-relaxed">
+              Per-patient economics in vein care have shifted: Medicare RFA reimbursement is
+              down ~40% since 2010 (now ~$990). Volume and mix matter more than ever, which is
+              why the plan focuses on patients who present with CVI severity that supports a
+              full course of care — not chasing every cosmetic spider-vein lead.
+            </p>
           </div>
         </FadeIn>
       </div>
@@ -1499,6 +1637,7 @@ export default function PrevostiClient() {
       <Market />
       <PaidSearch />
       <PlanTimeline />
+      <GuaranteeVsProject />
       <RoiCalculator />
       <Engagement />
       <Closing />
