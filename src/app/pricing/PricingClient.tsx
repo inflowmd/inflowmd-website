@@ -86,7 +86,7 @@ const faqs = [
   },
   {
     q: "What’s the contract commitment?",
-    a: "Two options: monthly is no-commitment, month-to-month, and includes the setup fee. Annual is a 12-month commitment billed monthly at the same rate — with the setup fee waived and two months free.",
+    a: "Two options: monthly is no-commitment, month-to-month, and includes the setup fee. Annual is a 12-month commitment billed monthly at the same rate — with the one-time setup fee waived.",
   },
   {
     q: "Can I upgrade my plan later?",
@@ -305,7 +305,7 @@ function BillingToggle({
         {annual ? (
           <>
             <span className="inline-block text-[10px] font-bold tracking-[0.18em] uppercase text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full mr-2">
-              Setup waived + 2 months free
+              Setup fee waived
             </span>
             12-month commitment, billed monthly.
           </>
@@ -364,7 +364,6 @@ function PricingCard({
                 </span>{" "}
                 <span className="text-emerald-300 font-semibold">WAIVED</span>
               </p>
-              <p className="text-emerald-300 font-semibold">+ 2 months free</p>
               <p className="text-gray-500 mt-0.5">
                 12-month commitment, billed monthly
               </p>
