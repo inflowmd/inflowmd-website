@@ -223,9 +223,9 @@ function Hero() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-12">
             {[
               { v: "5.0★", l: "Google rating" },
-              { v: "15", l: "Reviews (new identity)" },
-              { v: "B / B−", l: "On-site audit grade" },
-              { v: "~1.2s", l: "Site full-load" },
+              { v: "15", l: "Reviews" },
+              { v: "17.0", l: "Avg Google position" },
+              { v: "281", l: "Organic sessions / mo" },
             ].map((s) => (
               <div
                 key={s.l}
@@ -280,9 +280,11 @@ function Thesis() {
                 managed</strong>. That&apos;s the foundation. The remaining gap is the
                 local-search infrastructure around it —{" "}
                 <strong className="font-semibold text-dark">review volume, citation coverage,
-                and entity consolidation</strong>.{" "}
-                <strong className="font-semibold text-dark">Google sees a strong profile but
-                a thin signal everywhere else.</strong>
+                and entity consolidation</strong> — plus an average Google ranking sitting at
+                <strong className="font-semibold text-dark"> position 17.0 (page two)</strong>.
+                Google sees a strong profile but ranks it conservatively, and the signal
+                everywhere else online is thin. <span className="font-semibold text-dark">The
+                room to climb is real.</span>
               </p>
               <p className="text-gray-600 text-base sm:text-lg leading-relaxed mt-5">
                 The path to more patients here is{" "}
@@ -322,6 +324,90 @@ function Thesis() {
 }
 
 /* ============================================================
+   SECTION 1.5 — Live data snapshot (May 2026 actuals)
+   ============================================================ */
+
+const LIVE_STATS = [
+  { v: "17.0", l: "Avg Google position", note: "Page 2 — room to climb" },
+  { v: "281", l: "Organic sessions / mo", note: "Real traffic, real audience" },
+  { v: "0", l: "Organic conversions tracked", note: "The conversion-path gap", warn: true },
+  { v: "327", l: "Google Maps views / mo", note: "Local intent is finding you" },
+  { v: "21", l: "Calls via Google / mo", note: "Map-pack working — could be larger" },
+  { v: "138", l: "Site visits via Google / mo", note: "Map-pack → site flow" },
+  { v: "$3,327", l: "Current monthly ad spend", note: "Existing paid program" },
+  { v: "13", l: "Current paid leads / mo", note: "$256 per LEAD (not patient)" },
+];
+
+function LiveData() {
+  return (
+    <section className="bg-warm-bg-alt py-16 sm:py-20 border-b border-gray-100">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <FadeIn>
+          <div className="text-center mb-10">
+            <Eyebrow>Your live data · May 2026</Eyebrow>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-dark tracking-tight leading-tight">
+              What your accounts actually show.
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600 mt-3 max-w-2xl mx-auto leading-relaxed">
+              Honest grounding. Every recommendation in this report sits on top of these
+              numbers — pulled from your Google Ads, Analytics, and Maps profile this month.
+            </p>
+          </div>
+        </FadeIn>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          {LIVE_STATS.map((s, i) => (
+            <FadeIn key={s.l} delay={i * 0.04}>
+              <div
+                className={`h-full rounded-xl border p-4 sm:p-5 bg-white ${
+                  s.warn
+                    ? "border-amber-300 bg-amber-50/40"
+                    : "border-gray-200"
+                }`}
+              >
+                <div
+                  className={`text-2xl sm:text-3xl md:text-4xl font-extrabold tabular-nums leading-none ${
+                    s.warn ? "text-amber-700" : "text-dark"
+                  }`}
+                >
+                  {s.v}
+                </div>
+                <div className="text-[11px] sm:text-xs text-gray-500 uppercase tracking-wider mt-2 leading-snug">
+                  {s.l}
+                </div>
+                <div
+                  className={`text-xs sm:text-sm mt-2 leading-snug ${
+                    s.warn ? "text-amber-800 font-semibold" : "text-gray-500"
+                  }`}
+                >
+                  {s.note}
+                </div>
+              </div>
+            </FadeIn>
+          ))}
+        </div>
+        <FadeIn delay={0.3}>
+          <div className="mt-8 max-w-4xl mx-auto rounded-xl border border-amber-200 bg-amber-50/60 p-5 sm:p-6">
+            <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-amber-700 mb-2">
+              The honest reading
+            </div>
+            <p className="text-sm sm:text-base text-dark leading-relaxed">
+              You have real traffic and real local intent finding you — but{" "}
+              <strong className="text-amber-800">281 organic sessions a month with zero
+              tracked conversions</strong> is a conversion-path problem we can directly
+              address (CVI content + clear calls-to-action + measurable tracking). And your
+              paid program is producing <strong>13 leads at $256 each</strong>; leads aren&apos;t
+              patients, and the real cost-per-patient sits meaningfully higher. We&apos;d run
+              paid leaner and tighter, but your own data confirms paid is a bridge, not a
+              transformation.
+            </p>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
    SECTION 2 — On-site audit (Working / Fixable toggle)
    ============================================================ */
 
@@ -355,11 +441,11 @@ function OnSiteAudit() {
           eyebrow="On-site audit"
           title={
             <>
-              An <span className="text-accent">A-grade foundation</span>, capped by{" "}
+              A <span className="text-accent">strong foundation</span>, capped by{" "}
               fixable hygiene.
             </>
           }
-          subtitle="Grade: B / B−. The good stuff is the hard stuff — speed, content depth, credentials. The gaps are quick to close."
+          subtitle="The good stuff is the hard stuff — speed, content depth, credentials. The gaps below are quick to close."
         />
 
         <FadeIn delay={0.1}>
@@ -906,13 +992,67 @@ function PaidSearch() {
         </FadeIn>
 
         <FadeIn delay={0.15}>
-          <div className="mt-8 max-w-3xl mx-auto">
-            <HonestCallout label="The honest conclusion" tone="amber">
-              Paid search here is a <strong>small, precise CVI-focused bridge</strong> —
-              an estimated <strong>2–5 new patients per month</strong> at a modest budget,
-              a modeled <strong>~$417 cost-per-patient</strong> and a projected{" "}
-              <strong>~4.3× ROAS</strong>. It is <strong>not a volume play</strong>. The real
-              engine is GBP + reviews + Map Pack + organic CVI content.
+          <div className="mt-8 max-w-3xl mx-auto space-y-5">
+            {/* What the current paid program actually produces */}
+            <div className="rounded-2xl border border-amber-300 bg-amber-50 p-5 sm:p-6 md:p-7">
+              <div className="text-[10px] sm:text-xs font-bold tracking-[0.22em] uppercase text-amber-700 mb-3">
+                What your current paid program actually produces
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-amber-900 tabular-nums">
+                    $3,327
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-amber-800 uppercase tracking-wider mt-1">
+                    Spend / mo
+                  </div>
+                </div>
+                <div>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-amber-900 tabular-nums">
+                    13
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-amber-800 uppercase tracking-wider mt-1">
+                    Leads / mo
+                  </div>
+                </div>
+                <div>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-amber-900 tabular-nums">
+                    $256
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-amber-800 uppercase tracking-wider mt-1">
+                    Cost per LEAD
+                  </div>
+                </div>
+                <div>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-amber-900 tabular-nums">
+                    4,972
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-amber-800 uppercase tracking-wider mt-1">
+                    Impressions / mo
+                  </div>
+                </div>
+              </div>
+              <p className="text-sm sm:text-base text-amber-900 leading-relaxed">
+                <strong>Leads aren&apos;t patients.</strong> At a realistic 25–35% lead →
+                booked-patient close rate, those 13 leads translate to roughly{" "}
+                <strong>3–5 patients per month</strong> at a real cost-per-patient of{" "}
+                <strong>$665–$1,109</strong> — meaningfully higher than the $256/lead figure
+                Google Ads reports. Your own 4,972 monthly impressions across the entire vein
+                campaign also confirm the local volume ceiling: there isn&apos;t a bigger
+                campaign hiding in this market.
+              </p>
+            </div>
+
+            {/* What we'd do differently */}
+            <HonestCallout label="What we'd do differently" tone="amber">
+              <strong>Lean and CVI-focused.</strong> We&apos;d run paid tighter — fewer broad
+              treatment terms, more weight on the high-intent CVI cluster, conversion-path
+              cleanup so every lead is tracked all the way to booked appointment. Realistic
+              outcome at a similar budget: same 3–5 patients/mo but lower wasted spend and
+              cleaner attribution. <strong>Paid is a bridge, not a transformation.</strong>
+              {" "}The real engine is reviews + citations + entity consolidation + organic CVI
+              content — and your own conversion-tracking gap (281 organic sessions, 0
+              tracked conversions) is itself one of the biggest fixes in this report.
             </HonestCallout>
           </div>
         </FadeIn>
@@ -1192,9 +1332,11 @@ function RoiCalculator() {
   const [rev, setRev] = useState(1800);
 
   const m = useMemo(() => {
-    const cpc = 4.5;
+    // Grounded in his actual May 2026 paid data:
+    // $3,327 spend / 265 clicks = $12.56 CPC | 13 leads / 265 clicks = 4.91% click→lead
+    const cpc = 12;
     const clicks = spend / cpc;
-    const leads = clicks * 0.04;
+    const leads = clicks * 0.049;
     const consults = leads * 0.45;
     const patients = consults * 0.6;
     const revenue = patients * rev;
@@ -1222,7 +1364,7 @@ function RoiCalculator() {
               <span className="text-accent">See the math.</span>
             </>
           }
-          subtitle="Same model assumptions we used above: blended CPC $4.50, click→lead 4%, lead→consult 45%, consult→patient 60%."
+          subtitle="Grounded in your live May 2026 numbers: blended CPC $12.00 (your actual ~$12.56), click→lead 4.9% (your actual 4.91%), lead→consult 45%, consult→patient 60%. These produce honest, not optimistic, outputs."
         />
 
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
@@ -1644,6 +1786,7 @@ export default function PrevostiClient() {
     <main className="bg-white">
       <Hero />
       <Thesis />
+      <LiveData />
       <OnSiteAudit />
       <OffSiteGap />
       <Competitive />
