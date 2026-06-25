@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Outfit, Source_Serif_4 } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -88,10 +87,12 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans">
         {children}
-        <Script
-          src="https://assets.calendly.com/assets/external/widget.js"
-          strategy="lazyOnload"
-        />
+        {/* Calendly script moved to /get-started only — it was previously
+            loaded on every route, including the homepage where no widget
+            is mounted. Loading it globally caused mobile Safari to
+            allocate the widget runtime + pending iframe for nothing,
+            which contributed to OOM crashes ("A problem repeatedly
+            occurred"). It's now loaded inside GetStartedClient.tsx. */}
       </body>
     </html>
   );
