@@ -449,27 +449,35 @@ function SearchGrowth() {
           {/* Line chart */}
           <FadeIn>
             <div className="lg:col-span-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-4 sm:p-6 md:p-8 h-full">
-              <div className="flex items-baseline justify-between mb-3">
-                <h3 className="text-white font-bold text-sm sm:text-base">Google search clicks / month</h3>
-                <span className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider">Apr–Jun 2026</span>
+              {/* Header — title on its own line, date range as a small tag below */}
+              <div className="mb-5">
+                <h3 className="text-white font-bold text-sm sm:text-base leading-snug">
+                  Google search clicks / month
+                </h3>
+                <span className="inline-block mt-1.5 text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider">
+                  Apr–Jun 2026
+                </span>
               </div>
+
               <div className="h-64 sm:h-72">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={SEARCH_CLICKS} margin={{ top: 20, right: 12, left: 0, bottom: 4 }}>
+                  <LineChart data={SEARCH_CLICKS} margin={{ top: 12, right: 20, left: 8, bottom: 12 }}>
                     <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
                     <XAxis
                       dataKey="month"
                       stroke="rgba(255,255,255,0.5)"
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: 12, fill: "rgba(255,255,255,0.6)" }}
                       axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
                       tickLine={false}
+                      tickMargin={12}
                     />
                     <YAxis
                       stroke="rgba(255,255,255,0.5)"
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: 12, fill: "rgba(255,255,255,0.6)" }}
                       axisLine={false}
                       tickLine={false}
-                      width={32}
+                      width={40}
+                      tickMargin={10}
                     />
                     <Tooltip
                       contentStyle={{
@@ -490,29 +498,32 @@ function SearchGrowth() {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8 pt-4 border-t border-white/10">
-                <div className="min-w-0">
-                  <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tabular-nums whitespace-nowrap">
+
+              {/* Stats — stacked vertically. Each row: big number left, label right.
+                  Solves the multi-breakpoint collision from the 3-column grid. */}
+              <div className="mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-white/10 flex flex-col divide-y divide-white/[0.06]">
+                <div className="flex items-baseline justify-between gap-4 py-3 first:pt-0">
+                  <div className="text-2xl sm:text-3xl font-extrabold text-white tabular-nums leading-none">
                     <CountUp to={10529} />
                   </div>
-                  <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">
+                  <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider text-right">
                     Impressions
                   </div>
                 </div>
-                <div className="min-w-0">
-                  <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tabular-nums whitespace-nowrap">
+                <div className="flex items-baseline justify-between gap-4 py-3">
+                  <div className="text-2xl sm:text-3xl font-extrabold text-white tabular-nums leading-none">
                     <CountUp to={1.3} decimals={1} suffix="%" />
                   </div>
-                  <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">
+                  <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider text-right">
                     Avg CTR
                   </div>
                 </div>
-                <div className="min-w-0">
-                  <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tabular-nums whitespace-nowrap">
+                <div className="flex items-baseline justify-between gap-4 py-3 last:pb-0">
+                  <div className="text-2xl sm:text-3xl font-extrabold text-white tabular-nums leading-none">
                     <CountUp to={133} />
                   </div>
-                  <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">
-                    Total clicks since April
+                  <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider text-right">
+                    Clicks since April
                   </div>
                 </div>
               </div>
