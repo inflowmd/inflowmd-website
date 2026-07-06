@@ -484,6 +484,12 @@ function SearchGrowth() {
                 <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
                   Ranking on page 1 for the term your ideal patients search.
                 </p>
+                <p className="text-accent-light text-xs sm:text-sm leading-relaxed mt-3 pt-3 border-t border-white/10">
+                  On &ldquo;chronic venous insufficiency Marion Ohio,&rdquo; you hold #1
+                  in the map pack, #1 organic, and the AI Overview recommendation
+                  simultaneously — the model we&apos;ll replicate on the higher-volume
+                  varicose vein terms.
+                </p>
               </div>
             </FadeIn>
 
@@ -540,6 +546,75 @@ function SearchGrowth() {
    4B — AI OVERVIEW WIN (VERIFIED JULY 6, 2026)
    ============================================================ */
 
+type AiCell = "yes" | "no" | "kp";
+
+const KEYWORD_ROWS: Array<{
+  kw: string;
+  organic: number;
+  ai: AiCell;
+  map: number | null;
+}> = [
+  { kw: "vein doctor marion ohio", organic: 1, ai: "yes", map: 2 },
+  { kw: "vein specialist marion ohio", organic: 1, ai: "yes", map: 2 },
+  { kw: "vein clinic marion ohio", organic: 1, ai: "yes", map: null },
+  { kw: "vein treatment marion ohio", organic: 1, ai: "no", map: 2 },
+  { kw: "varicose vein treatment marion ohio", organic: 1, ai: "yes", map: 2 },
+  { kw: "vein clinic near me (Marion)", organic: 1, ai: "no", map: 3 },
+  { kw: "varicose veins marion ohio", organic: 1, ai: "yes", map: 3 },
+  { kw: "spider vein treatment marion ohio", organic: 1, ai: "yes", map: 3 },
+  { kw: "chronic venous insufficiency marion ohio", organic: 1, ai: "yes", map: 1 },
+  { kw: "venous insufficiency treatment marion ohio", organic: 1, ai: "yes", map: 1 },
+  { kw: "leg swelling doctor marion ohio", organic: 3, ai: "no", map: null },
+  { kw: "venous ulcer treatment marion ohio", organic: 1, ai: "yes", map: 2 },
+  { kw: "comprehensive vein care marion", organic: 1, ai: "yes", map: null },
+  { kw: "dr datta marion ohio", organic: 1, ai: "kp", map: 1 },
+];
+
+function OrganicCell({ position }: { position: number }) {
+  const isTop = position === 1;
+  return (
+    <span
+      className={`inline-block tabular-nums font-extrabold ${
+        isTop ? "text-accent-light text-base sm:text-lg" : "text-white text-base sm:text-lg"
+      }`}
+    >
+      #{position}
+    </span>
+  );
+}
+
+function AiCellBadge({ v }: { v: AiCell }) {
+  if (v === "yes") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/15 border border-accent/40 text-accent-light text-[10px] sm:text-xs font-bold tracking-[0.14em] uppercase">
+        ✓ Yes
+      </span>
+    );
+  }
+  if (v === "kp") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 text-[10px] sm:text-xs font-bold tracking-[0.14em] uppercase">
+        ★ Knowledge Panel
+      </span>
+    );
+  }
+  return <span className="text-gray-600 text-sm">—</span>;
+}
+
+function MapCell({ position }: { position: number | null }) {
+  if (position === null) return <span className="text-gray-600 text-sm">—</span>;
+  const isTop = position === 1;
+  return (
+    <span
+      className={`inline-block tabular-nums font-bold ${
+        isTop ? "text-accent-light text-base sm:text-lg font-extrabold" : "text-gray-200 text-sm sm:text-base"
+      }`}
+    >
+      #{position}
+    </span>
+  );
+}
+
 function AiOverview() {
   return (
     <section className="bg-dark py-20 sm:py-28 border-y border-white/5 relative overflow-hidden">
@@ -555,80 +630,158 @@ function AiOverview() {
               </span>
             </>
           }
-          subtitle="Real, logged-out searches run from the Marion area this week. This is what patients see today."
         />
 
-        <div className="grid lg:grid-cols-5 gap-6 lg:gap-8 items-stretch">
-          {/* AI Overview quote */}
-          <FadeIn delay={0.05}>
-            <div className="lg:col-span-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-6 sm:p-8 md:p-10 h-full">
-              <div className="flex items-center gap-2 mb-4">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-accent-light">
-                  <path d="M12 2a4 4 0 014 4c0 1.95-2 4-4 7-2-3-4-5.05-4-7a4 4 0 014-4z" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M12 13v9" strokeLinecap="round" />
-                  <path d="M8 18h8" strokeLinecap="round" />
-                </svg>
-                <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent-light">
-                  Google AI Overview · July 2026
-                </span>
+        {/* Intro paragraph */}
+        <FadeIn>
+          <p className="max-w-4xl mx-auto text-center text-white text-base sm:text-lg md:text-xl leading-relaxed mb-10 sm:mb-12">
+            We ran <strong className="text-accent-light">14 clean, logged-out Google
+            searches</strong> from the Marion area today. Your site is the{" "}
+            <strong className="text-accent-light">#1 organic result on 13 of them</strong>.
+            Google&apos;s AI Overview{" "}
+            <strong className="text-accent-light">names you on 10 of them</strong> —
+            describing you as &ldquo;a board-certified surgeon with over 30 years of
+            experience&rdquo; and citing your treatments by name. And on the chronic
+            venous insufficiency terms, you hold a clean sweep:{" "}
+            <strong className="text-accent-light">
+              #1 in the map pack, #1 organic, and the AI recommendation simultaneously.
+            </strong>
+          </p>
+        </FadeIn>
+
+        {/* Summary stats */}
+        <FadeIn delay={0.05}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 sm:mb-12">
+            <div className="rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/[0.10] to-transparent p-5 sm:p-6 text-center">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tabular-nums leading-none">
+                13 <span className="text-gray-500 text-2xl sm:text-3xl">/ 14</span>
               </div>
-              <blockquote className="text-white text-lg sm:text-2xl md:text-3xl font-extrabold leading-[1.25] tracking-tight">
-                <span className="text-accent-light">&ldquo;</span>For specialized vein care in
-                Marion, Ohio, Dr. Subhajit Datta at Comprehensive Vein Care is a{" "}
-                <span className="text-accent-light">highly recommended option</span>.
-                <span className="text-accent-light">&rdquo;</span>
-              </blockquote>
-              <div className="mt-6 pt-5 border-t border-white/10 text-xs sm:text-sm text-gray-400">
-                Returned for the queries{" "}
-                <span className="text-gray-200 font-semibold">&ldquo;vein specialist Marion Ohio&rdquo;</span>{" "}
-                and{" "}
-                <span className="text-gray-200 font-semibold">&ldquo;vein doctor Marion Ohio&rdquo;</span>{" "}
-                — with your address and phone number surfaced directly in the answer.
+              <div className="text-[10px] sm:text-xs text-accent-light uppercase tracking-[0.2em] font-bold mt-3">
+                #1 organic result
               </div>
             </div>
-          </FadeIn>
-
-          {/* Organic #1 proof */}
-          <div className="lg:col-span-2 flex flex-col gap-4">
-            <FadeIn delay={0.1}>
-              <div className="rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/[0.12] to-transparent p-6 sm:p-7 h-full flex flex-col justify-center">
-                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent-light mb-3">
-                  Organic result
-                </div>
-                <div className="text-5xl sm:text-6xl font-extrabold text-white tabular-nums leading-none mb-2">
-                  #1
-                </div>
-                <p className="text-white text-sm sm:text-base leading-relaxed mt-3">
-                  Your website holds the <strong>#1 organic result</strong> — with your
-                  photo — on every vein-related search we tested in Marion Ohio.
-                </p>
+            <div className="rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/[0.10] to-transparent p-5 sm:p-6 text-center">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tabular-nums leading-none">
+                10 <span className="text-gray-500 text-2xl sm:text-3xl">/ 14</span>
               </div>
-            </FadeIn>
-
-            <FadeIn delay={0.15}>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
-                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-400 mb-2">
-                  Ranking above
-                </div>
-                <ul className="space-y-1.5 text-white text-sm sm:text-base font-semibold">
-                  <li className="flex items-center gap-2">
-                    <span className="text-accent-light">→</span> Healthgrades
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-accent-light">→</span> OhioHealth
-                  </li>
-                </ul>
-                <p className="text-gray-500 text-xs mt-3 leading-relaxed">
-                  Queries tested: vein treatment, varicose vein treatment, vein specialist,
-                  vein doctor — all in Marion Ohio.
-                </p>
+              <div className="text-[10px] sm:text-xs text-accent-light uppercase tracking-[0.2em] font-bold mt-3">
+                Named by Google&apos;s AI
               </div>
-            </FadeIn>
+            </div>
+            <div className="rounded-2xl border-2 border-emerald-400/40 bg-gradient-to-br from-emerald-500/[0.10] to-transparent p-5 sm:p-6 text-center">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-none">
+                2 <span className="text-gray-500 text-2xl sm:text-3xl">clean sweeps</span>
+              </div>
+              <div className="text-[10px] sm:text-xs text-emerald-300 uppercase tracking-[0.2em] font-bold mt-3">
+                #1 everywhere at once
+              </div>
+            </div>
           </div>
-        </div>
+        </FadeIn>
 
-        <FadeIn delay={0.2}>
-          <div className="mt-10 max-w-3xl mx-auto text-center">
+        {/* AI Overview quote card — full width, generous padding */}
+        <FadeIn delay={0.1}>
+          <div className="rounded-2xl border border-accent/30 bg-gradient-to-br from-accent/[0.08] via-white/[0.02] to-transparent backdrop-blur p-6 sm:p-10 md:p-14 mb-10 sm:mb-12">
+            <div className="flex items-center gap-2 mb-6 sm:mb-8">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-accent-light">
+                <path d="M12 2a4 4 0 014 4c0 1.95-2 4-4 7-2-3-4-5.05-4-7a4 4 0 014-4z" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12 13v9" strokeLinecap="round" />
+                <path d="M8 18h8" strokeLinecap="round" />
+              </svg>
+              <span className="text-[10px] sm:text-xs font-bold tracking-[0.22em] uppercase text-accent-light">
+                Google AI Overview · July 2026
+              </span>
+            </div>
+            <blockquote className="text-white text-xl sm:text-3xl md:text-4xl lg:text-[2.75rem] font-extrabold leading-[1.2] tracking-tight max-w-5xl">
+              <span className="text-accent-light">&ldquo;</span>
+              For specialized vein care in Marion, Ohio, Dr. Subhajit Datta at
+              Comprehensive Vein Care is a{" "}
+              <span className="text-accent-light">highly recommended option</span>.
+              <span className="text-accent-light">&rdquo;</span>
+            </blockquote>
+            <div className="mt-8 sm:mt-10 pt-6 border-t border-white/10 text-sm sm:text-base text-gray-400 leading-relaxed">
+              Returned for the queries{" "}
+              <span className="text-gray-200 font-semibold">&ldquo;vein specialist Marion Ohio&rdquo;</span>{" "}
+              and{" "}
+              <span className="text-gray-200 font-semibold">&ldquo;vein doctor Marion Ohio&rdquo;</span>{" "}
+              — with your address and phone number surfaced directly in the answer.
+            </div>
+          </div>
+        </FadeIn>
+
+        {/* Keyword scoreboard */}
+        <FadeIn delay={0.14}>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur overflow-hidden">
+            <div className="p-4 sm:p-5 md:p-6 border-b border-white/10 flex items-center justify-between gap-3 flex-wrap">
+              <h3 className="text-white font-bold text-base sm:text-lg">
+                14 live Google searches
+              </h3>
+              <span className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-[0.18em]">
+                Marion, OH · logged out · July 6, 2026
+              </span>
+            </div>
+
+            {/* Header row — desktop only */}
+            <div className="hidden md:grid grid-cols-[minmax(0,3fr)_minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] gap-4 px-6 py-3 bg-white/[0.03] border-b border-white/10 text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500">
+              <div>Keyword</div>
+              <div className="text-center">Organic</div>
+              <div className="text-center">AI Overview</div>
+              <div className="text-center">Map pack</div>
+            </div>
+
+            {/* Rows */}
+            <div>
+              {KEYWORD_ROWS.map((r, i) => (
+                <div
+                  key={r.kw}
+                  className={`${
+                    i !== KEYWORD_ROWS.length - 1 ? "border-b border-white/[0.05]" : ""
+                  } md:grid md:grid-cols-[minmax(0,3fr)_minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] md:gap-4 md:items-center px-4 sm:px-6 py-3 sm:py-4`}
+                >
+                  {/* Keyword */}
+                  <div className="text-white text-sm sm:text-base font-semibold break-words">
+                    {r.kw}
+                  </div>
+                  {/* Mobile: chip row underneath the keyword */}
+                  <div className="md:hidden mt-2 flex flex-wrap items-center gap-3 text-xs">
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-[9px] text-gray-500 uppercase tracking-wider">Organic</span>
+                      <OrganicCell position={r.organic} />
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-[9px] text-gray-500 uppercase tracking-wider">AI</span>
+                      <AiCellBadge v={r.ai} />
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-[9px] text-gray-500 uppercase tracking-wider">Map</span>
+                      <MapCell position={r.map} />
+                    </span>
+                  </div>
+                  {/* Desktop columns */}
+                  <div className="hidden md:block text-center">
+                    <OrganicCell position={r.organic} />
+                  </div>
+                  <div className="hidden md:block text-center">
+                    <AiCellBadge v={r.ai} />
+                  </div>
+                  <div className="hidden md:block text-center">
+                    <MapCell position={r.map} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={0.18}>
+          <p className="mt-4 text-[10px] sm:text-xs text-gray-500 italic text-center leading-relaxed">
+            14 live Google searches, Marion OH search area, logged out — July 6, 2026.
+          </p>
+        </FadeIn>
+
+        {/* Closing line */}
+        <FadeIn delay={0.22}>
+          <div className="mt-10 sm:mt-12 max-w-3xl mx-auto text-center">
             <p className="text-white text-base sm:text-lg md:text-xl leading-relaxed font-medium">
               This is the new front door of patient search —{" "}
               <span className="bg-gradient-to-r from-accent-light to-white bg-clip-text text-transparent font-extrabold">
@@ -878,14 +1031,16 @@ function MarketPosition() {
                   Vascular, a 10-location vein chain spanning the Columbus and Cleveland
                   markets — has opened at{" "}
                   <strong className="text-white">125 Executive Dr</strong> and now appears
-                  in Marion&apos;s map results. Despite having just{" "}
-                  <strong className="text-white">1 Google review at this location to your
-                  10</strong>, it already appears{" "}
-                  <strong className="text-red-300">above you in the local pack</strong> on
-                  vein searches, because its business name says{" "}
-                  &ldquo;Marion Vein Center&rdquo; while your profile still says{" "}
-                  &ldquo;SD Cardiothoracic Services Inc.&rdquo; This chain runs aggressive
-                  city-page SEO and free-screening funnels in every market it enters.{" "}
+                  in Marion&apos;s map results.{" "}
+                  <strong className="text-red-300">
+                    In today&apos;s testing it appeared above you in the map results on 8
+                    of 14 vein searches
+                  </strong>{" "}
+                  — despite having 1 Google review to your 10 — because its business name
+                  says &ldquo;Marion Vein Center&rdquo; while your profile still says
+                  {" "}&ldquo;SD Cardiothoracic Services Inc.&rdquo; This chain runs
+                  aggressive city-page SEO and free-screening funnels in every market it
+                  enters.{" "}
                   <strong className="text-white">
                     The window to lock in your home-field advantage is now.
                   </strong>
@@ -939,9 +1094,9 @@ const PLAN_ITEMS: PlanItem[] = [
     status: "next",
   },
   {
-    title: "Google Business Profile alignment + citation cleanup",
+    title: "Google Business Profile alignment + citation cleanup — now urgent",
     body:
-      "Consistent name, address, and phone across every major directory. Removes contradictions Google penalizes — now urgent: the new chain location is outranking you in map results on name relevance alone.",
+      "Today's testing found two problems this fixes: the new chain location outranks you in map results on name relevance alone, and Google's AI is citing an outdated address (1050 Delaware Ave) from stale directory listings. Consistent name, address, and profile data across the web corrects both.",
     status: "next",
   },
   {
