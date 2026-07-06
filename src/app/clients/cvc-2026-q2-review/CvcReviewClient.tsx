@@ -1080,23 +1080,23 @@ type PlanItem = {
 
 const PLAN_ITEMS: PlanItem[] = [
   {
-    title: "Priority #1 — Close the reviews gap",
+    title: "Priority #1 — The Next.js rebuild",
     body:
-      "Your competitors carry up to 86+ Google reviews; you have 10. This is the single highest-impact lever for local ranking and call conversion. This month we're relaunching your review-request system with a done-for-you workflow so requests go out consistently after every visit — goal: 30+ total reviews (from 10 today) in 90 days.",
+      "The single highest-impact move. Rebuild your site on our modern Next.js platform: sub-1-second mobile loads, medical structured data (MedicalClinic, Physician, FAQ schema) that AI engines read natively, and every page indexed by Google. This is the technical foundation that locks in your AI Overview lead, protects your #1 organic results as the chain competes for the map pack, and puts every ranking gain we make on top of an architecture that can hold it. Detail in “Removing the ceiling” below.",
     status: "next",
     accent: true,
+  },
+  {
+    title: "Close the reviews gap",
+    body:
+      "Your competitors carry up to 86+ Google reviews; you have 10. A high-impact lever for local ranking and call conversion. This month we're relaunching your review-request system with a done-for-you workflow so requests go out consistently after every visit — goal: 30+ total reviews (from 10 today) in 90 days.",
+    status: "next",
     priority: true,
   },
   {
     title: "Push the “heavy legs” article to page 1",
     body:
       "4,451 impressions currently waiting at position ~24 — our next content move targets page 1.",
-    status: "next",
-  },
-  {
-    title: "Google Business Profile alignment + citation cleanup — now urgent",
-    body:
-      "Today's testing found two problems this fixes: the new chain location outranks you in map results on name relevance alone, and Google's AI is citing an outdated address (1050 Delaware Ave) from stale directory listings. Consistent name, address, and profile data across the web corrects both.",
     status: "next",
   },
   {
