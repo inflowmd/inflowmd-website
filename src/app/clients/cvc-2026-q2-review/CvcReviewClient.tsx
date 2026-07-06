@@ -509,13 +509,135 @@ function SearchGrowth() {
           </div>
         </div>
 
-        <FadeIn delay={0.15}>
-          <p className="max-w-4xl mx-auto text-center text-xs sm:text-sm text-gray-500 leading-relaxed mt-8 italic">
+        <FadeIn delay={0.14}>
+          <div className="mt-8 max-w-4xl mx-auto rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/[0.08] to-transparent p-5 sm:p-6">
+            <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent-light mb-2">
+              Reading the position numbers
+            </div>
+            <p className="text-white text-sm sm:text-base leading-relaxed">
+              Your average position across ALL queries includes national blog-traffic
+              searches. On the local searches that produce patients — vein doctor, vein
+              specialist, vein treatment in Marion —{" "}
+              <strong className="text-accent-light">you hold the #1 organic result today.</strong>
+            </p>
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={0.18}>
+          <p className="max-w-4xl mx-auto text-center text-xs sm:text-sm text-gray-500 leading-relaxed mt-6 italic">
             Note: measurement tools (Google Search Console) were installed in April 2026 as
             part of the service upgrade — this is the first quarter with true search-visibility
             data. Prior-year server logs showed flat traffic with no growth trend under the
             previous setup.
           </p>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   4B — AI OVERVIEW WIN (VERIFIED JULY 6, 2026)
+   ============================================================ */
+
+function AiOverview() {
+  return (
+    <section className="bg-dark py-20 sm:py-28 border-y border-white/5 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(45,108,223,0.10)_0%,_transparent_70%)]" />
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
+        <SectionHeading
+          eyebrow="Verified July 6, 2026 — live search results"
+          title={
+            <>
+              When patients ask Google&apos;s AI,{" "}
+              <span className="bg-gradient-to-r from-accent-light to-white bg-clip-text text-transparent">
+                the answer is you.
+              </span>
+            </>
+          }
+          subtitle="Real, logged-out searches run from the Marion area this week. This is what patients see today."
+        />
+
+        <div className="grid lg:grid-cols-5 gap-6 lg:gap-8 items-stretch">
+          {/* AI Overview quote */}
+          <FadeIn delay={0.05}>
+            <div className="lg:col-span-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-6 sm:p-8 md:p-10 h-full">
+              <div className="flex items-center gap-2 mb-4">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-accent-light">
+                  <path d="M12 2a4 4 0 014 4c0 1.95-2 4-4 7-2-3-4-5.05-4-7a4 4 0 014-4z" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M12 13v9" strokeLinecap="round" />
+                  <path d="M8 18h8" strokeLinecap="round" />
+                </svg>
+                <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent-light">
+                  Google AI Overview · July 2026
+                </span>
+              </div>
+              <blockquote className="text-white text-lg sm:text-2xl md:text-3xl font-extrabold leading-[1.25] tracking-tight">
+                <span className="text-accent-light">&ldquo;</span>For specialized vein care in
+                Marion, Ohio, Dr. Subhajit Datta at Comprehensive Vein Care is a{" "}
+                <span className="text-accent-light">highly recommended option</span>.
+                <span className="text-accent-light">&rdquo;</span>
+              </blockquote>
+              <div className="mt-6 pt-5 border-t border-white/10 text-xs sm:text-sm text-gray-400">
+                Returned for the queries{" "}
+                <span className="text-gray-200 font-semibold">&ldquo;vein specialist Marion Ohio&rdquo;</span>{" "}
+                and{" "}
+                <span className="text-gray-200 font-semibold">&ldquo;vein doctor Marion Ohio&rdquo;</span>{" "}
+                — with your address and phone number surfaced directly in the answer.
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* Organic #1 proof */}
+          <div className="lg:col-span-2 flex flex-col gap-4">
+            <FadeIn delay={0.1}>
+              <div className="rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/[0.12] to-transparent p-6 sm:p-7 h-full flex flex-col justify-center">
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent-light mb-3">
+                  Organic result
+                </div>
+                <div className="text-5xl sm:text-6xl font-extrabold text-white tabular-nums leading-none mb-2">
+                  #1
+                </div>
+                <p className="text-white text-sm sm:text-base leading-relaxed mt-3">
+                  Your website holds the <strong>#1 organic result</strong> — with your
+                  photo — on every vein-related search we tested in Marion Ohio.
+                </p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.15}>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-400 mb-2">
+                  Ranking above
+                </div>
+                <ul className="space-y-1.5 text-white text-sm sm:text-base font-semibold">
+                  <li className="flex items-center gap-2">
+                    <span className="text-accent-light">→</span> Healthgrades
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-accent-light">→</span> OhioHealth
+                  </li>
+                </ul>
+                <p className="text-gray-500 text-xs mt-3 leading-relaxed">
+                  Queries tested: vein treatment, varicose vein treatment, vein specialist,
+                  vein doctor — all in Marion Ohio.
+                </p>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+
+        <FadeIn delay={0.2}>
+          <div className="mt-10 max-w-3xl mx-auto text-center">
+            <p className="text-white text-base sm:text-lg md:text-xl leading-relaxed font-medium">
+              This is the new front door of patient search —{" "}
+              <span className="bg-gradient-to-r from-accent-light to-white bg-clip-text text-transparent font-extrabold">
+                and you&apos;re already winning it.
+              </span>{" "}
+              The rebuild&apos;s medical structured data is how we lock this in and extend
+              it as AI search grows.
+            </p>
+          </div>
         </FadeIn>
       </div>
     </section>
@@ -691,18 +813,18 @@ function MarketPosition() {
               for now.
             </>
           }
-          subtitle="You are the only dedicated vein clinic in Marion County. That advantage is real, but it isn't guaranteed to last — and the review gap is the fastest way we lose it."
+          subtitle="You are the established, dedicated vein practice in Marion — with the credentials, the in-office procedure suite, and a first-mover lead a new entrant can't match."
         />
 
         {/* Advantage stats */}
         <FadeIn>
           <div className="grid sm:grid-cols-3 gap-4 mb-8">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
-              <div className="text-3xl sm:text-4xl font-extrabold text-white tabular-nums">
-                <CountUp to={65000} />
+            <div className="rounded-2xl border-2 border-accent/40 bg-accent/[0.06] p-5 sm:p-6 sm:col-span-3 lg:col-span-1">
+              <div className="text-xs sm:text-sm font-extrabold text-white tracking-[0.16em] uppercase leading-snug">
+                The Established Vein Practice
               </div>
-              <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider mt-2">
-                Marion County
+              <div className="text-[10px] sm:text-xs text-accent-light uppercase tracking-wider mt-2">
+                In Marion County
               </div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
@@ -713,11 +835,11 @@ function MarketPosition() {
                 Effective catchment (Morrow, Wyandot, Crawford, Hardin fringes)
               </div>
             </div>
-            <div className="rounded-2xl border-2 border-accent/40 bg-accent/[0.06] p-5 sm:p-6">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
               <div className="text-3xl sm:text-4xl font-extrabold text-white tabular-nums">
                 8,000–13,000
               </div>
-              <div className="text-[10px] sm:text-xs text-accent-light uppercase tracking-wider mt-2">
+              <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider mt-2">
                 Adults w/ symptomatic CVI in catchment
               </div>
             </div>
@@ -745,7 +867,30 @@ function MarketPosition() {
             <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-amber-300 mb-3">
               The threats we&apos;re watching
             </div>
-            <ul className="space-y-3 text-sm sm:text-base text-amber-100 leading-relaxed">
+            <ul className="space-y-4 text-sm sm:text-base text-amber-100 leading-relaxed">
+              <li className="flex gap-3">
+                <span className="text-red-400 mt-0.5 font-bold">▲</span>
+                <span>
+                  <strong className="text-white">
+                    The chain has arrived in Marion.
+                  </strong>
+                  {" "}&ldquo;Marion Vein Center&rdquo; — a new location of Ohio Vein &amp;
+                  Vascular, a 10-location vein chain spanning the Columbus and Cleveland
+                  markets — has opened at{" "}
+                  <strong className="text-white">125 Executive Dr</strong> and now appears
+                  in Marion&apos;s map results. Despite having just{" "}
+                  <strong className="text-white">1 Google review at this location to your
+                  10</strong>, it already appears{" "}
+                  <strong className="text-red-300">above you in the local pack</strong> on
+                  vein searches, because its business name says{" "}
+                  &ldquo;Marion Vein Center&rdquo; while your profile still says{" "}
+                  &ldquo;SD Cardiothoracic Services Inc.&rdquo; This chain runs aggressive
+                  city-page SEO and free-screening funnels in every market it enters.{" "}
+                  <strong className="text-white">
+                    The window to lock in your home-field advantage is now.
+                  </strong>
+                </span>
+              </li>
               <li className="flex gap-3">
                 <span className="text-amber-400 mt-0.5">•</span>
                 <span>
@@ -754,15 +899,6 @@ function MarketPosition() {
                   </strong>
                   {" "}— opened in 2024. Their PCP-referral requirement slows them but
                   doesn&apos;t stop them.
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-amber-400 mt-0.5">•</span>
-                <span>
-                  <strong className="text-white">Columbus vein chains</strong>
-                  {" "}(Center for Vein Restoration, Ohio Vein &amp; Vascular) are running
-                  {" "}&ldquo;free screening&rdquo; funnels at the southern edge of your
-                  catchment.
                 </span>
               </li>
             </ul>
@@ -805,7 +941,7 @@ const PLAN_ITEMS: PlanItem[] = [
   {
     title: "Google Business Profile alignment + citation cleanup",
     body:
-      "Consistent name, address, and phone across every major directory. Removes contradictions Google penalizes.",
+      "Consistent name, address, and phone across every major directory. Removes contradictions Google penalizes — now urgent: the new chain location is outranking you in map results on name relevance alone.",
     status: "next",
   },
   {
@@ -1222,6 +1358,7 @@ export default function CvcReviewClient() {
       <HeadlineMetrics />
       <PatientActionsChart />
       <SearchGrowth />
+      <AiOverview />
       <ROI />
       <MarketPosition />
       <NinetyDayPlan />
