@@ -152,7 +152,7 @@ function Hero() {
           </h1>
         </FadeIn>
         <FadeIn delay={0.28}>
-          <p className="text-gray-400 text-sm sm:text-base md:text-lg max-w-2xl leading-relaxed">
+          <p className="text-gray-300 text-base sm:text-lg md:text-xl max-w-2xl leading-relaxed font-medium">
             Dr. Subhajit Datta · Marion, Ohio · Prepared July 2026 by InflowMD
           </p>
         </FadeIn>
@@ -209,17 +209,17 @@ function Baseline() {
                   <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
                   <XAxis
                     dataKey="month"
-                    stroke="rgba(255,255,255,0.3)"
-                    tick={{ fontSize: 11 }}
-                    axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
+                    stroke="rgba(255,255,255,0.55)"
+                    tick={{ fontSize: 12, fill: "rgba(255,255,255,0.6)" }}
+                    axisLine={{ stroke: "rgba(255,255,255,0.15)" }}
                     tickLine={false}
                   />
                   <YAxis
-                    stroke="rgba(255,255,255,0.3)"
-                    tick={{ fontSize: 11 }}
+                    stroke="rgba(255,255,255,0.55)"
+                    tick={{ fontSize: 12, fill: "rgba(255,255,255,0.6)" }}
                     axisLine={false}
                     tickLine={false}
-                    width={40}
+                    width={44}
                   />
                   <Tooltip
                     contentStyle={{
@@ -281,7 +281,7 @@ const HEADLINE_METRICS = [
     note: "Feb → Jun",
     special: "pct",
   },
-  { v: 33, l: "Google search clicks", note: "in June", special: "pct" },
+  { v: 33, l: "Click growth in June", note: "vs. May", special: "pct-plus" },
   {
     v: 1,
     l: "Google position",
@@ -301,8 +301,11 @@ function HeadlineMetrics() {
               <div className="h-full rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-5 sm:p-6">
                 <div className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-none tabular-nums">
                   {m.special === "hash" && <span className="text-accent-light">#</span>}
+                  {m.special === "pct-plus" && <span className="text-accent-light">+</span>}
                   <CountUp to={m.v} />
-                  {m.special === "pct" && <span className="text-accent-light">%</span>}
+                  {(m.special === "pct" || m.special === "pct-plus") && (
+                    <span className="text-accent-light">%</span>
+                  )}
                   {m.special === "pct" && m.v === 120 && (
                     <span className="text-accent-light text-2xl sm:text-3xl ml-1">↑</span>
                   )}
@@ -416,8 +419,7 @@ function PatientActionsChart() {
               JUNE WAS YOUR BEST MONTH ON RECORD.
             </p>
             <p className="text-gray-300 text-sm sm:text-base mt-2 leading-relaxed">
-              128 total patient actions — 54% more than the previous month, and 32% higher
-              than the previous best.
+              128 total patient actions — more than double May, and a new all-time high.
             </p>
           </div>
         </FadeIn>
@@ -496,25 +498,25 @@ function SearchGrowth() {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-3 pt-4 border-t border-white/10">
-                <div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-white tabular-nums">
+              <div className="mt-4 grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8 pt-4 border-t border-white/10">
+                <div className="min-w-0">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tabular-nums whitespace-nowrap">
                     <CountUp to={10529} />
                   </div>
                   <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">
                     Impressions
                   </div>
                 </div>
-                <div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-white tabular-nums">
+                <div className="min-w-0">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tabular-nums whitespace-nowrap">
                     <CountUp to={1.3} decimals={1} suffix="%" />
                   </div>
                   <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">
                     Avg CTR
                   </div>
                 </div>
-                <div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-white tabular-nums">
+                <div className="min-w-0">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tabular-nums whitespace-nowrap">
                     <CountUp to={133} />
                   </div>
                   <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">
@@ -845,26 +847,31 @@ const PLAN_ITEMS = [
     title: "Automated review generation system",
     body:
       "Post-visit SMS/email requests. Target 4–8 new reviews per month with a 90-day goal of 30+ new reviews.",
+    status: "next" as const,
     accent: true,
   },
   {
     title: "Push the “heavy legs” article to page 1",
     body:
       "4,451 impressions currently waiting at position 24. This is the highest-signal keyword ready to move.",
+    status: "next" as const,
   },
   {
     title: "Google Business Profile alignment + citation cleanup",
     body:
       "Consistent name, address, and phone across every major directory. Removes contradictions Google penalizes.",
+    status: "next" as const,
   },
   {
     title: "Patient-conversion tracking now live",
     body:
       "From this month forward we measure actual patient inquiries — calls and form fills — not just traffic. Every marketing dollar becomes attributable.",
+    status: "done" as const,
   },
   {
     title: "Full technical audit completed this week",
     body: "All findings fixed same-day. No open items.",
+    status: "done" as const,
   },
 ];
 
@@ -882,35 +889,51 @@ function NinetyDayPlan() {
           subtitle="Five moves. Each one moves the needle on a specific metric above."
         />
         <div className="space-y-4">
-          {PLAN_ITEMS.map((p, i) => (
-            <FadeIn key={p.title} delay={i * 0.06}>
-              <div
-                className={`rounded-2xl p-5 sm:p-6 flex items-start gap-4 sm:gap-5 border ${
-                  p.accent
-                    ? "border-accent/40 bg-gradient-to-br from-accent/[0.10] to-transparent"
-                    : "border-white/10 bg-white/[0.03]"
-                }`}
-              >
+          {PLAN_ITEMS.map((p, i) => {
+            const isDone = p.status === "done";
+            return (
+              <FadeIn key={p.title} delay={i * 0.06}>
                 <div
-                  className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm sm:text-base font-extrabold ${
+                  className={`rounded-2xl p-5 sm:p-6 flex items-start gap-4 sm:gap-5 border ${
                     p.accent
-                      ? "bg-accent text-white"
-                      : "bg-white/10 text-white"
+                      ? "border-accent/40 bg-gradient-to-br from-accent/[0.10] to-transparent"
+                      : isDone
+                        ? "border-emerald-400/25 bg-emerald-500/[0.04]"
+                        : "border-white/10 bg-white/[0.03]"
                   }`}
                 >
-                  ✓
+                  <div
+                    className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm sm:text-base font-extrabold ${
+                      isDone
+                        ? "bg-emerald-500/20 text-emerald-300 border-2 border-emerald-400/60"
+                        : "bg-transparent text-accent-light border-2 border-accent/50"
+                    }`}
+                  >
+                    {isDone ? "✓" : "○"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <h3 className="text-white font-extrabold text-base sm:text-lg leading-snug">
+                        {p.title}
+                      </h3>
+                      <span
+                        className={`text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase px-2 py-0.5 rounded-full ${
+                          isDone
+                            ? "bg-emerald-500/15 text-emerald-300 border border-emerald-400/40"
+                            : "bg-accent/15 text-accent-light border border-accent/40"
+                        }`}
+                      >
+                        {isDone ? "Done" : "Next"}
+                      </span>
+                    </div>
+                    <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
+                      {p.body}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-white font-extrabold text-base sm:text-lg mb-1.5 leading-snug">
-                    {p.title}
-                  </h3>
-                  <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
-                    {p.body}
-                  </p>
-                </div>
-              </div>
-            </FadeIn>
-          ))}
+              </FadeIn>
+            );
+          })}
         </div>
       </div>
     </section>
