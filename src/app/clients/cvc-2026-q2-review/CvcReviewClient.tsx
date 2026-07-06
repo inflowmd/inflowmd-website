@@ -445,10 +445,10 @@ function SearchGrowth() {
           subtitle="Click growth accelerating into June — with a much bigger opportunity queued up right behind it."
         />
 
-        <div className="grid lg:grid-cols-5 gap-6 lg:gap-8">
-          {/* Line chart */}
+        <div className="space-y-6 sm:space-y-8">
+          {/* Line chart — full width */}
           <FadeIn>
-            <div className="lg:col-span-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-4 sm:p-6 md:p-8 h-full">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-4 sm:p-6 md:p-8">
               {/* Header — title on its own line, date range as a small tag below */}
               <div className="mb-5">
                 <h3 className="text-white font-bold text-sm sm:text-base leading-snug">
@@ -459,81 +459,86 @@ function SearchGrowth() {
                 </span>
               </div>
 
-              <div className="h-64 sm:h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={SEARCH_CLICKS} margin={{ top: 12, right: 20, left: 8, bottom: 12 }}>
-                    <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
-                    <XAxis
-                      dataKey="month"
-                      stroke="rgba(255,255,255,0.5)"
-                      tick={{ fontSize: 12, fill: "rgba(255,255,255,0.6)" }}
-                      axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
-                      tickLine={false}
-                      tickMargin={12}
-                    />
-                    <YAxis
-                      stroke="rgba(255,255,255,0.5)"
-                      tick={{ fontSize: 12, fill: "rgba(255,255,255,0.6)" }}
-                      axisLine={false}
-                      tickLine={false}
-                      width={40}
-                      tickMargin={10}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        background: "rgba(11,22,51,0.95)",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        borderRadius: "10px",
-                        color: "#fff",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="clicks"
-                      stroke="#4F8EF7"
-                      strokeWidth={3}
-                      dot={{ fill: "#4F8EF7", r: 6, strokeWidth: 2, stroke: "#0b1633" }}
-                      activeDot={{ r: 8 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+              {/* Two-column layout on desktop: BIG chart on the left, stats on the right.
+                  Stacks vertically on mobile. Chart gets ~2/3 of the card at lg+, so at
+                  the full container width (max-w-6xl) the chart itself is ~700-800px
+                  wide — more than half the viewport at any reasonable desktop size. */}
+              <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 items-center">
+                <div className="lg:col-span-2 h-72 sm:h-80 lg:h-96">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={SEARCH_CLICKS} margin={{ top: 12, right: 20, left: 8, bottom: 12 }}>
+                      <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+                      <XAxis
+                        dataKey="month"
+                        stroke="rgba(255,255,255,0.5)"
+                        tick={{ fontSize: 13, fill: "rgba(255,255,255,0.6)" }}
+                        axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                        tickLine={false}
+                        tickMargin={12}
+                      />
+                      <YAxis
+                        stroke="rgba(255,255,255,0.5)"
+                        tick={{ fontSize: 12, fill: "rgba(255,255,255,0.6)" }}
+                        axisLine={false}
+                        tickLine={false}
+                        width={44}
+                        tickMargin={10}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: "rgba(11,22,51,0.95)",
+                          border: "1px solid rgba(255,255,255,0.15)",
+                          borderRadius: "10px",
+                          color: "#fff",
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="clicks"
+                        stroke="#4F8EF7"
+                        strokeWidth={3}
+                        dot={{ fill: "#4F8EF7", r: 6, strokeWidth: 2, stroke: "#0b1633" }}
+                        activeDot={{ r: 8 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
 
-              {/* Stats — stacked vertically. Each row: big number left, label right.
-                  Solves the multi-breakpoint collision from the 3-column grid. */}
-              <div className="mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-white/10 flex flex-col divide-y divide-white/[0.06]">
-                <div className="flex items-baseline justify-between gap-4 py-3 first:pt-0">
-                  <div className="text-2xl sm:text-3xl font-extrabold text-white tabular-nums leading-none">
-                    <CountUp to={10529} />
+                {/* Stats column — vertical stack, no collisions at any breakpoint */}
+                <div className="flex flex-col divide-y divide-white/[0.06] lg:pl-6 lg:border-l lg:border-white/10 lg:divide-y-0 lg:space-y-6">
+                  <div className="flex items-baseline justify-between gap-4 py-3 lg:py-0 first:pt-0">
+                    <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tabular-nums leading-none">
+                      <CountUp to={10529} />
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider text-right">
+                      Impressions
+                    </div>
                   </div>
-                  <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider text-right">
-                    Impressions
+                  <div className="flex items-baseline justify-between gap-4 py-3 lg:py-0">
+                    <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tabular-nums leading-none">
+                      <CountUp to={1.3} decimals={1} suffix="%" />
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider text-right">
+                      Avg CTR
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-baseline justify-between gap-4 py-3">
-                  <div className="text-2xl sm:text-3xl font-extrabold text-white tabular-nums leading-none">
-                    <CountUp to={1.3} decimals={1} suffix="%" />
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider text-right">
-                    Avg CTR
-                  </div>
-                </div>
-                <div className="flex items-baseline justify-between gap-4 py-3 last:pb-0">
-                  <div className="text-2xl sm:text-3xl font-extrabold text-white tabular-nums leading-none">
-                    <CountUp to={133} />
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider text-right">
-                    Clicks since April
+                  <div className="flex items-baseline justify-between gap-4 py-3 lg:py-0 last:pb-0">
+                    <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tabular-nums leading-none">
+                      <CountUp to={133} />
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider text-right">
+                      Clicks since April
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </FadeIn>
 
-          {/* Highlight cards */}
-          <div className="lg:col-span-2 space-y-4">
+          {/* Highlight cards — 3 across on desktop, stacked on mobile */}
+          <div className="grid md:grid-cols-3 gap-4">
             <FadeIn delay={0.08}>
-              <div className="rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/[0.12] to-transparent p-5 sm:p-6">
+              <div className="rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/[0.12] to-transparent p-5 sm:p-6 h-full">
                 <div className="flex items-baseline justify-between gap-3 mb-2">
                   <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent-light">
                     Position
@@ -552,7 +557,7 @@ function SearchGrowth() {
             </FadeIn>
 
             <FadeIn delay={0.14}>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6 h-full">
                 <div className="flex items-baseline justify-between gap-3 mb-2">
                   <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-400">
                     Position
@@ -571,7 +576,7 @@ function SearchGrowth() {
             </FadeIn>
 
             <FadeIn delay={0.2}>
-              <div className="rounded-2xl border-2 border-amber-500/40 bg-amber-500/[0.06] p-5 sm:p-6">
+              <div className="rounded-2xl border-2 border-amber-500/40 bg-amber-500/[0.06] p-5 sm:p-6 h-full">
                 <div className="flex items-baseline justify-between gap-3 mb-2">
                   <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-amber-300">
                     Impressions
