@@ -1,8 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
-import FadeIn from "@/components/FadeIn";
 import {
   BarChart,
   Bar,
@@ -15,6 +12,25 @@ import {
   Line,
   Legend,
 } from "recharts";
+
+/**
+ * Local FadeIn — a plain passthrough (no animation) for this client report.
+ * Overrides the global FadeIn to eliminate any chance of headers or content
+ * sitting at low opacity during scroll on the phone this is being read on.
+ * The trade-off: no scroll-reveal polish. The gain: everything is always
+ * visible and never resets.
+ */
+function FadeIn({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  direction?: "up" | "down" | "left" | "right";
+  className?: string;
+}) {
+  return <div className={className}>{children}</div>;
+}
 
 /* ============================================================
    Shared atoms
@@ -64,45 +80,33 @@ function SectionHeading({
   );
 }
 
+/**
+ * CountUp — renders the final value statically. No count-up animation, no
+ * intersection observer, no reset risk. A client audit report needs numbers
+ * that are always readable, not numbers that tick up every time a stat
+ * scrolls back into view.
+ */
 function CountUp({
   to,
   suffix = "",
   prefix = "",
   decimals = 0,
-  duration = 1600,
   format,
 }: {
   to: number;
   suffix?: string;
   prefix?: string;
   decimals?: number;
-  duration?: number;
+  duration?: number; // accepted for API compat, unused
   format?: (v: number) => string;
 }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.3 });
-  const [v, setV] = useState<number>(to); // default to the real value
-  const animated = useRef(false);
-
-  useEffect(() => {
-    if (!inView || animated.current) return;
-    animated.current = true;
-    const start = performance.now();
-    let raf = 0;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setV(to * eased);
-      if (t < 1) raf = requestAnimationFrame(tick);
-    };
-    setV(0);
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [inView, to, duration]);
-
-  const shown = format ? format(v) : decimals > 0 ? v.toFixed(decimals) : Math.round(v).toLocaleString();
+  const shown = format
+    ? format(to)
+    : decimals > 0
+      ? to.toFixed(decimals)
+      : Math.round(to).toLocaleString();
   return (
-    <span ref={ref} className="tabular-nums">
+    <span className="tabular-nums">
       {prefix}
       {shown}
       {suffix}
@@ -185,7 +189,7 @@ function Baseline() {
               Where we started
             </p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-[1.15] text-gray-300">
-              Traffic, but no trajectory.
+              Traffic, but no growth trend.
             </h2>
           </div>
         </FadeIn>
@@ -213,6 +217,8 @@ function Baseline() {
                     tick={{ fontSize: 12, fill: "rgba(255,255,255,0.6)" }}
                     axisLine={{ stroke: "rgba(255,255,255,0.15)" }}
                     tickLine={false}
+                    interval={0}
+                    padding={{ left: 12, right: 12 }}
                   />
                   {/* Y-axis intentionally removed — chart reads as a pure trend sparkline;
                       no absolute numbers, no hover values, no dot labels. */}
@@ -277,7 +283,7 @@ const HEADLINE_METRICS = [
   {
     v: 1,
     l: "Google position",
-    note: "“Dr. Datta Marion Ohio”",
+    note: "“dr datta marion ohio”",
     special: "hash",
   },
   { v: 10529, l: "Google impressions", note: "since April" },
@@ -414,6 +420,13 @@ function PatientActionsChart() {
               128 total patient actions — more than double May, and a new all-time high.
             </p>
           </div>
+        </FadeIn>
+
+        <FadeIn delay={0.16}>
+          <p className="mt-5 text-[10px] sm:text-xs text-gray-500 italic text-center max-w-3xl mx-auto leading-relaxed">
+            May reflects normal single-month variance — June confirmed the underlying trend
+            at an all-time high.
+          </p>
         </FadeIn>
       </div>
     </section>
@@ -589,7 +602,8 @@ function SearchGrowth() {
                   Your &ldquo;heavy legs&rdquo; article
                 </div>
                 <p className="text-amber-100 text-xs sm:text-sm leading-relaxed">
-                  Currently position 24 — one push from page 1. This is our next lever.
+                  Currently position ~24 with 4,451 impressions waiting. Our next content
+                  push targets page 1.
                 </p>
               </div>
             </FadeIn>
@@ -682,12 +696,19 @@ function ROI() {
           </div>
         </FadeIn>
 
+        <FadeIn>
+          <p className="text-[10px] sm:text-xs text-gray-500 mt-4 italic text-center leading-relaxed max-w-3xl mx-auto">
+            Patient value range based on CMS 2026 physician fee schedule and industry
+            treatment-course data.
+          </p>
+        </FadeIn>
+
         <FadeIn delay={0.1}>
-          <div className="rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/[0.10] to-transparent p-5 sm:p-7 text-center">
+          <div className="mt-6 rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/[0.10] to-transparent p-5 sm:p-7 text-center">
             <p className="text-white text-base sm:text-lg leading-relaxed">
               <strong className="text-accent-light">
-                Even the most conservative scenario covers the annual marketing investment
-                several times over.
+                A single treated patient covers months of the entire program. The realistic
+                scenario more than covers the year.
               </strong>
             </p>
             <p className="text-gray-400 text-xs sm:text-sm mt-3 leading-relaxed">
@@ -714,15 +735,12 @@ function ROI() {
  * was leaving both bars at width: 0.
  */
 function ReviewsGapBars() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const inView = useInView(containerRef, { once: true, amount: 0.3 });
-
-  // Bar widths as % of the shared max (86)
+  // Static — widths always at final % values; no scroll-triggered animation.
   const YOU_PCT = (10 / 86) * 100;
   const COMP_PCT = 100;
 
   return (
-    <div ref={containerRef} className="space-y-3 mb-5">
+    <div className="space-y-3 mb-2">
       {/* You */}
       <div>
         <div className="flex items-baseline justify-between mb-1.5">
@@ -735,12 +753,8 @@ function ReviewsGapBars() {
         </div>
         <div className="h-6 sm:h-7 rounded bg-white/5 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-accent to-accent-light origin-left"
-            style={{
-              width: `${YOU_PCT}%`,
-              transform: inView ? "scaleX(1)" : "scaleX(0)",
-              transition: "transform 1.2s cubic-bezier(0.22, 1, 0.36, 1)",
-            }}
+            className="h-full bg-gradient-to-r from-accent to-accent-light"
+            style={{ width: `${YOU_PCT}%` }}
           />
         </div>
       </div>
@@ -757,12 +771,8 @@ function ReviewsGapBars() {
         </div>
         <div className="h-6 sm:h-7 rounded bg-white/5 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-red-500/60 to-red-400/60 origin-left"
-            style={{
-              width: `${COMP_PCT}%`,
-              transform: inView ? "scaleX(1)" : "scaleX(0)",
-              transition: "transform 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.2s",
-            }}
+            className="h-full bg-gradient-to-r from-red-500/60 to-red-400/60"
+            style={{ width: `${COMP_PCT}%` }}
           />
         </div>
       </div>
@@ -840,42 +850,27 @@ function MarketPosition() {
               <li className="flex gap-3">
                 <span className="text-amber-400 mt-0.5">•</span>
                 <span>
-                  <strong className="text-white">OhioHealth&apos;s $8.7M, 12-provider
-                  vascular clinic in Marion</strong> opened in 2024. Their PCP-referral
-                  requirement slows them but doesn&apos;t stop them.
+                  <strong className="text-white">
+                    OhioHealth&apos;s $8.7M, 12-provider vascular clinic in Marion
+                  </strong>
+                  {" "}— opened in 2024. Their PCP-referral requirement slows them but
+                  doesn&apos;t stop them.
                 </span>
               </li>
               <li className="flex gap-3">
                 <span className="text-amber-400 mt-0.5">•</span>
                 <span>
-                  <strong className="text-white">Columbus vein chains</strong> (Center for
-                  Vein Restoration, Ohio Vein &amp; Vascular) are running &ldquo;free
-                  screening&rdquo; funnels at the southern edge of your catchment.
+                  <strong className="text-white">Columbus vein chains</strong>
+                  {" "}(Center for Vein Restoration, Ohio Vein &amp; Vascular) are running
+                  {" "}&ldquo;free screening&rdquo; funnels at the southern edge of your
+                  catchment.
                 </span>
               </li>
             </ul>
           </div>
         </FadeIn>
 
-        {/* Reviews gap — visual bar comparison */}
-        <FadeIn delay={0.2}>
-          <div className="rounded-2xl border-2 border-red-400/40 bg-red-500/[0.06] p-5 sm:p-7">
-            <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-red-300 mb-2">
-              The reviews gap
-            </div>
-            <h3 className="text-white font-extrabold text-xl sm:text-2xl mb-5 leading-tight">
-              Reviews are the #1 driver of local ranking and call conversion.
-            </h3>
-
-            <ReviewsGapBars />
-
-
-            <div className="text-sm text-gray-300 mb-4">
-              <strong className="text-red-300">Zero new reviews in the last 3 months.</strong>{" "}
-              This is our highest-impact, lowest-effort lever.
-            </div>
-          </div>
-        </FadeIn>
+        {/* Reviews-gap moved forward into the 90-Day Plan as Priority #1 — see below. */}
       </div>
     </section>
   );
@@ -885,36 +880,46 @@ function MarketPosition() {
    7 — 90-DAY PLAN
    ============================================================ */
 
-const PLAN_ITEMS = [
+type PlanItem = {
+  title: string;
+  body: string;
+  status: "next" | "done";
+  accent?: boolean;
+  priority?: boolean; // renders the ReviewsGapBars + Priority #1 pill
+};
+
+const PLAN_ITEMS: PlanItem[] = [
   {
-    title: "Automated review generation system",
+    title: "Priority #1 — Close the reviews gap",
     body:
-      "Post-visit SMS/email requests. Target 4–8 new reviews per month with a 90-day goal of 30+ new reviews.",
-    status: "next" as const,
+      "Your competitors carry up to 86+ Google reviews; you have 10. This is the single highest-impact lever for local ranking and call conversion. This month we're relaunching your review-request system with a done-for-you workflow so requests go out consistently after every visit — goal: 30+ total reviews (from 10 today) in 90 days.",
+    status: "next",
     accent: true,
+    priority: true,
   },
   {
     title: "Push the “heavy legs” article to page 1",
     body:
-      "4,451 impressions currently waiting at position 24. This is the highest-signal keyword ready to move.",
-    status: "next" as const,
+      "4,451 impressions currently waiting at position ~24 — our next content move targets page 1.",
+    status: "next",
   },
   {
     title: "Google Business Profile alignment + citation cleanup",
     body:
       "Consistent name, address, and phone across every major directory. Removes contradictions Google penalizes.",
-    status: "next" as const,
+    status: "next",
   },
   {
     title: "Patient-conversion tracking now live",
     body:
       "From this month forward we measure actual patient inquiries — calls and form fills — not just traffic. Every marketing dollar becomes attributable.",
-    status: "done" as const,
+    status: "done",
   },
   {
     title: "Full technical audit completed this week",
-    body: "All findings fixed same-day. No open items.",
-    status: "done" as const,
+    body:
+      "Every correctable issue fixed same-day. Structural platform limits are addressed in the next section.",
+    status: "done",
   },
 ];
 
@@ -972,6 +977,11 @@ function NinetyDayPlan() {
                     <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
                       {p.body}
                     </p>
+                    {p.priority && (
+                      <div className="mt-5 pt-5 border-t border-white/10">
+                        <ReviewsGapBars />
+                      </div>
+                    )}
                   </div>
                 </div>
               </FadeIn>
@@ -1074,36 +1084,17 @@ function Milestones() {
    ============================================================ */
 
 function GaugeRing({ score, label, tone }: { score: number; label: string; tone: "red" | "emerald" }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.3 });
-  const [display, setDisplay] = useState(score);
-  const animated = useRef(false);
-
-  useEffect(() => {
-    if (!inView || animated.current) return;
-    animated.current = true;
-    const start = performance.now();
-    let raf = 0;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / 1400);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setDisplay(Math.round(score * eased));
-      if (t < 1) raf = requestAnimationFrame(tick);
-    };
-    setDisplay(0);
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [inView, score]);
-
+  // Static — no count-up animation, no observer, no reset risk.
   const radius = 46;
   const circumference = 2 * Math.PI * radius;
-  const pct = display / 100;
+  const pct = score / 100;
   const dashOffset = circumference - pct * circumference;
   const stroke = tone === "red" ? "#ef4444" : "#10b981";
   const textColor = tone === "red" ? "text-red-400" : "text-emerald-400";
+  const display = score;
 
   return (
-    <div ref={ref} className="flex flex-col items-center">
+    <div className="flex flex-col items-center">
       <div className="relative w-32 h-32 sm:w-36 sm:h-36">
         <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
           <circle cx="60" cy="60" r={radius} strokeWidth="10" stroke="rgba(255,255,255,0.08)" fill="none" />
@@ -1138,7 +1129,7 @@ const REBUILD_PROBLEMS = [
     problem:
       "Your mobile experience scores 75/100 and takes 4.7 seconds to load — most of your patients are 50+ searching on phones.",
     solution:
-      "The rebuild: 95+ scores, ~1 second loads. Same design, modern engine underneath.",
+      "95+ scores, ~1 second loads. Same design, modern engine underneath.",
     gauge: true,
   },
   {
@@ -1146,14 +1137,14 @@ const REBUILD_PROBLEMS = [
     problem:
       "Google currently indexes fewer than half your pages due to how the old platform structures them.",
     solution:
-      "The rebuild's architecture makes every page findable and rankable — server-rendered HTML, proper heading hierarchy, clean sitemap.",
+      "A modern architecture makes every page findable and rankable — server-rendered HTML, proper heading hierarchy, clean sitemap.",
   },
   {
     kicker: "AI-search readiness",
     problem:
       "Patients increasingly ask ChatGPT and Google AI “who's the best vein doctor near me.” Your content is good enough to be the answer — but the site lacks the medical structured data AI engines read.",
     solution:
-      "The rebuild ships with it natively: your credentials, treatments, and location machine-readable via MedicalClinic, Physician, and FAQ schema.",
+      "Ships with it natively: your credentials, treatments, and location machine-readable via MedicalClinic, Physician, and FAQ schema.",
   },
 ];
 
@@ -1174,6 +1165,20 @@ function NextLevel() {
           }
           subtitle="Your current WordPress platform has structural limits no amount of optimization removes. Here's what the rebuild changes — and why the growth plan compounds faster on top of it."
         />
+
+        <FadeIn>
+          <div className="max-w-4xl mx-auto mb-8 sm:mb-10 rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6 md:p-7">
+            <p className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed">
+              To be clear:{" "}
+              <strong className="text-white">
+                the growth system is working — the numbers above show it.
+              </strong>{" "}
+              These are structural limits of the WordPress platform itself, the same limits
+              every practice on it inherits. Optimization has taken it as far as it goes;
+              the rebuild removes the ceiling.
+            </p>
+          </div>
+        </FadeIn>
 
         <div className="space-y-6 sm:space-y-8">
           {REBUILD_PROBLEMS.map((r, i) => (
@@ -1265,7 +1270,7 @@ function FooterCTA() {
           <Eyebrow tone="muted">Where we go from here</Eyebrow>
         </FadeIn>
         <FadeIn delay={0.08}>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-[1.1] mb-8">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-[1.1] mb-10">
             Let&apos;s talk through{" "}
             <span className="bg-gradient-to-r from-accent-light via-white to-accent-light bg-clip-text text-transparent">
               this together
@@ -1274,19 +1279,30 @@ function FooterCTA() {
           </h2>
         </FadeIn>
         <FadeIn delay={0.16}>
-          <a
-            href="mailto:clayton@inflowmd.com?subject=Q2%20review%20follow-up"
-            className="inline-block px-8 py-4 bg-accent text-white font-semibold rounded-lg text-base sm:text-lg glow-blue hover:bg-accent-light transition-colors"
-          >
-            clayton@inflowmd.com
-          </a>
+          <div className="flex flex-col items-center gap-1.5">
+            <p className="text-white font-bold text-lg sm:text-xl">
+              Clayton Peterson
+            </p>
+            <p className="text-accent-light text-sm sm:text-base font-semibold">
+              Founder — InflowMD
+            </p>
+            <p className="text-gray-300 text-sm sm:text-base mt-3">
+              <a
+                href="mailto:clayton@inflowmd.com?subject=Q2%20review%20follow-up"
+                className="hover:text-accent-light transition-colors"
+              >
+                clayton@inflowmd.com
+              </a>{" "}
+              · <span className="text-gray-400">PHONE_HERE</span>
+            </p>
+          </div>
         </FadeIn>
         <FadeIn delay={0.24}>
           <div className="mt-14 pt-8 border-t border-white/10 flex flex-col items-center gap-2">
             <p className="text-accent font-bold text-lg sm:text-xl tracking-[0.18em]">
               InflowMD
             </p>
-            <p className="text-gray-500 text-[10px] sm:text-xs uppercase tracking-[0.22em]">
+            <p className="text-gray-500 text-[10px] sm:text-xs uppercase tracking-[0.22em] text-center">
               Prepared exclusively for Comprehensive Vein Care · Confidential
             </p>
           </div>
