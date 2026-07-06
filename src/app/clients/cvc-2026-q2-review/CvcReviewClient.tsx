@@ -705,6 +705,71 @@ function ROI() {
    6 — MARKET POSITION
    ============================================================ */
 
+/**
+ * Reviews-gap bars — uses the same "default to the target value, animate
+ * from 0 → target only when in view" pattern as CountUp and GaugeRing so
+ * bars are always populated even if the intersection observer never fires
+ * (matches the mobile-safe pattern used elsewhere on this page). Replaces
+ * the earlier motion whileInView + negative-margin viewport combo, which
+ * was leaving both bars at width: 0.
+ */
+function ReviewsGapBars() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(containerRef, { once: true, amount: 0.3 });
+
+  // Bar widths as % of the shared max (86)
+  const YOU_PCT = (10 / 86) * 100;
+  const COMP_PCT = 100;
+
+  return (
+    <div ref={containerRef} className="space-y-3 mb-5">
+      {/* You */}
+      <div>
+        <div className="flex items-baseline justify-between mb-1.5">
+          <span className="text-white text-sm font-semibold">
+            Comprehensive Vein Care (you)
+          </span>
+          <span className="text-white font-extrabold tabular-nums text-sm sm:text-base">
+            10
+          </span>
+        </div>
+        <div className="h-6 sm:h-7 rounded bg-white/5 overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-accent to-accent-light origin-left"
+            style={{
+              width: `${YOU_PCT}%`,
+              transform: inView ? "scaleX(1)" : "scaleX(0)",
+              transition: "transform 1.2s cubic-bezier(0.22, 1, 0.36, 1)",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Competitors */}
+      <div>
+        <div className="flex items-baseline justify-between mb-1.5">
+          <span className="text-gray-300 text-sm">
+            Columbus competitors (up to)
+          </span>
+          <span className="text-red-300 font-extrabold tabular-nums text-sm sm:text-base">
+            86+
+          </span>
+        </div>
+        <div className="h-6 sm:h-7 rounded bg-white/5 overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-red-500/60 to-red-400/60 origin-left"
+            style={{
+              width: `${COMP_PCT}%`,
+              transform: inView ? "scaleX(1)" : "scaleX(0)",
+              transition: "transform 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.2s",
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MarketPosition() {
   return (
     <section className="bg-[#080814] py-20 sm:py-28 border-y border-white/5">
@@ -802,38 +867,8 @@ function MarketPosition() {
               Reviews are the #1 driver of local ranking and call conversion.
             </h3>
 
-            <div className="space-y-3 mb-5">
-              <div>
-                <div className="flex items-baseline justify-between mb-1.5">
-                  <span className="text-white text-sm font-semibold">Comprehensive Vein Care (you)</span>
-                  <span className="text-white font-extrabold tabular-nums text-sm sm:text-base">10</span>
-                </div>
-                <div className="h-6 sm:h-7 rounded bg-white/5 overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${(10 / 86) * 100}%` }}
-                    viewport={{ once: true, margin: "-20%" }}
-                    transition={{ duration: 1.2, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-accent to-accent-light"
-                  />
-                </div>
-              </div>
-              <div>
-                <div className="flex items-baseline justify-between mb-1.5">
-                  <span className="text-gray-300 text-sm">Columbus competitors (up to)</span>
-                  <span className="text-red-300 font-extrabold tabular-nums text-sm sm:text-base">86+</span>
-                </div>
-                <div className="h-6 sm:h-7 rounded bg-white/5 overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: "100%" }}
-                    viewport={{ once: true, margin: "-20%" }}
-                    transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
-                    className="h-full bg-gradient-to-r from-red-500/60 to-red-400/60"
-                  />
-                </div>
-              </div>
-            </div>
+            <ReviewsGapBars />
+
 
             <div className="text-sm text-gray-300 mb-4">
               <strong className="text-red-300">Zero new reviews in the last 3 months.</strong>{" "}
