@@ -162,6 +162,113 @@ function Hero() {
 }
 
 /* ============================================================
+   2A — BASELINE (Where We Started) — visually muted on purpose
+   ============================================================ */
+
+const BASELINE_TRAFFIC = [
+  { month: "Jul '25", visitors: 743 },
+  { month: "Aug '25", visitors: 344 },
+  { month: "Sep '25", visitors: 1493 },
+  { month: "Oct '25", visitors: 1386 },
+  { month: "Nov '25", visitors: 1136 },
+  { month: "Dec '25", visitors: 1151 },
+  { month: "Jan '26", visitors: 1213 },
+];
+
+function Baseline() {
+  return (
+    <section className="bg-[#0a0a12] py-16 sm:py-20 border-y border-white/5">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <FadeIn>
+          <div className="text-center mb-10 sm:mb-12">
+            <p className="font-semibold text-[10px] sm:text-xs tracking-[0.28em] uppercase mb-3 text-gray-500">
+              Where we started
+            </p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-[1.15] text-gray-300">
+              Traffic, but no trajectory.
+            </h2>
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={0.08}>
+          <div className="rounded-2xl border border-white/5 bg-white/[0.015] p-4 sm:p-6 md:p-8">
+            <div className="flex items-baseline justify-between mb-3">
+              <h3 className="text-gray-400 font-semibold text-sm sm:text-base">
+                Monthly unique visitors
+              </h3>
+              <span className="text-[10px] sm:text-xs text-gray-600 uppercase tracking-wider">
+                Jul 2025 – Jan 2026
+              </span>
+            </div>
+            <div className="h-56 sm:h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={BASELINE_TRAFFIC}
+                  margin={{ top: 20, right: 12, left: 0, bottom: 4 }}
+                >
+                  <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
+                  <XAxis
+                    dataKey="month"
+                    stroke="rgba(255,255,255,0.3)"
+                    tick={{ fontSize: 11 }}
+                    axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    stroke="rgba(255,255,255,0.3)"
+                    tick={{ fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={40}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: "rgba(10,10,18,0.95)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: "10px",
+                      color: "rgba(255,255,255,0.7)",
+                    }}
+                    cursor={{ stroke: "rgba(255,255,255,0.15)", strokeWidth: 1 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="visitors"
+                    stroke="rgba(255,255,255,0.35)"
+                    strokeWidth={2}
+                    dot={{
+                      fill: "rgba(255,255,255,0.4)",
+                      r: 4,
+                      strokeWidth: 1,
+                      stroke: "rgba(255,255,255,0.15)",
+                    }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-[10px] sm:text-xs text-gray-600 mt-4 italic text-center">
+              Pre-upgrade baseline — server log data (the only measurement that existed).
+            </p>
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={0.16}>
+          <p className="mt-8 sm:mt-10 max-w-3xl mx-auto text-center text-sm sm:text-base text-gray-400 leading-relaxed">
+            Before April 2026, the site had traffic but no trajectory — and no real
+            measurement. The service upgrade installed{" "}
+            <span className="text-gray-200 font-semibold">
+              professional-grade analytics
+            </span>{" "}
+            (Google Search Console, conversion tracking) and began the growth work.
+            Everything below is what&apos;s happened since.
+          </p>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
    2 — HEADLINE METRICS
    ============================================================ */
 
@@ -1131,6 +1238,7 @@ export default function CvcReviewClient() {
   return (
     <main className="bg-dark min-h-screen">
       <Hero />
+      <Baseline />
       <HeadlineMetrics />
       <PatientActionsChart />
       <SearchGrowth />
