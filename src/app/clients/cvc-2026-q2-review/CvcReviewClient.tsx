@@ -204,7 +204,7 @@ function Baseline() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={BASELINE_TRAFFIC}
-                  margin={{ top: 20, right: 12, left: 0, bottom: 4 }}
+                  margin={{ top: 20, right: 12, left: 12, bottom: 4 }}
                 >
                   <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
                   <XAxis
@@ -214,22 +214,8 @@ function Baseline() {
                     axisLine={{ stroke: "rgba(255,255,255,0.15)" }}
                     tickLine={false}
                   />
-                  <YAxis
-                    stroke="rgba(255,255,255,0.55)"
-                    tick={{ fontSize: 12, fill: "rgba(255,255,255,0.6)" }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={44}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: "rgba(10,10,18,0.95)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: "10px",
-                      color: "rgba(255,255,255,0.7)",
-                    }}
-                    cursor={{ stroke: "rgba(255,255,255,0.15)", strokeWidth: 1 }}
-                  />
+                  {/* Y-axis intentionally removed — chart reads as a pure trend sparkline;
+                      no absolute numbers, no hover values, no dot labels. */}
                   <Line
                     type="monotone"
                     dataKey="visitors"
@@ -241,13 +227,19 @@ function Baseline() {
                       strokeWidth: 1,
                       stroke: "rgba(255,255,255,0.15)",
                     }}
-                    activeDot={{ r: 6 }}
+                    activeDot={false}
+                    isAnimationActive={true}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
             <p className="text-[10px] sm:text-xs text-gray-600 mt-4 italic text-center">
               Pre-upgrade baseline — server log data (the only measurement that existed).
+            </p>
+            <p className="text-[10px] sm:text-xs text-gray-600 mt-2 italic text-center max-w-2xl mx-auto leading-relaxed">
+              Server logs count all requests, including significant automated and crawler
+              traffic — shown here for trend only, not comparable to the Google-verified
+              patient metrics below.
             </p>
           </div>
         </FadeIn>
