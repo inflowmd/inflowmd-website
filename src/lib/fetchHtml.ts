@@ -5,7 +5,13 @@
  * never to a false accusation — so the caller always gets a result object.
  */
 
+import { assertSafeUrl, type GuardVerdict } from "@/lib/ssrfGuard";
+
 const TIMEOUT_MS = 8_000;
+const MAX_REDIRECTS = 5;
+
+/** Injectable for tests; production always uses the real guard. */
+export type UrlGuard = (url: string) => Promise<GuardVerdict>;
 
 /** A current desktop Chrome UA — many sites serve reduced markup to unknown agents. */
 const USER_AGENT =
@@ -48,20 +54,73 @@ function detectChallenge(html: string): boolean {
   return CHALLENGE_MARKERS.some((marker) => haystack.includes(marker));
 }
 
+function blockedResult(url: string): FetchHtmlResult {
+  return {
+    ok: false,
+    statusCode: null,
+    blocked: true,
+    html: "",
+    finalUrl: url,
+    error: "That address cannot be audited.",
+  };
+}
+
 /**
  * @param url Fully-qualified URL to fetch.
+ * @param options.guard Overridable for tests. Every redirect hop is checked
+ *   with it, not just the initial URL.
  */
-export async function fetchHtml(url: string): Promise<FetchHtmlResult> {
+export async function fetchHtml(
+  url: string,
+  options: { guard?: UrlGuard } = {}
+): Promise<FetchHtmlResult> {
+  const guard = options.guard ?? assertSafeUrl;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      redirect: "follow",
-      headers: BROWSER_HEADERS,
-      cache: "no-store",
-    });
+    // Redirects are followed by hand so each destination can be validated —
+    // `redirect: "follow"` would hide the hops entirely.
+    let current = url;
+    let res: Response | null = null;
+
+    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+      const verdict = await guard(current);
+      if (!verdict.ok) {
+        clearTimeout(timer);
+        return blockedResult(current);
+      }
+
+      res = await fetch(current, {
+        signal: controller.signal,
+        redirect: "manual",
+        headers: BROWSER_HEADERS,
+        cache: "no-store",
+      });
+
+      const isRedirect = res.status >= 300 && res.status < 400;
+      const location = res.headers.get("location");
+      if (!isRedirect || !location) break;
+
+      if (hop === MAX_REDIRECTS) {
+        clearTimeout(timer);
+        return {
+          ok: false,
+          statusCode: res.status,
+          blocked: false,
+          html: "",
+          finalUrl: current,
+          error: "The site redirected too many times.",
+        };
+      }
+      // Resolve relative Location headers against the current URL.
+      current = new URL(location, current).toString();
+    }
+
+    if (!res) {
+      clearTimeout(timer);
+      return blockedResult(url);
+    }
 
     const status = res.status;
     let html = "";
@@ -81,7 +140,7 @@ export async function fetchHtml(url: string): Promise<FetchHtmlResult> {
         statusCode: status,
         blocked: true,
         html: "",
-        finalUrl: res.url || null,
+        finalUrl: current,
         error: refused
           ? `The site refused our request (status ${status}).`
           : "The site returned a bot-protection challenge instead of the page.",
@@ -94,7 +153,7 @@ export async function fetchHtml(url: string): Promise<FetchHtmlResult> {
         statusCode: status,
         blocked: false,
         html: "",
-        finalUrl: res.url || null,
+        finalUrl: current,
         error: `The site returned status ${status}.`,
       };
     }
@@ -105,7 +164,7 @@ export async function fetchHtml(url: string): Promise<FetchHtmlResult> {
         statusCode: status,
         blocked: false,
         html: "",
-        finalUrl: res.url || null,
+        finalUrl: current,
         error: "The site returned an empty response body.",
       };
     }
@@ -115,7 +174,7 @@ export async function fetchHtml(url: string): Promise<FetchHtmlResult> {
       statusCode: status,
       blocked: false,
       html,
-      finalUrl: res.url || null,
+      finalUrl: current,
     };
   } catch (err) {
     const aborted = err instanceof Error && err.name === "AbortError";
@@ -139,11 +198,17 @@ export async function fetchHtml(url: string): Promise<FetchHtmlResult> {
 /** Fetches a plain-text file (robots.txt, llms.txt). Never throws. */
 export async function fetchText(
   url: string,
-  timeoutMs = TIMEOUT_MS
+  timeoutMs = TIMEOUT_MS,
+  options: { guard?: UrlGuard } = {}
 ): Promise<{ ok: boolean; statusCode: number | null; text: string; error?: string }> {
+  const guard = options.guard ?? assertSafeUrl;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
+    const verdict = await guard(url);
+    if (!verdict.ok) {
+      return { ok: false, statusCode: null, text: "", error: "Blocked target." };
+    }
     const res = await fetch(url, {
       signal: controller.signal,
       redirect: "follow",

@@ -8,7 +8,16 @@ import type { PerformanceResult } from "@/types/audit";
  */
 
 const ENDPOINT = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
-const TIMEOUT_MS = 45_000;
+
+/**
+ * Single attempt, no retry.
+ *
+ * This previously ran up to two 45s attempts inside a 60s function, so a slow
+ * PageSpeed run was killed mid-retry and the caller got a dead connection
+ * instead of a report. One bounded attempt that degrades to
+ * `available: false` is worth far more than a retry that never gets to finish.
+ */
+const TIMEOUT_MS = 55_000;
 
 function emptyResult(error?: string): PerformanceResult {
   return {
@@ -88,22 +97,23 @@ async function requestOnce(
 }
 
 /**
- * Runs PageSpeed with a 45s ceiling and a single retry on timeout or 5xx.
+ * Runs PageSpeed once, with a 55s ceiling.
+ *
+ * Never throws and never retries: on timeout or error it returns
+ * `available: false` with an explanatory message, so the caller can still
+ * assemble a partial report from the HTML-derived checks.
+ *
  * @param url Fully-qualified URL to test.
  */
 export async function runPageSpeed(url: string): Promise<PerformanceResult> {
-  let lastError = "PageSpeed did not return a result.";
-
-  for (let attempt = 0; attempt < 2; attempt++) {
+  {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
       const { status, body } = await requestOnce(url, controller.signal);
 
-      // Retry once on server-side failures; client errors are terminal.
       if (status >= 500) {
-        lastError = `PageSpeed returned a server error (${status}).`;
-        continue;
+        return emptyResult(`PageSpeed returned a server error (${status}).`);
       }
       if (status !== 200 || !body) {
         const apiError = asObject(body?.error);
@@ -149,16 +159,17 @@ export async function runPageSpeed(url: string): Promise<PerformanceResult> {
       };
     } catch (err) {
       const aborted = err instanceof Error && err.name === "AbortError";
-      lastError = aborted
-        ? "PageSpeed timed out before returning a score."
-        : err instanceof Error
-          ? err.message
-          : "PageSpeed request failed.";
-      // Timeouts and network faults get one retry.
+      // A timeout is a partial result, not a failed request: the HTML checks
+      // ran in parallel and are still worth returning.
+      return emptyResult(
+        aborted
+          ? "PageSpeed did not finish measuring this page in time."
+          : err instanceof Error
+            ? err.message
+            : "PageSpeed request failed."
+      );
     } finally {
       clearTimeout(timer);
     }
   }
-
-  return emptyResult(lastError);
 }
