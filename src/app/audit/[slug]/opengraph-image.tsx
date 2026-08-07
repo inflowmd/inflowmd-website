@@ -1,0 +1,75 @@
+import { ImageResponse } from "next/og";
+import { getAudit } from "../data";
+
+export const runtime = "edge";
+export const alt = "InflowMD — Confidential Technical Audit";
+export const size = { width: 1200, height: 630 };
+export const contentType = "image/png";
+
+export default async function Image({ params }: { params: { slug: string } }) {
+  const audit = getAudit(params.slug);
+  const domain = audit?.practice.domain ?? "";
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          background: "linear-gradient(135deg, #1A1A2E 0%, #12122a 60%, #0d0d24 100%)",
+          color: "white",
+          padding: "80px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          fontFamily: "system-ui, sans-serif",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div
+            style={{
+              padding: "8px 14px",
+              background: "rgba(245,158,11,0.18)",
+              border: "1px solid rgba(245,158,11,0.5)",
+              color: "#fcd34d",
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: 4,
+              textTransform: "uppercase",
+              borderRadius: 999,
+            }}
+          >
+            ● Confidential
+          </div>
+          <div style={{ color: "#94a3b8", fontSize: 22, fontWeight: 600, letterSpacing: 2 }}>
+            InflowMD
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div
+            style={{
+              color: "#4A8AF4",
+              fontSize: 22,
+              fontWeight: 700,
+              letterSpacing: 4,
+              textTransform: "uppercase",
+            }}
+          >
+            Technical Site Audit
+          </div>
+          <div style={{ fontSize: 72, fontWeight: 800, lineHeight: 1.05 }}>
+            Confidential Audit —
+            <br />
+            <span style={{ color: "#4A8AF4" }}>{domain || "Vein-ity.com"}</span>
+          </div>
+        </div>
+
+        <div style={{ color: "#94a3b8", fontSize: 22, fontWeight: 500 }}>
+          Prepared July 2026 · inflowmd.com
+        </div>
+      </div>
+    ),
+    { ...size }
+  );
+}

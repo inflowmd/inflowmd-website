@@ -1,7 +1,34 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx create-next-app@latest:*)"
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(npm install:*)",
+      "Bash(npx next:*)",
+      "Bash(npm run:*)",
+      "Bash(brew install:*)",
+      "Bash(git commit:*)",
+      "Bash(gh auth:*)",
+      "Bash(/opt/homebrew/bin/gh auth:*)",
+      "Read(//opt/homebrew/Cellar/gh/2.89.0/bin/**)",
+      "Read(//usr/local/bin/**)",
+      "Bash(/opt/homebrew/bin/gh repo:*)",
+      "Bash(vercel:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(xargs ls:*)",
+      "Bash(ls -la /Users/claytonpeterson/projects/inflowmd/src/app/services/*/)",
+      "Bash(wc -l /Users/claytonpeterson/projects/inflowmd/src/app/services/*/page.tsx)",
+      "Bash(lsof -i :3000 -sTCP:LISTEN)",
+      "Bash(kill 10186)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/pricing)",
+      "Bash(git log:*)",
+      "Bash(lsof -i :3000 -sTCP:LISTEN -t)",
+      "Bash(xargs kill:*)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000__TRACKED_VAR__)",
+      "Bash(ls /Users/claytonpeterson/projects/inflowmd/.claude/worktrees/musing-kepler/next.config*)",
+      "Bash(cat /Users/claytonpeterson/projects/inflowmd/.claude/worktrees/musing-kepler/next.config*)",
+      "Bash(ls /Users/claytonpeterson/projects/inflowmd/.claude/worktrees/musing-kepler/src/app/pricing/PricingClient.tsx /Users/claytonpeterson/projects/inflowmd/.claude/worktrees/musing-kepler/src/app/get-started/GetStartedClient.tsx /Users/claytonpeterson/projects/inflowmd/.claude/worktrees/musing-kepler/src/app/services/*/page.tsx /Users/claytonpeterson/projects/inflowmd/.claude/worktrees/musing-kepler/src/app/services/*/*Client.tsx)",
+      "Bash(xargs -r kill)"
     ]
   }
 }
