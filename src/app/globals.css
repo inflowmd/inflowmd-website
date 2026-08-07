@@ -374,3 +374,34 @@ body {
 .booth-slider:focus-visible::-webkit-slider-thumb {
   box-shadow: 0 0 0 4px rgba(132, 184, 59, 0.45);
 }
+
+/* Booth scan: indeterminate sweep + resolved-dot pop.
+   The sweep is deliberately not a percentage — there are no progress events,
+   and a fabricated percentage would violate the booth's honesty rule. */
+@keyframes booth-sweep {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(360%); }
+}
+.booth-sweep-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.booth-sweep-bar {
+  height: 100%;
+  width: 32%;
+  border-radius: 9999px;
+  background: #84b83b;
+  animation: booth-sweep 1.5s ease-in-out infinite;
+}
+@keyframes booth-pop {
+  from { transform: scale(0.4); opacity: 0.3; }
+  to { transform: scale(1); opacity: 1; }
+}
+.booth-pop {
+  animation: booth-pop 200ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .booth-sweep-bar, .booth-pop { animation: none; }
+}
