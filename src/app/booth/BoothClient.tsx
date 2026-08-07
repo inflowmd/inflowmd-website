@@ -27,13 +27,13 @@ const CLIENT_TIMEOUT_MS = 150_000;
 /**
  * Each stage names its source. A line only ever resolves to its `done` label
  * after the response has actually arrived — never on a timer.
+ *
+ * Order: the four HTML-derived checks on top, resolving top-to-bottom; the
+ * Google measurement — the longest-running task, kicked off visibly the
+ * moment the scan starts — sits at the bottom and resolves last, the
+ * featured beat right before the report opens.
  */
 const SCAN_STAGES = [
-  {
-    running: "Connecting to Google PageSpeed Insights…",
-    done: "Google measurement received",
-    featured: true,
-  },
   { running: "Reading the site's code…", done: "Site code read", featured: false },
   {
     running: "Checking how search engines see this practice…",
@@ -50,7 +50,20 @@ const SCAN_STAGES = [
     done: "Practice identification checked",
     featured: false,
   },
+  {
+    running: "Connecting to Google PageSpeed Insights…",
+    done: "Google measurement received",
+    featured: true,
+  },
 ];
+
+/** Index of the featured Google line — always active in flight, resolves last. */
+const PSI_STAGE = SCAN_STAGES.length - 1;
+
+/** Minimum gap between one dot resolving and the next. */
+const RESOLVE_STAGGER_MS = 600;
+/** Minimum hold after the last dot resolves, before the report opens. */
+const RESOLVE_HOLD_MS = 1_500;
 
 /* ---------- formatting ---------- */
 
@@ -341,6 +354,8 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
   const [revealed, setRevealed] = useState(999);
   /** Per-stage outcomes, set only once the response has actually arrived. */
   const [stageOutcomes, setStageOutcomes] = useState<boolean[] | null>(null);
+  /** How many stage lines (top-down) have flipped to their final state. */
+  const [resolvedCount, setResolvedCount] = useState(0);
   /** The full chain and secondary sliders live behind this. */
   const [showMath, setShowMath] = useState(false);
   /** Booth CTA card flips to the in-person instruction when tapped. */
@@ -357,6 +372,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
   const searchRef = useRef<HTMLInputElement>(null);
   const revealTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const scanTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const resolveTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -383,9 +399,11 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
   const clearTimers = useCallback(() => {
     if (revealTimer.current) clearInterval(revealTimer.current);
     if (scanTimer.current) clearInterval(scanTimer.current);
+    if (resolveTimer.current) clearInterval(resolveTimer.current);
     if (holdTimer.current) clearTimeout(holdTimer.current);
     revealTimer.current = null;
     scanTimer.current = null;
+    resolveTimer.current = null;
     holdTimer.current = null;
   }, []);
 
@@ -402,6 +420,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
     setRunFailed(false);
     setPendingUrl("");
     setStageOutcomes(null);
+    setResolvedCount(0);
     setShowMath(false);
     setCtaFlipped(false);
   }, [clearTimers]);
@@ -430,6 +449,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
       setResult(null);
       setRunFailed(false);
       setStageOutcomes(null);
+      setResolvedCount(0);
       setShowMath(false);
       setCtaFlipped(false);
       setPhase("running");
@@ -440,7 +460,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
       // marks anything complete — we have no progress events, so a green tick
       // here would be a claim we cannot support.
       scanTimer.current = setInterval(() => {
-        setScanStage((s) => Math.min(s + 1, SCAN_STAGES.length - 1));
+        setScanStage((s) => Math.min(s + 1, PSI_STAGE - 1));
       }, 1600);
 
       // Matches the route's 150s ceiling so the client never gives up first.
@@ -479,25 +499,35 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
         clearTimers();
         // The response is here — each line may now resolve, and only from what
         // the data actually says. A stage whose work did not complete stays
-        // neutral rather than ticking green.
+        // neutral rather than ticking green. Everything below merely PACES the
+        // display of results that have already arrived: the dots flip one at a
+        // time, top to bottom, Google last, so each completion is visible.
         setStageOutcomes([
-          data.performance.available,
           data.htmlFetch.ok,
           data.scores.seo !== null,
           data.scores.aiReadiness !== null,
           data.scores.schema !== null,
+          data.performance.available,
         ]);
-        setScanStage(SCAN_STAGES.length - 1);
-        // Brief hold so the resolutions are visible before the report opens.
-        holdTimer.current = setTimeout(() => {
-          setResult(data);
-          setPhase("result");
-          // Stagger paces the display of results that have ALREADY arrived.
-          setRevealed(0);
-          revealTimer.current = setInterval(() => {
-            setRevealed((n) => n + 1);
-          }, 380);
-        }, 1100);
+        setResolvedCount(0);
+        let flipped = 0;
+        resolveTimer.current = setInterval(() => {
+          flipped++;
+          setResolvedCount(flipped);
+          if (flipped >= SCAN_STAGES.length) {
+            if (resolveTimer.current) clearInterval(resolveTimer.current);
+            resolveTimer.current = null;
+            // Hold on the fully-resolved list before the report replaces it.
+            holdTimer.current = setTimeout(() => {
+              setResult(data);
+              setPhase("result");
+              setRevealed(0);
+              revealTimer.current = setInterval(() => {
+                setRevealed((n) => n + 1);
+              }, 380);
+            }, RESOLVE_HOLD_MS);
+          }
+        }, RESOLVE_STAGGER_MS);
       } catch (err) {
         clearTimers();
         const aborted = err instanceof Error && err.name === "AbortError";
@@ -602,13 +632,22 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
               <ul className="space-y-4">
                 {SCAN_STAGES.map((stage, i) => {
                   // While the response is in flight nothing resolves — a tick
-                  // would assert a result we do not have. Once stageOutcomes
-                  // arrives, each line resolves from what the data says.
-                  const outcome = stageOutcomes ? stageOutcomes[i] : null;
+                  // would assert a result we do not have. Once the response
+                  // arrives, lines flip to their final state one at a time
+                  // (resolvedCount walks top to bottom, Google last).
+                  const resolved = stageOutcomes !== null && i < resolvedCount;
+                  const outcome = resolved && stageOutcomes ? stageOutcomes[i] : null;
                   const resolvedOk = outcome === true;
                   const unresolvedFail = runFailed || outcome === false;
-                  const active = !runFailed && !stageOutcomes && i === scanStage;
-                  const reached = !runFailed && (stageOutcomes !== null || i <= scanStage);
+                  // Google runs the whole time, so its line pulses from the
+                  // first frame until its own flip at the end.
+                  const active =
+                    !runFailed &&
+                    !resolved &&
+                    (i === PSI_STAGE || (!stageOutcomes && i === scanStage));
+                  const reached =
+                    !runFailed &&
+                    (stageOutcomes !== null || i <= scanStage || i === PSI_STAGE);
                   const featured = stage.featured && resolvedOk;
                   return (
                     <li
