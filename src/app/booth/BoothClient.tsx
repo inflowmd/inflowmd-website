@@ -21,6 +21,9 @@ const ACCENT = "#84B83B";
 
 type Phase = "input" | "running" | "result";
 
+/** Matches the route's maxDuration so the client never gives up first. */
+const CLIENT_TIMEOUT_MS = 150_000;
+
 const SCAN_STAGES = [
   "Measuring load speed",
   "Reading the page",
@@ -173,6 +176,11 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
   const [urlInput, setUrlInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [scanStage, setScanStage] = useState(0);
+  /** True once the run has been going long enough to reassure the visitor. */
+  const [slowRun, setSlowRun] = useState(false);
+  /** The run finished without a result — stages must show "not completed". */
+  const [runFailed, setRunFailed] = useState(false);
+  const [pendingUrl, setPendingUrl] = useState("");
   /** How many model beats are visible; large number = all (cached path). */
   const [revealed, setRevealed] = useState(999);
 
@@ -187,6 +195,8 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
   const searchRef = useRef<HTMLInputElement>(null);
   const revealTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const scanTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const slowTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const model = useMemo(() => {
     if (!result) return null;
@@ -211,18 +221,25 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
   const clearTimers = useCallback(() => {
     if (revealTimer.current) clearInterval(revealTimer.current);
     if (scanTimer.current) clearInterval(scanTimer.current);
+    if (slowTimer.current) clearTimeout(slowTimer.current);
     revealTimer.current = null;
     scanTimer.current = null;
+    slowTimer.current = null;
   }, []);
 
   const reset = useCallback(() => {
     clearTimers();
+    abortRef.current?.abort();
+    abortRef.current = null;
     setPhase("input");
     setResult(null);
     setError(null);
     setQuery("");
     setUrlInput("");
     setRevealed(999);
+    setSlowRun(false);
+    setRunFailed(false);
+    setPendingUrl("");
   }, [clearTimers]);
 
   /** Cached path — no network, no reveal sequence. */
@@ -237,7 +254,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
     [clearTimers]
   );
 
-  /** Live path — progressive reveal. */
+  /** Live path — progressive reveal of RESOLVED results only. */
   const runLive = useCallback(
     async (rawUrl: string, force = false) => {
       const target = rawUrl.trim();
@@ -245,37 +262,75 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
       clearTimers();
       setError(null);
       setResult(null);
+      setRunFailed(false);
+      setSlowRun(false);
       setPhase("running");
       setScanStage(0);
+      setPendingUrl(target);
+
+      // The stage list is a narrative of what the server is doing. It never
+      // marks anything complete — we have no progress events, so a green tick
+      // here would be a claim we cannot support.
       scanTimer.current = setInterval(() => {
         setScanStage((s) => Math.min(s + 1, SCAN_STAGES.length - 1));
       }, 1600);
+      // Google's measurement can genuinely take a minute; say so rather than
+      // letting a booth visitor conclude it has hung.
+      slowTimer.current = setTimeout(() => setSlowRun(true), 15_000);
+
+      // Matches the route's 150s ceiling so the client never gives up first.
+      const controller = new AbortController();
+      abortRef.current = controller;
+      const clientTimeout = setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS);
 
       try {
         const res = await fetch("/api/audit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ url: target, force }),
+          signal: controller.signal,
         });
-        const data = await res.json();
+
+        // Check the status BEFORE parsing: a gateway timeout returns an HTML
+        // error page, and blindly calling .json() on it turned every distinct
+        // failure into the same useless "could not reach" message.
         if (!res.ok) {
+          let message = `The audit service returned ${res.status}.`;
+          try {
+            const body = await res.json();
+            if (typeof body?.error === "string") message = body.error;
+          } catch {
+            if (res.status === 504 || res.status === 502) {
+              message = "The audit took too long to finish. Try again.";
+            }
+          }
           clearTimers();
-          setError(typeof data?.error === "string" ? data.error : "That audit did not run.");
-          setPhase("input");
+          setError(message);
+          setRunFailed(true);
           return;
         }
+
+        const data = (await res.json()) as AuditResult;
         clearTimers();
-        setResult(data as AuditResult);
+        setResult(data);
         setPhase("result");
-        // Reveal each beat in sequence.
+        // Stagger paces the display of results that have ALREADY arrived.
         setRevealed(0);
         revealTimer.current = setInterval(() => {
           setRevealed((n) => n + 1);
         }, 380);
-      } catch {
+      } catch (err) {
         clearTimers();
-        setError("Could not reach the audit service.");
-        setPhase("input");
+        const aborted = err instanceof Error && err.name === "AbortError";
+        setError(
+          aborted
+            ? "The audit took too long to finish. Try again."
+            : "Could not reach the audit service."
+        );
+        setRunFailed(true);
+      } finally {
+        clearTimeout(clientTimeout);
+        abortRef.current = null;
       }
     },
     [clearTimers]
@@ -332,31 +387,81 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
           </div>
 
           {phase === "running" ? (
-            <div className="py-20">
+            <div className="py-16">
               <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-6">
-                Auditing {domainOf(urlInput)}
+                {runFailed ? "Audit did not complete" : `Auditing ${domainOf(pendingUrl)}`}
               </div>
               <ul className="space-y-4">
-                {SCAN_STAGES.map((stage, i) => (
-                  <li
-                    key={stage}
-                    className={`flex items-center gap-4 text-lg sm:text-2xl font-bold transition-opacity duration-300 ${
-                      i <= scanStage ? "opacity-100" : "opacity-25"
-                    }`}
-                  >
-                    <span
-                      className="inline-block w-3 h-3 rounded-full shrink-0"
-                      style={{
-                        background: i < scanStage ? ACCENT : "rgba(255,255,255,0.25)",
-                      }}
-                    />
-                    <span className={i <= scanStage ? "text-white" : "text-white/40"}>
-                      {stage}
-                      {i === scanStage ? "…" : ""}
-                    </span>
-                  </li>
-                ))}
+                {SCAN_STAGES.map((stage, i) => {
+                  // Nothing here is ever marked complete. We receive no
+                  // progress events, so a green tick would assert a result we
+                  // do not have. Only the active line is emphasised.
+                  const active = !runFailed && i === scanStage;
+                  const reached = !runFailed && i <= scanStage;
+                  return (
+                    <li
+                      key={stage}
+                      className="flex items-center gap-4 text-lg sm:text-2xl font-bold"
+                    >
+                      <span
+                        className={`inline-block w-3 h-3 rounded-full shrink-0 ${
+                          active ? "animate-pulse" : ""
+                        }`}
+                        style={{
+                          background: runFailed
+                            ? "rgba(255,255,255,0.18)"
+                            : active
+                              ? "rgba(255,255,255,0.75)"
+                              : "rgba(255,255,255,0.22)",
+                        }}
+                      />
+                      <span
+                        className={
+                          runFailed ? "text-white/35" : reached ? "text-white" : "text-white/35"
+                        }
+                      >
+                        {stage}
+                        {active ? "…" : ""}
+                      </span>
+                      {runFailed && (
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-white/30">
+                          not completed
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
+
+              {slowRun && !runFailed && (
+                <p className="mt-8 text-white/55 text-base sm:text-lg max-w-xl leading-snug">
+                  Still working — Google is measuring the site, this can take a minute.
+                </p>
+              )}
+
+              {runFailed && (
+                <div className="mt-8">
+                  <p className="text-amber-300 text-base sm:text-lg">{error}</p>
+                  <div className="mt-5 flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void runLive(pendingUrl, true)}
+                      className="rounded-lg px-6 font-bold text-[#081C34]"
+                      style={{ background: ACCENT, minHeight: 44 }}
+                    >
+                      Try again
+                    </button>
+                    <button
+                      type="button"
+                      onClick={reset}
+                      className="rounded-lg border border-white/15 px-6 font-bold text-white/70 hover:text-white"
+                      style={{ minHeight: 44 }}
+                    >
+                      Back
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <>

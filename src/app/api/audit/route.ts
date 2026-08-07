@@ -4,7 +4,12 @@ import { getCached } from "@/lib/cache";
 import { assertSafeUrl } from "@/lib/ssrfGuard";
 import { clientIp, rateLimit } from "@/lib/rateLimit";
 
-export const maxDuration = 60;
+/**
+ * 150s ceiling. PageSpeed alone can take the better part of a minute on a
+ * heavy site; the previous 60s budget killed the function mid-run and handed
+ * the caller a dead connection instead of a report.
+ */
+export const maxDuration = 150;
 export const dynamic = "force-dynamic";
 
 /**
