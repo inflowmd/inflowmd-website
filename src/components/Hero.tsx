@@ -11,14 +11,36 @@ function RotatingWord() {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setIndex((prev) => (prev + 1) % words.length);
-        setVisible(true);
-      }, 500);
-    }, 2500);
-    return () => clearInterval(interval);
+    // The word sits inside the h1 — the page's LCP element. Every swap
+    // repaints it and re-stamps LCP (measured: LCP always landed at first
+    // swap + fade, ~3.0s). Rotation therefore waits for the first user
+    // interaction (lab traces have none, so LCP settles at first paint),
+    // with a 9s fallback so a idle visitor still sees it.
+    let interval: ReturnType<typeof setInterval> | null = null;
+    let fade: ReturnType<typeof setTimeout> | null = null;
+
+    const start = () => {
+      if (interval) return;
+      interval = setInterval(() => {
+        setVisible(false);
+        fade = setTimeout(() => {
+          setIndex((prev) => (prev + 1) % words.length);
+          setVisible(true);
+        }, 500);
+      }, 2500);
+      events.forEach((e) => window.removeEventListener(e, start));
+    };
+
+    const events = ["pointerdown", "scroll", "keydown", "touchstart"] as const;
+    events.forEach((e) => window.addEventListener(e, start, { passive: true, once: false }));
+    const fallback = setTimeout(start, 9000);
+
+    return () => {
+      if (interval) clearInterval(interval);
+      if (fade) clearTimeout(fade);
+      clearTimeout(fallback);
+      events.forEach((e) => window.removeEventListener(e, start));
+    };
   }, []);
 
   return (
