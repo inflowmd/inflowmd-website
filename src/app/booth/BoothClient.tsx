@@ -24,8 +24,10 @@ type Phase = "input" | "running" | "result";
 /** Matches the route's maxDuration so the client never gives up first. */
 const CLIENT_TIMEOUT_MS = 150_000;
 
-/** The site the comparison button audits, live. Swappable in one line. */
-const COMPARISON_SITE = "inflowmd.com";
+/** The site the comparison button audits, live. Swappable in one line.
+ *  Canonical final URL — auditing the apex would eat a ~780ms redirect penalty. */
+const COMPARISON_SITE = "https://www.inflowmd.com";
+const COMPARISON_HOST = COMPARISON_SITE.replace(/^https?:\/\//, "").replace(/^www\./, "");
 
 /**
  * Each stage names its source. A line only ever resolves to its `done` label
@@ -122,6 +124,8 @@ function ProvenanceTag({ provenance }: { provenance: Provenance }) {
  * physician should care. Factual register, no scare copy.
  */
 const CHECK_EXPLANATIONS: Record<string, string> = {
+  "seo.redirect-chain":
+    "How many hops a patient's browser takes before your page starts loading. Each redirect adds waiting time before anything appears on screen.",
   "seo.https":
     "Whether the connection between a patient's browser and this site is encrypted. Browsers mark unencrypted sites “Not secure,” and Google ranks them lower.",
   "seo.title":
@@ -517,7 +521,7 @@ function ComparisonBlock({ their, onRan }: { their: AuditResult; onRan: () => vo
             const ours = data.scores.performance;
             if (ours === null || ours < 90) {
               console.warn(
-                `BOOTH ALERT: comparison site ${COMPARISON_SITE} scored ${ours ?? "null"} ` +
+                `BOOTH ALERT: comparison site ${domainOf(COMPARISON_SITE)} scored ${ours ?? "null"} ` +
                   "(below 90). Investigate before the next demo."
               );
             }
@@ -564,7 +568,7 @@ function ComparisonBlock({ their, onRan }: { their: AuditResult; onRan: () => vo
     return (
       <div className="mb-10 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
         <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-6">
-          Auditing {COMPARISON_SITE} — live, not cached
+          Auditing {domainOf(COMPARISON_SITE)} — live, not cached
         </div>
         <StageList
           scanStage={scanStage}
@@ -1414,7 +1418,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
         {/* COMPARISON — only against a failing score, never against ourselves */}
         {s.performance !== null &&
           s.performance < 90 &&
-          domainOf(result.url).replace(/^www\./, "") !== COMPARISON_SITE && (
+          domainOf(result.url).replace(/^www\./, "") !== COMPARISON_HOST && (
             <ComparisonBlock
               key={`${result.url}-${result.fetchedAt}`}
               their={result}

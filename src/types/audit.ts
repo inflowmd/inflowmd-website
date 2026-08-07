@@ -89,7 +89,10 @@ export interface PlatformInfo {
 }
 
 export interface AuditResult {
+  /** Final measured URL, after following any redirect chain. */
   url: string;
+  /** The URL as typed/requested, present only when it redirected elsewhere. */
+  requestedUrl?: string;
   /**
    * Practice name, carried from the attendee list. Present on pre-warmed
    * results so the booth picker can search on it; absent for walk-up audits.

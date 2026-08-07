@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import http from "node:http";
 import { assertSafeUrl, isInternalAddress } from "./ssrfGuard";
 import { fetchHtml } from "./fetchHtml";
+import { resolveRedirectChain } from "./runAudit";
 import { rateLimit, resetRateLimit } from "./rateLimit";
 
 let passed = 0;
@@ -174,6 +175,48 @@ async function main(): Promise<void> {
       assert.equal(r.ok, true);
       assert.match(r.finalUrl ?? "", /\/landed$/);
       assert.match(r.html, /landed/);
+    } finally {
+      await new Promise<void>((r) => server.close(() => r()));
+    }
+  });
+
+  await check("RESOLVER: redirect chain resolution guards every hop", async () => {
+    const server = http.createServer((req, res) => {
+      if (req.url === "/to-metadata") {
+        res.writeHead(307, { Location: "http://169.254.169.254/latest/meta-data/" });
+        res.end();
+        return;
+      }
+      if (req.url === "/to-final") {
+        res.writeHead(307, { Location: "/landed" });
+        res.end();
+        return;
+      }
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end("<html><body>ok</body></html>");
+    });
+    await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
+    const port = (server.address() as { port: number }).port;
+
+    try {
+      const guard = async (u: string) => {
+        const parsed = new URL(u);
+        if (parsed.hostname === "127.0.0.1" && parsed.port === String(port)) {
+          return { ok: true } as const;
+        }
+        return assertSafeUrl(u);
+      };
+
+      // A hop to cloud metadata is refused mid-chain.
+      const blocked = await resolveRedirectChain(`http://127.0.0.1:${port}/to-metadata`, guard);
+      assert.equal(blocked.blocked, true, "metadata hop must be refused");
+      assert.equal(blocked.resolved, false);
+
+      // A benign chain resolves to its terminal URL with the hop counted.
+      const okChain = await resolveRedirectChain(`http://127.0.0.1:${port}/to-final`, guard);
+      assert.equal(okChain.resolved, true);
+      assert.equal(okChain.hops, 1);
+      assert.match(okChain.finalUrl, /\/landed$/);
     } finally {
       await new Promise<void>((r) => server.close(() => r()));
     }
