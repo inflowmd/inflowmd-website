@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prewarm": "tsx --env-file-if-exists=.env.local scripts/prewarm.ts",
+    "summarize": "tsx scripts/summarize.ts",
+    "test:model": "tsx src/lib/conversionModel.test.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.79",
@@ -32,7 +35,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
+    "playwright": "^1.61.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.9",
     "typescript": "^5"
   }
 }

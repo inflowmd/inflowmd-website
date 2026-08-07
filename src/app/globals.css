@@ -253,3 +253,124 @@ body {
     animation: none !important;
   }
 }
+
+/* Print styles — for the /audit and /clients confidential reports. */
+@media print {
+  .no-print { display: none !important; }
+  html, body { background: #ffffff !important; color: #0f172a !important; }
+  .audit-page,
+  .audit-page * {
+    color: #0f172a !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+  .audit-page .bg-dark,
+  .audit-page [class*="bg-white/"],
+  .audit-page [class*="bg-black/"] {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+  }
+  .audit-page a { color: #1d4ed8 !important; text-decoration: underline; }
+  .audit-page blockquote { color: #0f172a !important; border-color: #94a3b8 !important; }
+  .audit-page [class*="text-gray-"],
+  .audit-page [class*="text-white"] { color: #0f172a !important; }
+  .audit-page [class*="text-accent"] { color: #1d4ed8 !important; }
+  .audit-page [class*="text-red"] { color: #b91c1c !important; }
+  .audit-page [class*="text-amber"],
+  .audit-page [class*="text-orange"] { color: #b45309 !important; }
+  .audit-page [class*="text-emerald"] { color: #047857 !important; }
+  .audit-page section, .audit-page article { break-inside: avoid; }
+}
+
+/* ROI calculator sliders (/clients/atlanta-vein-center) */
+.roi-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.15);
+  outline: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.roi-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  background: #2d6cdf;
+  border: 3px solid #fff;
+  box-shadow: 0 0 12px rgba(45, 108, 223, 0.6);
+  cursor: pointer;
+}
+.roi-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  background: #2d6cdf;
+  border: 3px solid #fff;
+  box-shadow: 0 0 12px rgba(45, 108, 223, 0.6);
+  cursor: pointer;
+}
+.roi-slider:focus-visible {
+  box-shadow: 0 0 0 3px rgba(45, 108, 223, 0.4);
+}
+
+/* PSI-style gauge sweep — plays once on load, never resets */
+@keyframes gauge-sweep-in {
+  from { stroke-dashoffset: var(--gauge-circ); }
+}
+.gauge-sweep {
+  animation: gauge-sweep-in 1.2s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gauge-sweep { animation: none; }
+}
+
+/* Booth audit sliders — fingertip-sized targets for a trackpad in a hurry. */
+.booth-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 44px;               /* full 44px hit target */
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.booth-slider::-webkit-slider-runnable-track {
+  height: 10px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.booth-slider::-moz-range-track {
+  height: 10px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.booth-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  margin-top: -11px;          /* centre the 32px thumb on the 10px track */
+  border-radius: 9999px;
+  background: #84b83b;
+  border: 3px solid #081c34;
+  box-shadow: 0 0 0 1px rgba(132, 184, 59, 0.6);
+  cursor: pointer;
+}
+.booth-slider::-moz-range-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  background: #84b83b;
+  border: 3px solid #081c34;
+  box-shadow: 0 0 0 1px rgba(132, 184, 59, 0.6);
+  cursor: pointer;
+}
+.booth-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(132, 184, 59, 0.45);
+}

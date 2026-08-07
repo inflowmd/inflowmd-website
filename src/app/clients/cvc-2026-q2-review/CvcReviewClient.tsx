@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   BarChart,
   Bar,
@@ -1072,7 +1073,9 @@ function MarketPosition() {
 
 type PlanItem = {
   title: string;
-  body: string;
+  body?: string;
+  bullets?: string[];
+  demoUrl?: string;
   status: "next" | "done";
   accent?: boolean;
   priority?: boolean; // renders the ReviewsGapBars + Priority #1 pill
@@ -1081,15 +1084,21 @@ type PlanItem = {
 const PLAN_ITEMS: PlanItem[] = [
   {
     title: "Priority #1 — The Next.js rebuild",
-    body:
-      "The single highest-impact move. Rebuild your site on our modern Next.js platform: sub-1-second mobile loads, medical structured data (MedicalClinic, Physician, FAQ schema) that AI engines read natively, and every page indexed by Google. This is the technical foundation that locks in your AI Overview lead, protects your #1 organic results as the chain competes for the map pack, and puts every ranking gain we make on top of an architecture that can hold it. Detail in “Removing the ceiling” below.",
+    bullets: [
+      "Sub-1-second mobile loads → every second saved = 7% more conversions",
+      "100% of pages indexed by Google (up from <50% today)",
+      "Native medical schema — ChatGPT & Google AI cite you as the answer",
+      "Locks in your AI Overview lead and protects your #1 organic results",
+      "See it live on our premier vein practice: Florida Vascular Care",
+    ],
+    demoUrl: "https://thefloridavascularcare.com",
     status: "next",
     accent: true,
   },
   {
     title: "Close the reviews gap",
     body:
-      "Your competitors carry up to 86+ Google reviews; you have 10. A high-impact lever for local ranking and call conversion. This month we're relaunching your review-request system with a done-for-you workflow so requests go out consistently after every visit — goal: 30+ total reviews (from 10 today) in 90 days.",
+      "Your competitors carry up to 86+ Google reviews; you have 10. A high-impact lever for local ranking and call conversion.",
     status: "next",
     priority: true,
   },
@@ -1098,12 +1107,6 @@ const PLAN_ITEMS: PlanItem[] = [
     body:
       "4,451 impressions currently waiting at position ~24 — our next content move targets page 1.",
     status: "next",
-  },
-  {
-    title: "Patient-conversion tracking now live",
-    body:
-      "From this month forward we measure actual patient inquiries — calls and form fills — not just traffic. Every marketing dollar becomes attributable.",
-    status: "done",
   },
   {
     title: "Full technical audit completed this week",
@@ -1164,9 +1167,35 @@ function NinetyDayPlan() {
                         {isDone ? "Done" : "Next"}
                       </span>
                     </div>
-                    <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
-                      {p.body}
-                    </p>
+                    {p.body && (
+                      <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
+                        {p.body}
+                      </p>
+                    )}
+                    {p.bullets && (
+                      <ul className="space-y-1.5 mt-1">
+                        {p.bullets.map((b) => (
+                          <li
+                            key={b}
+                            className="text-gray-200 text-sm sm:text-base font-medium leading-snug flex items-start gap-2"
+                          >
+                            <span className="text-accent-light mt-0.5 shrink-0">→</span>
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {p.demoUrl && (
+                      <a
+                        href={p.demoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 mt-4 rounded-xl bg-accent hover:bg-accent-light transition-colors px-5 py-3 text-white font-bold text-sm shadow-[0_0_20px_rgba(45,108,223,0.35)]"
+                      >
+                        View live demo — Florida Vascular Care
+                        <span aria-hidden>→</span>
+                      </a>
+                    )}
                     {p.priority && (
                       <div className="mt-5 pt-5 border-t border-white/10">
                         <ReviewsGapBars />
@@ -1225,24 +1254,24 @@ function Milestones() {
           subtitle="Compounding growth. Each stage builds on the metrics from the one before."
         />
 
-        <div className="relative">
-          {/* Center connector line (desktop) */}
-          <div className="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-gradient-to-r from-accent/30 via-accent to-accent/30 mx-16" />
+        <div className="relative pt-10 md:pt-14">
+          {/* Center connector line — sits ABOVE the cards, aligned with the number badges */}
+          <div className="hidden md:block absolute top-[34px] left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent mx-24 z-0" />
 
-          <div className="grid md:grid-cols-3 gap-5 sm:gap-6">
+          <div className="grid md:grid-cols-3 gap-5 sm:gap-6 relative z-10">
             {MILESTONES.map((m, i) => (
               <FadeIn key={m.label} delay={i * 0.1}>
                 <div className="relative">
-                  {/* Dot */}
-                  <div className="hidden md:block absolute -top-1 left-1/2 -translate-x-1/2 z-10">
-                    <div className="w-4 h-4 rounded-full bg-accent shadow-[0_0_16px_rgba(45,108,223,0.6)] ring-4 ring-dark" />
+                  {/* Timeline number — sits above the card, centered on the connector line */}
+                  <div className="hidden md:flex absolute -top-[52px] left-1/2 -translate-x-1/2 z-20 items-center justify-center w-10 h-10 rounded-full bg-accent text-white text-base font-extrabold shadow-[0_0_16px_rgba(45,108,223,0.6)] ring-4 ring-[#080814]">
+                    {i + 1}
                   </div>
                   <div
                     className={`rounded-2xl border ${
                       i === 1
                         ? "border-accent/40 bg-gradient-to-br from-accent/[0.10] to-transparent"
                         : "border-white/10 bg-white/[0.03]"
-                    } p-5 sm:p-6 mt-8 md:mt-6`}
+                    } p-5 sm:p-6`}
                   >
                     <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent-light mb-2">
                       {m.label}
@@ -1273,14 +1302,14 @@ function Milestones() {
    9 — NEXT-LEVEL REBUILD
    ============================================================ */
 
-function GaugeRing({ score, label, tone }: { score: number; label: string; tone: "red" | "emerald" }) {
+function GaugeRing({ score, label, tone }: { score: number; label: string; tone: "amber" | "emerald" }) {
   // Static — no count-up animation, no observer, no reset risk.
   const radius = 46;
   const circumference = 2 * Math.PI * radius;
   const pct = score / 100;
   const dashOffset = circumference - pct * circumference;
-  const stroke = tone === "red" ? "#ef4444" : "#10b981";
-  const textColor = tone === "red" ? "text-red-400" : "text-emerald-400";
+  const stroke = tone === "amber" ? "#f59e0b" : "#10b981";
+  const textColor = tone === "amber" ? "text-amber-400" : "text-emerald-400";
   const display = score;
 
   return (
@@ -1313,30 +1342,62 @@ function GaugeRing({ score, label, tone }: { score: number; label: string; tone:
   );
 }
 
-const REBUILD_PROBLEMS = [
+const REBUILD_ROWS = [
   {
-    kicker: "Speed",
-    problem:
-      "Your mobile experience scores 75/100 and takes 4.7 seconds to load — most of your patients are 50+ searching on phones.",
-    solution:
-      "95+ scores, ~1 second loads. Same design, modern engine underneath.",
+    kicker: "Speed → conversions",
+    currentBullets: [
+      <><strong>75/100</strong> mobile score · <strong>4.7s</strong> load</>,
+      <>Most of your patients are 50+ searching on phones</>,
+      <>Every extra second above 1s bleeds bookings</>,
+    ],
+    rebuiltBullets: [
+      <><strong>95+/100</strong> mobile · <strong>~1s</strong> load</>,
+      <>Sharper design, modern engine, zero legacy drag</>,
+      <>Form and phone-tap conversion goes up on day one</>,
+    ],
     gauge: true,
   },
   {
-    kicker: "Visibility",
-    problem:
-      "Google currently indexes fewer than half your pages due to how the old platform structures them.",
-    solution:
-      "A modern architecture makes every page findable and rankable — server-rendered HTML, proper heading hierarchy, clean sitemap.",
+    kicker: "SEO — what we can rank",
+    currentBullets: [
+      <>Fewer than half your pages indexed by Google</>,
+      <>WordPress structure hides content from crawlers</>,
+      <>Can't rank pages Google can't see</>,
+    ],
+    rebuiltBullets: [
+      <>100% of pages server-rendered and indexable</>,
+      <>Clean sitemap, proper heading hierarchy, clean URLs</>,
+      <>Rank on the long-tail treatment terms you're missing today</>,
+    ],
   },
   {
-    kicker: "AI-search readiness",
-    problem:
-      "Patients increasingly ask ChatGPT and Google AI “who's the best vein doctor near me.” Your content is good enough to be the answer — but the site lacks the medical structured data AI engines read.",
-    solution:
-      "Ships with it natively: your credentials, treatments, and location machine-readable via MedicalClinic, Physician, and FAQ schema.",
+    kicker: "GEO — winning in AI search",
+    currentBullets: [
+      <>No medical structured data — AI engines guess</>,
+      <>Content is good enough to be the answer, but not machine-readable</>,
+      <>You already win 1 AI Overview; the others are up for grabs</>,
+    ],
+    rebuiltBullets: [
+      <>MedicalClinic + Physician + FAQ schema built in</>,
+      <>Credentials, treatments, location parsed cleanly by ChatGPT + Google AI</>,
+      <>Protects your existing AI Overview lead and extends it to higher-volume terms</>,
+    ],
   },
 ];
+
+function BulletList({ items, tone }: { items: ReactNode[]; tone: "amber" | "emerald" }) {
+  const arrow = tone === "amber" ? "text-amber-400" : "text-emerald-400";
+  return (
+    <ul className="space-y-2">
+      {items.map((it, i) => (
+        <li key={i} className="text-white text-sm sm:text-base font-medium flex items-start gap-2 leading-snug">
+          <span className={`${arrow} mt-0.5 shrink-0`}>→</span>
+          <span>{it}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 function NextLevel() {
   return (
@@ -1353,92 +1414,95 @@ function NextLevel() {
               .
             </>
           }
-          subtitle="Your current WordPress platform has structural limits no amount of optimization removes. Here's what the rebuild changes — and why the growth plan compounds faster on top of it."
+          subtitle="The growth system is working. The platform is the ceiling. The rebuild is what makes it all compound — faster site, more indexed pages, and native AI-search readiness."
         />
 
+        {/* Bold conversion stat callout */}
         <FadeIn>
-          <div className="max-w-4xl mx-auto mb-8 sm:mb-10 rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6 md:p-7">
-            <p className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed">
-              To be clear:{" "}
-              <strong className="text-white">
-                the growth system is working — the numbers above show it.
-              </strong>{" "}
-              These are structural limits of the WordPress platform itself, the same limits
-              every practice on it inherits. Optimization has taken it as far as it goes;
-              the rebuild removes the ceiling.
+          <div className="max-w-4xl mx-auto mb-8 sm:mb-10 rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/[0.12] to-transparent p-6 sm:p-8 text-center">
+            <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent-light mb-3">
+              Why the rebuild matters
+            </div>
+            <p className="text-white text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight">
+              Every second of load time is a <span className="text-accent-light">7% drop in conversions.</span>
+            </p>
+            <p className="text-gray-400 text-xs sm:text-sm mt-3">
+              Google / Deloitte — mobile commerce &amp; healthcare studies
             </p>
           </div>
         </FadeIn>
 
         <div className="space-y-6 sm:space-y-8">
-          {REBUILD_PROBLEMS.map((r, i) => (
+          {REBUILD_ROWS.map((r, i) => (
             <FadeIn key={r.kicker} delay={i * 0.08}>
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-6 sm:p-8">
-                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent-light mb-4">
+                <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-accent-light mb-5">
                   {r.kicker}
                 </div>
 
-                {r.gauge ? (
-                  <div className="grid lg:grid-cols-5 gap-6 sm:gap-8 items-center">
-                    <div className="lg:col-span-3">
-                      <div className="grid grid-cols-2 gap-4 mb-2">
-                        <div className="rounded-xl border border-red-400/30 bg-red-500/[0.06] p-4">
-                          <div className="text-[10px] font-bold tracking-wider uppercase text-red-300 mb-1">
-                            Current site
-                          </div>
-                          <p className="text-white text-sm sm:text-base leading-snug">
-                            <strong>75/100</strong> mobile · <strong>4.7s</strong> load
-                          </p>
-                        </div>
-                        <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/[0.06] p-4">
-                          <div className="text-[10px] font-bold tracking-wider uppercase text-emerald-300 mb-1">
-                            Rebuilt
-                          </div>
-                          <p className="text-white text-sm sm:text-base leading-snug">
-                            <strong>95+</strong> mobile · <strong>~1s</strong> load
-                          </p>
-                        </div>
-                      </div>
-                      <p className="text-white text-sm sm:text-base leading-relaxed mt-4">
-                        <strong className="text-white">Speed problem:</strong>{" "}
-                        <span className="text-gray-300">{r.problem}</span>
-                      </p>
-                      <p className="text-gray-300 text-sm sm:text-base leading-relaxed mt-2">
-                        <strong className="text-accent-light">The rebuild:</strong>{" "}
-                        {r.solution}
-                      </p>
+                <div className="grid lg:grid-cols-2 gap-4 sm:gap-5">
+                  <div className="rounded-xl border border-amber-400/30 bg-amber-500/[0.06] p-5">
+                    <div className="text-[10px] font-bold tracking-wider uppercase text-amber-300 mb-3">
+                      Current
                     </div>
-                    <div className="lg:col-span-2 flex items-center justify-around gap-4 pt-4 lg:pt-0 lg:border-l lg:border-white/10 lg:pl-6">
-                      <GaugeRing score={75} label="Current" tone="red" />
-                      <div className="text-gray-500 text-xl">→</div>
-                      <GaugeRing score={95} label="Rebuilt" tone="emerald" />
-                    </div>
+                    <BulletList items={r.currentBullets} tone="amber" />
                   </div>
-                ) : (
-                  <>
-                    <p className="text-white text-sm sm:text-base leading-relaxed mb-3">
-                      <strong>{r.kicker} problem:</strong>{" "}
-                      <span className="text-gray-300">{r.problem}</span>
-                    </p>
-                    <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-                      <strong className="text-accent-light">The rebuild:</strong>{" "}
-                      {r.solution}
-                    </p>
-                  </>
+                  <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/[0.06] p-5">
+                    <div className="text-[10px] font-bold tracking-wider uppercase text-emerald-300 mb-3">
+                      Rebuilt
+                    </div>
+                    <BulletList items={r.rebuiltBullets} tone="emerald" />
+                  </div>
+                </div>
+
+                {r.gauge && (
+                  <div className="flex items-center justify-around gap-4 mt-6 pt-6 border-t border-white/10">
+                    <GaugeRing score={75} label="Current" tone="amber" />
+                    <div className="text-gray-500 text-2xl">→</div>
+                    <GaugeRing score={95} label="Rebuilt" tone="emerald" />
+                  </div>
                 )}
               </div>
             </FadeIn>
           ))}
         </div>
 
+        {/* Florida Vascular Care — live demo */}
+        <FadeIn delay={0.12}>
+          <div className="mt-8 sm:mt-10 rounded-2xl border-2 border-accent/50 bg-gradient-to-br from-accent/[0.14] to-transparent p-6 sm:p-8">
+            <div className="grid md:grid-cols-[1fr_auto] gap-6 items-center">
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent-light mb-2">
+                  See it live
+                </div>
+                <h3 className="text-white text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-2">
+                  Florida Vascular Care
+                </h3>
+                <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
+                  Our premier vein practice on Next.js. Same architecture we&apos;d build for you —
+                  live, indexed, and converting today.
+                </p>
+              </div>
+              <a
+                href="https://thefloridavascularcare.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent hover:bg-accent-light transition-colors px-6 py-4 text-white font-bold text-sm sm:text-base shadow-[0_0_24px_rgba(45,108,223,0.4)] whitespace-nowrap"
+              >
+                View live demo
+                <span aria-hidden>→</span>
+              </a>
+            </div>
+          </div>
+        </FadeIn>
+
         <FadeIn delay={0.16}>
-          <div className="mt-8 sm:mt-10 rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/[0.10] to-transparent p-6 sm:p-8 text-center">
+          <div className="mt-8 sm:mt-10 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8 text-center">
             <p className="text-white text-base sm:text-lg md:text-xl leading-relaxed max-w-3xl mx-auto">
               <strong className="text-accent-light">
-                The rebuild doesn&apos;t replace the growth plan — it&apos;s what lets the
-                growth plan compound.
+                The rebuild doesn&apos;t replace the growth plan — it&apos;s what lets it compound.
               </strong>{" "}
-              Same content, modern engine, delivered in weeks.
+              Sharper design, deeper content, modern engine — delivered in weeks.
             </p>
           </div>
         </FadeIn>
@@ -1475,15 +1539,6 @@ function FooterCTA() {
             </p>
             <p className="text-accent-light text-sm sm:text-base font-semibold">
               Founder — InflowMD
-            </p>
-            <p className="text-gray-300 text-sm sm:text-base mt-3">
-              <a
-                href="mailto:clayton@inflowmd.com?subject=Q2%20review%20follow-up"
-                className="hover:text-accent-light transition-colors"
-              >
-                clayton@inflowmd.com
-              </a>{" "}
-              · <span className="text-gray-400">PHONE_HERE</span>
             </p>
           </div>
         </FadeIn>

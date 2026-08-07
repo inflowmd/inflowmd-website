@@ -1,0 +1,525 @@
+{
+  "generatedAt": "2026-08-07T05:26:53.782Z",
+  "count": 3,
+  "results": [
+    {
+      "url": "https://thefloridavascularcare.com",
+      "fetchedAt": "2026-08-07T05:25:52.734Z",
+      "fromCache": false,
+      "performance": {
+        "available": true,
+        "lighthouseScore": 90,
+        "lcp": 3.3,
+        "cls": 0,
+        "tbt": 107,
+        "speedIndex": 3.66,
+        "fieldDataAvailable": false,
+        "fieldLcp": null
+      },
+      "htmlFetch": {
+        "ok": true,
+        "statusCode": 200,
+        "blocked": false
+      },
+      "platform": {
+        "platform": null,
+        "version": null,
+        "vendor": null,
+        "builders": [],
+        "evidence": []
+      },
+      "seo": [
+        {
+          "id": "seo.https",
+          "label": "Secure connection",
+          "status": "pass",
+          "detail": "Your site loads over a secure connection, which patients' browsers and Google both expect.",
+          "evidence": "https://"
+        },
+        {
+          "id": "seo.title",
+          "label": "Page title",
+          "status": "pass",
+          "detail": "Your page title is 55 characters \u2014 a good length to display in full.",
+          "evidence": "Florida Vascular Care | Dr. Hany Anton, MD, MBA, FASDIN"
+        },
+        {
+          "id": "seo.meta-description",
+          "label": "Search result description",
+          "status": "warn",
+          "detail": "Your search description is 160 characters and will be trimmed mid-sentence in results.",
+          "evidence": "Minimally invasive vascular care in Pompano Beach, FL \u2014 Dr. Hany Anton treats varicose veins, arterial disease, and dialysis access. 20+ years&#x27; experience."
+        },
+        {
+          "id": "seo.h1",
+          "label": "Main page heading",
+          "status": "pass",
+          "detail": "This page has one clear main heading, which tells search engines what it is about.",
+          "evidence": "Don&#x27;t let vein disease hold you back."
+        },
+        {
+          "id": "seo.heading-order",
+          "label": "Heading structure",
+          "status": "pass",
+          "detail": "Your headings step down in order, so the page reads as a clear outline.",
+          "evidence": "21 headings, in order"
+        },
+        {
+          "id": "seo.viewport",
+          "label": "Mobile display setting",
+          "status": "pass",
+          "detail": "This page is set up to resize properly on phones.",
+          "evidence": "width=device-width, initial-scale=1"
+        },
+        {
+          "id": "seo.canonical",
+          "label": "Preferred page address",
+          "status": "pass",
+          "detail": "This page tells search engines which web address is the official one, which prevents duplicate versions competing with each other.",
+          "evidence": "https://thefloridavascularcare.com"
+        },
+        {
+          "id": "seo.open-graph",
+          "label": "Social sharing preview",
+          "status": "pass",
+          "detail": "When someone shares your page in a text or on social media, it will show a proper title, description and image.",
+          "evidence": "og:title, og:description, og:image all present"
+        },
+        {
+          "id": "seo.image-alt",
+          "label": "Image descriptions",
+          "status": "warn",
+          "detail": "4 of your 28 images have no written description, so search engines and screen readers cannot tell what they show.",
+          "evidence": "24 of 28 images have alt text"
+        }
+      ],
+      "schema": [
+        {
+          "id": "schema.present",
+          "label": "Machine-readable practice details",
+          "status": "pass",
+          "detail": "This page publishes 4 machine-readable descriptions that search engines and AI assistants can read directly.",
+          "evidence": "GeoCoordinates, LocalBusiness, MedicalBusiness, PostalAddress"
+        },
+        {
+          "id": "schema.medical",
+          "label": "Medical practice identification",
+          "status": "pass",
+          "detail": "Search engines can tell this site belongs to a medical practice, which is what makes you eligible to appear for treatment searches.",
+          "evidence": "Found: MedicalBusiness"
+        },
+        {
+          "id": "schema.local-business",
+          "label": "Local listing details",
+          "status": "pass",
+          "detail": "Your practice is described as a local business, which is how your address, phone number and hours reach local search results.",
+          "evidence": "Found: MedicalBusiness, LocalBusiness"
+        },
+        {
+          "id": "schema.faq",
+          "label": "Frequently asked questions",
+          "status": "warn",
+          "detail": "No patient questions are marked up on this page, so you are not eligible for the expandable answers competitors can win."
+        },
+        {
+          "id": "schema.organization",
+          "label": "Organization details",
+          "status": "pass",
+          "detail": "The practice is described as an organization, which lets search engines connect your name, logo and official profiles.",
+          "evidence": "Found: MedicalBusiness, LocalBusiness"
+        }
+      ],
+      "aiReadiness": [
+        {
+          "id": "ai.robots-file",
+          "label": "Crawler instructions file",
+          "status": "pass",
+          "detail": "Your site publishes crawler instructions, so you control what search engines and AI tools may read.",
+          "evidence": "robots.txt found"
+        },
+        {
+          "id": "ai.crawler-access",
+          "label": "AI assistant access",
+          "status": "pass",
+          "detail": "AI assistants such as ChatGPT, Claude and Perplexity are all allowed to read your site, so they can cite you when patients ask about your treatments.",
+          "evidence": "Allowed: GPTBot, ClaudeBot, PerplexityBot, Google-Extended"
+        },
+        {
+          "id": "ai.llms-txt",
+          "label": "AI content guide",
+          "status": "pass",
+          "detail": "Your site publishes a guide telling AI assistants what it is about and which pages matter most.",
+          "evidence": "llms.txt found"
+        },
+        {
+          "id": "ai.semantic-structure",
+          "label": "Page structure for AI",
+          "status": "pass",
+          "detail": "Your headings form a clean outline, which is how AI assistants find the passage that answers a patient's question.",
+          "evidence": "21 headings, in order"
+        },
+        {
+          "id": "ai.content-depth",
+          "label": "Content depth",
+          "status": "pass",
+          "detail": "This page has enough written content for search engines and AI assistants to understand and quote it.",
+          "evidence": "721 words of page content"
+        }
+      ],
+      "scores": {
+        "performance": 90,
+        "seo": 89,
+        "seoVerified": 9,
+        "seoTotal": 9,
+        "schema": 90,
+        "schemaVerified": 5,
+        "schemaTotal": 5,
+        "aiReadiness": 100,
+        "aiReadinessVerified": 5,
+        "aiReadinessTotal": 5
+      },
+      "practiceName": "Florida Vascular Care"
+    },
+    {
+      "url": "https://veinclinics.com",
+      "fetchedAt": "2026-08-07T05:26:33.975Z",
+      "fromCache": false,
+      "performance": {
+        "available": true,
+        "lighthouseScore": 57,
+        "lcp": 8.8,
+        "cls": 0.001,
+        "tbt": 480,
+        "speedIndex": 3.79,
+        "fieldDataAvailable": true,
+        "fieldLcp": 1.85
+      },
+      "htmlFetch": {
+        "ok": true,
+        "statusCode": 200,
+        "blocked": false
+      },
+      "platform": {
+        "platform": "WordPress",
+        "version": null,
+        "vendor": null,
+        "builders": [],
+        "evidence": [
+          "asset path: /wp-includes/"
+        ]
+      },
+      "seo": [
+        {
+          "id": "seo.https",
+          "label": "Secure connection",
+          "status": "pass",
+          "detail": "Your site loads over a secure connection, which patients' browsers and Google both expect.",
+          "evidence": "https://"
+        },
+        {
+          "id": "seo.title",
+          "label": "Page title",
+          "status": "warn",
+          "detail": "Your page title is only 27 characters \u2014 there is room to say more about what you treat and where.",
+          "evidence": "America's Vein Care Experts"
+        },
+        {
+          "id": "seo.meta-description",
+          "label": "Search result description",
+          "status": "pass",
+          "detail": "Your search description is 127 characters \u2014 the right length to display in full.",
+          "evidence": "Learn about vein clinics in America with USA Vein Clinics. Information about vein disease, its symptoms, and treatment options."
+        },
+        {
+          "id": "seo.h1",
+          "label": "Main page heading",
+          "status": "pass",
+          "detail": "This page has one clear main heading, which tells search engines what it is about.",
+          "evidence": "Resources from America's Leading Vein Clinics"
+        },
+        {
+          "id": "seo.heading-order",
+          "label": "Heading structure",
+          "status": "warn",
+          "detail": "Your headings skip a level, which makes the page harder to follow for screen readers and search engines.",
+          "evidence": "Jumps from a level 1 heading to a level 4 heading"
+        },
+        {
+          "id": "seo.viewport",
+          "label": "Mobile display setting",
+          "status": "pass",
+          "detail": "This page is set up to resize properly on phones.",
+          "evidence": "width=device-width, initial-scale=1, maximum-scale=1"
+        },
+        {
+          "id": "seo.canonical",
+          "label": "Preferred page address",
+          "status": "pass",
+          "detail": "This page tells search engines which web address is the official one, which prevents duplicate versions competing with each other.",
+          "evidence": "https://www.veinclinics.com/"
+        },
+        {
+          "id": "seo.open-graph",
+          "label": "Social sharing preview",
+          "status": "pass",
+          "detail": "When someone shares your page in a text or on social media, it will show a proper title, description and image.",
+          "evidence": "og:title, og:description, og:image all present"
+        },
+        {
+          "id": "seo.image-alt",
+          "label": "Image descriptions",
+          "status": "warn",
+          "detail": "2 of your 56 images have no written description, so search engines and screen readers cannot tell what they show.",
+          "evidence": "54 of 56 images have alt text"
+        }
+      ],
+      "schema": [
+        {
+          "id": "schema.present",
+          "label": "Machine-readable practice details",
+          "status": "pass",
+          "detail": "This page publishes 12 machine-readable descriptions that search engines and AI assistants can read directly.",
+          "evidence": "Article, ContactPoint, ImageObject, MedicalClinic, Organization, Person, Place, PostalAddress, SearchAction, SpeakableSpecification, WebPage, WebSite"
+        },
+        {
+          "id": "schema.medical",
+          "label": "Medical practice identification",
+          "status": "pass",
+          "detail": "Search engines can tell this site belongs to a medical practice, which is what makes you eligible to appear for treatment searches.",
+          "evidence": "Found: MedicalClinic"
+        },
+        {
+          "id": "schema.local-business",
+          "label": "Local listing details",
+          "status": "pass",
+          "detail": "Your practice is described as a local business, which is how your address, phone number and hours reach local search results.",
+          "evidence": "Found: MedicalClinic"
+        },
+        {
+          "id": "schema.faq",
+          "label": "Frequently asked questions",
+          "status": "warn",
+          "detail": "No patient questions are marked up on this page, so you are not eligible for the expandable answers competitors can win."
+        },
+        {
+          "id": "schema.organization",
+          "label": "Organization details",
+          "status": "pass",
+          "detail": "The practice is described as an organization, which lets search engines connect your name, logo and official profiles.",
+          "evidence": "Found: Organization, MedicalClinic"
+        }
+      ],
+      "aiReadiness": [
+        {
+          "id": "ai.robots-file",
+          "label": "Crawler instructions file",
+          "status": "pass",
+          "detail": "Your site publishes crawler instructions, so you control what search engines and AI tools may read.",
+          "evidence": "robots.txt found"
+        },
+        {
+          "id": "ai.crawler-access",
+          "label": "AI assistant access",
+          "status": "pass",
+          "detail": "AI assistants such as ChatGPT, Claude and Perplexity are all allowed to read your site, so they can cite you when patients ask about your treatments.",
+          "evidence": "Allowed: GPTBot, ClaudeBot, PerplexityBot, Google-Extended"
+        },
+        {
+          "id": "ai.llms-txt",
+          "label": "AI content guide",
+          "status": "warn",
+          "detail": "Your site has no AI content guide \u2014 an emerging standard that tells AI assistants which of your pages matter most. Few practices have one yet, so adding it is an easy edge."
+        },
+        {
+          "id": "ai.semantic-structure",
+          "label": "Page structure for AI",
+          "status": "warn",
+          "detail": "Your headings skip a level, which makes it harder for AI assistants to work out how the sections relate.",
+          "evidence": "Jumps from a level 1 heading to a level 4 heading"
+        },
+        {
+          "id": "ai.content-depth",
+          "label": "Content depth",
+          "status": "pass",
+          "detail": "This page has enough written content for search engines and AI assistants to understand and quote it.",
+          "evidence": "485 words of page content"
+        }
+      ],
+      "scores": {
+        "performance": 57,
+        "seo": 83,
+        "seoVerified": 9,
+        "seoTotal": 9,
+        "schema": 90,
+        "schemaVerified": 5,
+        "schemaTotal": 5,
+        "aiReadiness": 80,
+        "aiReadinessVerified": 5,
+        "aiReadinessTotal": 5
+      },
+      "practiceName": "Vein Clinics of America"
+    },
+    {
+      "url": "https://centerforvein.com",
+      "fetchedAt": "2026-08-07T05:26:53.781Z",
+      "fromCache": false,
+      "performance": {
+        "available": true,
+        "lighthouseScore": 54,
+        "lcp": 14.47,
+        "cls": 0,
+        "tbt": 159,
+        "speedIndex": 9.36,
+        "fieldDataAvailable": true,
+        "fieldLcp": 2.45
+      },
+      "htmlFetch": {
+        "ok": false,
+        "statusCode": null,
+        "blocked": false,
+        "error": "The site did not respond within 8 seconds."
+      },
+      "platform": {
+        "platform": null,
+        "version": null,
+        "vendor": null,
+        "builders": [],
+        "evidence": []
+      },
+      "seo": [
+        {
+          "id": "seo.https",
+          "label": "Secure connection",
+          "status": "pass",
+          "detail": "Your site loads over a secure connection, which patients' browsers and Google both expect.",
+          "evidence": "https://"
+        },
+        {
+          "id": "seo.title",
+          "label": "Page title",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check this. It may well be fine."
+        },
+        {
+          "id": "seo.meta-description",
+          "label": "Search result description",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check this. It may well be fine."
+        },
+        {
+          "id": "seo.h1",
+          "label": "Main page heading",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check this. It may well be fine."
+        },
+        {
+          "id": "seo.heading-order",
+          "label": "Heading structure",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check this. It may well be fine."
+        },
+        {
+          "id": "seo.viewport",
+          "label": "Mobile display setting",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check this. It may well be fine."
+        },
+        {
+          "id": "seo.canonical",
+          "label": "Preferred page address",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check this. It may well be fine."
+        },
+        {
+          "id": "seo.open-graph",
+          "label": "Social sharing preview",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check this. It may well be fine."
+        },
+        {
+          "id": "seo.image-alt",
+          "label": "Image descriptions",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check this. It may well be fine."
+        }
+      ],
+      "schema": [
+        {
+          "id": "schema.present",
+          "label": "Machine-readable practice details",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check this. It may well be fine."
+        },
+        {
+          "id": "schema.medical",
+          "label": "Medical practice identification",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check this. It may well be fine."
+        },
+        {
+          "id": "schema.local-business",
+          "label": "Local listing details",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check this. It may well be fine."
+        },
+        {
+          "id": "schema.faq",
+          "label": "Frequently asked questions",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check this. It may well be fine."
+        },
+        {
+          "id": "schema.organization",
+          "label": "Organization details",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check this. It may well be fine."
+        }
+      ],
+      "aiReadiness": [
+        {
+          "id": "ai.robots-file",
+          "label": "Crawler instructions file",
+          "status": "could_not_verify",
+          "detail": "We could not reach your robots.txt file, so we did not check what it allows. It may well be fine."
+        },
+        {
+          "id": "ai.crawler-access",
+          "label": "AI assistant access",
+          "status": "could_not_verify",
+          "detail": "We could not read your crawler instructions, so we cannot say whether AI assistants are allowed to read your site."
+        },
+        {
+          "id": "ai.llms-txt",
+          "label": "AI content guide",
+          "status": "could_not_verify",
+          "detail": "We could not check for an AI content guide on your site."
+        },
+        {
+          "id": "ai.semantic-structure",
+          "label": "Page structure for AI",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not check its structure. It may well be fine."
+        },
+        {
+          "id": "ai.content-depth",
+          "label": "Content depth",
+          "status": "could_not_verify",
+          "detail": "We could not read this page, so we did not measure how much content it has."
+        }
+      ],
+      "scores": {
+        "performance": 54,
+        "seo": null,
+        "seoVerified": 1,
+        "seoTotal": 9,
+        "schema": null,
+        "schemaVerified": 0,
+        "schemaTotal": 5,
+        "aiReadiness": null,
+        "aiReadinessVerified": 0,
+        "aiReadinessTotal": 5
+      },
+      "practiceName": "Center for Vein Restoration"
+    }
+  ]
+}

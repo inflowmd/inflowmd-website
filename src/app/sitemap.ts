@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const BASE = "https://inflowmd.vercel.app";
+const BASE = "https://www.inflowmd.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
