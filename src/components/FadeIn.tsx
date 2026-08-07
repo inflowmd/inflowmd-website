@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { LazyMotion, domAnimation, m } from "framer-motion";
 import { ReactNode } from "react";
 
 export default function FadeIn({
@@ -22,7 +22,8 @@ export default function FadeIn({
   };
 
   return (
-    <motion.div
+    <LazyMotion features={domAnimation} strict>
+    <m.div
       initial={{ opacity: 0, ...directionMap[direction] }}
       whileInView={{ opacity: 1, y: 0, x: 0 }}
       viewport={{ once: true, margin: "-80px" }}
@@ -30,6 +31,7 @@ export default function FadeIn({
       className={className}
     >
       {children}
-    </motion.div>
+    </m.div>
+    </LazyMotion>
   );
 }

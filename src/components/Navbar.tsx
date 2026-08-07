@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
 const serviceLinks = [
@@ -35,6 +35,7 @@ export default function Navbar() {
   };
 
   return (
+    <LazyMotion features={domAnimation} strict>
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
@@ -80,7 +81,7 @@ export default function Navbar() {
 
             <AnimatePresence>
               {servicesOpen && (
-                <motion.div
+                <m.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 8 }}
@@ -98,7 +99,7 @@ export default function Navbar() {
                       </a>
                     ))}
                   </div>
-                </motion.div>
+                </m.div>
               )}
             </AnimatePresence>
           </div>
@@ -154,7 +155,7 @@ export default function Navbar() {
       {/* Mobile Menu */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
+          <m.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -181,7 +182,7 @@ export default function Navbar() {
               </button>
               <AnimatePresence>
                 {mobileServicesOpen && (
-                  <motion.div
+                  <m.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
@@ -199,7 +200,7 @@ export default function Navbar() {
                         </a>
                       ))}
                     </div>
-                  </motion.div>
+                  </m.div>
                 )}
               </AnimatePresence>
 
@@ -232,9 +233,10 @@ export default function Navbar() {
                 Free Audit
               </a>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </nav>
+    </LazyMotion>
   );
 }

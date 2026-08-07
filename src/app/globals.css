@@ -405,3 +405,20 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .booth-sweep-bar, .booth-pop { animation: none; }
 }
+
+/* Hero entrance — CSS-driven so the LCP element paints immediately instead
+   of waiting for JS hydration. Same 0.6s ease-out fade-up as the framer
+   version it replaces; stagger via inline animation-delay. */
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes hero-fade-left {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: none; }
+}
+.hero-fade-up { animation: hero-fade-up 0.6s ease-out both; }
+.hero-fade-left { animation: hero-fade-left 0.6s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-fade-up, .hero-fade-left { animation: none; }
+}

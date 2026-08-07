@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import FadeIn from "./FadeIn";
+import { LazyMotion, domAnimation, m } from "framer-motion";
 
 const chartData = [28, 35, 32, 45, 42, 55, 52, 65, 60, 72, 68, 82];
 const words = ["practice", "patients", "revenue", "rankings", "reputation"];
@@ -42,6 +41,7 @@ function RotatingWord() {
 
 export default function Hero() {
   return (
+    <LazyMotion features={domAnimation} strict>
     <section className="relative overflow-hidden bg-dark pt-28 pb-12 md:pt-32 md:pb-20">
       {/* Mesh gradient background */}
       <div className="absolute inset-0 overflow-hidden">
@@ -59,29 +59,30 @@ export default function Hero() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center w-full">
           {/* Left - Copy */}
           <div>
-            <FadeIn>
+            <div className="hero-fade-up">
               <p className="text-accent font-semibold text-sm tracking-wide uppercase mb-4">
                 AI-Powered Healthcare Marketing
               </p>
-            </FadeIn>
+            </div>
 
-            <FadeIn delay={0.1}>
+            {/* The LCP element — must paint at first render, not post-hydration. */}
+            <div className="hero-fade-up" style={{ animationDelay: "0.1s" }}>
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
                 Smarter growth
                 <br />
                 for your <RotatingWord />
               </h1>
-            </FadeIn>
+            </div>
 
-            <FadeIn delay={0.2}>
+            <div className="hero-fade-up" style={{ animationDelay: "0.2s" }}>
               <p className="text-gray-400 text-base sm:text-lg max-w-xl mb-8 md:mb-8 leading-relaxed">
                 We combine AI-driven strategy with deep healthcare expertise to
                 help medical practices attract more patients, rank higher, and
                 grow predictably — without the guesswork.
               </p>
-            </FadeIn>
+            </div>
 
-            <FadeIn delay={0.3}>
+            <div className="hero-fade-up" style={{ animationDelay: "0.3s" }}>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 md:mb-0">
                 <a
                   href="/get-started"
@@ -96,11 +97,11 @@ export default function Hero() {
                   See Our Process
                 </a>
               </div>
-            </FadeIn>
+            </div>
           </div>
 
           {/* Right - Dashboard Mockup */}
-          <FadeIn delay={0.4} direction="left">
+          <div className="hero-fade-left" style={{ animationDelay: "0.4s" }}>
             <div className="relative max-w-[90vw] sm:max-w-none mx-auto">
               {/* Dashboard Card */}
               <div className="bg-dark-card/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 dashboard-shadow">
@@ -121,7 +122,7 @@ export default function Hero() {
                 {/* Chart */}
                 <div className="h-24 sm:h-32 flex items-end gap-1 sm:gap-1.5 mb-4 sm:mb-6">
                   {chartData.map((val, i) => (
-                    <motion.div
+                    <m.div
                       key={i}
                       initial={{ height: 0 }}
                       whileInView={{ height: `${val}%` }}
@@ -150,7 +151,7 @@ export default function Hero() {
               </div>
 
               {/* Floating AI Audit Badge */}
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, scale: 0.8, y: 20 }}
                 whileInView={{ opacity: 1, scale: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -177,11 +178,12 @@ export default function Hero() {
                     Score: 63/100
                   </p>
                 </div>
-              </motion.div>
+              </m.div>
             </div>
-          </FadeIn>
+          </div>
         </div>
       </div>
     </section>
+    </LazyMotion>
   );
 }
