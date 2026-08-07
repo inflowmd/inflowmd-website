@@ -107,7 +107,7 @@ function ProvenanceTag({ provenance }: { provenance: Provenance }) {
  */
 const CHECK_EXPLANATIONS: Record<string, string> = {
   "seo.https":
-    "Whether the connection between a patient's browser and this site is encrypted. Browsers mark unencrypted sites \u201cNot secure,\u201d and Google ranks them lower.",
+    "Whether the connection between a patient's browser and this site is encrypted. Browsers mark unencrypted sites “Not secure,” and Google ranks them lower.",
   "seo.title":
     "The headline Google shows in search results — often the first thing a prospective patient reads about the practice.",
   "seo.meta-description":
@@ -171,12 +171,22 @@ function FindingRow({ check }: { check: Check }) {
         <span className={`text-[11px] font-bold uppercase tracking-wider ${st.text}`}>
           {st.label}
         </span>
-        <span
+        {/* Inline SVG rather than a text glyph — immune to escaping bugs,
+            and the rotation animates cleaner. */}
+        <svg
           aria-hidden
-          className={`text-white/40 text-sm transition-transform ${open ? "rotate-180" : ""}`}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`w-4 h-4 shrink-0 text-white/40 transition-transform ${
+            open ? "rotate-180" : ""
+          }`}
         >
-          \u25be
-        </span>
+          <path d="m6 9 6 6 6-6" />
+        </svg>
       </button>
       {open && (
         <div className="px-4 pb-3.5 pl-[38px]">
