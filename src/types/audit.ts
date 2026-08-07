@@ -90,6 +90,11 @@ export interface PlatformInfo {
 
 export interface AuditResult {
   url: string;
+  /**
+   * Practice name, carried from the attendee list. Present on pre-warmed
+   * results so the booth picker can search on it; absent for walk-up audits.
+   */
+  practiceName?: string;
   /** ISO-8601 timestamp. Preserved verbatim when served from cache. */
   fetchedAt: string;
   /** True when this result came from the pre-warmed cache. */

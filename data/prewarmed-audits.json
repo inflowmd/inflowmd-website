@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-06T23:16:38.691Z",
+  "generatedAt": "2026-08-07T03:52:08.190Z",
   "count": 5,
   "results": [
     {
       "url": "https://vein-ity.com",
-      "fetchedAt": "2026-08-06T23:16:28.057Z",
+      "fetchedAt": "2026-08-07T03:51:55.029Z",
       "fromCache": false,
       "performance": {
         "available": false,
@@ -181,11 +181,12 @@
         "aiReadiness": 100,
         "aiReadinessVerified": 5,
         "aiReadinessTotal": 5
-      }
+      },
+      "practiceName": "Vein-ity Vein Care Centers of Kansas"
     },
     {
       "url": "https://thefloridavascularcare.com",
-      "fetchedAt": "2026-08-06T23:16:30.421Z",
+      "fetchedAt": "2026-08-07T03:51:57.379Z",
       "fromCache": false,
       "performance": {
         "available": false,
@@ -359,11 +360,12 @@
         "aiReadiness": 100,
         "aiReadinessVerified": 5,
         "aiReadinessTotal": 5
-      }
+      },
+      "practiceName": "Florida Vascular Care"
     },
     {
       "url": "https://cvcohio.com",
-      "fetchedAt": "2026-08-06T23:16:32.505Z",
+      "fetchedAt": "2026-08-07T03:52:00.555Z",
       "fromCache": false,
       "performance": {
         "available": false,
@@ -521,11 +523,12 @@
         "aiReadiness": null,
         "aiReadinessVerified": 0,
         "aiReadinessTotal": 5
-      }
+      },
+      "practiceName": "Comprehensive Vein Care"
     },
     {
       "url": "https://veinclinics.com",
-      "fetchedAt": "2026-08-06T23:16:36.291Z",
+      "fetchedAt": "2026-08-07T03:52:04.729Z",
       "fromCache": false,
       "performance": {
         "available": false,
@@ -700,11 +703,12 @@
         "aiReadiness": 80,
         "aiReadinessVerified": 5,
         "aiReadinessTotal": 5
-      }
+      },
+      "practiceName": "Vein Clinics of America"
     },
     {
       "url": "https://centerforvein.com",
-      "fetchedAt": "2026-08-06T23:16:38.677Z",
+      "fetchedAt": "2026-08-07T03:52:08.176Z",
       "fromCache": false,
       "performance": {
         "available": false,
@@ -877,7 +881,8 @@
         "aiReadiness": 90,
         "aiReadinessVerified": 5,
         "aiReadinessTotal": 5
-      }
+      },
+      "practiceName": "Center for Vein Restoration"
     }
   ]
 }

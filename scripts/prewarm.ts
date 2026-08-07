@@ -154,7 +154,7 @@ async function main(): Promise<void> {
     if (!normalized) {
       failures++;
       const message = `Invalid URL: "${row.url}"`;
-      results.push(erroredResult(row.url, message));
+      results.push({ ...erroredResult(row.url, message), practiceName: row.practice_name });
       console.log(`${counter} ${display} … SKIPPED — ${message}`);
       continue;
     }
@@ -163,6 +163,8 @@ async function main(): Promise<void> {
 
     try {
       const result = await runAudit(normalized);
+      // Carry the practice name through so the booth picker can search on it.
+      if (row.practice_name) result.practiceName = row.practice_name;
       results.push(result);
 
       const s = result.scores;
@@ -180,7 +182,7 @@ async function main(): Promise<void> {
       // One bad URL must never kill the run.
       failures++;
       const message = err instanceof Error ? err.message : "Audit threw an unknown error.";
-      results.push(erroredResult(normalized, message));
+      results.push({ ...erroredResult(normalized, message), practiceName: row.practice_name });
       console.log(`ERROR — ${message}`);
     }
 

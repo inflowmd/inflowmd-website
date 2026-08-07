@@ -328,3 +328,49 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .gauge-sweep { animation: none; }
 }
+
+/* Booth audit sliders — fingertip-sized targets for a trackpad in a hurry. */
+.booth-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 44px;               /* full 44px hit target */
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.booth-slider::-webkit-slider-runnable-track {
+  height: 10px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.booth-slider::-moz-range-track {
+  height: 10px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.booth-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  margin-top: -11px;          /* centre the 32px thumb on the 10px track */
+  border-radius: 9999px;
+  background: #84b83b;
+  border: 3px solid #081c34;
+  box-shadow: 0 0 0 1px rgba(132, 184, 59, 0.6);
+  cursor: pointer;
+}
+.booth-slider::-moz-range-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  background: #84b83b;
+  border: 3px solid #081c34;
+  box-shadow: 0 0 0 1px rgba(132, 184, 59, 0.6);
+  cursor: pointer;
+}
+.booth-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(132, 184, 59, 0.45);
+}
