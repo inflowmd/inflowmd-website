@@ -24,12 +24,32 @@ type Phase = "input" | "running" | "result";
 /** Matches the route's maxDuration so the client never gives up first. */
 const CLIENT_TIMEOUT_MS = 150_000;
 
+/**
+ * Each stage names its source. A line only ever resolves to its `done` label
+ * after the response has actually arrived — never on a timer.
+ */
 const SCAN_STAGES = [
-  "Measuring load speed",
-  "Reading the page",
-  "Checking structured data",
-  "Checking AI crawler access",
-  "Building the model",
+  {
+    running: "Connecting to Google PageSpeed Insights…",
+    done: "Google measurement received",
+    featured: true,
+  },
+  { running: "Reading the site's code…", done: "Site code read", featured: false },
+  {
+    running: "Checking how search engines see this practice…",
+    done: "Search visibility checked",
+    featured: false,
+  },
+  {
+    running: "Checking whether AI assistants (ChatGPT, Perplexity) can read this site…",
+    done: "AI assistant access checked",
+    featured: false,
+  },
+  {
+    running: "Checking medical practice identification (structured data)…",
+    done: "Practice identification checked",
+    featured: false,
+  },
 ];
 
 /* ---------- formatting ---------- */
@@ -80,37 +100,75 @@ function ProvenanceTag({ provenance }: { provenance: Provenance }) {
   );
 }
 
-/* ---------- score tile ---------- */
+/* ---------- circular gauge, Google PageSpeed color conventions ---------- */
 
-function ScoreTile({
-  label,
+/** 0–49 red, 50–89 amber, 90–100 green — exactly the bands PSI uses. */
+function gaugeColor(score: number | null): string {
+  if (score === null) return "rgba(255,255,255,0.3)";
+  if (score >= 90) return "#0cce6b";
+  if (score >= 50) return "#ffa400";
+  return "#ff4e42";
+}
+
+function Gauge({
   score,
+  label,
   verified,
   total,
+  size = 110,
+  valueClass = "text-3xl",
 }: {
-  label: string;
   score: number | null;
+  label?: string;
   verified?: number;
   total?: number;
+  size?: number;
+  valueClass?: string;
 }) {
-  const tone =
-    score === null
-      ? "text-white/40"
-      : score >= 90
-        ? "text-[#84B83B]"
-        : score >= 50
-          ? "text-amber-300"
-          : "text-red-400";
+  const color = gaugeColor(score);
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  const offset = score === null ? circumference : circumference * (1 - score / 100);
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4 min-w-0">
-      <div className={`text-4xl sm:text-5xl font-extrabold tabular-nums leading-none ${tone}`}>
-        {score === null ? "—" : score}
+    <div className="flex flex-col items-center min-w-0">
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
+          <circle
+            cx="60"
+            cy="60"
+            r={radius}
+            strokeWidth="8"
+            stroke={score === null ? "rgba(255,255,255,0.12)" : `${color}29`}
+            fill="none"
+          />
+          <circle
+            cx="60"
+            cy="60"
+            r={radius}
+            strokeWidth="8"
+            stroke={color}
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span
+            className={`font-extrabold tabular-nums ${valueClass}`}
+            style={{ color: score === null ? "rgba(255,255,255,0.4)" : color }}
+          >
+            {score === null ? "—" : score}
+          </span>
+        </div>
       </div>
-      <div className="text-[11px] uppercase tracking-wider text-white/55 mt-2 leading-snug">
-        {label}
-      </div>
+      {label && (
+        <div className="text-[11px] uppercase tracking-wider text-white/55 mt-2 text-center leading-snug">
+          {label}
+        </div>
+      )}
       {typeof verified === "number" && typeof total === "number" && (
-        <div className="text-[11px] text-white/35 mt-1 tabular-nums">
+        <div className="text-[11px] text-white/35 mt-0.5 tabular-nums">
           {verified} of {total} verified
         </div>
       )}
@@ -183,6 +241,10 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
   const [pendingUrl, setPendingUrl] = useState("");
   /** How many model beats are visible; large number = all (cached path). */
   const [revealed, setRevealed] = useState(999);
+  /** Per-stage outcomes, set only once the response has actually arrived. */
+  const [stageOutcomes, setStageOutcomes] = useState<boolean[] | null>(null);
+  /** The full chain and secondary sliders live behind this. */
+  const [showMath, setShowMath] = useState(false);
 
   // Conversion-model inputs — all default, none blank.
   const [monthlyVisitors, setMonthlyVisitors] = useState(800);
@@ -196,6 +258,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
   const revealTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const scanTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const slowTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const model = useMemo(() => {
@@ -222,9 +285,11 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
     if (revealTimer.current) clearInterval(revealTimer.current);
     if (scanTimer.current) clearInterval(scanTimer.current);
     if (slowTimer.current) clearTimeout(slowTimer.current);
+    if (holdTimer.current) clearTimeout(holdTimer.current);
     revealTimer.current = null;
     scanTimer.current = null;
     slowTimer.current = null;
+    holdTimer.current = null;
   }, []);
 
   const reset = useCallback(() => {
@@ -240,6 +305,8 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
     setSlowRun(false);
     setRunFailed(false);
     setPendingUrl("");
+    setStageOutcomes(null);
+    setShowMath(false);
   }, [clearTimers]);
 
   /** Cached path — no network, no reveal sequence. */
@@ -249,6 +316,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
       setError(null);
       setResult(p);
       setRevealed(999);
+      setShowMath(false);
       setPhase("result");
     },
     [clearTimers]
@@ -264,6 +332,8 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
       setResult(null);
       setRunFailed(false);
       setSlowRun(false);
+      setStageOutcomes(null);
+      setShowMath(false);
       setPhase("running");
       setScanStage(0);
       setPendingUrl(target);
@@ -312,13 +382,27 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
 
         const data = (await res.json()) as AuditResult;
         clearTimers();
-        setResult(data);
-        setPhase("result");
-        // Stagger paces the display of results that have ALREADY arrived.
-        setRevealed(0);
-        revealTimer.current = setInterval(() => {
-          setRevealed((n) => n + 1);
-        }, 380);
+        // The response is here — each line may now resolve, and only from what
+        // the data actually says. A stage whose work did not complete stays
+        // neutral rather than ticking green.
+        setStageOutcomes([
+          data.performance.available,
+          data.htmlFetch.ok,
+          data.scores.seo !== null,
+          data.scores.aiReadiness !== null,
+          data.scores.schema !== null,
+        ]);
+        setScanStage(SCAN_STAGES.length - 1);
+        // Brief hold so the resolutions are visible before the report opens.
+        holdTimer.current = setTimeout(() => {
+          setResult(data);
+          setPhase("result");
+          // Stagger paces the display of results that have ALREADY arrived.
+          setRevealed(0);
+          revealTimer.current = setInterval(() => {
+            setRevealed((n) => n + 1);
+          }, 380);
+        }, 1100);
       } catch (err) {
         clearTimers();
         const aborted = err instanceof Error && err.name === "AbortError";
@@ -393,37 +477,49 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
               </div>
               <ul className="space-y-4">
                 {SCAN_STAGES.map((stage, i) => {
-                  // Nothing here is ever marked complete. We receive no
-                  // progress events, so a green tick would assert a result we
-                  // do not have. Only the active line is emphasised.
-                  const active = !runFailed && i === scanStage;
-                  const reached = !runFailed && i <= scanStage;
+                  // While the response is in flight nothing resolves — a tick
+                  // would assert a result we do not have. Once stageOutcomes
+                  // arrives, each line resolves from what the data says.
+                  const outcome = stageOutcomes ? stageOutcomes[i] : null;
+                  const resolvedOk = outcome === true;
+                  const unresolvedFail = runFailed || outcome === false;
+                  const active = !runFailed && !stageOutcomes && i === scanStage;
+                  const reached = !runFailed && (stageOutcomes !== null || i <= scanStage);
+                  const featured = stage.featured && resolvedOk;
                   return (
                     <li
-                      key={stage}
-                      className="flex items-center gap-4 text-lg sm:text-2xl font-bold"
+                      key={stage.running}
+                      className={`flex items-center gap-4 font-bold ${
+                        featured ? "text-xl sm:text-3xl" : "text-lg sm:text-2xl"
+                      }`}
                     >
                       <span
                         className={`inline-block w-3 h-3 rounded-full shrink-0 ${
                           active ? "animate-pulse" : ""
                         }`}
                         style={{
-                          background: runFailed
-                            ? "rgba(255,255,255,0.18)"
-                            : active
-                              ? "rgba(255,255,255,0.75)"
-                              : "rgba(255,255,255,0.22)",
+                          background: resolvedOk
+                            ? ACCENT
+                            : unresolvedFail
+                              ? "rgba(255,255,255,0.18)"
+                              : active
+                                ? "rgba(255,255,255,0.75)"
+                                : "rgba(255,255,255,0.22)",
                         }}
                       />
                       <span
                         className={
-                          runFailed ? "text-white/35" : reached ? "text-white" : "text-white/35"
+                          unresolvedFail
+                            ? "text-white/35"
+                            : reached
+                              ? "text-white"
+                              : "text-white/35"
                         }
+                        style={featured ? { color: ACCENT } : undefined}
                       >
-                        {stage}
-                        {active ? "…" : ""}
+                        {resolvedOk ? stage.done : stage.running}
                       </span>
-                      {runFailed && (
+                      {unresolvedFail && (
                         <span className="text-[11px] font-bold uppercase tracking-wider text-white/30">
                           not completed
                         </span>
@@ -572,53 +668,81 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
           </button>
         </div>
 
-        {/* HERO — the one measured number everything flows from */}
-        {result.performance.lcp !== null ? (
-          <div className="mb-8">
-            <div className="mb-3">
-              <ProvenanceTag provenance="measured" />
-            </div>
-            <div className="text-lg sm:text-xl md:text-2xl text-white/70 leading-snug max-w-3xl">
-              On a typical phone connection, Google measures your main content at
-            </div>
-            <div
-              className="font-extrabold tabular-nums leading-[0.85] mt-1"
-              style={{ fontSize: "clamp(180px, 26vw, 240px)", color: ACCENT }}
-            >
-              {result.performance.lcp}
-              <span className="text-[0.35em] text-white/50">s</span>
-            </div>
-            <div className="text-sm text-white/40 mt-3">
-              Google PageSpeed Insights · Lighthouse LCP (mobile)
-            </div>
+        {/* HERO — the Lighthouse performance score, PSI-style */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="mb-4">
+            <ProvenanceTag provenance="measured" />
           </div>
-        ) : (
-          <div className="mb-8 rounded-xl border border-dashed border-white/25 bg-white/[0.03] p-6">
-            <div className="text-2xl font-extrabold text-white/70">Speed not measured</div>
-            <p className="text-white/45 mt-2 max-w-2xl">
+          <Gauge
+            score={s.performance}
+            size={240}
+            valueClass="text-7xl sm:text-8xl"
+          />
+          <div className="text-sm text-white/40 mt-4">
+            Google PageSpeed Insights · measured{" "}
+            {new Date(result.fetchedAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </div>
+          {s.performance === null && (
+            <p className="text-white/45 mt-2 max-w-xl text-center text-sm">
               {result.performance.error ??
-                "The performance test did not return a result, so the speed model below is unavailable."}
+                "The performance test did not return a result."}
             </p>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* scores with verified counts */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
-          <ScoreTile label="Performance" score={s.performance} />
-          <ScoreTile label="Search basics" score={s.seo} verified={s.seoVerified} total={s.seoTotal} />
-          <ScoreTile
+        {/* the four category gauges, verified counts kept */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Gauge label="Performance" score={s.performance} />
+          <Gauge label="Search basics" score={s.seo} verified={s.seoVerified} total={s.seoTotal} />
+          <Gauge
             label="Structured data"
             score={s.schema}
             verified={s.schemaVerified}
             total={s.schemaTotal}
           />
-          <ScoreTile
+          <Gauge
             label="AI readiness"
             score={s.aiReadiness}
             verified={s.aiReadinessVerified}
             total={s.aiReadinessTotal}
           />
         </div>
+
+        {/* LCP — demoted to a labeled, defined metric row */}
+        {result.performance.lcp !== null ? (
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 mb-10">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="text-white/60 text-sm sm:text-base">
+                  Largest Contentful Paint
+                </div>
+                <div className="text-2xl sm:text-3xl font-extrabold mt-0.5">
+                  {result.performance.lcp}s{" "}
+                  <span className="text-white/50 text-base sm:text-lg font-semibold">
+                    on a simulated mobile connection
+                  </span>
+                </div>
+                <p className="text-white/45 text-sm mt-2 max-w-2xl leading-snug">
+                  This is how long the main content takes to appear for a patient on a
+                  typical phone network — not on office wifi.
+                </p>
+              </div>
+              <ProvenanceTag provenance="measured" />
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-white/25 bg-white/[0.03] p-5 mb-10">
+            <div className="text-lg font-extrabold text-white/70">Speed not measured</div>
+            <p className="text-white/45 mt-1 max-w-2xl text-sm">
+              {result.performance.error ??
+                "The performance test did not return a result, so the speed model is unavailable."}
+            </p>
+          </div>
+        )}
 
         {/* conversion model */}
         {model ? (
@@ -635,90 +759,115 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
               </p>
             </div>
 
-            <div className="grid lg:grid-cols-[1fr_360px] gap-6">
-              {/* the chain, revealed as beats */}
-              <ol className="space-y-2">
-                {model.steps.map((step, i) => (
-                  <li
-                    key={step.label}
-                    className={`rounded-xl border border-white/10 bg-white/[0.03] p-4 transition-all duration-500 ${
-                      i < revealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="text-white/60 text-sm sm:text-base">{step.label}</div>
-                        <div className="text-xl sm:text-2xl font-extrabold mt-0.5">
-                          {step.value}
-                        </div>
-                      </div>
-                      <ProvenanceTag provenance={step.provenance} />
-                    </div>
-                    {step.source && (
-                      <div className="text-[11px] text-white/35 mt-2">
-                        {step.sourceUrl ? (
-                          <a
-                            href={step.sourceUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline decoration-white/20 hover:decoration-white/60"
-                          >
-                            {step.source}
-                          </a>
-                        ) : (
-                          step.source
-                        )}
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ol>
-
-              {/* sliders — always visible, never behind a toggle */}
-              <div className="space-y-3">
-                <Slider
-                  label="Monthly visitors"
-                  value={monthlyVisitors}
-                  min={100}
-                  max={5000}
-                  step={100}
-                  display={monthlyVisitors.toLocaleString("en-US")}
-                  onChange={setMonthlyVisitors}
-                />
-                <Slider
-                  label="How much of the gap is speed?"
-                  value={gapCaptureRate}
-                  min={0}
-                  max={1}
-                  step={0.05}
-                  display={pct(gapCaptureRate)}
-                  onChange={setGapCaptureRate}
-                />
-                <Slider
-                  label="Inquiries that become patients"
-                  value={closeRate}
-                  min={0.05}
-                  max={1}
-                  step={0.05}
-                  display={pct(closeRate)}
-                  onChange={setCloseRate}
-                />
-                <Slider
-                  label="Value per patient"
-                  value={avgPatientValue}
-                  min={500}
-                  max={10000}
-                  step={250}
-                  display={usd(avgPatientValue)}
-                  onChange={setAvgPatientValue}
-                />
-              </div>
+            {/* Default view: the number, one lever, the caveat. */}
+            <div className="max-w-xl">
+              <Slider
+                label="Monthly visitors"
+                value={monthlyVisitors}
+                min={100}
+                max={5000}
+                step={100}
+                display={monthlyVisitors.toLocaleString("en-US")}
+                onChange={setMonthlyVisitors}
+              />
             </div>
 
-            <div className="mt-6 rounded-xl border border-white/10 bg-black/25 p-5">
+            <div className="mt-4 rounded-xl border border-white/10 bg-black/25 p-5">
               <p className="text-white/50 text-sm leading-relaxed">{model.caveat}</p>
-              <p className="text-white/35 text-xs mt-3">{model.supportingStat}</p>
             </div>
+
+            {/* The full chain and remaining levers, behind an invitation to check us. */}
+            <button
+              type="button"
+              onClick={() => setShowMath((v) => !v)}
+              aria-expanded={showMath}
+              className="mt-4 inline-flex items-center gap-2 rounded-lg border border-white/15 px-5 text-sm sm:text-base font-bold text-white/80 hover:text-white hover:border-white/40 transition-colors"
+              style={{ minHeight: 44 }}
+            >
+              {showMath ? "Hide the math" : "Show the math"}
+              <span
+                aria-hidden
+                className={`transition-transform ${showMath ? "rotate-180" : ""}`}
+              >
+                ▾
+              </span>
+            </button>
+
+            {showMath && (
+              <div className="mt-5">
+                <div className="grid lg:grid-cols-[1fr_360px] gap-6">
+                  {/* the chain, provenance intact */}
+                  <ol className="space-y-2">
+                    {model.steps.map((step, i) => (
+                      <li
+                        key={step.label}
+                        className={`rounded-xl border border-white/10 bg-white/[0.03] p-4 transition-all duration-500 ${
+                          i < revealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="min-w-0">
+                            <div className="text-white/60 text-sm sm:text-base">{step.label}</div>
+                            <div className="text-xl sm:text-2xl font-extrabold mt-0.5">
+                              {step.value}
+                            </div>
+                          </div>
+                          <ProvenanceTag provenance={step.provenance} />
+                        </div>
+                        {step.source && (
+                          <div className="text-[11px] text-white/35 mt-2">
+                            {step.sourceUrl ? (
+                              <a
+                                href={step.sourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline decoration-white/20 hover:decoration-white/60"
+                              >
+                                {step.source}
+                              </a>
+                            ) : (
+                              step.source
+                            )}
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+
+                  {/* the remaining levers */}
+                  <div className="space-y-3">
+                    <Slider
+                      label="How much of the gap is speed?"
+                      value={gapCaptureRate}
+                      min={0}
+                      max={1}
+                      step={0.05}
+                      display={pct(gapCaptureRate)}
+                      onChange={setGapCaptureRate}
+                    />
+                    <Slider
+                      label="Inquiries that become patients"
+                      value={closeRate}
+                      min={0.05}
+                      max={1}
+                      step={0.05}
+                      display={pct(closeRate)}
+                      onChange={setCloseRate}
+                    />
+                    <Slider
+                      label="Value per patient"
+                      value={avgPatientValue}
+                      min={500}
+                      max={10000}
+                      step={250}
+                      display={usd(avgPatientValue)}
+                      onChange={setAvgPatientValue}
+                    />
+                  </div>
+                </div>
+                <p className="mt-4 text-white/35 text-xs">{model.supportingStat}</p>
+              </div>
+            )}
           </>
         ) : null}
 
