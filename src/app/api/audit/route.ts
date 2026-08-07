@@ -1,9 +1,18 @@
 import { NextResponse } from "next/server";
 import { normalizeUrl, runAudit } from "@/lib/runAudit";
 import { getCached } from "@/lib/cache";
+import { assertSafeUrl } from "@/lib/ssrfGuard";
+import { clientIp, rateLimit } from "@/lib/rateLimit";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
+
+/**
+ * Neutral rejection. The caller learns the address was refused and nothing
+ * else — an SSRF probe must not be able to read internal topology out of our
+ * error messages.
+ */
+const REFUSED = { error: "That address could not be audited." };
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -29,8 +38,9 @@ export async function POST(request: Request) {
 
   const force = payload.force === true;
 
-  // Pre-warmed hit: return immediately, preserving the original fetchedAt so
-  // the reader can see when it was actually measured.
+  // Cache hits are served before any limiting or outbound work: they make no
+  // network request, so they carry no abuse risk, and the booth picker must
+  // never be throttled.
   if (!force) {
     const cached = getCached(url);
     if (cached) {
@@ -40,9 +50,36 @@ export async function POST(request: Request) {
     }
   }
 
+  // From here we make outbound requests on the caller's behalf, so both the
+  // rate limit and the SSRF guard apply.
+  const limit = rateLimit(clientIp(request));
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Try again shortly." },
+      {
+        status: 429,
+        headers: {
+          "Cache-Control": "no-store",
+          "Retry-After": String(limit.retryAfter),
+        },
+      }
+    );
+  }
+
+  // Fail fast on internal targets. fetchHtml re-checks every redirect hop, so
+  // this is the outer of two layers rather than the only one.
+  const verdict = await assertSafeUrl(url);
+  if (!verdict.ok) {
+    return NextResponse.json(REFUSED, { status: 400, headers: { "Cache-Control": "no-store" } });
+  }
+
   const result = await runAudit(url);
 
   return NextResponse.json(result, {
-    headers: { "Cache-Control": "no-store", "X-Audit-Source": "live" },
+    headers: {
+      "Cache-Control": "no-store",
+      "X-Audit-Source": "live",
+      "X-RateLimit-Remaining": String(limit.remaining),
+    },
   });
 }

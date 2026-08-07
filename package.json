@@ -9,7 +9,9 @@
     "lint": "eslint",
     "prewarm": "tsx --env-file-if-exists=.env.local scripts/prewarm.ts",
     "summarize": "tsx scripts/summarize.ts",
-    "test:model": "tsx src/lib/conversionModel.test.ts"
+    "test:model": "tsx src/lib/conversionModel.test.ts",
+    "test:security": "tsx src/lib/ssrfGuard.test.ts",
+    "test": "npm run test:model && npm run test:security"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.79",
