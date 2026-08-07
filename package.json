@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "prewarm": "tsx scripts/prewarm.ts",
+    "prewarm": "tsx --env-file-if-exists=.env.local scripts/prewarm.ts",
     "summarize": "tsx scripts/summarize.ts",
     "test:model": "tsx src/lib/conversionModel.test.ts"
   },
