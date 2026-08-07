@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-08-07T18:53:56.464Z",
+  "generatedAt": "2026-08-07T19:28:08.281Z",
   "count": 3,
   "results": [
     {
       "url": "https://thefloridavascularcare.com",
-      "fetchedAt": "2026-08-07T18:53:12.502Z",
+      "fetchedAt": "2026-08-07T19:27:24.848Z",
       "fromCache": false,
       "performance": {
         "available": true,
-        "lighthouseScore": 66,
-        "lcp": 6.72,
-        "cls": 0,
-        "tbt": 92,
-        "speedIndex": 5.54,
+        "lighthouseScore": 90,
+        "lcp": 2.93,
+        "cls": 0.124,
+        "tbt": 38,
+        "speedIndex": 2.98,
         "fieldDataAvailable": false,
         "fieldLcp": null
       },
@@ -174,7 +174,7 @@
         }
       ],
       "scores": {
-        "performance": 66,
+        "performance": 90,
         "seo": 90,
         "seoVerified": 10,
         "seoTotal": 10,
@@ -190,15 +190,15 @@
     {
       "url": "https://www.veinclinics.com",
       "requestedUrl": "https://veinclinics.com",
-      "fetchedAt": "2026-08-07T18:53:31.969Z",
+      "fetchedAt": "2026-08-07T19:27:47.059Z",
       "fromCache": false,
       "performance": {
         "available": true,
-        "lighthouseScore": 60,
-        "lcp": 11.96,
+        "lighthouseScore": 47,
+        "lcp": 11.89,
         "cls": 0,
-        "tbt": 366,
-        "speedIndex": 3.9,
+        "tbt": 792,
+        "speedIndex": 5.93,
         "fieldDataAvailable": true,
         "fieldLcp": 1.85
       },
@@ -361,7 +361,7 @@
         }
       ],
       "scores": {
-        "performance": 60,
+        "performance": 47,
         "seo": 80,
         "seoVerified": 10,
         "seoTotal": 10,
@@ -377,15 +377,15 @@
     {
       "url": "https://www.centerforvein.com",
       "requestedUrl": "https://centerforvein.com",
-      "fetchedAt": "2026-08-07T18:53:56.456Z",
+      "fetchedAt": "2026-08-07T19:28:08.270Z",
       "fromCache": false,
       "performance": {
         "available": true,
-        "lighthouseScore": 49,
-        "lcp": 13.71,
+        "lighthouseScore": 55,
+        "lcp": 13.78,
         "cls": 0,
-        "tbt": 346,
-        "speedIndex": 8.75,
+        "tbt": 160,
+        "speedIndex": 8.88,
         "fieldDataAvailable": true,
         "fieldLcp": 2.45
       },
@@ -546,7 +546,7 @@
         }
       ],
       "scores": {
-        "performance": 49,
+        "performance": 55,
         "seo": 95,
         "seoVerified": 10,
         "seoTotal": 10,
