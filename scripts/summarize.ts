@@ -166,6 +166,45 @@ async function main(): Promise<void> {
     `  Blocking an AI crawler     ${String(blockingAi).padStart(3)} of ${total} sites`
   );
 
+  // --- Drift + stale entries ------------------------------------------------
+  try {
+    const hist = JSON.parse(
+      await readFile(path.resolve(process.cwd(), "data/prewarm-history.json"), "utf8")
+    ) as {
+      previous: Record<string, { practiceName?: string; url: string; score: number | null }> | null;
+      current: Record<string, { practiceName?: string; url: string; score: number | null }> | null;
+    };
+    if (hist.previous && hist.current) {
+      const moved: string[] = [];
+      for (const [key, now] of Object.entries(hist.current)) {
+        const before = hist.previous[key];
+        if (!before || before.score === null || now.score === null) continue;
+        const delta = now.score - before.score;
+        if (Math.abs(delta) >= 10) {
+          moved.push(
+            `  ${(now.practiceName ?? now.url).slice(0, 40).padEnd(42)} ${before.score} → ${now.score} (${delta > 0 ? "+" : ""}${delta})`
+          );
+        }
+      }
+      console.log(`\nCHANGED SINCE LAST RUN (±10 or more)`);
+      if (moved.length === 0) console.log("  (no score moved ±10)");
+      for (const line of moved) console.log(line);
+    }
+  } catch {
+    /* no history yet */
+  }
+
+  const stale = results.filter((r) => r.stale);
+  if (stale.length > 0) {
+    console.log(`\n${"!".repeat(64)}`);
+    console.log(`STALE ENTRIES — the cache is serving PRIOR results for:`);
+    for (const r of stale) {
+      console.log(`  !! ${(r.practiceName ?? r.url).slice(0, 44)}`);
+      if (r.staleNote) console.log(`     ${r.staleNote}`);
+    }
+    console.log(`${"!".repeat(64)}`);
+  }
+
   // --- Fetch failures -------------------------------------------------------
   const failed = results.filter((r) => !r.htmlFetch.ok);
   console.log(

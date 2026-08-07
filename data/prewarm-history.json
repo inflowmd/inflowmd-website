@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-08-07T19:45:22.816Z",
+  "previous": {
+    "thefloridavascularcare.com": {
+      "practiceName": "Florida Vascular Care",
+      "url": "https://thefloridavascularcare.com",
+      "score": 90,
+      "lcp": 2.93,
+      "fetchedAt": "2026-08-07T19:27:24.848Z"
+    },
+    "veinclinics.com": {
+      "practiceName": "Vein Clinics of America",
+      "url": "https://www.veinclinics.com",
+      "score": 47,
+      "lcp": 11.89,
+      "fetchedAt": "2026-08-07T19:27:47.059Z"
+    },
+    "centerforvein.com": {
+      "practiceName": "Center for Vein Restoration",
+      "url": "https://www.centerforvein.com",
+      "score": 55,
+      "lcp": 13.78,
+      "fetchedAt": "2026-08-07T19:28:08.270Z"
+    }
+  },
+  "current": {
+    "thefloridavascularcare.com": {
+      "practiceName": "Florida Vascular Care",
+      "url": "https://thefloridavascularcare.com",
+      "score": 65,
+      "lcp": 7.05,
+      "fetchedAt": "2026-08-07T19:44:34.165Z"
+    },
+    "veinclinics.com": {
+      "practiceName": "Vein Clinics of America",
+      "url": "https://www.veinclinics.com",
+      "score": 52,
+      "lcp": 11.73,
+      "fetchedAt": "2026-08-07T19:44:56.369Z"
+    },
+    "centerforvein.com": {
+      "practiceName": "Center for Vein Restoration",
+      "url": "https://www.centerforvein.com",
+      "score": 44,
+      "lcp": 13.83,
+      "fetchedAt": "2026-08-07T19:45:22.805Z"
+    }
+  }
+}
