@@ -470,18 +470,21 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
         {/* HERO — the one measured number everything flows from */}
         {result.performance.lcp !== null ? (
           <div className="mb-8">
-            <div className="mb-2">
+            <div className="mb-3">
               <ProvenanceTag provenance="measured" />
             </div>
+            <div className="text-lg sm:text-xl md:text-2xl text-white/70 leading-snug max-w-3xl">
+              On a typical phone connection, Google measures your main content at
+            </div>
             <div
-              className="font-extrabold tabular-nums leading-[0.85]"
+              className="font-extrabold tabular-nums leading-[0.85] mt-1"
               style={{ fontSize: "clamp(180px, 26vw, 240px)", color: ACCENT }}
             >
               {result.performance.lcp}
               <span className="text-[0.35em] text-white/50">s</span>
             </div>
-            <div className="text-lg sm:text-xl text-white/60 mt-2">
-              until the main content appears on a phone
+            <div className="text-sm text-white/40 mt-3">
+              Google PageSpeed Insights · Lighthouse LCP (mobile)
             </div>
           </div>
         ) : (
