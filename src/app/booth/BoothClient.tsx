@@ -24,6 +24,9 @@ type Phase = "input" | "running" | "result";
 /** Matches the route's maxDuration so the client never gives up first. */
 const CLIENT_TIMEOUT_MS = 150_000;
 
+/** The site the comparison button audits, live. Swappable in one line. */
+const COMPARISON_SITE = "inflowmd.com";
+
 /**
  * Each stage names its source. A line only ever resolves to its `done` label
  * after the response has actually arrived — never on a timer.
@@ -338,6 +341,341 @@ function Slider({
   );
 }
 
+/**
+ * The staged scan list, shared by the main run and the comparison run.
+ * Honesty invariant lives here: a line only ever resolves after the response
+ * has arrived, paced by resolvedCount.
+ */
+function StageList({
+  scanStage,
+  stageOutcomes,
+  resolvedCount,
+  runFailed,
+}: {
+  scanStage: number;
+  stageOutcomes: boolean[] | null;
+  resolvedCount: number;
+  runFailed: boolean;
+}) {
+  return (
+    <ul className="space-y-4">
+                {SCAN_STAGES.map((stage, i) => {
+                  // While the response is in flight nothing resolves — a tick
+                  // would assert a result we do not have. Once the response
+                  // arrives, lines flip to their final state one at a time
+                  // (resolvedCount walks top to bottom, Google last).
+                  const resolved = stageOutcomes !== null && i < resolvedCount;
+                  const outcome = resolved && stageOutcomes ? stageOutcomes[i] : null;
+                  const resolvedOk = outcome === true;
+                  const unresolvedFail = runFailed || outcome === false;
+                  // Google runs the whole time, so its line pulses from the
+                  // first frame until its own flip at the end.
+                  const active =
+                    !runFailed &&
+                    !resolved &&
+                    (i === PSI_STAGE || (!stageOutcomes && i === scanStage));
+                  const reached =
+                    !runFailed &&
+                    (stageOutcomes !== null || i <= scanStage || i === PSI_STAGE);
+                  const featured = stage.featured && resolvedOk;
+                  return (
+                    <li
+                      key={stage.running}
+                      className={`flex items-center gap-4 font-bold ${
+                        featured ? "text-xl sm:text-3xl" : "text-lg sm:text-2xl"
+                      }`}
+                    >
+                      {resolvedOk ? (
+                        <span
+                          className="booth-pop inline-flex items-center justify-center w-5 h-5 rounded-full shrink-0"
+                          style={{ background: ACCENT }}
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#fff"
+                            strokeWidth="3.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="w-3 h-3"
+                            aria-hidden
+                          >
+                            <path d="M20 6 9 17l-5-5" />
+                          </svg>
+                        </span>
+                      ) : active ? (
+                        <span className="inline-block w-3.5 h-3.5 rounded-full shrink-0 border-2 border-white/60 animate-pulse" />
+                      ) : (
+                        <span
+                          className="inline-block w-3 h-3 rounded-full shrink-0"
+                          style={{
+                            background: unresolvedFail
+                              ? "rgba(255,255,255,0.18)"
+                              : "rgba(255,255,255,0.22)",
+                          }}
+                        />
+                      )}
+                      <span
+                        className={
+                          unresolvedFail
+                            ? "text-white/35"
+                            : reached
+                              ? "text-white"
+                              : "text-white/35"
+                        }
+                        style={featured ? { color: ACCENT } : undefined}
+                      >
+                        {resolvedOk ? stage.done : stage.running}
+                      </span>
+                      {unresolvedFail && (
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-white/30">
+                          not completed
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+    </ul>
+  );
+}
+
+/**
+ * The comparison flex: a REAL live audit of COMPARISON_SITE, run on demand,
+ * never cached — the point is watching it happen. Self-contained state so a
+ * failure here can never corrupt the main report.
+ */
+function ComparisonBlock({ their, onRan }: { their: AuditResult; onRan: () => void }) {
+  const [state, setState] = useState<"prompt" | "running" | "done" | "failed">("prompt");
+  const [scanStage, setScanStage] = useState(0);
+  const [outcomes, setOutcomes] = useState<boolean[] | null>(null);
+  const [resolvedCount, setResolvedCount] = useState(0);
+  const [comparison, setComparison] = useState<AuditResult | null>(null);
+  const timers = useRef<{
+    scan: ReturnType<typeof setInterval> | null;
+    resolve: ReturnType<typeof setInterval> | null;
+    hold: ReturnType<typeof setTimeout> | null;
+    abort: AbortController | null;
+  }>({ scan: null, resolve: null, hold: null, abort: null });
+
+  const clearAll = useCallback(() => {
+    const t = timers.current;
+    if (t.scan) clearInterval(t.scan);
+    if (t.resolve) clearInterval(t.resolve);
+    if (t.hold) clearTimeout(t.hold);
+    t.abort?.abort();
+    timers.current = { scan: null, resolve: null, hold: null, abort: null };
+  }, []);
+
+  useEffect(() => () => clearAll(), [clearAll]);
+
+  const run = useCallback(async () => {
+    clearAll();
+    setState("running");
+    setScanStage(0);
+    setOutcomes(null);
+    setResolvedCount(0);
+
+    timers.current.scan = setInterval(() => {
+      setScanStage((v) => Math.min(v + 1, PSI_STAGE - 1));
+    }, 1600);
+
+    const controller = new AbortController();
+    timers.current.abort = controller;
+    const clientTimeout = setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS);
+
+    try {
+      const res = await fetch("/api/audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // force: the comparison is always live. Serving it from a cache would
+        // make "watch it happen" a lie.
+        body: JSON.stringify({ url: COMPARISON_SITE, force: true }),
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`comparison audit returned ${res.status}`);
+      const data = (await res.json()) as AuditResult;
+
+      if (timers.current.scan) clearInterval(timers.current.scan);
+      timers.current.scan = null;
+      setOutcomes([
+        data.htmlFetch.ok,
+        data.scores.seo !== null,
+        data.scores.aiReadiness !== null,
+        data.scores.schema !== null,
+        data.performance.available,
+      ]);
+      let flipped = 0;
+      timers.current.resolve = setInterval(() => {
+        flipped++;
+        setResolvedCount(flipped);
+        if (flipped >= SCAN_STAGES.length) {
+          if (timers.current.resolve) clearInterval(timers.current.resolve);
+          timers.current.resolve = null;
+          timers.current.hold = setTimeout(() => {
+            // If our own site is having a bad day, render it honestly — the
+            // tool does not lie about us either — but flag it loudly.
+            const ours = data.scores.performance;
+            if (ours === null || ours < 90) {
+              console.warn(
+                `BOOTH ALERT: comparison site ${COMPARISON_SITE} scored ${ours ?? "null"} ` +
+                  "(below 90). Investigate before the next demo."
+              );
+            }
+            setComparison(data);
+            setState("done");
+            onRan();
+          }, RESOLVE_HOLD_MS);
+        }
+      }, RESOLVE_STAGGER_MS);
+    } catch {
+      clearAll();
+      // A failed flex must never corrupt the main result — neutral, quiet.
+      setState("failed");
+    } finally {
+      clearTimeout(clientTimeout);
+      timers.current.abort = null;
+    }
+  }, [clearAll, onRan]);
+
+  /* ---------- render ---------- */
+
+  if (state === "prompt") {
+    return (
+      <div
+        className="mb-10 rounded-2xl border-2 p-6 sm:p-8 text-center"
+        style={{ borderColor: "rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.2)" }}
+      >
+        <h2 className="text-xl sm:text-2xl font-extrabold leading-tight">
+          Want to see what a passing score looks like?
+        </h2>
+        <button
+          type="button"
+          onClick={() => void run()}
+          className="mt-5 rounded-xl px-8 py-4 font-extrabold text-base sm:text-lg text-[#081C34] transition-opacity hover:opacity-90"
+          style={{ background: ACCENT, minHeight: 44 }}
+        >
+          Run this same test on a site we built
+        </button>
+      </div>
+    );
+  }
+
+  if (state === "running") {
+    return (
+      <div className="mb-10 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+        <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-6">
+          Auditing {COMPARISON_SITE} — live, not cached
+        </div>
+        <StageList
+          scanStage={scanStage}
+          stageOutcomes={outcomes}
+          resolvedCount={resolvedCount}
+          runFailed={false}
+        />
+        {!outcomes && (
+          <div className="mt-6 max-w-xl">
+            <p className="text-white/45 text-sm sm:text-base leading-snug">
+              Same test, same rules — Google is measuring our site right now.
+            </p>
+            <div className="booth-sweep-track mt-3" aria-hidden>
+              <div className="booth-sweep-bar" />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (state === "failed") {
+    return (
+      <div className="mb-10 rounded-2xl border border-dashed border-white/20 bg-white/[0.02] p-6 text-center">
+        <p className="text-white/55 font-semibold">Comparison unavailable</p>
+        <button
+          type="button"
+          onClick={() => void run()}
+          className="mt-3 rounded-lg border border-white/15 px-5 text-sm font-bold text-white/60 hover:text-white transition-colors"
+          style={{ minHeight: 44 }}
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
+  if (!comparison) return null;
+  const theirPerf = their.scores.performance;
+  const ourPerf = comparison.scores.performance;
+  const theirLcp = their.performance.lcp;
+  const ourLcp = comparison.performance.lcp;
+  const seconds = (v: number) => {
+    const n = Math.max(1, Math.round(v));
+    return `${n} second${n === 1 ? "" : "s"}`;
+  };
+
+  return (
+    <div className="mb-10 rounded-2xl border-2 p-6 sm:p-8" style={{ borderColor: `${ACCENT}55` }}>
+      <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-6 text-center">
+        Same test · measured just now
+      </div>
+
+      {/* the two performance gauges */}
+      <div className="flex items-start justify-center gap-10 sm:gap-20">
+        <Gauge score={theirPerf} label="Their practice site" size={150} valueClass="text-4xl" />
+        <Gauge score={ourPerf} label="Built by InflowMD" size={150} valueClass="text-4xl" />
+      </div>
+
+      {/* the patient-wait line — the centerpiece */}
+      {theirLcp !== null && ourLcp !== null && (
+        <p className="mt-8 text-center text-xl sm:text-2xl md:text-3xl font-extrabold leading-snug max-w-3xl mx-auto">
+          A patient waits{" "}
+          <span style={{ color: gaugeColor(theirPerf) }}>{seconds(theirLcp)}</span> for
+          this site —{" "}
+          <span style={{ color: gaugeColor(ourPerf) }}>{seconds(ourLcp)}</span> for ours.
+        </p>
+      )}
+
+      {/* four category scores, two compact columns */}
+      <div className="mt-8 grid grid-cols-2 gap-4 max-w-2xl mx-auto">
+        {[
+          { title: "Their practice site", r: their },
+          { title: "Built by InflowMD", r: comparison },
+        ].map(({ title, r }) => (
+          <div key={title} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="text-[11px] font-bold tracking-wider uppercase text-white/45 mb-3">
+              {title}
+            </div>
+            <ul className="space-y-2.5">
+              {[
+                { label: "Performance", score: r.scores.performance, v: null, t: null },
+                { label: "Search basics", score: r.scores.seo, v: r.scores.seoVerified, t: r.scores.seoTotal },
+                { label: "Structured data", score: r.scores.schema, v: r.scores.schemaVerified, t: r.scores.schemaTotal },
+                { label: "AI readiness", score: r.scores.aiReadiness, v: r.scores.aiReadinessVerified, t: r.scores.aiReadinessTotal },
+              ].map((row) => (
+                <li key={row.label} className="flex items-baseline justify-between gap-3">
+                  <span className="text-sm text-white/70 min-w-0">{row.label}</span>
+                  <span className="text-right shrink-0">
+                    <span
+                      className="text-lg font-extrabold tabular-nums"
+                      style={{ color: gaugeColor(row.score) }}
+                    >
+                      {row.score === null ? "—" : row.score}
+                    </span>
+                    {row.v !== null && row.t !== null && (
+                      <span className="block text-[10px] text-white/30 tabular-nums">
+                        {row.v} of {row.t} verified
+                      </span>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ============================================================ */
 
 export default function BoothClient({ practices }: { practices: AuditResult[] }) {
@@ -360,6 +698,8 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
   const [showMath, setShowMath] = useState(false);
   /** Booth CTA card flips to the in-person instruction when tapped. */
   const [ctaFlipped, setCtaFlipped] = useState(false);
+  /** True once a comparison has completed — the CTA sub-line references it. */
+  const [comparisonRan, setComparisonRan] = useState(false);
 
   // Conversion-model inputs — all default, none blank.
   const [monthlyVisitors, setMonthlyVisitors] = useState(800);
@@ -423,6 +763,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
     setResolvedCount(0);
     setShowMath(false);
     setCtaFlipped(false);
+    setComparisonRan(false);
   }, [clearTimers]);
 
   /** Cached path — no network, no reveal sequence. */
@@ -434,6 +775,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
       setRevealed(999);
       setShowMath(false);
       setCtaFlipped(false);
+      setComparisonRan(false);
       setPhase("result");
     },
     [clearTimers]
@@ -452,6 +794,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
       setResolvedCount(0);
       setShowMath(false);
       setCtaFlipped(false);
+      setComparisonRan(false);
       setPhase("running");
       setScanStage(0);
       setPendingUrl(target);
@@ -629,84 +972,12 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
               <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-6">
                 {runFailed ? "Audit did not complete" : `Auditing ${domainOf(pendingUrl)}`}
               </div>
-              <ul className="space-y-4">
-                {SCAN_STAGES.map((stage, i) => {
-                  // While the response is in flight nothing resolves — a tick
-                  // would assert a result we do not have. Once the response
-                  // arrives, lines flip to their final state one at a time
-                  // (resolvedCount walks top to bottom, Google last).
-                  const resolved = stageOutcomes !== null && i < resolvedCount;
-                  const outcome = resolved && stageOutcomes ? stageOutcomes[i] : null;
-                  const resolvedOk = outcome === true;
-                  const unresolvedFail = runFailed || outcome === false;
-                  // Google runs the whole time, so its line pulses from the
-                  // first frame until its own flip at the end.
-                  const active =
-                    !runFailed &&
-                    !resolved &&
-                    (i === PSI_STAGE || (!stageOutcomes && i === scanStage));
-                  const reached =
-                    !runFailed &&
-                    (stageOutcomes !== null || i <= scanStage || i === PSI_STAGE);
-                  const featured = stage.featured && resolvedOk;
-                  return (
-                    <li
-                      key={stage.running}
-                      className={`flex items-center gap-4 font-bold ${
-                        featured ? "text-xl sm:text-3xl" : "text-lg sm:text-2xl"
-                      }`}
-                    >
-                      {resolvedOk ? (
-                        <span
-                          className="booth-pop inline-flex items-center justify-center w-5 h-5 rounded-full shrink-0"
-                          style={{ background: ACCENT }}
-                        >
-                          <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="#fff"
-                            strokeWidth="3.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="w-3 h-3"
-                            aria-hidden
-                          >
-                            <path d="M20 6 9 17l-5-5" />
-                          </svg>
-                        </span>
-                      ) : active ? (
-                        <span className="inline-block w-3.5 h-3.5 rounded-full shrink-0 border-2 border-white/60 animate-pulse" />
-                      ) : (
-                        <span
-                          className="inline-block w-3 h-3 rounded-full shrink-0"
-                          style={{
-                            background: unresolvedFail
-                              ? "rgba(255,255,255,0.18)"
-                              : "rgba(255,255,255,0.22)",
-                          }}
-                        />
-                      )}
-                      <span
-                        className={
-                          unresolvedFail
-                            ? "text-white/35"
-                            : reached
-                              ? "text-white"
-                              : "text-white/35"
-                        }
-                        style={featured ? { color: ACCENT } : undefined}
-                      >
-                        {resolvedOk ? stage.done : stage.running}
-                      </span>
-                      {unresolvedFail && (
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-white/30">
-                          not completed
-                        </span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
+<StageList
+                scanStage={scanStage}
+                stageOutcomes={stageOutcomes}
+                resolvedCount={resolvedCount}
+                runFailed={runFailed}
+              />
 
               {!runFailed && !stageOutcomes && (
                 <div className="mt-8 max-w-xl">
@@ -1140,6 +1411,17 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
           </>
         ) : null}
 
+        {/* COMPARISON — only against a failing score, never against ourselves */}
+        {s.performance !== null &&
+          s.performance < 90 &&
+          domainOf(result.url).replace(/^www\./, "") !== COMPARISON_SITE && (
+            <ComparisonBlock
+              key={`${result.url}-${result.fetchedAt}`}
+              their={result}
+              onRan={() => setComparisonRan(true)}
+            />
+          )}
+
         {/* check detail — could_not_verify styled neutrally, never as failure */}
         <div className="mt-10">
           <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-3">
@@ -1167,8 +1449,9 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
                 Every one of these is fixable.
               </h2>
               <p className="text-white/55 text-base sm:text-lg mt-2 max-w-2xl mx-auto">
-                We rebuild medical practice sites to pass this exact audit — most in
-                under 30 days.
+                {comparisonRan
+                  ? "You just watched the difference. We rebuild medical practice sites to pass this exact audit — most in under 30 days."
+                  : "We rebuild medical practice sites to pass this exact audit — most in under 30 days."}
               </p>
               <button
                 type="button"
