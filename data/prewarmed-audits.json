@@ -4,15 +4,15 @@
   "results": [
     {
       "url": "https://thefloridavascularcare.com",
-      "fetchedAt": "2026-08-07T19:44:34.165Z",
+      "fetchedAt": "2026-08-07T19:27:24.848Z",
       "fromCache": false,
       "performance": {
         "available": true,
-        "lighthouseScore": 65,
-        "lcp": 7.05,
-        "cls": 0,
-        "tbt": 70,
-        "speedIndex": 5.41,
+        "lighthouseScore": 90,
+        "lcp": 2.93,
+        "cls": 0.124,
+        "tbt": 38,
+        "speedIndex": 2.98,
         "fieldDataAvailable": false,
         "fieldLcp": null
       },
@@ -40,14 +40,14 @@
           "id": "seo.redirect-chain",
           "label": "Redirect chain",
           "status": "pass",
-          "detail": "Your address goes straight to the page — no redirects, no added wait.",
+          "detail": "Your address goes straight to the page \u2014 no redirects, no added wait.",
           "evidence": "thefloridavascularcare.com"
         },
         {
           "id": "seo.title",
           "label": "Page title",
           "status": "pass",
-          "detail": "Your page title is 55 characters — a good length to display in full.",
+          "detail": "Your page title is 55 characters \u2014 a good length to display in full.",
           "evidence": "Florida Vascular Care | Dr. Hany Anton, MD, MBA, FASDIN"
         },
         {
@@ -55,7 +55,7 @@
           "label": "Search result description",
           "status": "warn",
           "detail": "Your search description is 160 characters and will be trimmed mid-sentence in results.",
-          "evidence": "Minimally invasive vascular care in Pompano Beach, FL — Dr. Hany Anton treats varicose veins, arterial disease, and dialysis access. 20+ years&#x27; experience."
+          "evidence": "Minimally invasive vascular care in Pompano Beach, FL \u2014 Dr. Hany Anton treats varicose veins, arterial disease, and dialysis access. 20+ years&#x27; experience."
         },
         {
           "id": "seo.h1",
@@ -174,7 +174,7 @@
         }
       ],
       "scores": {
-        "performance": 65,
+        "performance": 90,
         "seo": 90,
         "seoVerified": 10,
         "seoTotal": 10,
@@ -185,7 +185,9 @@
         "aiReadinessVerified": 5,
         "aiReadinessTotal": 5
       },
-      "practiceName": "Florida Vascular Care"
+      "practiceName": "Florida Vascular Care",
+      "stale": true,
+      "staleNote": "Kept prior measurement of 2026-08-07T19:27:24.848Z (perf 90, LCP 2.93s). Fresh run of 2026-08-07T19:45Z measured perf 65, LCP 7.05s during active FVC redeployment \u2014 rejected per the keep-prior rule pending re-prewarm."
     },
     {
       "url": "https://www.veinclinics.com",
@@ -228,21 +230,21 @@
           "id": "seo.redirect-chain",
           "label": "Redirect chain",
           "status": "warn",
-          "detail": "Each redirect adds load time before the page even starts — patients typing your domain wait through every hop.",
-          "evidence": "veinclinics.com → www.veinclinics.com"
+          "detail": "Each redirect adds load time before the page even starts \u2014 patients typing your domain wait through every hop.",
+          "evidence": "veinclinics.com \u2192 www.veinclinics.com"
         },
         {
           "id": "seo.title",
           "label": "Page title",
           "status": "warn",
-          "detail": "Your page title is only 27 characters — there is room to say more about what you treat and where.",
+          "detail": "Your page title is only 27 characters \u2014 there is room to say more about what you treat and where.",
           "evidence": "America's Vein Care Experts"
         },
         {
           "id": "seo.meta-description",
           "label": "Search result description",
           "status": "pass",
-          "detail": "Your search description is 127 characters — the right length to display in full.",
+          "detail": "Your search description is 127 characters \u2014 the right length to display in full.",
           "evidence": "Learn about vein clinics in America with USA Vein Clinics. Information about vein disease, its symptoms, and treatment options."
         },
         {
@@ -343,7 +345,7 @@
           "id": "ai.llms-txt",
           "label": "AI content guide",
           "status": "warn",
-          "detail": "Your site has no AI content guide — an emerging standard that tells AI assistants which of your pages matter most. Few practices have one yet, so adding it is an easy edge."
+          "detail": "Your site has no AI content guide \u2014 an emerging standard that tells AI assistants which of your pages matter most. Few practices have one yet, so adding it is an easy edge."
         },
         {
           "id": "ai.semantic-structure",
@@ -413,21 +415,21 @@
           "id": "seo.redirect-chain",
           "label": "Redirect chain",
           "status": "warn",
-          "detail": "Each redirect adds load time before the page even starts — patients typing your domain wait through every hop.",
-          "evidence": "centerforvein.com → www.centerforvein.com"
+          "detail": "Each redirect adds load time before the page even starts \u2014 patients typing your domain wait through every hop.",
+          "evidence": "centerforvein.com \u2192 www.centerforvein.com"
         },
         {
           "id": "seo.title",
           "label": "Page title",
           "status": "pass",
-          "detail": "Your page title is 59 characters — a good length to display in full.",
+          "detail": "Your page title is 59 characters \u2014 a good length to display in full.",
           "evidence": "Center for Vein Restoration | Leading National Vein Clinics"
         },
         {
           "id": "seo.meta-description",
           "label": "Search result description",
           "status": "pass",
-          "detail": "Your search description is 138 characters — the right length to display in full.",
+          "detail": "Your search description is 138 characters \u2014 the right length to display in full.",
           "evidence": "Center for Vein Restoration is nationally recognized as the leader in the treatment of varicose veins and spider veins. Find a doctor now!"
         },
         {
@@ -528,7 +530,7 @@
           "id": "ai.llms-txt",
           "label": "AI content guide",
           "status": "warn",
-          "detail": "Your site has no AI content guide — an emerging standard that tells AI assistants which of your pages matter most. Few practices have one yet, so adding it is an easy edge."
+          "detail": "Your site has no AI content guide \u2014 an emerging standard that tells AI assistants which of your pages matter most. Few practices have one yet, so adding it is an easy edge."
         },
         {
           "id": "ai.semantic-structure",
