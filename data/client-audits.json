@@ -1,0 +1,188 @@
+{
+  "note": "Client audits held out of the booth picker. Vein-ity's pre-rebuild baseline, kept for a before/after comparison once their new site ships.",
+  "generatedAt": "2026-08-07T05:26:53.782Z",
+  "count": 1,
+  "results": [
+    {
+      "url": "https://vein-ity.com",
+      "fetchedAt": "2026-08-07T05:25:30.028Z",
+      "fromCache": false,
+      "performance": {
+        "available": true,
+        "lighthouseScore": 54,
+        "lcp": 55.32,
+        "cls": 0,
+        "tbt": 175,
+        "speedIndex": 18.91,
+        "fieldDataAvailable": false,
+        "fieldLcp": null
+      },
+      "htmlFetch": {
+        "ok": true,
+        "statusCode": 200,
+        "blocked": false
+      },
+      "platform": {
+        "platform": "WordPress",
+        "version": null,
+        "vendor": null,
+        "builders": [
+          "Elementor"
+        ],
+        "evidence": [
+          "asset path: /wp-content/",
+          "builder marker: elementor-"
+        ]
+      },
+      "seo": [
+        {
+          "id": "seo.https",
+          "label": "Secure connection",
+          "status": "pass",
+          "detail": "Your site loads over a secure connection, which patients' browsers and Google both expect.",
+          "evidence": "https://"
+        },
+        {
+          "id": "seo.title",
+          "label": "Page title",
+          "status": "warn",
+          "detail": "Your page title is only 15 characters \u2014 there is room to say more about what you treat and where.",
+          "evidence": "Home - Vein-Ity"
+        },
+        {
+          "id": "seo.meta-description",
+          "label": "Search result description",
+          "status": "fail",
+          "detail": "This page has no description, so Google will invent one from whatever text it finds \u2014 often the wrong text."
+        },
+        {
+          "id": "seo.h1",
+          "label": "Main page heading",
+          "status": "fail",
+          "detail": "This page has no main heading, so search engines have to guess what the page is about."
+        },
+        {
+          "id": "seo.heading-order",
+          "label": "Heading structure",
+          "status": "pass",
+          "detail": "Your headings step down in order, so the page reads as a clear outline.",
+          "evidence": "81 headings, in order"
+        },
+        {
+          "id": "seo.viewport",
+          "label": "Mobile display setting",
+          "status": "pass",
+          "detail": "This page is set up to resize properly on phones.",
+          "evidence": "width=device-width, initial-scale=1"
+        },
+        {
+          "id": "seo.canonical",
+          "label": "Preferred page address",
+          "status": "pass",
+          "detail": "This page tells search engines which web address is the official one, which prevents duplicate versions competing with each other.",
+          "evidence": "https://vein-ity.com/"
+        },
+        {
+          "id": "seo.open-graph",
+          "label": "Social sharing preview",
+          "status": "pass",
+          "detail": "When someone shares your page in a text or on social media, it will show a proper title, description and image.",
+          "evidence": "og:title, og:description, og:image all present"
+        },
+        {
+          "id": "seo.image-alt",
+          "label": "Image descriptions",
+          "status": "fail",
+          "detail": "22 of your 37 images have no written description, so search engines and screen readers cannot tell what they show.",
+          "evidence": "15 of 37 images have alt text"
+        }
+      ],
+      "schema": [
+        {
+          "id": "schema.present",
+          "label": "Machine-readable practice details",
+          "status": "pass",
+          "detail": "This page publishes 10 machine-readable descriptions that search engines and AI assistants can read directly.",
+          "evidence": "BreadcrumbList, EntryPoint, ImageObject, ListItem, Organization, PropertyValueSpecification, ReadAction, SearchAction, WebPage, WebSite"
+        },
+        {
+          "id": "schema.medical",
+          "label": "Medical practice identification",
+          "status": "fail",
+          "detail": "Search engines cannot tell what kind of practice this is \u2014 nothing on the page identifies it as a medical provider.",
+          "evidence": "Found instead: BreadcrumbList, EntryPoint, ImageObject, ListItem, Organization, PropertyValueSpecification, ReadAction, SearchAction, WebPage, WebSite"
+        },
+        {
+          "id": "schema.local-business",
+          "label": "Local listing details",
+          "status": "fail",
+          "detail": "Your address, phone number and hours are not published in a form search engines can read directly, which weakens local visibility.",
+          "evidence": "Found instead: BreadcrumbList, EntryPoint, ImageObject, ListItem, Organization, PropertyValueSpecification, ReadAction, SearchAction, WebPage, WebSite"
+        },
+        {
+          "id": "schema.faq",
+          "label": "Frequently asked questions",
+          "status": "warn",
+          "detail": "No patient questions are marked up on this page, so you are not eligible for the expandable answers competitors can win."
+        },
+        {
+          "id": "schema.organization",
+          "label": "Organization details",
+          "status": "pass",
+          "detail": "The practice is described as an organization, which lets search engines connect your name, logo and official profiles.",
+          "evidence": "Found: Organization"
+        }
+      ],
+      "aiReadiness": [
+        {
+          "id": "ai.robots-file",
+          "label": "Crawler instructions file",
+          "status": "pass",
+          "detail": "Your site publishes crawler instructions, so you control what search engines and AI tools may read.",
+          "evidence": "robots.txt found"
+        },
+        {
+          "id": "ai.crawler-access",
+          "label": "AI assistant access",
+          "status": "pass",
+          "detail": "AI assistants such as ChatGPT, Claude and Perplexity are all allowed to read your site, so they can cite you when patients ask about your treatments.",
+          "evidence": "Allowed: GPTBot, ClaudeBot, PerplexityBot, Google-Extended"
+        },
+        {
+          "id": "ai.llms-txt",
+          "label": "AI content guide",
+          "status": "pass",
+          "detail": "Your site publishes a guide telling AI assistants what it is about and which pages matter most.",
+          "evidence": "llms.txt found"
+        },
+        {
+          "id": "ai.semantic-structure",
+          "label": "Page structure for AI",
+          "status": "pass",
+          "detail": "Your headings form a clean outline, which is how AI assistants find the passage that answers a patient's question.",
+          "evidence": "81 headings, in order"
+        },
+        {
+          "id": "ai.content-depth",
+          "label": "Content depth",
+          "status": "pass",
+          "detail": "This page has enough written content for search engines and AI assistants to understand and quote it.",
+          "evidence": "1,991 words of page content"
+        }
+      ],
+      "scores": {
+        "performance": 54,
+        "seo": 61,
+        "seoVerified": 9,
+        "seoTotal": 9,
+        "schema": 50,
+        "schemaVerified": 5,
+        "schemaTotal": 5,
+        "aiReadiness": 100,
+        "aiReadinessVerified": 5,
+        "aiReadinessTotal": 5
+      },
+      "practiceName": "Vein-ity Vein Care Centers of Kansas"
+    }
+  ]
+}
