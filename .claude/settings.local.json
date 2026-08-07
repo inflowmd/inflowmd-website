@@ -28,7 +28,17 @@
       "Bash(ls /Users/claytonpeterson/projects/inflowmd/.claude/worktrees/musing-kepler/next.config*)",
       "Bash(cat /Users/claytonpeterson/projects/inflowmd/.claude/worktrees/musing-kepler/next.config*)",
       "Bash(ls /Users/claytonpeterson/projects/inflowmd/.claude/worktrees/musing-kepler/src/app/pricing/PricingClient.tsx /Users/claytonpeterson/projects/inflowmd/.claude/worktrees/musing-kepler/src/app/get-started/GetStartedClient.tsx /Users/claytonpeterson/projects/inflowmd/.claude/worktrees/musing-kepler/src/app/services/*/page.tsx /Users/claytonpeterson/projects/inflowmd/.claude/worktrees/musing-kepler/src/app/services/*/*Client.tsx)",
-      "Bash(xargs -r kill)"
+      "Bash(xargs -r kill)",
+      "Bash(npm run *)",
+      "Bash(git -C /Users/claytonpeterson/projects/inflowmd status)",
+      "Bash(git -C /Users/claytonpeterson/projects/inflowmd log -1 --format=\"%s\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(curl -sI https://inflowmd.vercel.app/for/varicose-vein-doctors)",
+      "Bash(curl -sI https://inflowmd.vercel.app/)",
+      "Bash(curl -sI https://inflowmd.vercel.app/services/seo)",
+      "Bash(gh api *)"
     ]
   }
 }
