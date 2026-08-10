@@ -422,3 +422,60 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .hero-fade-up, .hero-fade-left { animation: none; }
 }
+
+/* ============================================================
+   Booth kiosk display (/booth) — full-screen poster for an iPad.
+   ============================================================ */
+
+/* A poster, not a page: nothing selectable, nothing tappable, no
+   long-press callouts or image-save sheets. */
+.kiosk-lock {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+.kiosk-lock img {
+  -webkit-user-drag: none;
+}
+
+/* Portrait: stacked and centered. Landscape (the propped-iPad case):
+   copy on the left, QR on the right. */
+.kiosk-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6vmin;
+}
+.kiosk-stage .kiosk-copy {
+  align-items: center;
+  text-align: center;
+}
+@media (orientation: landscape) {
+  .kiosk-stage {
+    flex-direction: row;
+    gap: 8vmin;
+  }
+  .kiosk-stage .kiosk-copy {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+/* Proof-line fade. Reduced motion: no fade — the line still rotates. */
+.kiosk-proof {
+  opacity: 1;
+  transition: opacity 0.45s ease;
+}
+.kiosk-proof-hidden {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kiosk-proof {
+    transition: none;
+  }
+  .kiosk-proof-hidden {
+    opacity: 1;
+  }
+}

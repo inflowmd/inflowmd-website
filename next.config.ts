@@ -11,16 +11,6 @@ const nextConfig: NextConfig = {
      */
     inlineCss: true,
   },
-  async redirects() {
-    return [
-      {
-        // The booth audit tool moved; keep previously shared links working.
-        source: "/booth",
-        destination: "/audit",
-        permanent: false,
-      },
-    ];
-  },
   async headers() {
     return [
       {
