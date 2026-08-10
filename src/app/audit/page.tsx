@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.inflowmd.com"),
   title: "Site Audit — InflowMD",
   description: "Live website audit.",
-  alternates: { canonical: "https://www.inflowmd.com/booth" },
+  alternates: { canonical: "https://www.inflowmd.com/audit" },
   robots: {
     index: false,
     follow: false,
