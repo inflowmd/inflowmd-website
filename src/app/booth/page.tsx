@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import ProofRotator from "./ProofRotator";
 
 /**
  * Conference booth display — a full-screen poster for a propped-up iPad.
@@ -37,14 +36,19 @@ export default function BoothDisplayPage() {
       {/* Stage: column in portrait, row in landscape (see globals.css). */}
       <div className="kiosk-stage flex-1 min-h-0 px-[6vmin]">
         <div className="kiosk-copy flex flex-col">
-          <p className="text-[clamp(14px,2.2vmin,22px)] font-bold uppercase tracking-[0.42em] text-[#84B83B]">
-            InflowMD
-          </p>
+          <img
+            src="/inflowmd-final.png"
+            alt="InflowMD"
+            draggable={false}
+            width={788}
+            height={118}
+            className="h-[clamp(30px,5vmin,54px)] w-auto"
+          />
           <h1 className="mt-[2.5vmin] max-w-[16em] text-[clamp(30px,6.4vmin,72px)] font-extrabold leading-[1.06] tracking-tight text-white">
             Is your website costing you patients?
           </h1>
           <p className="mt-[2.5vmin] max-w-[26em] text-[clamp(16px,2.9vmin,30px)] font-light leading-snug text-slate-300">
-            Free audit of your practice&rsquo;s site — findings in 48 hours
+            Free audit of your practice&rsquo;s site — findings in under a minute
           </p>
         </div>
 
@@ -66,9 +70,6 @@ export default function BoothDisplayPage() {
         </div>
       </div>
 
-      <div className="flex items-center justify-center px-[6vmin] pb-[4vmin] pt-[2vmin]">
-        <ProofRotator />
-      </div>
     </main>
   );
 }

@@ -462,20 +462,3 @@ body {
     text-align: left;
   }
 }
-
-/* Proof-line fade. Reduced motion: no fade — the line still rotates. */
-.kiosk-proof {
-  opacity: 1;
-  transition: opacity 0.45s ease;
-}
-.kiosk-proof-hidden {
-  opacity: 0;
-}
-@media (prefers-reduced-motion: reduce) {
-  .kiosk-proof {
-    transition: none;
-  }
-  .kiosk-proof-hidden {
-    opacity: 1;
-  }
-}
