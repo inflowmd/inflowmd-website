@@ -58,10 +58,9 @@ export default function BoothDisplayPage() {
               width={3000}
               height={3000}
             />
-            <p className="mt-[2vmin] text-center text-[clamp(13px,2vmin,20px)] font-semibold text-[#081C34]">
-              Scan for your free audit
-              <span className="mx-[0.6em] text-[#84B83B]">·</span>
-              inflowmd.com/audit
+            <p className="mt-[2vmin] text-center text-[clamp(13px,2vmin,20px)] font-semibold leading-snug text-[#081C34]">
+              <span className="block">Scan for your free audit</span>
+              <span className="block">inflowmd.com/audit</span>
             </p>
           </div>
         </div>
