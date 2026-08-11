@@ -4,6 +4,15 @@
  *
  * Local Node script, not a route handler — no serverless timeout applies, so
  * it can take as long as it needs. Run with: npm run prewarm
+ *
+ * --only-missing-speed: re-audits ONLY cached entries whose performance
+ * data is missing (a prior PSI timeout or API error), leaving every good
+ * entry untouched — no network call, no delay, carried forward as-is.
+ * Sanity bounds (history comparison, outlier retry, stale-value keep) stay
+ * active for whatever DOES get re-audited. A PSI failure that recurs after
+ * a second attempt is kept as an honest partial and listed at the end —
+ * never silently dropped, never faked.
+ *   npm run prewarm -- --only-missing-speed
  */
 
 import { readFile, writeFile } from "node:fs/promises";
@@ -135,6 +144,68 @@ function erroredResult(url: string, message: string): AuditResult {
   };
 }
 
+/**
+ * Runs one target through the audit + sanity-bounds anomaly check (and its
+ * own retry-once-on-suspect dance), returning the final result and any
+ * anomaly note to log. Shared by the normal pass and the targeted
+ * --only-missing-speed retry so the anomaly logic never has to be
+ * duplicated. Throws only if runAudit itself throws.
+ */
+async function auditWithAnomalyCheck(
+  target: Target,
+  displayName: string,
+  display: string,
+  baseline: Record<string, HistoryEntry>,
+  priorFull: Map<string, AuditResult>
+): Promise<{ result: AuditResult; anomaly: string | null }> {
+  let result = await runAudit(target.normalized);
+  result.practiceName = displayName;
+
+  const key = cacheKey(result.url);
+  const prior = baseline[key];
+  const reason = anomalyReason(result, prior);
+  let anomaly: string | null = null;
+
+  if (reason) {
+    console.log(`SUSPECT — ${reason}. Retrying in ${RETRY_DELAY_MS / 1000}s…`);
+    await sleep(RETRY_DELAY_MS);
+    process.stdout.write(`   (retry) … `);
+    const retry = await runAudit(target.normalized);
+    retry.practiceName = displayName;
+    const retryReason = anomalyReason(retry, prior);
+
+    if (!retryReason) {
+      result = retry;
+    } else {
+      // Twice anomalous: never silently ship an outlier. Keep the prior
+      // result, marked stale, with both values on the record.
+      const kept = priorFull.get(key);
+      if (kept) {
+        anomaly =
+          `${displayName || display}: fresh measurement rejected twice (${retryReason}). ` +
+          `Cache keeps the prior result (perf ${kept.scores.performance}, LCP ${kept.performance.lcp}s); ` +
+          `rejected: perf ${retry.scores.performance}, LCP ${retry.performance.lcp}s.`;
+        result = {
+          ...kept,
+          stale: true,
+          staleNote:
+            `Kept prior measurement of ${kept.fetchedAt} (perf ${kept.scores.performance}, ` +
+            `LCP ${kept.performance.lcp}s). Fresh run rejected twice: ${retryReason}; ` +
+            `rejected values perf ${retry.scores.performance}, LCP ${retry.performance.lcp}s.`,
+        };
+      } else {
+        // No prior to fall back to — ship the fresh one, loudly.
+        anomaly =
+          `${displayName || display}: measurement looks anomalous (${retryReason}) ` +
+          `and there is NO prior result to keep. Shipped as measured — verify by hand.`;
+        result = retry;
+      }
+    }
+  }
+
+  return { result, anomaly };
+}
+
 async function main(): Promise<void> {
   const attendeesPath = path.resolve(process.cwd(), "data/hps-practices.json");
 
@@ -184,6 +255,8 @@ async function main(): Promise<void> {
     /* none */
   }
 
+  const onlyMissingSpeed = process.argv.includes("--only-missing-speed");
+
   const noWebsite = attendees.filter((a) => !a.url.trim());
   const withUrl = attendees.filter((a) => a.url.trim());
 
@@ -203,17 +276,45 @@ async function main(): Promise<void> {
     if (existing) existing.names.push(a.name);
     else targetsByKey.set(key, { normalized, names: [a.name] });
   }
-  const targets = [...targetsByKey.values()];
+  const allTargets = [...targetsByKey.values()];
 
-  log(
-    `Pre-warming ${targets.length} unique site${targets.length === 1 ? "" : "s"} ` +
-      `(${withUrl.length} attendees with a URL, ${noWebsite.length} with no website found)\n`
-  );
+  // --only-missing-speed narrows the work to targets whose CACHED result has
+  // no performance data (or has no cached result at all yet). Everything
+  // else is carried forward untouched — no network call, no delay.
+  const targets = onlyMissingSpeed
+    ? allTargets.filter((t) => {
+        const prior = priorFull.get(cacheKey(t.normalized));
+        return !prior || !prior.performance.available;
+      })
+    : allTargets;
+  const skipped = onlyMissingSpeed ? allTargets.filter((t) => !targets.includes(t)) : [];
+
+  if (onlyMissingSpeed) {
+    log(
+      `Re-auditing ${targets.length} of ${allTargets.length} unique sites — ` +
+        `${skipped.length} already have complete speed data and are untouched.\n`
+    );
+  } else {
+    log(
+      `Pre-warming ${targets.length} unique site${targets.length === 1 ? "" : "s"} ` +
+        `(${withUrl.length} attendees with a URL, ${noWebsite.length} with no website found)\n`
+    );
+  }
 
   const results: AuditResult[] = [];
   const newHistory: Record<string, HistoryEntry> = {};
   const anomalies: string[] = [];
+  const stillMissingSpeed: Array<{ name: string; url: string; error: string }> = [];
   let failures = 0;
+
+  // Carry forward every skipped (already-complete) entry unchanged.
+  for (const t of skipped) {
+    const key = cacheKey(t.normalized);
+    const prior = priorFull.get(key);
+    if (!prior) continue; // filtered out above whenever prior is missing
+    results.push(prior);
+    newHistory[key] = toHistoryEntry(prior);
+  }
 
   for (let i = 0; i < targets.length; i++) {
     const target = targets[i];
@@ -226,53 +327,39 @@ async function main(): Promise<void> {
     process.stdout.write(`${counter} ${display} … `);
 
     try {
-      let result = await runAudit(target.normalized);
-      result.practiceName = displayName;
+      const first = await auditWithAnomalyCheck(target, displayName, display, baseline, priorFull);
+      let result = first.result;
+      if (first.anomaly) anomalies.push(first.anomaly);
 
-      const key = cacheKey(result.url);
-      const prior = baseline[key];
-      const reason = anomalyReason(result, prior);
-
-      if (reason) {
-        console.log(`SUSPECT — ${reason}. Retrying in ${RETRY_DELAY_MS / 1000}s…`);
+      // Targeted mode: a PSI failure is often transient. One more full
+      // attempt (with its own anomaly check) before accepting the gap.
+      if (onlyMissingSpeed && !result.performance.available) {
+        console.log(
+          `perf still missing (${result.performance.error ?? "unknown"}) — retrying once ` +
+            `in ${RETRY_DELAY_MS / 1000}s…`
+        );
         await sleep(RETRY_DELAY_MS);
-        process.stdout.write(`${counter} ${display} (retry) … `);
-        const retry = await runAudit(target.normalized);
-        retry.practiceName = displayName;
-        const retryReason = anomalyReason(retry, prior);
-
-        if (!retryReason) {
-          result = retry;
-        } else {
-          // Twice anomalous: never silently ship an outlier. Keep the prior
-          // result, marked stale, with both values on the record.
-          const kept = priorFull.get(key);
-          if (kept) {
-            anomalies.push(
-              `${displayName || display}: fresh measurement rejected twice (${retryReason}). ` +
-                `Cache keeps the prior result (perf ${kept.scores.performance}, LCP ${kept.performance.lcp}s); ` +
-                `rejected: perf ${retry.scores.performance}, LCP ${retry.performance.lcp}s.`
-            );
-            result = {
-              ...kept,
-              stale: true,
-              staleNote:
-                `Kept prior measurement of ${kept.fetchedAt} (perf ${kept.scores.performance}, ` +
-                `LCP ${kept.performance.lcp}s). Fresh run rejected twice: ${retryReason}; ` +
-                `rejected values perf ${retry.scores.performance}, LCP ${retry.performance.lcp}s.`,
-            };
-          } else {
-            // No prior to fall back to — ship the fresh one, loudly.
-            anomalies.push(
-              `${displayName || display}: measurement looks anomalous (${retryReason}) ` +
-                `and there is NO prior result to keep. Shipped as measured — verify by hand.`
-            );
-            result = retry;
-          }
+        process.stdout.write(`${counter} ${display} (speed retry) … `);
+        const retryOutcome = await auditWithAnomalyCheck(
+          target,
+          displayName,
+          display,
+          baseline,
+          priorFull
+        );
+        result = retryOutcome.result;
+        if (retryOutcome.anomaly) anomalies.push(retryOutcome.anomaly);
+        if (!result.performance.available) {
+          stillMissingSpeed.push({
+            name: displayName,
+            url: target.normalized,
+            error: result.performance.error ?? "unknown",
+          });
         }
       }
 
       // Record what this run actually measured (even when the cache keeps prior).
+      const key = cacheKey(result.url);
       newHistory[key] = toHistoryEntry(result);
       results.push(result);
 
@@ -317,6 +404,12 @@ async function main(): Promise<void> {
     log(`\nURL present but would not normalize (${invalid.length}):`);
     for (const a of invalid) {
       log(`  — ${a.name}: "${a.url}"`);
+    }
+  }
+  if (stillMissingSpeed.length > 0) {
+    log(`\nSpeed data still missing after retry (${stillMissingSpeed.length}):`);
+    for (const m of stillMissingSpeed) {
+      log(`  — ${m.name} (${m.url.replace(/^https?:\/\//, "")}) … ${m.error}`);
     }
   }
 
@@ -377,11 +470,13 @@ async function main(): Promise<void> {
     else if (r.htmlFetch.blocked) statusCounts.blocked++;
     else statusCounts.ok++;
   }
+  const speedComplete = results.filter((r) => r.performance.available).length;
   log(
     `\nSTATUS SUMMARY: ${statusCounts.ok} ok, ${statusCounts.blocked} blocked, ` +
       `${statusCounts.failed} failed, ${noWebsite.length} no website ` +
       `(${targets.length} unique sites audited for ${withUrl.length} attendees)`
   );
+  log(`Speed data: ${speedComplete} of ${results.length} cache entries have complete performance data.`);
 
   log("\nRun `npm run summarize` for the aggregate picture.");
 
