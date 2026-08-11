@@ -20,6 +20,7 @@ import path from "node:path";
 import type { AuditResult } from "../src/types/audit";
 import { normalizeUrl, runAudit } from "../src/lib/runAudit";
 import { cacheKey, writeCache } from "../src/lib/cache";
+import { withDerivedScores } from "../src/lib/categories";
 import { describePlatform } from "../src/lib/platform";
 
 /** PSI is rate-limited; the batch is small enough that speed is irrelevant. */
@@ -130,15 +131,15 @@ function erroredResult(url: string, message: string): AuditResult {
     aiReadiness: [],
     scores: {
       performance: null,
-      seo: null,
-      seoVerified: 0,
-      seoTotal: 0,
-      schema: null,
-      schemaVerified: 0,
-      schemaTotal: 0,
-      aiReadiness: null,
-      aiReadinessVerified: 0,
-      aiReadinessTotal: 0,
+      aiFind: null,
+      aiFindVerified: 0,
+      aiFindTotal: 0,
+      aiUnderstand: null,
+      aiUnderstandVerified: 0,
+      aiUnderstandTotal: 0,
+      patientsFind: null,
+      patientsFindVerified: 0,
+      patientsFindTotal: 0,
     },
     error: message,
   };
@@ -307,13 +308,16 @@ async function main(): Promise<void> {
   const stillMissingSpeed: Array<{ name: string; url: string; error: string }> = [];
   let failures = 0;
 
-  // Carry forward every skipped (already-complete) entry unchanged.
+  // Carry forward every skipped (already-complete) entry. Measurements are
+  // untouched — only `scores` is recomputed, so an entry written before a
+  // category change is re-scored on the current table without re-auditing.
   for (const t of skipped) {
     const key = cacheKey(t.normalized);
     const prior = priorFull.get(key);
     if (!prior) continue; // filtered out above whenever prior is missing
-    results.push(prior);
-    newHistory[key] = toHistoryEntry(prior);
+    const normalized = withDerivedScores(prior);
+    results.push(normalized);
+    newHistory[key] = toHistoryEntry(normalized);
   }
 
   for (let i = 0; i < targets.length; i++) {
@@ -376,9 +380,11 @@ async function main(): Promise<void> {
           : "ok";
 
       log(
-        `${counter} ${display} … [${status}] perf ${fmtScore(s.performance)} | seo ${fmtScore(
-          s.seo
-        )} | schema ${fmtScore(s.schema)} | ai ${fmtScore(s.aiReadiness)} | ${platform}${fetchNote}${staleNote}${sharedNote}`
+        `${counter} ${display} … [${status}] speed ${fmtScore(s.performance)} | ai-find ${fmtScore(
+          s.aiFind
+        )} | ai-understand ${fmtScore(s.aiUnderstand)} | patients-find ${fmtScore(
+          s.patientsFind
+        )} | ${platform}${fetchNote}${staleNote}${sharedNote}`
       );
     } catch (err) {
       // One bad URL must never kill the run.

@@ -176,15 +176,15 @@
       ],
       "scores": {
         "performance": 97,
-        "seo": 85,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 96,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 81,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Akribis Veins & Vitality"
     },
@@ -366,15 +366,15 @@
       ],
       "scores": {
         "performance": 71,
-        "seo": 85,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 96,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 81,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Artemis Vein Center"
     },
@@ -550,15 +550,15 @@
       ],
       "scores": {
         "performance": 41,
-        "seo": 55,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 10,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 21,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 50,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Atlanta Vein Center"
     },
@@ -736,15 +736,15 @@
       ],
       "scores": {
         "performance": 39,
-        "seo": 90,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 70,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 88,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Bucks Vein and Body"
     },
@@ -923,15 +923,15 @@
       ],
       "scores": {
         "performance": 93,
-        "seo": 75,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 100,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 96,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 69,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Cardiac Associates Of North Jersey"
     },
@@ -1114,15 +1114,15 @@
       ],
       "scores": {
         "performance": 46,
-        "seo": 80,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 50,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 81,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Carolina Vein Care & Aesthetics"
     },
@@ -1303,15 +1303,15 @@
       ],
       "scores": {
         "performance": 54,
-        "seo": 70,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 100,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 100,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 63,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Center For Advanced Vein Care"
     },
@@ -1487,15 +1487,15 @@
       ],
       "scores": {
         "performance": 18,
-        "seo": 55,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 10,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 21,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 50,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Center For Vein Care"
     },
@@ -1676,15 +1676,15 @@
       ],
       "scores": {
         "performance": 36,
-        "seo": 80,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 100,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 96,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 75,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Chesapeake Vein Center and MedSpa"
     },
@@ -1846,15 +1846,15 @@
       ],
       "scores": {
         "performance": 88,
-        "seo": null,
-        "seoVerified": 2,
-        "seoTotal": 10,
-        "schema": null,
-        "schemaVerified": 0,
-        "schemaTotal": 5,
-        "aiReadiness": 67,
-        "aiReadinessVerified": 3,
-        "aiReadinessTotal": 5
+        "aiFind": 75,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": null,
+        "aiUnderstandVerified": 0,
+        "aiUnderstandTotal": 8,
+        "patientsFind": null,
+        "patientsFindVerified": 1,
+        "patientsFindTotal": 8
       },
       "practiceName": "Integrative Cardiology and Vein Clinic"
     },
@@ -2034,15 +2034,15 @@
       ],
       "scores": {
         "performance": 32,
-        "seo": 85,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 88,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 88,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Miller Vein"
     },
@@ -2223,15 +2223,15 @@
       ],
       "scores": {
         "performance": 73,
-        "seo": 80,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 40,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 70,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 81,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Missouri Vein Care"
     },
@@ -2415,15 +2415,15 @@
       ],
       "scores": {
         "performance": 49,
-        "seo": 95,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 96,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 94,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "NG Vascular And Vein Center"
     },
@@ -2609,15 +2609,15 @@
       ],
       "scores": {
         "performance": 47,
-        "seo": 75,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 50,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 75,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "North Georgia Vein & Aesthetics"
     },
@@ -2795,15 +2795,15 @@
       ],
       "scores": {
         "performance": 63,
-        "seo": 70,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 50,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 69,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Northwest Vein and Aesthetic Center"
     },
@@ -2982,15 +2982,15 @@
       ],
       "scores": {
         "performance": 57,
-        "seo": 75,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 70,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 75,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Refine Vein Center"
     },
@@ -3172,15 +3172,15 @@
       ],
       "scores": {
         "performance": 51,
-        "seo": 95,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 100,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 96,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 94,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Salcedo Medical Center"
     },
@@ -3362,15 +3362,15 @@
       ],
       "scores": {
         "performance": 63,
-        "seo": 90,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 88,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 94,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Sound Vascular"
     },
@@ -3549,15 +3549,15 @@
       ],
       "scores": {
         "performance": 85,
-        "seo": 80,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 80,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 81,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 83,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 81,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "South Shore Vein and Aesthetic Medicine"
     },
@@ -3736,15 +3736,15 @@
       ],
       "scores": {
         "performance": 26,
-        "seo": 80,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 80,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 75,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Summit Vein Care"
     },
@@ -3926,15 +3926,15 @@
       ],
       "scores": {
         "performance": 42,
-        "seo": 80,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 92,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 75,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "The Heart Institute of East Texas, P.A."
     },
@@ -4106,15 +4106,15 @@
       ],
       "scores": {
         "performance": 46,
-        "seo": 95,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 10,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 29,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 94,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "The Vein Clinic at Beltline Health"
     },
@@ -4296,15 +4296,15 @@
       ],
       "scores": {
         "performance": 69,
-        "seo": 100,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 40,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 100,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "The Vein Clinic of Dallas"
     },
@@ -4487,15 +4487,15 @@
       ],
       "scores": {
         "performance": 43,
-        "seo": 75,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 40,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 81,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 75,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "The Vein Institute of Hunterdon"
     },
@@ -4670,15 +4670,15 @@
       ],
       "scores": {
         "performance": 84,
-        "seo": 75,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 10,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 21,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 75,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "The Vein Specialists"
     },
@@ -4850,15 +4850,15 @@
       ],
       "scores": {
         "performance": 53,
-        "seo": 65,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 10,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 29,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 56,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "U.P. Superior Vascular Interventional Specialists"
     },
@@ -5018,15 +5018,15 @@
       ],
       "scores": {
         "performance": 47,
-        "seo": null,
-        "seoVerified": 1,
-        "seoTotal": 10,
-        "schema": null,
-        "schemaVerified": 0,
-        "schemaTotal": 5,
-        "aiReadiness": null,
-        "aiReadinessVerified": 0,
-        "aiReadinessTotal": 5
+        "aiFind": null,
+        "aiFindVerified": 0,
+        "aiFindTotal": 4,
+        "aiUnderstand": null,
+        "aiUnderstandVerified": 0,
+        "aiUnderstandTotal": 8,
+        "patientsFind": null,
+        "patientsFindVerified": 1,
+        "patientsFindTotal": 8
       },
       "practiceName": "University Medicine and Cardiology"
     },
@@ -5190,15 +5190,15 @@
       ],
       "scores": {
         "performance": 53,
-        "seo": null,
-        "seoVerified": 2,
-        "seoTotal": 10,
-        "schema": null,
-        "schemaVerified": 0,
-        "schemaTotal": 5,
-        "aiReadiness": 100,
-        "aiReadinessVerified": 3,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": null,
+        "aiUnderstandVerified": 0,
+        "aiUnderstandTotal": 8,
+        "patientsFind": null,
+        "patientsFindVerified": 1,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vanish Advanced Vein Treatment"
     },
@@ -5365,15 +5365,15 @@
       ],
       "scores": {
         "performance": 66,
-        "seo": 45,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 10,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 70,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 75,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 21,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 38,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vascular Institute of the Pines"
     },
@@ -5552,15 +5552,15 @@
       ],
       "scores": {
         "performance": 84,
-        "seo": 95,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 88,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 100,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vascular Solutions"
     },
@@ -5744,15 +5744,15 @@
       ],
       "scores": {
         "performance": 45,
-        "seo": 75,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 100,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 92,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 75,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vein & Vascular Institute"
     },
@@ -5935,15 +5935,15 @@
       ],
       "scores": {
         "performance": 66,
-        "seo": 95,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 60,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 79,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 100,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vein Center of North Texas"
     },
@@ -6115,15 +6115,15 @@
       ],
       "scores": {
         "performance": 60,
-        "seo": 80,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 10,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 75,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 29,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 75,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vein Center of Wisconsin"
     },
@@ -6305,15 +6305,15 @@
       ],
       "scores": {
         "performance": 57,
-        "seo": 90,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 40,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 94,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vein Clinic of Greater Kansas City"
     },
@@ -6494,15 +6494,15 @@
       ],
       "scores": {
         "performance": 56,
-        "seo": 85,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 80,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 83,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 88,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vein Health Clinics"
     },
@@ -6682,15 +6682,15 @@
       ],
       "scores": {
         "performance": 47,
-        "seo": 65,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 50,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 100,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 56,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vein-ity: Vein Care Centers of Kansas"
     },
@@ -6872,15 +6872,15 @@
       ],
       "scores": {
         "performance": 59,
-        "seo": 60,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 50,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 70,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 81,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 63,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Versailles Health and Wellness"
     },
@@ -7050,15 +7050,15 @@
       ],
       "scores": {
         "performance": 52,
-        "seo": 65,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 10,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 70,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 75,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 21,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 63,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Well Life Medical"
     },
@@ -7237,15 +7237,15 @@
       ],
       "scores": {
         "performance": 59,
-        "seo": 75,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 80,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 83,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 75,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Alaska Vein Care"
     },
@@ -7423,15 +7423,15 @@
       ],
       "scores": {
         "performance": 37,
-        "seo": 75,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 70,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 69,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Anderson Vein and Wellness Heart and Vascular"
     },
@@ -7607,15 +7607,15 @@
       ],
       "scores": {
         "performance": 63,
-        "seo": 55,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 10,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 70,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 17,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 50,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Dominion Vascular Surgical Specialists"
     },
@@ -7794,15 +7794,15 @@
       ],
       "scores": {
         "performance": 64,
-        "seo": 85,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 70,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 88,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Eterna Vein & Medical Aesthetics"
     },
@@ -7979,15 +7979,15 @@
       ],
       "scores": {
         "performance": 33,
-        "seo": 90,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 100,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 92,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 94,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Florida Vein Center"
     },
@@ -8169,15 +8169,15 @@
       ],
       "scores": {
         "performance": 72,
-        "seo": 85,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 70,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 88,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Hawaii Vein Institute"
     },
@@ -8359,15 +8359,15 @@
       ],
       "scores": {
         "performance": 64,
-        "seo": 70,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 40,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 69,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Ismail Ozcan MD"
     },
@@ -8547,15 +8547,15 @@
       ],
       "scores": {
         "performance": 39,
-        "seo": 75,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 88,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 75,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Living Water Vein Institute"
     },
@@ -8737,15 +8737,15 @@
       ],
       "scores": {
         "performance": 34,
-        "seo": 85,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 88,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 88,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Medical Vein Clinic"
     },
@@ -8919,15 +8919,15 @@
       ],
       "scores": {
         "performance": 60,
-        "seo": 85,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 10,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 17,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 88,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Ooh so vein"
     },
@@ -9105,15 +9105,15 @@
       ],
       "scores": {
         "performance": 28,
-        "seo": 90,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 96,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 88,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Ozark Regional Vein & Artery Center"
     },
@@ -9293,15 +9293,15 @@
       ],
       "scores": {
         "performance": 42,
-        "seo": 90,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 50,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 94,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "The Vein Institute of Chattanooga"
     },
@@ -9484,15 +9484,15 @@
       ],
       "scores": {
         "performance": 38,
-        "seo": 85,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 100,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 92,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 88,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Trident Vein Center"
     },
@@ -9670,15 +9670,15 @@
       ],
       "scores": {
         "performance": 83,
-        "seo": 70,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 70,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 69,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Tulsa Vein Institute"
     },
@@ -9857,15 +9857,15 @@
       ],
       "scores": {
         "performance": 77,
-        "seo": 75,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 70,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 75,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vein and Skin Studio"
     },
@@ -10043,15 +10043,15 @@
       ],
       "scores": {
         "performance": 67,
-        "seo": 70,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 60,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 79,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 69,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vein and Vascular Centers"
     },
@@ -10235,15 +10235,15 @@
       ],
       "scores": {
         "performance": null,
-        "seo": 65,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 100,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 92,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 63,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vein and Wellness Centers of Texas"
     },
@@ -10423,15 +10423,15 @@
       ],
       "scores": {
         "performance": 62,
-        "seo": 80,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 100,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 80,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 88,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 92,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 81,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vein Clinic & Med Spa"
     },
@@ -10616,15 +10616,15 @@
       ],
       "scores": {
         "performance": 28,
-        "seo": 85,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 90,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 88,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 88,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vein Specialists"
     },
@@ -10806,15 +10806,15 @@
       ],
       "scores": {
         "performance": 44,
-        "seo": 80,
-        "seoVerified": 10,
-        "seoTotal": 10,
-        "schema": 50,
-        "schemaVerified": 5,
-        "schemaTotal": 5,
-        "aiReadiness": 90,
-        "aiReadinessVerified": 5,
-        "aiReadinessTotal": 5
+        "aiFind": 100,
+        "aiFindVerified": 4,
+        "aiFindTotal": 4,
+        "aiUnderstand": 40,
+        "aiUnderstandVerified": 8,
+        "aiUnderstandTotal": 8,
+        "patientsFind": 81,
+        "patientsFindVerified": 8,
+        "patientsFindTotal": 8
       },
       "practiceName": "Vein911 Vein Treatment Centers"
     }

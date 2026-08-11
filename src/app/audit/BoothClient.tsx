@@ -11,6 +11,7 @@ import {
 import { normalizeUrl } from "@/lib/normalizeUrl";
 import { cacheKey } from "@/lib/cache";
 import { attendeeMatches, hasNoWebsite, letterOf, type Attendee } from "@/lib/attendees";
+import { buildCategories, type ResolvedCategory } from "@/lib/categories";
 
 /* ============================================================
    Booth audit UI.
@@ -104,6 +105,13 @@ const usd = (n: number) =>
 const pct = (r: number) => `${Math.round(r * 100)}%`;
 const domainOf = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
+/** Attribution shown under each category gauge. Only the Lighthouse score is
+ *  Google's — the other three are our own analysis and must say so. */
+const SOURCE_LABEL: Record<string, string> = {
+  google: "Google PageSpeed Insights",
+  inflowmd: "InflowMD analysis",
+};
+
 /* ---------- provenance + status styling ---------- */
 
 const PROVENANCE_STYLE: Record<Provenance, { label: string; className: string }> = {
@@ -186,7 +194,7 @@ const CHECK_EXPLANATIONS: Record<string, string> = {
   "ai.crawler-access":
     "Whether ChatGPT, Perplexity, and other AI tools are allowed to read this site. Blocked means invisible when patients ask an AI for a doctor.",
   "ai.llms-txt":
-    "An emerging standard: a short guide telling AI assistants what the site is about and which pages matter most. Few practices have one yet.",
+    "An emerging standard that tells AI assistants how to read and summarize your site. Few practices have one yet — which is exactly the opportunity.",
   "ai.semantic-structure":
     "Whether the page's structure lets an AI assistant find the passage that answers a patient's question. Clean outlines get quoted; jumbles get skipped.",
   "ai.content-depth":
@@ -456,9 +464,9 @@ function ComparisonBlock({ their, onRan }: { their: AuditResult; onRan: () => vo
       timers.current.scan = null;
       setOutcomes([
         data.htmlFetch.ok,
-        data.scores.seo !== null,
-        data.scores.aiReadiness !== null,
-        data.scores.schema !== null,
+        data.scores.patientsFind !== null,
+        data.scores.aiFind !== null,
+        data.scores.aiUnderstand !== null,
         data.performance.available,
       ]);
       let flipped = 0;
@@ -560,8 +568,10 @@ function ComparisonBlock({ their, onRan }: { their: AuditResult; onRan: () => vo
   }
 
   if (!comparison) return null;
-  const theirPerf = their.scores.performance;
-  const ourPerf = comparison.scores.performance;
+  const theirPerf = their.performance.available ? their.performance.lighthouseScore : null;
+  const ourPerf = comparison.performance.available
+    ? comparison.performance.lighthouseScore
+    : null;
   const theirLcp = their.performance.lcp;
   const ourLcp = comparison.performance.lcp;
   const seconds = (v: number) => {
@@ -603,10 +613,12 @@ function ComparisonBlock({ their, onRan }: { their: AuditResult; onRan: () => vo
             </div>
             <ul className="space-y-2.5">
               {[
-                { label: "Performance", score: r.scores.performance, v: null, t: null },
-                { label: "Search basics", score: r.scores.seo, v: r.scores.seoVerified, t: r.scores.seoTotal },
-                { label: "Structured data", score: r.scores.schema, v: r.scores.schemaVerified, t: r.scores.schemaTotal },
-                { label: "AI readiness", score: r.scores.aiReadiness, v: r.scores.aiReadinessVerified, t: r.scores.aiReadinessTotal },
+                ...buildCategories(r).map((c) => ({
+                  label: c.label,
+                  score: c.score,
+                  v: c.key === "speed" ? null : c.verified,
+                  t: c.key === "speed" ? null : c.total,
+                })),
               ].map((row) => (
                 <li key={row.label} className="flex items-baseline justify-between gap-3">
                   <span className="text-sm text-white/70 min-w-0">{row.label}</span>
@@ -954,9 +966,9 @@ export default function BoothClient({
         // time, top to bottom, Google last, so each completion is visible.
         setStageOutcomes([
           data.htmlFetch.ok,
-          data.scores.seo !== null,
-          data.scores.aiReadiness !== null,
-          data.scores.schema !== null,
+          data.scores.patientsFind !== null,
+          data.scores.aiFind !== null,
+          data.scores.aiUnderstand !== null,
           data.performance.available,
         ]);
         setResolvedCount(0);
@@ -1379,8 +1391,8 @@ export default function BoothClient({
                 Find your practice
               </h1>
               <p className="text-white/50 text-sm sm:text-base mb-5">
-                Built on Google PageSpeed Insights — the same test Google runs on every
-                site.
+                Speed measured by Google PageSpeed Insights — the same test Google runs on
+                every site. Search and AI readiness analyzed by InflowMD.
               </p>
               <input
                 ref={searchRef}
@@ -1477,8 +1489,15 @@ export default function BoothClient({
   /* ---------- result screen ---------- */
 
   if (!result) return null;
-  const s = result.scores;
-  const allChecks = [...result.seo, ...result.schema, ...result.aiReadiness];
+  // Categories are derived from the raw checks, not read from the stored
+  // `scores` — so a result cached before the category restructure renders
+  // under the new categories with the correct new numbers.
+  const categories = buildCategories(result);
+  const byKey = Object.fromEntries(categories.map((c) => [c.key, c])) as Record<
+    ResolvedCategory["key"],
+    ResolvedCategory
+  >;
+  const perfScore = byKey.speed.score;
 
   return (
     <main className="min-h-screen text-white" style={{ background: BG }}>
@@ -1527,7 +1546,7 @@ export default function BoothClient({
             <ProvenanceTag provenance="measured" />
           </div>
           <Gauge
-            score={s.performance}
+            score={perfScore}
             size={240}
             valueClass="text-7xl sm:text-8xl"
           />
@@ -1539,7 +1558,7 @@ export default function BoothClient({
               year: "numeric",
             })}
           </div>
-          {s.performance === null && (
+          {perfScore === null && (
             <p className="text-white/45 mt-2 max-w-xl text-center text-sm">
               {result.performance.error ??
                 "The performance test did not return a result."}
@@ -1547,30 +1566,26 @@ export default function BoothClient({
           )}
         </div>
 
-        {/* the four category gauges, verified counts kept */}
+        {/* The four categories, each answering its own question. Attribution is
+            per-gauge: only the Lighthouse score is Google's. */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Gauge label="Performance" score={s.performance} />
-          <Gauge label="Search basics" score={s.seo} verified={s.seoVerified} total={s.seoTotal} />
-          <Gauge
-            label="Structured data"
-            score={s.schema}
-            verified={s.schemaVerified}
-            total={s.schemaTotal}
-          />
-          <Gauge
-            label="AI readiness"
-            score={s.aiReadiness}
-            verified={s.aiReadinessVerified}
-            total={s.aiReadinessTotal}
-          />
+          {categories.map((c) => (
+            <Gauge
+              key={c.key}
+              label={c.label}
+              score={c.score}
+              {...(c.key === "speed" ? {} : { verified: c.verified, total: c.total })}
+              source={SOURCE_LABEL[c.source]}
+            />
+          ))}
         </div>
 
         {/* WHAT WE'D FIX — direction, not proposal. <70 qualifies, worst first. */}
         {(() => {
           const fixes = [
             {
-              key: "performance",
-              score: s.performance,
+              key: "speed",
+              score: byKey.speed.score,
               text: "Rebuild on a modern stack — target under 3 seconds on mobile",
               icon: (
                 <svg viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden>
@@ -1579,8 +1594,8 @@ export default function BoothClient({
               ),
             },
             {
-              key: "schema",
-              score: s.schema,
+              key: "aiUnderstand",
+              score: byKey.aiUnderstand.score,
               text: "Add medical practice schema so Google and AI know exactly who you are",
               icon: (
                 <svg viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden>
@@ -1591,9 +1606,9 @@ export default function BoothClient({
               ),
             },
             {
-              key: "aiReadiness",
-              score: s.aiReadiness,
-              text: "Open the site to AI assistants and add machine-readable practice info",
+              key: "aiFind",
+              score: byKey.aiFind.score,
+              text: "Open the site to AI assistants and publish a guide they can read",
               icon: (
                 <svg viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden>
                   <path d="M12 3v3" />
@@ -1604,9 +1619,9 @@ export default function BoothClient({
               ),
             },
             {
-              key: "seo",
-              score: s.seo,
-              text: "Fix titles, descriptions, and heading structure for search",
+              key: "patientsFind",
+              score: byKey.patientsFind.score,
+              text: "Fix titles, descriptions, and headings so patients find you in search",
               icon: (
                 <svg viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden>
                   <circle cx="11" cy="11" r="7" />
@@ -1801,8 +1816,8 @@ export default function BoothClient({
         ) : null}
 
         {/* COMPARISON — only against a failing score, never against ourselves */}
-        {s.performance !== null &&
-          s.performance < 90 &&
+        {perfScore !== null &&
+          perfScore < 90 &&
           domainOf(result.url).replace(/^www\./, "") !== COMPARISON_HOST && (
             <ComparisonBlock
               key={`${result.url}-${result.fetchedAt}`}
@@ -1811,15 +1826,35 @@ export default function BoothClient({
             />
           )}
 
-        {/* check detail — could_not_verify styled neutrally, never as failure */}
+        {/* check detail, grouped under the question each category answers —
+            could_not_verify styled neutrally, never as failure */}
         <div className="mt-10">
           <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-3">
             What we checked
           </div>
-          <div className="grid sm:grid-cols-2 gap-2">
-            {allChecks.map((c) => (
-              <FindingRow key={c.id} check={c} />
-            ))}
+          <div className="space-y-6">
+            {categories
+              .filter((c) => c.checks.length > 0)
+              .map((c) => (
+                <div key={c.key}>
+                  <div className="flex items-baseline justify-between gap-3 mb-2">
+                    <h3 className="text-base sm:text-lg font-extrabold text-white/90">
+                      {c.label}
+                    </h3>
+                    <span
+                      className="text-sm font-extrabold tabular-nums shrink-0"
+                      style={{ color: gaugeColor(c.score) }}
+                    >
+                      {c.score === null ? "—" : c.score}
+                    </span>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    {c.checks.map((check) => (
+                      <FindingRow key={check.id} check={check} />
+                    ))}
+                  </div>
+                </div>
+              ))}
           </div>
         </div>
 

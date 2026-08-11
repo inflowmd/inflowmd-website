@@ -6,7 +6,7 @@ import { detectPlatform } from "@/lib/platform";
 import { runSeoChecks } from "@/lib/checks/seo";
 import { runSchemaChecks } from "@/lib/checks/schema";
 import { fetchAiSignals, runAiReadinessChecks, type AiSignals } from "@/lib/checks/aiReadiness";
-import { scoreCategory } from "@/lib/scoring";
+import { deriveScores } from "@/lib/categories";
 
 /**
  * The full audit, shared by the API route and the pre-warm batch script so
@@ -199,10 +199,8 @@ export async function runAudit(
     headings,
   });
 
-  const seoScore = scoreCategory(seo);
-  const schemaScore = scoreCategory(schema);
-  const aiScore = scoreCategory(aiReadiness);
-
+  // Scores are derived from the raw checks by the shared category table, so the
+  // server and the booth UI can never disagree about a number.
   return {
     url: target,
     ...(target !== url ? { requestedUrl: url } : {}),
@@ -214,17 +212,6 @@ export async function runAudit(
     seo,
     schema,
     aiReadiness,
-    scores: {
-      performance: performance.available ? performance.lighthouseScore : null,
-      seo: seoScore.score,
-      seoVerified: seoScore.verified,
-      seoTotal: seoScore.total,
-      schema: schemaScore.score,
-      schemaVerified: schemaScore.verified,
-      schemaTotal: schemaScore.total,
-      aiReadiness: aiScore.score,
-      aiReadinessVerified: aiScore.verified,
-      aiReadinessTotal: aiScore.total,
-    },
+    scores: deriveScores({ seo, schema, aiReadiness, performance }),
   };
 }
