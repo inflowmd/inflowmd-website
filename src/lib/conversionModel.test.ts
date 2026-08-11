@@ -102,6 +102,34 @@ check("6.2s site → every output is a range, rendered as a range", () => {
   assert.match(m.headline, /–/);
 });
 
+check("critical band: collapsed ranges render as single values, never X – X", () => {
+  const m = build({ lcpSeconds: 12 });
+  assert.equal(m.band, "critical");
+  assert.deepEqual(m.multiplierRange, [5, 5]);
+  // The cited multiplier collapses to "5x".
+  const cited = m.steps.find((s) => s.provenance === "cited");
+  assert.equal(cited?.value, "5x");
+  // Counts and currency collapse to hedged single values.
+  const gapStep = m.steps.find((s) => s.label === "The gap");
+  assert.match(gapStep?.value ?? "", /^about \d/);
+  const revStep = m.steps.find((s) => s.label === "Patient value per month");
+  assert.match(revStep?.value ?? "", /^about \$/);
+  // No string anywhere renders the same value on both sides of a dash.
+  for (const s of collectStrings(m)) {
+    const collapsed = s.match(/([\w$][\w,.$]*) – \1(?![\d,])/);
+    assert.equal(collapsed, null, `collapsed range rendered as a pair: "${s}"`);
+  }
+});
+
+check("slow band: true ranges are untouched by the collapse rule", () => {
+  const m = build({ lcpSeconds: 6.2 });
+  const gapStep = m.steps.find((s) => s.label === "The gap");
+  assert.equal(gapStep?.value, "32 – 64");
+  const revStep = m.steps.find((s) => s.label === "Patient value per month");
+  assert.equal(revStep?.value, "$9,600 – $19,200");
+  assert.doesNotMatch(gapStep?.value ?? "", /about/);
+});
+
 check("6.2s site → no annual figure anywhere in the strings", () => {
   const m = build({ lcpSeconds: 6.2 });
   for (const s of collectStrings(m)) {

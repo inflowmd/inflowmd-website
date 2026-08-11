@@ -21,11 +21,20 @@ const TITLE_MAX = 60;
 const DESC_MIN = 120;
 const DESC_MAX = 158;
 
+export interface RedirectInfo {
+  chain: string[];
+  hops: number;
+  /** True when the chain terminated at a confirmed non-redirect response. */
+  resolved: boolean;
+}
+
 export interface SeoCheckInput {
   url: string;
   html: string;
   /** False when the page could not be read — forces could_not_verify. */
   htmlOk: boolean;
+  /** Redirect-chain resolution, known independently of the HTML fetch. */
+  redirects?: RedirectInfo;
 }
 
 export interface SeoCheckOutput {
@@ -43,7 +52,36 @@ function unverified(id: string, label: string, reason: string): Check {
   };
 }
 
-export function runSeoChecks({ url, html, htmlOk }: SeoCheckInput): SeoCheckOutput {
+export function runSeoChecks({ url, html, htmlOk, redirects }: SeoCheckInput): SeoCheckOutput {
+  // The redirect chain is resolved independently of the HTML fetch, so this
+  // check can render a verdict even when the page itself could not be read.
+  const displayChain = (redirects?.chain ?? []).map((u) => u.replace(/^https?:\/\//, ""));
+  const redirectCheck: Check =
+    !redirects || !redirects.resolved
+      ? {
+          id: "seo.redirect-chain",
+          label: "Redirect chain",
+          status: "could_not_verify",
+          detail:
+            "We could not confirm where this address finally lands, so we did not judge its redirects.",
+        }
+      : redirects.hops === 0
+        ? {
+            id: "seo.redirect-chain",
+            label: "Redirect chain",
+            status: "pass",
+            detail: "Your address goes straight to the page — no redirects, no added wait.",
+            evidence: displayChain[0],
+          }
+        : {
+            id: "seo.redirect-chain",
+            label: "Redirect chain",
+            status: redirects.hops === 1 ? "warn" : "fail",
+            detail:
+              "Each redirect adds load time before the page even starts — patients typing your domain wait through every hop.",
+            evidence: displayChain.join(" → "),
+          };
+
   // HTTPS is derived from the URL itself, so it stands even when the page
   // could not be read.
   const isHttps = url.toLowerCase().startsWith("https://");
@@ -72,6 +110,7 @@ export function runSeoChecks({ url, html, htmlOk }: SeoCheckInput): SeoCheckOutp
       headings: [],
       checks: [
         httpsCheck,
+        redirectCheck,
         unverified("seo.title", "Page title", reason),
         unverified("seo.meta-description", "Search result description", reason),
         unverified("seo.h1", "Main page heading", reason),
@@ -85,7 +124,7 @@ export function runSeoChecks({ url, html, htmlOk }: SeoCheckInput): SeoCheckOutp
   }
 
   const doc = stripComments(html);
-  const checks: Check[] = [httpsCheck];
+  const checks: Check[] = [httpsCheck, redirectCheck];
 
   // --- Page title -----------------------------------------------------------
   const title = getTitle(doc);

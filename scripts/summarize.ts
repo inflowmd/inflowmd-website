@@ -5,7 +5,7 @@
  * Run with: npm run summarize
  */
 
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { AuditResult, Check } from "../src/types/audit";
 
@@ -165,6 +165,107 @@ async function main(): Promise<void> {
   console.log(
     `  Blocking an AI crawler     ${String(blockingAi).padStart(3)} of ${total} sites`
   );
+
+  // --- Platform clustering ---------------------------------------------------
+  // Whether attending practices cluster on shared templates: same platform,
+  // same builder combination, same vendor — a signature a template vendor
+  // would recognize instantly. Console AND data/platform-summary.txt.
+  const clusterLines: string[] = [];
+  const clog = (line: string = "") => {
+    console.log(line);
+    clusterLines.push(line);
+  };
+
+  function siteLabel(r: AuditResult): string {
+    return (r.practiceName ?? r.url.replace(/^https?:\/\//, "")).slice(0, 44);
+  }
+
+  function printCluster(
+    title: string,
+    keyOf: (r: AuditResult) => string
+  ): void {
+    const groups = new Map<string, AuditResult[]>();
+    for (const r of results) {
+      const key = keyOf(r);
+      const list = groups.get(key) ?? [];
+      list.push(r);
+      groups.set(key, list);
+    }
+    const sorted = [...groups.entries()].sort((a, b) => b[1].length - a[1].length);
+    clog(`\n${title}`);
+    for (const [key, members] of sorted) {
+      const pct = total > 0 ? Math.round((members.length / total) * 100) : 0;
+      clog(`  ${key.padEnd(46)} ${String(members.length).padStart(3)}  (${pct}%)`);
+      if (members.length > 1) {
+        for (const m of members) clog(`      · ${siteLabel(m)}`);
+      }
+    }
+  }
+
+  clog("=".repeat(64));
+  clog(`PLATFORM CLUSTERING — ${total} attending practice site${total === 1 ? "" : "s"}`);
+  if (file.generatedAt) clog(`Generated ${file.generatedAt}`);
+  clog("=".repeat(64));
+
+  printCluster("BY PLATFORM", (r) => r.platform?.platform ?? "unknown");
+  printCluster(
+    "BY PAGE BUILDER",
+    (r) => {
+      const builders = r.platform?.builders ?? [];
+      return builders.length > 0 ? [...builders].sort().join(" + ") : "(none detected)";
+    }
+  );
+  printCluster("BY MEDICAL WEB VENDOR", (r) => r.platform?.vendor ?? "unknown");
+  printCluster("BY EXACT TEMPLATE SIGNATURE (platform + builders + vendor)", (r) => {
+    const platform = r.platform?.platform ?? "unknown";
+    const builders = r.platform?.builders ?? [];
+    const builderPart = builders.length > 0 ? [...builders].sort().join("+") : "no-builder";
+    const vendor = r.platform?.vendor ?? "no-vendor";
+    return `${platform} / ${builderPart} / ${vendor}`;
+  });
+
+  const platformSummaryPath = path.resolve(process.cwd(), "data/platform-summary.txt");
+  await writeFile(platformSummaryPath, `${clusterLines.join("\n")}\n`, "utf8");
+  console.log(`\nPlatform summary written to ${platformSummaryPath}`);
+
+  // --- Drift + stale entries ------------------------------------------------
+  try {
+    const hist = JSON.parse(
+      await readFile(path.resolve(process.cwd(), "data/prewarm-history.json"), "utf8")
+    ) as {
+      previous: Record<string, { practiceName?: string; url: string; score: number | null }> | null;
+      current: Record<string, { practiceName?: string; url: string; score: number | null }> | null;
+    };
+    if (hist.previous && hist.current) {
+      const moved: string[] = [];
+      for (const [key, now] of Object.entries(hist.current)) {
+        const before = hist.previous[key];
+        if (!before || before.score === null || now.score === null) continue;
+        const delta = now.score - before.score;
+        if (Math.abs(delta) >= 10) {
+          moved.push(
+            `  ${(now.practiceName ?? now.url).slice(0, 40).padEnd(42)} ${before.score} → ${now.score} (${delta > 0 ? "+" : ""}${delta})`
+          );
+        }
+      }
+      console.log(`\nCHANGED SINCE LAST RUN (±10 or more)`);
+      if (moved.length === 0) console.log("  (no score moved ±10)");
+      for (const line of moved) console.log(line);
+    }
+  } catch {
+    /* no history yet */
+  }
+
+  const stale = results.filter((r) => r.stale);
+  if (stale.length > 0) {
+    console.log(`\n${"!".repeat(64)}`);
+    console.log(`STALE ENTRIES — the cache is serving PRIOR results for:`);
+    for (const r of stale) {
+      console.log(`  !! ${(r.practiceName ?? r.url).slice(0, 44)}`);
+      if (r.staleNote) console.log(`     ${r.staleNote}`);
+    }
+    console.log(`${"!".repeat(64)}`);
+  }
 
   // --- Fetch failures -------------------------------------------------------
   const failed = results.filter((r) => !r.htmlFetch.ok);

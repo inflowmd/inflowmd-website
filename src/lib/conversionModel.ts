@@ -14,8 +14,9 @@
  *   is not a pot of inquiries that fixing speed hands you.
  * - Only a portion of the gap is attributed to speed, via gapCaptureRate, and
  *   that portion is applied as its own visible step — never silently.
- * - Every figure is a range. A point estimate implies a precision this model
- *   does not have.
+ * - Every figure is a range in the data. When both ends format identically
+ *   (the 'critical' band is pinned at [5, 5]) the display collapses to one
+ *   hedged value — "5x – 5x" would read as a bug, not a range.
  * - Nothing is ever annualized. Monthly only — a twelve-month figure is how a
  *   credible model starts sounding like a pitch.
  * - Revenue routes through closeRate. Inquiries are not patients, and hiding
@@ -160,17 +161,26 @@ function formatCount(value: number): string {
     : rounded.toFixed(1);
 }
 
-/** Ranges always render as ranges, even when both ends round the same. */
+/**
+ * A collapsed range (both ends format identically — guaranteed in the
+ * 'critical' band, whose multiplierRange is [5, 5]) renders as a single
+ * hedged value: "8 – 8" reads as a rendering mistake, not a range.
+ * True ranges are untouched.
+ */
 function formatCountRange([low, high]: [number, number]): string {
-  return `${formatCount(low)} – ${formatCount(high)}`;
+  const l = formatCount(low);
+  const h = formatCount(high);
+  return l === h ? `about ${l}` : `${l} – ${h}`;
 }
 
 function formatCurrencyRange([low, high]: [number, number]): string {
-  return `${formatCurrency(low)} – ${formatCurrency(high)}`;
+  const l = formatCurrency(low);
+  const h = formatCurrency(high);
+  return l === h ? `about ${l}` : `${l} – ${h}`;
 }
 
 function formatMultiplierRange([low, high]: [number, number]): string {
-  return `${low}x – ${high}x`;
+  return low === high ? `${low}x` : `${low}x – ${high}x`;
 }
 
 /** Revenue is rounded to the nearest $100 — finer precision is false confidence. */
@@ -374,7 +384,7 @@ export function buildConversionModel(
       gapRange
     )} inquiries per month. Attributing ${formatPercent(
       gapCaptureRate
-    )} of that gap to speed, that is roughly ${formatCurrencyRange(
+    )} of that gap to speed, that is ${formatCurrencyRange(
       revenueRange
     )} in patient value.`,
     caveat: MODEL_CAVEAT,

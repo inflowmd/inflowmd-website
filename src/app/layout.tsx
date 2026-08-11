@@ -15,6 +15,12 @@ const sourceSerif = Source_Serif_4({
   style: ["normal", "italic"],
   variable: "--font-serif",
   display: "swap",
+  /**
+   * Not preloaded: the serif appears only in below-fold accents, and its
+   * ~83KB was competing with the LCP-critical sans font on throttled mobile.
+   * It lazy-loads when the CSS first demands it — invisible below the fold.
+   */
+  preload: false,
 });
 
 const SITE_URL = "https://www.inflowmd.com";

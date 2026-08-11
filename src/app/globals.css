@@ -374,3 +374,399 @@ body {
 .booth-slider:focus-visible::-webkit-slider-thumb {
   box-shadow: 0 0 0 4px rgba(132, 184, 59, 0.45);
 }
+
+/* Booth scan: indeterminate sweep + resolved-dot pop.
+   The sweep is deliberately not a percentage — there are no progress events,
+   and a fabricated percentage would violate the booth's honesty rule. */
+@keyframes booth-sweep {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(360%); }
+}
+.booth-sweep-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.booth-sweep-bar {
+  height: 100%;
+  width: 32%;
+  border-radius: 9999px;
+  background: #84b83b;
+  animation: booth-sweep 1.5s ease-in-out infinite;
+}
+@keyframes booth-pop {
+  from { transform: scale(0.4); opacity: 0.3; }
+  to { transform: scale(1); opacity: 1; }
+}
+.booth-pop {
+  animation: booth-pop 200ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .booth-sweep-bar, .booth-pop { animation: none; }
+}
+
+/* Hero entrance — CSS-driven so the LCP element paints immediately instead
+   of waiting for JS hydration. Same 0.6s ease-out fade-up as the framer
+   version it replaces; stagger via inline animation-delay. */
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes hero-fade-left {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: none; }
+}
+.hero-fade-up { animation: hero-fade-up 0.6s ease-out both; }
+.hero-fade-left { animation: hero-fade-left 0.6s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-fade-up, .hero-fade-left { animation: none; }
+}
+
+/* ============================================================
+   Booth kiosk display (/booth) — full-screen poster for an iPad.
+   ============================================================ */
+
+/* A poster, not a page: nothing selectable, nothing tappable, no
+   long-press callouts or image-save sheets. */
+.kiosk-lock {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+.kiosk-lock img {
+  -webkit-user-drag: none;
+}
+
+/* Portrait: stacked and centered. Landscape (the propped-iPad case):
+   copy on the left, QR on the right. */
+.kiosk-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6vmin;
+}
+.kiosk-stage .kiosk-copy {
+  align-items: center;
+  text-align: center;
+}
+@media (orientation: landscape) {
+  .kiosk-stage {
+    flex-direction: row;
+    gap: 8vmin;
+  }
+  .kiosk-stage .kiosk-copy {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+/* ============================================================
+   Pitch deck (/pitch)
+   ============================================================ */
+
+.pitch-scroll {
+  scrollbar-width: none;
+}
+.pitch-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Staggered scale-in, same beat as the audit scan dots — but starting at
+   opacity 0 so `backwards` genuinely hides a delayed element until its turn
+   (booth-pop's own from-state is 30% opacity, which would ghost). */
+@keyframes pitch-pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.pitch-pop {
+  animation: pitch-pop 200ms ease-out backwards;
+}
+
+/* S3b bars grow up on section entry. */
+.pitch-bar {
+  transform-origin: bottom;
+  transition: transform 800ms cubic-bezier(0.22, 0.7, 0.3, 1);
+}
+.pitch-bar-hidden {
+  transform: scaleY(0.02);
+}
+
+/* --- Section entrances: children rise in with a stagger when their
+       section goes live. Idle sections sit at full opacity so manual
+       scrolling never passes a blank screen. --- */
+.pitch-rise {
+  opacity: 1;
+}
+.is-live .pitch-rise {
+  animation: pitch-rise 700ms cubic-bezier(0.22, 0.7, 0.3, 1) both;
+  animation-delay: var(--rise, 0ms);
+}
+@keyframes pitch-rise {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- Ambient dot-grid texture --- */
+.pitch-dotgrid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1.5px, transparent 1.5px);
+  background-size: 26px 26px;
+}
+
+/* --- S1: typing caret, thinking dots, waveform, answer glow --- */
+.pitch-caret {
+  animation: pitch-caret 900ms steps(1) infinite;
+}
+@keyframes pitch-caret {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0; }
+}
+.pitch-think-dot {
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.75);
+  animation: pitch-think 900ms ease-in-out infinite;
+}
+@keyframes pitch-think {
+  0%, 100% { transform: translateY(0); opacity: 0.45; }
+  40% { transform: translateY(-0.35em); opacity: 1; }
+}
+.pitch-wavebar {
+  animation: pitch-wave 1.15s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes pitch-wave {
+  0%, 100% { transform: scaleY(0.45); }
+  50% { transform: scaleY(1.15); }
+}
+.pitch-ai-glow {
+  box-shadow: 0 0 70px rgba(132, 184, 59, 0.55) !important;
+}
+
+/* Voice door: while "hearing" the query the waveform surges. */
+.pitch-speaking .pitch-wavebar {
+  animation-duration: 0.5s;
+}
+
+/* --- S0 slogan: words cascade in with blur-to-sharp overshoot; the
+       lime words bloom with a glow once they settle. --- */
+.pitch-word {
+  opacity: 1;
+}
+.is-live .pitch-word {
+  animation: pitch-word 650ms cubic-bezier(0.2, 0.8, 0.25, 1.05) both;
+  animation-delay: var(--word, 0ms);
+}
+.is-live .pitch-word-lime {
+  animation:
+    pitch-word 650ms cubic-bezier(0.2, 0.8, 0.25, 1.05) both,
+    pitch-word-bloom 1.5s ease-out both;
+  animation-delay: var(--word, 0ms), calc(var(--word, 0ms) + 520ms);
+}
+@keyframes pitch-word {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.94);
+    filter: blur(8px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.015);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes pitch-word-bloom {
+  0% {
+    text-shadow: 0 0 0 rgba(132, 184, 59, 0);
+  }
+  35% {
+    text-shadow: 0 0 36px rgba(132, 184, 59, 0.9);
+  }
+  100% {
+    text-shadow: 0 0 14px rgba(132, 184, 59, 0.28);
+  }
+}
+
+/* --- S2a: the AI reading a site --- */
+.pitch-scanbeam {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(132, 184, 59, 0.22) 45%,
+    rgba(132, 184, 59, 0.55) 50%,
+    rgba(132, 184, 59, 0.22) 55%,
+    transparent
+  );
+  animation: pitch-scan 2.76s linear infinite;
+}
+@keyframes pitch-scan {
+  from { top: -12%; }
+  to { top: 104%; }
+}
+.pitch-scanline-item {
+  animation: pitch-scanline 2.76s linear infinite;
+}
+@keyframes pitch-scanline {
+  0%, 100% { background: rgba(255, 255, 255, 0.22); }
+  12% { background: rgba(132, 184, 59, 0.85); }
+  30% { background: rgba(255, 255, 255, 0.38); }
+}
+.pitch-flow {
+  animation: pitch-flow 900ms linear infinite;
+}
+@keyframes pitch-flow {
+  to { stroke-dashoffset: -24; }
+}
+.pitch-answer-bar {
+  animation: pitch-answer 4.2s ease-in-out infinite;
+}
+@keyframes pitch-answer {
+  0%, 100% { opacity: 0.55; }
+  12% { opacity: 1; }
+}
+
+/* --- S2b: the failed scan — red beam, lines flashing red, ✗ marks
+       popping where content should be. Same clock as the S2a read. --- */
+.pitch-scanbeam-fail {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(248, 113, 113, 0.2) 45%,
+    rgba(248, 113, 113, 0.5) 50%,
+    rgba(248, 113, 113, 0.2) 55%,
+    transparent
+  );
+}
+.pitch-scanfail-item {
+  animation: pitch-scanfail 2.76s linear infinite;
+}
+@keyframes pitch-scanfail {
+  0%, 100% { background: rgba(255, 255, 255, 0.18); }
+  12% { background: rgba(248, 113, 113, 0.75); }
+  30% { background: rgba(255, 255, 255, 0.18); }
+}
+.pitch-scanfail-x {
+  opacity: 0;
+  animation: pitch-scanfail-x 2.76s linear infinite;
+}
+@keyframes pitch-scanfail-x {
+  0%, 8% { opacity: 0; transform: scale(0.4); }
+  14% { opacity: 1; transform: scale(1); }
+  46% { opacity: 0.6; }
+  64%, 100% { opacity: 0; }
+}
+
+/* --- S3b: the booking simulation. One shared 4s timeline; every part
+       keys its keyframes to the same clock. Runs only while live. --- */
+.pitch-sim-cursor,
+.pitch-sim-ripple,
+.pitch-sim-booked {
+  opacity: 0;
+}
+.pitch-sim-live .pitch-sim-cursor {
+  animation: pitch-sim-cursor 4s ease-in-out infinite;
+}
+.pitch-sim-live .pitch-sim-btn {
+  animation: pitch-sim-press 4s ease-in-out infinite;
+}
+.pitch-sim-live .pitch-sim-ripple {
+  animation: pitch-sim-ripple 4s ease-out infinite;
+}
+.pitch-sim-live .pitch-sim-label {
+  animation: pitch-sim-label 4s steps(1) infinite;
+}
+.pitch-sim-live .pitch-sim-booked {
+  animation: pitch-sim-booked 4s steps(1) infinite;
+}
+@keyframes pitch-sim-cursor {
+  0% { opacity: 0; transform: translate(9vw, 9vh); }
+  12% { opacity: 1; }
+  30% { transform: translate(0.6vw, -1.2vh); }
+  35% { transform: translate(0.6vw, -1.2vh) scale(0.82); }
+  40% { transform: translate(0.6vw, -1.2vh) scale(1); }
+  58% { opacity: 1; transform: translate(0.6vw, -1.2vh); }
+  70%, 100% { opacity: 0; transform: translate(3vw, 4vh); }
+}
+@keyframes pitch-sim-press {
+  0%, 32% { transform: scale(1); }
+  35% { transform: scale(0.94); }
+  39% { transform: scale(1); }
+}
+@keyframes pitch-sim-ripple {
+  0%, 34% { opacity: 0; box-shadow: 0 0 0 0 rgba(8, 28, 52, 0.35) inset, 0 0 0 0 rgba(132, 184, 59, 0.7); }
+  36% { opacity: 1; }
+  52% { opacity: 0; box-shadow: 0 0 0 0 rgba(8, 28, 52, 0) inset, 0 0 0 22px rgba(132, 184, 59, 0); }
+  100% { opacity: 0; }
+}
+@keyframes pitch-sim-label {
+  0%, 37% { opacity: 1; }
+  38%, 88% { opacity: 0; }
+  89%, 100% { opacity: 1; }
+}
+@keyframes pitch-sim-booked {
+  0%, 37% { opacity: 0; }
+  38%, 88% { opacity: 1; }
+  89%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pitch-pop {
+    animation: none;
+  }
+  .pitch-bar {
+    transition: none;
+  }
+  .is-live .pitch-rise,
+  .is-live .pitch-word,
+  .is-live .pitch-word-lime,
+  .pitch-caret,
+  .pitch-think-dot,
+  .pitch-wavebar,
+  .pitch-scanbeam,
+  .pitch-scanline-item,
+  .pitch-scanfail-item,
+  .pitch-scanfail-x,
+  .pitch-flow,
+  .pitch-answer-bar,
+  .pitch-sim-live .pitch-sim-cursor,
+  .pitch-sim-live .pitch-sim-btn,
+  .pitch-sim-live .pitch-sim-ripple,
+  .pitch-sim-live .pitch-sim-label,
+  .pitch-sim-live .pitch-sim-booked {
+    animation: none;
+  }
+  .pitch-scanbeam,
+  .pitch-sim-cursor,
+  .pitch-sim-ripple {
+    opacity: 0;
+  }
+  .pitch-scanfail-x {
+    opacity: 0.6;
+  }
+  .pitch-sim-booked {
+    opacity: 0;
+  }
+  .pitch-sim-label {
+    opacity: 1;
+  }
+}

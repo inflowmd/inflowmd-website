@@ -11,7 +11,8 @@
     "summarize": "tsx scripts/summarize.ts",
     "test:model": "tsx src/lib/conversionModel.test.ts",
     "test:security": "tsx src/lib/ssrfGuard.test.ts",
-    "test": "npm run test:model && npm run test:security"
+    "test:attendees": "tsx src/lib/attendees.test.ts",
+    "test": "npm run test:model && npm run test:security && npm run test:attendees"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.79",

@@ -1,6 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    /**
+     * Inline compiled CSS into the HTML instead of serving it as
+     * render-blocking <link> requests. Lighthouse measured those two
+     * stylesheets at ~450–600ms of FCP/LCP delay on throttled mobile.
+     * Trade-off: slightly larger HTML, no cross-page CSS caching — the right
+     * side of the trade for a marketing site this size.
+     */
+    inlineCss: true,
+  },
   async headers() {
     return [
       {
