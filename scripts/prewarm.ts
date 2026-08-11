@@ -1,6 +1,6 @@
 /**
- * Pre-warm batch. Runs the full audit against every URL in data/attendees.csv
- * and writes data/prewarmed-audits.json.
+ * Pre-warm batch. Runs the full audit against every URL in
+ * data/hps-practices.json and writes data/prewarmed-audits.json.
  *
  * Local Node script, not a route handler — no serverless timeout applies, so
  * it can take as long as it needs. Run with: npm run prewarm
@@ -75,65 +75,18 @@ function anomalyReason(fresh: AuditResult, prior: HistoryEntry | undefined): str
   return null;
 }
 
-interface AttendeeRow {
-  practice_name: string;
+interface Attendee {
+  name: string;
+  city: string;
+  state: string;
+  /** Empty string when no website could be found for this attendee. */
   url: string;
-  /** Every other column is carried through untouched. */
-  [key: string]: string;
 }
 
-/** Minimal CSV parser handling quoted fields, embedded commas and newlines. */
-function parseCsv(text: string): AttendeeRow[] {
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let field = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    if (inQuotes) {
-      if (char === '"') {
-        if (text[i + 1] === '"') {
-          field += '"';
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        field += char;
-      }
-      continue;
-    }
-    if (char === '"') {
-      inQuotes = true;
-    } else if (char === ",") {
-      row.push(field);
-      field = "";
-    } else if (char === "\n") {
-      row.push(field);
-      rows.push(row);
-      row = [];
-      field = "";
-    } else if (char !== "\r") {
-      field += char;
-    }
-  }
-  if (field.length > 0 || row.length > 0) {
-    row.push(field);
-    rows.push(row);
-  }
-
-  const nonEmpty = rows.filter((r) => r.some((c) => c.trim().length > 0));
-  if (nonEmpty.length === 0) return [];
-
-  const headers = nonEmpty[0].map((h) => h.trim().toLowerCase().replace(/\s+/g, "_"));
-  return nonEmpty.slice(1).map((cells) => {
-    const record: Record<string, string> = {};
-    headers.forEach((h, idx) => {
-      record[h] = (cells[idx] ?? "").trim();
-    });
-    return record as AttendeeRow;
-  });
+/** One URL to audit, carrying every attendee name that maps to it. */
+interface Target {
+  normalized: string;
+  names: string[];
 }
 
 function fmtScore(value: number | null): string {
@@ -183,15 +136,23 @@ function erroredResult(url: string, message: string): AuditResult {
 }
 
 async function main(): Promise<void> {
-  const csvPath = path.resolve(process.cwd(), "data/attendees.csv");
+  const attendeesPath = path.resolve(process.cwd(), "data/hps-practices.json");
 
-  let csv: string;
+  let attendees: Attendee[];
   try {
-    csv = await readFile(csvPath, "utf8");
+    attendees = JSON.parse(await readFile(attendeesPath, "utf8")) as Attendee[];
   } catch {
-    console.error(`Could not read ${csvPath}. Expected columns: practice_name, url`);
+    console.error(`Could not read ${attendeesPath}. Expected an array of {name, city, state, url}.`);
     process.exit(1);
   }
+
+  // Report lines are both printed live AND written to a file — the run
+  // report is what gates whether the cache ships.
+  const reportLines: string[] = [];
+  const log = (line: string = "") => {
+    console.log(line);
+    reportLines.push(line);
+  };
 
   const historyPath = path.resolve(process.cwd(), "data/prewarm-history.json");
   let history: HistoryFile = { generatedAt: null, previous: null, current: null };
@@ -201,7 +162,7 @@ async function main(): Promise<void> {
     /* first run — no history yet */
   }
   // Baseline for comparison: the last run if recorded, else the shipped cache.
-  let baseline: Record<string, HistoryEntry> = history.current ?? {};
+  const baseline: Record<string, HistoryEntry> = history.current ?? {};
   if (Object.keys(baseline).length === 0) {
     try {
       const prior = JSON.parse(
@@ -223,38 +184,50 @@ async function main(): Promise<void> {
     /* none */
   }
 
-  const rows = parseCsv(csv).filter((r) => r.url);
-  if (rows.length === 0) {
-    console.error("No rows with a 'url' column found in data/attendees.csv");
-    process.exit(1);
-  }
+  const noWebsite = attendees.filter((a) => !a.url.trim());
+  const withUrl = attendees.filter((a) => a.url.trim());
 
-  console.log(`Pre-warming ${rows.length} site${rows.length === 1 ? "" : "s"}\n`);
+  // Multiple attendee names MAY share one URL (e.g. Salcedo Medical Center /
+  // Salcedo Medical Center And Vein Institute). The cache stays URL-keyed —
+  // a shared domain is audited exactly once, all its names are logged.
+  const targetsByKey = new Map<string, Target>();
+  const invalid: Attendee[] = [];
+  for (const a of withUrl) {
+    const normalized = normalizeUrl(a.url);
+    if (!normalized) {
+      invalid.push(a);
+      continue;
+    }
+    const key = cacheKey(normalized);
+    const existing = targetsByKey.get(key);
+    if (existing) existing.names.push(a.name);
+    else targetsByKey.set(key, { normalized, names: [a.name] });
+  }
+  const targets = [...targetsByKey.values()];
+
+  log(
+    `Pre-warming ${targets.length} unique site${targets.length === 1 ? "" : "s"} ` +
+      `(${withUrl.length} attendees with a URL, ${noWebsite.length} with no website found)\n`
+  );
 
   const results: AuditResult[] = [];
   const newHistory: Record<string, HistoryEntry> = {};
   const anomalies: string[] = [];
   let failures = 0;
 
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    const counter = `[${String(i + 1).padStart(String(rows.length).length, " ")}/${rows.length}]`;
-    const normalized = normalizeUrl(row.url);
-    const display = (normalized ?? row.url).replace(/^https?:\/\//, "");
-
-    if (!normalized) {
-      failures++;
-      const message = `Invalid URL: "${row.url}"`;
-      results.push({ ...erroredResult(row.url, message), practiceName: row.practice_name });
-      console.log(`${counter} ${display} … SKIPPED — ${message}`);
-      continue;
-    }
+  for (let i = 0; i < targets.length; i++) {
+    const target = targets[i];
+    const displayName = target.names[0];
+    const sharedNote =
+      target.names.length > 1 ? ` [shared by: ${target.names.join(", ")}]` : "";
+    const counter = `[${String(i + 1).padStart(String(targets.length).length, " ")}/${targets.length}]`;
+    const display = target.normalized.replace(/^https?:\/\//, "");
 
     process.stdout.write(`${counter} ${display} … `);
 
     try {
-      let result = await runAudit(normalized);
-      if (row.practice_name) result.practiceName = row.practice_name;
+      let result = await runAudit(target.normalized);
+      result.practiceName = displayName;
 
       const key = cacheKey(result.url);
       const prior = baseline[key];
@@ -264,8 +237,8 @@ async function main(): Promise<void> {
         console.log(`SUSPECT — ${reason}. Retrying in ${RETRY_DELAY_MS / 1000}s…`);
         await sleep(RETRY_DELAY_MS);
         process.stdout.write(`${counter} ${display} (retry) … `);
-        const retry = await runAudit(normalized);
-        if (row.practice_name) retry.practiceName = row.practice_name;
+        const retry = await runAudit(target.normalized);
+        retry.practiceName = displayName;
         const retryReason = anomalyReason(retry, prior);
 
         if (!retryReason) {
@@ -276,7 +249,7 @@ async function main(): Promise<void> {
           const kept = priorFull.get(key);
           if (kept) {
             anomalies.push(
-              `${row.practice_name || display}: fresh measurement rejected twice (${retryReason}). ` +
+              `${displayName || display}: fresh measurement rejected twice (${retryReason}). ` +
                 `Cache keeps the prior result (perf ${kept.scores.performance}, LCP ${kept.performance.lcp}s); ` +
                 `rejected: perf ${retry.scores.performance}, LCP ${retry.performance.lcp}s.`
             );
@@ -291,7 +264,7 @@ async function main(): Promise<void> {
           } else {
             // No prior to fall back to — ship the fresh one, loudly.
             anomalies.push(
-              `${row.practice_name || display}: measurement looks anomalous (${retryReason}) ` +
+              `${displayName || display}: measurement looks anomalous (${retryReason}) ` +
                 `and there is NO prior result to keep. Shipped as measured — verify by hand.`
             );
             result = retry;
@@ -309,27 +282,48 @@ async function main(): Promise<void> {
         ? ""
         : ` | FETCH FAILED: ${result.htmlFetch.error ?? "unknown"}`;
       const staleNote = result.stale ? " | STALE — prior kept" : "";
+      const status = !result.htmlFetch.ok
+        ? "failed"
+        : result.htmlFetch.blocked
+          ? "blocked"
+          : "ok";
 
-      console.log(
-        `perf ${fmtScore(s.performance)} | seo ${fmtScore(s.seo)} | schema ${fmtScore(
-          s.schema
-        )} | ai ${fmtScore(s.aiReadiness)} | ${platform}${fetchNote}${staleNote}`
+      log(
+        `${counter} ${display} … [${status}] perf ${fmtScore(s.performance)} | seo ${fmtScore(
+          s.seo
+        )} | schema ${fmtScore(s.schema)} | ai ${fmtScore(s.aiReadiness)} | ${platform}${fetchNote}${staleNote}${sharedNote}`
       );
     } catch (err) {
       // One bad URL must never kill the run.
       failures++;
       const message = err instanceof Error ? err.message : "Audit threw an unknown error.";
-      results.push({ ...erroredResult(normalized, message), practiceName: row.practice_name });
-      console.log(`ERROR — ${message}`);
+      const timedOut = /timed out|timeout/i.test(message);
+      results.push({ ...erroredResult(target.normalized, message), practiceName: displayName });
+      log(`${counter} ${display} … [${timedOut ? "timeout" : "failed"}] ERROR — ${message}${sharedNote}`);
     }
 
-    if (i < rows.length - 1) await sleep(DELAY_MS);
+    if (i < targets.length - 1) await sleep(DELAY_MS);
+  }
+
+  // No-website attendees never touch the network — they still belong in the
+  // report so nobody wonders where they went.
+  if (noWebsite.length > 0) {
+    log(`\nNo website on file (${noWebsite.length}):`);
+    for (const a of noWebsite) {
+      log(`  — ${a.name} (${a.city}, ${a.state}) … [no website]`);
+    }
+  }
+  if (invalid.length > 0) {
+    log(`\nURL present but would not normalize (${invalid.length}):`);
+    for (const a of invalid) {
+      log(`  — ${a.name}: "${a.url}"`);
+    }
   }
 
   const outPath = await writeCache(results);
-  console.log(`\nWrote ${results.length} results to ${outPath}`);
+  log(`\nWrote ${results.length} results to ${outPath}`);
   if (failures > 0) {
-    console.log(`${failures} site${failures === 1 ? "" : "s"} could not be audited.`);
+    log(`${failures} site${failures === 1 ? "" : "s"} could not be audited.`);
   }
 
   // Roll the history: last run becomes `previous`, this run becomes `current`.
@@ -346,7 +340,7 @@ async function main(): Promise<void> {
     )}\n`,
     "utf8"
   );
-  console.log(`History updated at ${historyPath}`);
+  log(`History updated at ${historyPath}`);
 
   // Drift report: anything that moved ±10 vs the prior run deserves eyes.
   const drift: string[] = [];
@@ -363,22 +357,37 @@ async function main(): Promise<void> {
     }
   }
   if (drift.length > 0) {
-    console.log(`\nCHANGED SINCE LAST RUN (±10 or more):`);
-    for (const line of drift) console.log(line);
+    log(`\nCHANGED SINCE LAST RUN (±10 or more):`);
+    for (const line of drift) log(line);
   } else {
-    console.log(`\nNo score moved ±10 or more since the last run.`);
+    log(`\nNo score moved ±10 or more since the last run.`);
   }
 
   if (anomalies.length > 0) {
-    console.log(`\n${"!".repeat(64)}`);
-    console.log(
-      `ANOMALIES — ${anomalies.length} result${anomalies.length === 1 ? "" : "s"} needed intervention:`
-    );
-    for (const a of anomalies) console.log(`  !! ${a}`);
-    console.log(`${"!".repeat(64)}`);
+    log(`\n${"!".repeat(64)}`);
+    log(`ANOMALIES — ${anomalies.length} result${anomalies.length === 1 ? "" : "s"} needed intervention:`);
+    for (const a of anomalies) log(`  !! ${a}`);
+    log(`${"!".repeat(64)}`);
   }
 
-  console.log("\nRun `npm run summarize` for the aggregate picture.");
+  // Status summary — the gate for "does this report look safe to ship".
+  const statusCounts = { ok: 0, blocked: 0, failed: 0 };
+  for (const r of results) {
+    if (!r.htmlFetch.ok) statusCounts.failed++;
+    else if (r.htmlFetch.blocked) statusCounts.blocked++;
+    else statusCounts.ok++;
+  }
+  log(
+    `\nSTATUS SUMMARY: ${statusCounts.ok} ok, ${statusCounts.blocked} blocked, ` +
+      `${statusCounts.failed} failed, ${noWebsite.length} no website ` +
+      `(${targets.length} unique sites audited for ${withUrl.length} attendees)`
+  );
+
+  log("\nRun `npm run summarize` for the aggregate picture.");
+
+  const reportPath = path.resolve(process.cwd(), "data/prewarm-report.txt");
+  await writeFile(reportPath, `${reportLines.join("\n")}\n`, "utf8");
+  console.log(`\nReport written to ${reportPath}`);
 }
 
 main().catch((err) => {

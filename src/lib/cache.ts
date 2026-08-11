@@ -1,5 +1,6 @@
 import type { AuditResult } from "@/types/audit";
 import prewarmed from "../../data/prewarmed-audits.json";
+import { cacheKey } from "@/lib/cacheKey";
 
 /**
  * Pre-warmed audit cache.
@@ -17,18 +18,10 @@ export interface PrewarmedFile {
 
 const file = prewarmed as unknown as PrewarmedFile;
 
-/**
- * Cache key: lowercase, no protocol, no `www.`, no trailing slash.
- * So `HTTPS://WWW.Example.com/` and `example.com` collapse to one entry.
- */
-export function cacheKey(url: string): string {
-  return url
-    .trim()
-    .toLowerCase()
-    .replace(/^https?:\/\//, "")
-    .replace(/^www\./, "")
-    .replace(/\/+$/, "");
-}
+// Re-exported so existing callers (the API route, the pre-warm script) don't
+// need a second import — implementation lives in a Node-import-free module
+// so client components (the picker) can use it too.
+export { cacheKey } from "@/lib/cacheKey";
 
 const index: Map<string, AuditResult> = (() => {
   const map = new Map<string, AuditResult>();

@@ -8,6 +8,9 @@ import {
   MODEL_DEFAULTS,
   type Provenance,
 } from "@/lib/conversionModel";
+import { normalizeUrl } from "@/lib/normalizeUrl";
+import { cacheKey } from "@/lib/cache";
+import { attendeeMatches, hasNoWebsite, letterOf, type Attendee } from "@/lib/attendees";
 
 /* ============================================================
    Booth audit UI.
@@ -20,7 +23,7 @@ import {
 const BG = "#081C34";
 const ACCENT = "#84B83B";
 
-type Phase = "input" | "running" | "result";
+type Phase = "input" | "running" | "result" | "no-website" | "browse";
 
 /** Matches the route's maxDuration so the client never gives up first. */
 const CLIENT_TIMEOUT_MS = 150_000;
@@ -609,12 +612,50 @@ function ComparisonBlock({ their, onRan }: { their: AuditResult; onRan: () => vo
 
 /* ============================================================ */
 
-export default function BoothClient({ practices }: { practices: AuditResult[] }) {
+/** Ambient dark mesh with lime accents, shared by every full-screen phase
+ *  (picker, browse grid, no-website state) so the design language matches. */
+function MeshBg() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+      <div
+        className="mesh-blob-1 absolute -top-40 -left-40 w-[520px] h-[520px] rounded-full opacity-25"
+        style={{
+          background: "radial-gradient(circle, rgba(132,184,59,0.25), transparent 70%)",
+          filter: "blur(80px)",
+        }}
+      />
+      <div
+        className="mesh-blob-2 absolute -bottom-32 -right-24 w-[560px] h-[560px] rounded-full opacity-30"
+        style={{
+          background: "radial-gradient(circle, rgba(18,54,94,0.9), transparent 70%)",
+          filter: "blur(90px)",
+        }}
+      />
+      <div
+        className="mesh-blob-3 absolute top-1/3 left-1/2 w-[420px] h-[420px] rounded-full opacity-15"
+        style={{
+          background: "radial-gradient(circle, rgba(132,184,59,0.18), transparent 70%)",
+          filter: "blur(70px)",
+        }}
+      />
+    </div>
+  );
+}
+
+export default function BoothClient({
+  practices,
+  attendees,
+}: {
+  practices: AuditResult[];
+  attendees: Attendee[];
+}) {
   const [phase, setPhase] = useState<Phase>("input");
   const [result, setResult] = useState<AuditResult | null>(null);
   const [query, setQuery] = useState("");
   const [urlInput, setUrlInput] = useState("");
   const [error, setError] = useState<string | null>(null);
+  /** Set when the picker selects an attendee with no website on file. */
+  const [noWebsiteAttendee, setNoWebsiteAttendee] = useState<Attendee | null>(null);
   const [scanStage, setScanStage] = useState(0);
   /** The run finished without a result — stages must show "not completed". */
   const [runFailed, setRunFailed] = useState(false);
@@ -658,14 +699,27 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
     });
   }, [result, monthlyVisitors, gapCaptureRate, closeRate, avgPatientValue]);
 
+  /** Pre-warmed results keyed the same way the cache module keys them, so
+   *  an attendee's raw URL — pre-redirect, possibly missing www — still
+   *  finds the result the audit engine filed under its final URL. Two
+   *  attendee names sharing one domain (e.g. Salcedo) resolve to the SAME
+   *  map entry, so the site was only ever audited once. */
+  const cacheByUrl = useMemo(() => {
+    const map = new Map<string, AuditResult>();
+    for (const p of practices) if (p.url) map.set(cacheKey(p.url), p);
+    return map;
+  }, [practices]);
+
   const matches = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return practices;
-    return practices.filter((p) => {
-      const name = (p.practiceName ?? "").toLowerCase();
-      return name.includes(q) || domainOf(p.url).toLowerCase().includes(q);
-    });
-  }, [query, practices]);
+    const q = query.trim();
+    if (!q) return attendees;
+    return attendees.filter((a) => attendeeMatches(a, q));
+  }, [query, attendees]);
+
+  /** The pending display name for the NEXT runLive call — set right before
+   *  it fires from a picker selection, consumed (and cleared) at the top of
+   *  runLive so a later manual entry never inherits a stale attendee name. */
+  const pendingDisplayNameRef = useRef<string | null>(null);
 
   const clearTimers = useCallback(() => {
     if (revealTimer.current) clearInterval(revealTimer.current);
@@ -682,6 +736,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
     clearTimers();
     abortRef.current?.abort();
     abortRef.current = null;
+    pendingDisplayNameRef.current = null;
     setPhase("input");
     setResult(null);
     setError(null);
@@ -695,6 +750,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
     setShowMath(false);
     setCtaFlipped(false);
     setComparisonRan(false);
+    setNoWebsiteAttendee(null);
   }, [clearTimers]);
 
   /** Cached path — no network, no reveal sequence. */
@@ -717,6 +773,10 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
     async (rawUrl: string, force = false) => {
       const target = rawUrl.trim();
       if (!target) return;
+      // Consumed immediately so a later manual URL entry (or a failed run)
+      // never inherits a stale attendee name from a prior picker selection.
+      const displayNameOverride = pendingDisplayNameRef.current;
+      pendingDisplayNameRef.current = null;
       clearTimers();
       setError(null);
       setResult(null);
@@ -770,6 +830,7 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
         }
 
         const data = (await res.json()) as AuditResult;
+        if (displayNameOverride) data.practiceName = displayNameOverride;
         clearTimers();
         // The response is here — each line may now resolve, and only from what
         // the data actually says. A stage whose work did not complete stays
@@ -819,6 +880,35 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
     [clearTimers]
   );
 
+  /** Picker/browse-grid selection: the single entry point for both layers.
+   *  A no-website attendee routes to a dedicated opportunity screen — never
+   *  an error. A URL with a pre-warmed result renders instantly; otherwise
+   *  it falls back to a live run under the attendee's own name. */
+  const selectAttendee = useCallback(
+    (a: Attendee) => {
+      clearTimers();
+      setError(null);
+      if (hasNoWebsite(a)) {
+        setNoWebsiteAttendee(a);
+        setPhase("no-website");
+        return;
+      }
+      const normalized = normalizeUrl(a.url);
+      if (!normalized) {
+        setError(`Could not use the website address on file for ${a.name}.`);
+        return;
+      }
+      const cached = cacheByUrl.get(cacheKey(normalized));
+      if (cached) {
+        selectPractice({ ...cached, practiceName: a.name });
+        return;
+      }
+      pendingDisplayNameRef.current = a.name;
+      void runLive(normalized);
+    },
+    [clearTimers, cacheByUrl, selectPractice, runLive]
+  );
+
   // Stop the reveal timer once every beat is showing.
   useEffect(() => {
     const steps = model?.steps.length ?? 0;
@@ -854,36 +944,147 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
     if (phase === "input") searchRef.current?.focus();
   }, [phase]);
 
+  /* ---------- no-website screen ---------- */
+  // Not an error — the opportunity framing carries the same weight as a
+  // failing score. The design language matches the result screen's CTA.
+
+  if (phase === "no-website" && noWebsiteAttendee) {
+    const name = noWebsiteAttendee.name;
+    return (
+      <main className="relative min-h-screen text-white overflow-hidden" style={{ background: BG }}>
+        <MeshBg />
+        <div className="relative z-10 max-w-3xl mx-auto px-5 sm:px-8 py-10 sm:py-14">
+          <div className="flex items-center justify-between gap-4 mb-8">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/inflowmd-final.png" alt="InflowMD" className="h-8 sm:h-9 w-auto" />
+            <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40">
+              Site Audit
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={reset}
+            className="text-white/45 hover:text-white text-sm font-semibold mb-6"
+          >
+            &larr; Back
+          </button>
+
+          <div
+            className="rounded-2xl border-2 p-6 sm:p-10 text-center"
+            style={{ borderColor: `${ACCENT}66`, background: "rgba(0,0,0,0.25)" }}
+          >
+            <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-3">
+              Finding
+            </div>
+            <h1 className="text-2xl sm:text-4xl font-extrabold leading-tight">
+              We couldn&rsquo;t find a website for {name}.
+            </h1>
+            <p className="text-white/70 text-base sm:text-xl mt-4 max-w-xl mx-auto leading-snug">
+              That&rsquo;s actually the most important finding on this page — patients
+              searching for you are finding nothing, or finding someone else.
+            </p>
+            <button
+              type="button"
+              onClick={() => setCtaFlipped(true)}
+              className="mt-8 rounded-xl px-8 py-4 font-extrabold text-lg text-[#081C34] transition-opacity hover:opacity-90"
+              style={{ background: ACCENT, minHeight: 44 }}
+            >
+              {ctaFlipped ? "Ask for Clayton — we\u2019ll find you" : "Talk to us at the booth"}
+            </button>
+          </div>
+
+          <div className="mt-8 text-white/25 text-xs">Esc — new search</div>
+        </div>
+      </main>
+    );
+  }
+
+  /* ---------- browse grid: all attendees, alphabetical, sticky letters ---------- */
+
+  if (phase === "browse") {
+    const sorted = [...attendees].sort((a, b) => a.name.localeCompare(b.name));
+    const groups = new Map<string, Attendee[]>();
+    for (const a of sorted) {
+      const letter = letterOf(a);
+      const list = groups.get(letter) ?? [];
+      list.push(a);
+      groups.set(letter, list);
+    }
+
+    return (
+      <main className="relative min-h-screen text-white overflow-hidden" style={{ background: BG }}>
+        <MeshBg />
+        <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 py-8 sm:py-10">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                All attending practices
+              </h1>
+              <p className="text-white/45 text-sm mt-1">{attendees.length} practices &middot; tap any to view</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPhase("input")}
+              className="shrink-0 rounded-xl border border-white/15 px-5 text-white/70 hover:text-white hover:border-white/30 font-semibold transition-colors"
+              style={{ minHeight: 64 }}
+            >
+              &larr; Back
+            </button>
+          </div>
+
+          <div className="space-y-8 pb-10">
+            {[...groups.entries()].map(([letter, list]) => (
+              <div key={letter}>
+                <div
+                  className="sticky top-0 z-10 -mx-1 px-1 py-2 mb-3 text-lg font-extrabold"
+                  style={{ color: ACCENT, background: BG }}
+                >
+                  {letter}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {list.map((a) => (
+                    <button
+                      key={`${a.name}-${a.city}`}
+                      type="button"
+                      onClick={() => selectAttendee(a)}
+                      className="w-full text-left rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.09] hover:border-[#84B83B]/50 transition-colors px-4 flex items-center gap-2 justify-between"
+                      style={{ minHeight: 64 }}
+                    >
+                      <span className="min-w-0 flex flex-col justify-center">
+                        <span className="text-sm sm:text-base font-bold leading-tight truncate">
+                          {a.name}
+                        </span>
+                        <span className="text-xs text-white/45 truncate">
+                          {a.city}, {a.state}
+                        </span>
+                      </span>
+                      {hasNoWebsite(a) && (
+                        <span
+                          className="shrink-0 w-2 h-2 rounded-full bg-white/30"
+                          title="No site found"
+                          aria-label="No site found"
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-white/25 text-xs pb-6">Esc — new search</div>
+        </div>
+      </main>
+    );
+  }
+
   /* ---------- input screen ---------- */
 
   if (phase === "input" || phase === "running") {
     return (
       <main className="relative min-h-screen text-white overflow-hidden" style={{ background: BG }}>
-        {/* Animated mesh, tuned dark with lime accents — subtle enough that
-            practice names stay high-contrast. */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-          <div
-            className="mesh-blob-1 absolute -top-40 -left-40 w-[520px] h-[520px] rounded-full opacity-25"
-            style={{
-              background: "radial-gradient(circle, rgba(132,184,59,0.25), transparent 70%)",
-              filter: "blur(80px)",
-            }}
-          />
-          <div
-            className="mesh-blob-2 absolute -bottom-32 -right-24 w-[560px] h-[560px] rounded-full opacity-30"
-            style={{
-              background: "radial-gradient(circle, rgba(18,54,94,0.9), transparent 70%)",
-              filter: "blur(90px)",
-            }}
-          />
-          <div
-            className="mesh-blob-3 absolute top-1/3 left-1/2 w-[420px] h-[420px] rounded-full opacity-15"
-            style={{
-              background: "radial-gradient(circle, rgba(132,184,59,0.18), transparent 70%)",
-              filter: "blur(70px)",
-            }}
-          />
-        </div>
+        <MeshBg />
 
         <div className="relative z-10 max-w-4xl mx-auto px-5 sm:px-8 py-10 sm:py-14">
           <div className="flex items-center justify-between gap-4 mb-8">
@@ -976,22 +1177,41 @@ export default function BoothClient({ practices }: { practices: AuditResult[] })
                     No match. Use the field below to audit any site.
                   </div>
                 ) : (
-                  matches.map((p) => (
+                  matches.map((a) => (
                     <button
-                      key={p.url}
+                      key={`${a.name}-${a.city}`}
                       type="button"
-                      onClick={() => selectPractice(p)}
-                      className="w-full text-left rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.09] hover:border-[#84B83B]/50 transition-colors px-5 flex flex-col justify-center"
+                      onClick={() => selectAttendee(a)}
+                      className="w-full text-left rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.09] hover:border-[#84B83B]/50 transition-colors px-5 flex items-center gap-3 justify-between"
                       style={{ minHeight: 72 }}
                     >
-                      <span className="text-lg sm:text-xl font-bold leading-tight">
-                        {p.practiceName ?? domainOf(p.url)}
+                      <span className="min-w-0 flex flex-col justify-center">
+                        <span className="text-lg sm:text-xl font-bold leading-tight truncate">
+                          {a.name}
+                        </span>
+                        <span className="text-sm text-white/45 mt-0.5">
+                          {a.city}, {a.state}
+                        </span>
                       </span>
-                      <span className="text-sm text-white/45 mt-0.5">{domainOf(p.url)}</span>
+                      {hasNoWebsite(a) && (
+                        <span className="shrink-0 inline-flex items-center gap-1.5 text-xs text-white/35">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
+                          no site found
+                        </span>
+                      )}
                     </button>
                   ))
                 )}
               </div>
+
+              <button
+                type="button"
+                onClick={() => setPhase("browse")}
+                className="mt-4 w-full rounded-xl border border-dashed border-white/15 px-5 py-4 text-center text-white/55 hover:text-white hover:border-white/30 transition-colors font-semibold"
+                style={{ minHeight: 64 }}
+              >
+                Browse all attending practices
+              </button>
 
               {/* SECONDARY — walk-up URL, visually subordinate */}
               <div className="mt-10 pt-6 border-t border-white/10">

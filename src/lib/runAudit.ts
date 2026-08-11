@@ -13,26 +13,10 @@ import { scoreCategory } from "@/lib/scoring";
  * both produce byte-identical results.
  */
 
-/** Adds https:// when missing, drops a trailing slash, validates the result. */
-export function normalizeUrl(input: string): string | null {
-  const trimmed = input.trim();
-  if (!trimmed) return null;
-
-  const withScheme = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-
-  let parsed: URL;
-  try {
-    parsed = new URL(withScheme);
-  } catch {
-    return null;
-  }
-
-  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
-  if (!parsed.hostname.includes(".")) return null;
-
-  const path = parsed.pathname.replace(/\/+$/, "");
-  return `${parsed.origin}${path}${parsed.search}`;
-}
+// Re-exported so existing server-side callers (the API route, the pre-warm
+// script) don't need a second import — but the implementation lives in a
+// Node-import-free module so client components can use it too.
+export { normalizeUrl } from "@/lib/normalizeUrl";
 
 export interface RedirectResolution {
   /** Final destination after following the chain (normalized, no trailing slash). */

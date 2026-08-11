@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import type { AuditResult } from "@/types/audit";
+import type { Attendee } from "@/lib/attendees";
 import prewarmed from "../../../data/prewarmed-audits.json";
+import hpsPractices from "../../../data/hps-practices.json";
 import BoothClient from "./BoothClient";
 
 export const metadata: Metadata = {
@@ -24,7 +26,8 @@ interface PrewarmedFile {
 
 export default function BoothPage() {
   const file = prewarmed as unknown as PrewarmedFile;
+  const attendees = hpsPractices as unknown as Attendee[];
   // The full cached results are embedded so a picker selection renders with
   // no network round trip — conference wifi is exactly what we cannot rely on.
-  return <BoothClient practices={file.results ?? []} />;
+  return <BoothClient practices={file.results ?? []} attendees={attendees} />;
 }

@@ -1,29 +1,6 @@
 {
-  "generatedAt": "2026-08-07T19:45:22.816Z",
+  "generatedAt": "2026-08-11T18:54:07.121Z",
   "previous": {
-    "thefloridavascularcare.com": {
-      "practiceName": "Florida Vascular Care",
-      "url": "https://thefloridavascularcare.com",
-      "score": 90,
-      "lcp": 2.93,
-      "fetchedAt": "2026-08-07T19:27:24.848Z"
-    },
-    "veinclinics.com": {
-      "practiceName": "Vein Clinics of America",
-      "url": "https://www.veinclinics.com",
-      "score": 47,
-      "lcp": 11.89,
-      "fetchedAt": "2026-08-07T19:27:47.059Z"
-    },
-    "centerforvein.com": {
-      "practiceName": "Center for Vein Restoration",
-      "url": "https://www.centerforvein.com",
-      "score": 55,
-      "lcp": 13.78,
-      "fetchedAt": "2026-08-07T19:28:08.270Z"
-    }
-  },
-  "current": {
     "thefloridavascularcare.com": {
       "practiceName": "Florida Vascular Care",
       "url": "https://thefloridavascularcare.com",
@@ -44,6 +21,414 @@
       "score": 44,
       "lcp": 13.83,
       "fetchedAt": "2026-08-07T19:45:22.805Z"
+    }
+  },
+  "current": {
+    "akribisveinsandvitality.com": {
+      "practiceName": "Akribis Veins & Vitality",
+      "url": "https://akribisveinsandvitality.com",
+      "score": 97,
+      "lcp": 2.19,
+      "fetchedAt": "2026-08-11T18:25:19.273Z"
+    },
+    "alaskaveincare.com": {
+      "practiceName": "Alaska Vein Care",
+      "url": "https://www.alaskaveincare.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:25:37.873Z"
+    },
+    "andersonveinandwellness.com": {
+      "practiceName": "Anderson Vein and Wellness Heart and Vascular",
+      "url": "https://www.andersonveinandwellness.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:26:00.103Z"
+    },
+    "artemis-colorado.com": {
+      "practiceName": "Artemis Vein Center",
+      "url": "https://artemis-colorado.com",
+      "score": 71,
+      "lcp": 17.41,
+      "fetchedAt": "2026-08-11T18:26:24.866Z"
+    },
+    "atlantaveincenter.com": {
+      "practiceName": "Atlanta Vein Center",
+      "url": "https://atlantaveincenter.com",
+      "score": 41,
+      "lcp": 9.28,
+      "fetchedAt": "2026-08-11T18:27:04.520Z"
+    },
+    "bucksveinandbody.com": {
+      "practiceName": "Bucks Vein and Body",
+      "url": "https://www.bucksveinandbody.com",
+      "score": 39,
+      "lcp": 20.2,
+      "fetchedAt": "2026-08-11T18:27:33.197Z"
+    },
+    "cardiacassociatesnj.com": {
+      "practiceName": "Cardiac Associates Of North Jersey",
+      "url": "https://cardiacassociatesnj.com",
+      "score": 93,
+      "lcp": 3.15,
+      "fetchedAt": "2026-08-11T18:27:49.262Z"
+    },
+    "carolinaveincare.com": {
+      "practiceName": "Carolina Vein Care & Aesthetics",
+      "url": "https://carolinaveincare.com",
+      "score": 46,
+      "lcp": 4.88,
+      "fetchedAt": "2026-08-11T18:28:29.609Z"
+    },
+    "yourhealthyveins.com": {
+      "practiceName": "Center For Advanced Vein Care",
+      "url": "https://yourhealthyveins.com",
+      "score": 54,
+      "lcp": 5.79,
+      "fetchedAt": "2026-08-11T18:28:57.520Z"
+    },
+    "centerforveincareandsurgery.com": {
+      "practiceName": "Center For Vein Care",
+      "url": "https://centerforveincareandsurgery.com",
+      "score": 18,
+      "lcp": 10.88,
+      "fetchedAt": "2026-08-11T18:29:39.068Z"
+    },
+    "chesapeakeveinandmedspa.com": {
+      "practiceName": "Chesapeake Vein Center and MedSpa",
+      "url": "https://chesapeakeveinandmedspa.com",
+      "score": 36,
+      "lcp": 6.45,
+      "fetchedAt": "2026-08-11T18:30:10.171Z"
+    },
+    "dominionvascular.com": {
+      "practiceName": "Dominion Vascular Surgical Specialists",
+      "url": "https://dominionvascular.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:31:07.670Z"
+    },
+    "eternaaesthetic.com": {
+      "practiceName": "Eterna Vein & Medical Aesthetics",
+      "url": "https://www.eternaaesthetic.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:31:20.759Z"
+    },
+    "floridaveincenter.com": {
+      "practiceName": "Florida Vein Center",
+      "url": "https://www.floridaveincenter.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:32:18.098Z"
+    },
+    "hawaiivein.com": {
+      "practiceName": "Hawaii Vein Institute",
+      "url": "https://www.hawaiivein.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:33:16.160Z"
+    },
+    "integrativecardio.com": {
+      "practiceName": "Integrative Cardiology and Vein Clinic",
+      "url": "https://integrativecardio.com",
+      "score": 88,
+      "lcp": 3.08,
+      "fetchedAt": "2026-08-11T18:33:26.996Z"
+    },
+    "drozcan.com": {
+      "practiceName": "Ismail Ozcan MD",
+      "url": "https://www.drozcan.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:33:39.404Z"
+    },
+    "livingwatervein.com": {
+      "practiceName": "Living Water Vein Institute",
+      "url": "https://www.livingwatervein.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:34:05.492Z"
+    },
+    "medicalveinclinic.com": {
+      "practiceName": "Medical Vein Clinic",
+      "url": "https://www.medicalveinclinic.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:35:02.630Z"
+    },
+    "millervein.com": {
+      "practiceName": "Miller Vein",
+      "url": "https://www.millervein.com",
+      "score": 32,
+      "lcp": 8.65,
+      "fetchedAt": "2026-08-11T18:35:52.529Z"
+    },
+    "missouriveincare.com": {
+      "practiceName": "Missouri Vein Care",
+      "url": "https://missouriveincare.com",
+      "score": 73,
+      "lcp": 7.37,
+      "fetchedAt": "2026-08-11T18:36:03.578Z"
+    },
+    "ngvascular.com": {
+      "practiceName": "NG Vascular And Vein Center",
+      "url": "https://ngvascular.com",
+      "score": 49,
+      "lcp": 3.45,
+      "fetchedAt": "2026-08-11T18:36:55.191Z"
+    },
+    "northgeorgiavein.com": {
+      "practiceName": "North Georgia Vein & Aesthetics",
+      "url": "https://www.northgeorgiavein.com",
+      "score": 47,
+      "lcp": 18.17,
+      "fetchedAt": "2026-08-11T18:37:46.794Z"
+    },
+    "nwveins.com": {
+      "practiceName": "Northwest Vein and Aesthetic Center",
+      "url": "https://www.nwveins.com",
+      "score": 63,
+      "lcp": 7.65,
+      "fetchedAt": "2026-08-11T18:38:05.538Z"
+    },
+    "oohsovein.com": {
+      "practiceName": "Ooh so vein",
+      "url": "https://oohsovein.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:39:02.691Z"
+    },
+    "ozarkregionalveincenter.com": {
+      "practiceName": "Ozark Regional Vein & Artery Center",
+      "url": "https://ozarkregionalveincenter.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:39:06.589Z"
+    },
+    "refinevein.com": {
+      "practiceName": "Refine Vein Center",
+      "url": "https://refinevein.com",
+      "score": 57,
+      "lcp": 2.41,
+      "fetchedAt": "2026-08-11T18:39:30.621Z"
+    },
+    "salcedomedicalcenter.com": {
+      "practiceName": "Salcedo Medical Center",
+      "url": "https://salcedomedicalcenter.com",
+      "score": 51,
+      "lcp": 10.44,
+      "fetchedAt": "2026-08-11T18:39:50.476Z"
+    },
+    "soundvascular.com": {
+      "practiceName": "Sound Vascular",
+      "url": "https://www.soundvascular.com",
+      "score": 63,
+      "lcp": 19.42,
+      "fetchedAt": "2026-08-11T18:40:10.885Z"
+    },
+    "southshorevein.com": {
+      "practiceName": "South Shore Vein and Aesthetic Medicine",
+      "url": "https://www.southshorevein.com",
+      "score": 85,
+      "lcp": 3.63,
+      "fetchedAt": "2026-08-11T18:40:35.489Z"
+    },
+    "summitveincare.com": {
+      "practiceName": "Summit Vein Care",
+      "url": "https://www.summitveincare.com",
+      "score": 26,
+      "lcp": 28.2,
+      "fetchedAt": "2026-08-11T18:41:05.071Z"
+    },
+    "hiet.com": {
+      "practiceName": "The Heart Institute of East Texas, P.A.",
+      "url": "https://www.hiet.com",
+      "score": 42,
+      "lcp": 35.93,
+      "fetchedAt": "2026-08-11T18:41:32.580Z"
+    },
+    "beltlinehealth.com": {
+      "practiceName": "The Vein Clinic at Beltline Health",
+      "url": "https://beltlinehealth.com",
+      "score": 46,
+      "lcp": 10.87,
+      "fetchedAt": "2026-08-11T18:41:59.806Z"
+    },
+    "veinclinicofdallas.com": {
+      "practiceName": "The Vein Clinic of Dallas",
+      "url": "https://veinclinicofdallas.com",
+      "score": 69,
+      "lcp": 6.9,
+      "fetchedAt": "2026-08-11T18:42:18.374Z"
+    },
+    "yourveininstitute.com": {
+      "practiceName": "The Vein Institute of Chattanooga",
+      "url": "https://www.yourveininstitute.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:42:40.575Z"
+    },
+    "theveininstituteofhunterdon.com": {
+      "practiceName": "The Vein Institute of Hunterdon",
+      "url": "https://theveininstituteofhunterdon.com",
+      "score": 43,
+      "lcp": 6.46,
+      "fetchedAt": "2026-08-11T18:43:12.257Z"
+    },
+    "ilveins.com": {
+      "practiceName": "The Vein Specialists",
+      "url": "https://www.ilveins.com",
+      "score": 84,
+      "lcp": 3.47,
+      "fetchedAt": "2026-08-11T18:43:33.553Z"
+    },
+    "tridentvein.com": {
+      "practiceName": "Trident Vein Center",
+      "url": "https://www.tridentvein.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:44:30.982Z"
+    },
+    "tulsaveininstitute.com": {
+      "practiceName": "Tulsa Vein Institute",
+      "url": "https://tulsaveininstitute.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:44:38.560Z"
+    },
+    "upsvis.com": {
+      "practiceName": "U.P. Superior Vascular Interventional Specialists",
+      "url": "https://upsvis.com",
+      "score": 53,
+      "lcp": 38.16,
+      "fetchedAt": "2026-08-11T18:45:30.799Z"
+    },
+    "mygreatveins.com": {
+      "practiceName": "University Medicine and Cardiology",
+      "url": "https://www.mygreatveins.com",
+      "score": 47,
+      "lcp": 5.37,
+      "fetchedAt": "2026-08-11T18:45:58.102Z"
+    },
+    "vanishlegveins.com": {
+      "practiceName": "Vanish Advanced Vein Treatment",
+      "url": "https://vanishlegveins.com",
+      "score": 53,
+      "lcp": 11.55,
+      "fetchedAt": "2026-08-11T18:46:57.652Z"
+    },
+    "vascularinstituteofthepines.com": {
+      "practiceName": "Vascular Institute of the Pines",
+      "url": "https://vascularinstituteofthepines.com",
+      "score": 66,
+      "lcp": 6.4,
+      "fetchedAt": "2026-08-11T18:47:24.751Z"
+    },
+    "vasc-solutions.com": {
+      "practiceName": "Vascular Solutions",
+      "url": "https://www.vasc-solutions.com",
+      "score": 84,
+      "lcp": 3.95,
+      "fetchedAt": "2026-08-11T18:47:47.194Z"
+    },
+    "veinvascular.com": {
+      "practiceName": "Vein & Vascular Institute",
+      "url": "https://www.veinvascular.com",
+      "score": 45,
+      "lcp": 21.71,
+      "fetchedAt": "2026-08-11T18:48:16.241Z"
+    },
+    "veinandskinstudio.com": {
+      "practiceName": "Vein and Skin Studio",
+      "url": "https://veinandskinstudio.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:48:42.433Z"
+    },
+    "veinandvascularcenters.com": {
+      "practiceName": "Vein and Vascular Centers",
+      "url": "https://veinandvascularcenters.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:48:45.324Z"
+    },
+    "veinandwellnesscenters.com": {
+      "practiceName": "Vein and Wellness Centers of Texas",
+      "url": "https://veinandwellnesscenters.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:49:06.589Z"
+    },
+    "veincenternorthtexas.com": {
+      "practiceName": "Vein Center of North Texas",
+      "url": "https://veincenternorthtexas.com",
+      "score": 66,
+      "lcp": 7.2,
+      "fetchedAt": "2026-08-11T18:49:29.643Z"
+    },
+    "veincenterofwisconsin.com": {
+      "practiceName": "Vein Center of Wisconsin",
+      "url": "https://veincenterofwisconsin.com",
+      "score": 60,
+      "lcp": 5.6,
+      "fetchedAt": "2026-08-11T18:49:48.960Z"
+    },
+    "veinandmedspa.com": {
+      "practiceName": "Vein Clinic & Med Spa",
+      "url": "https://www.veinandmedspa.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:49:51.748Z"
+    },
+    "veinkc.com": {
+      "practiceName": "Vein Clinic of Greater Kansas City",
+      "url": "https://www.veinkc.com",
+      "score": 57,
+      "lcp": 12.6,
+      "fetchedAt": "2026-08-11T18:50:06.224Z"
+    },
+    "veinhealthclinics.com": {
+      "practiceName": "Vein Health Clinics",
+      "url": "https://www.veinhealthclinics.com",
+      "score": 56,
+      "lcp": 13.73,
+      "fetchedAt": "2026-08-11T18:50:54.507Z"
+    },
+    "weknowveins.com": {
+      "practiceName": "Vein Specialists",
+      "url": "https://www.weknowveins.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:51:55.418Z"
+    },
+    "vein-ity.com": {
+      "practiceName": "Vein-ity: Vein Care Centers of Kansas",
+      "url": "https://vein-ity.com",
+      "score": 47,
+      "lcp": 55.42,
+      "fetchedAt": "2026-08-11T18:52:23.496Z"
+    },
+    "vein911.com": {
+      "practiceName": "Vein911 Vein Treatment Centers",
+      "url": "https://vein911.com",
+      "score": null,
+      "lcp": null,
+      "fetchedAt": "2026-08-11T18:53:20.665Z"
+    },
+    "versailleshealthandwellness.com": {
+      "practiceName": "Versailles Health and Wellness",
+      "url": "https://versailleshealthandwellness.com",
+      "score": 59,
+      "lcp": 9.08,
+      "fetchedAt": "2026-08-11T18:53:47.052Z"
+    },
+    "amarillovaricoseveins.com": {
+      "practiceName": "Well Life Medical",
+      "url": "https://amarillovaricoseveins.com",
+      "score": 52,
+      "lcp": 7.56,
+      "fetchedAt": "2026-08-11T18:54:07.100Z"
     }
   }
 }
