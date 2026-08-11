@@ -462,3 +462,49 @@ body {
     text-align: left;
   }
 }
+
+/* ============================================================
+   Pitch deck (/pitch)
+   ============================================================ */
+
+.pitch-scroll {
+  scrollbar-width: none;
+}
+.pitch-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Staggered scale-in, same beat as the audit scan dots — but starting at
+   opacity 0 so `backwards` genuinely hides a delayed element until its turn
+   (booth-pop's own from-state is 30% opacity, which would ghost). */
+@keyframes pitch-pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.pitch-pop {
+  animation: pitch-pop 200ms ease-out backwards;
+}
+
+/* S3b bars grow up on section entry. */
+.pitch-bar {
+  transform-origin: bottom;
+  transition: transform 800ms cubic-bezier(0.22, 0.7, 0.3, 1);
+}
+.pitch-bar-hidden {
+  transform: scaleY(0.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pitch-pop {
+    animation: none;
+  }
+  .pitch-bar {
+    transition: none;
+  }
+}
