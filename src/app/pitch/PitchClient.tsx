@@ -9,6 +9,11 @@ import { Gauge } from "../audit/Gauge";
  * or the progress dots. Section S2b reveals its three lines one
  * keypress at a time before the deck moves on.
  *
+ * Every section replays a staggered rise-in when it becomes active
+ * (`is-live`), and the showpiece sections run looping CSS/JS motion:
+ * S1 types and thinks, S2a scans a site, S3b books an appointment,
+ * S4 counts its scores up. All of it respects prefers-reduced-motion.
+ *
  * Everything renders from local assets — no external requests.
  */
 
@@ -29,6 +34,25 @@ const INVISIBLE_LINES = [
   ["Blocked crawlers", "your site may lock ChatGPT out"],
   ["Unstructured content", "AI can’t parse what you offer"],
 ] as const;
+
+/** Household names from the Next.js showcase — the architecture we build on. */
+const FAST_SITES = [
+  "OpenAI",
+  "Netflix",
+  "Nike",
+  "TikTok",
+  "Notion",
+  "DoorDash",
+  "Twitch",
+  "Target",
+  "Washington Post",
+];
+
+const SEARCH_QUERY = "vein specialist near me";
+
+function prefersReducedMotion(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
 
 /* ---------- small shared pieces ---------- */
 
@@ -74,6 +98,253 @@ function PassCheck({ delayMs, animate }: { delayMs: number; animate: boolean }) 
         <path d="M20 6 9 17l-5-5" />
       </svg>
     </span>
+  );
+}
+
+/** Subtle dot-grid texture patch — the deck's ambient ornament. */
+function DotGrid({ className }: { className: string }) {
+  return <div className={`pitch-dotgrid pointer-events-none absolute ${className}`} aria-hidden />;
+}
+
+/* ---------- S1: search bars that type, think, and listen ---------- */
+
+function SearchBars({ live }: { live: boolean }) {
+  // One looping timeline: Google types → holds → ChatGPT types → thinks →
+  // glows → everything resets. Driven by chained timeouts so cleanup is easy.
+  const [gChars, setGChars] = useState(0);
+  const [cChars, setCChars] = useState(0);
+  const [thinking, setThinking] = useState(false);
+  const [glow, setGlow] = useState(false);
+
+  useEffect(() => {
+    if (!live) return;
+    if (prefersReducedMotion()) {
+      setGChars(SEARCH_QUERY.length);
+      setCChars(SEARCH_QUERY.length);
+      setThinking(false);
+      setGlow(true);
+      return;
+    }
+    let cancelled = false;
+    const timers: number[] = [];
+    const later = (fn: () => void, ms: number) => {
+      timers.push(window.setTimeout(() => !cancelled && fn(), ms));
+    };
+
+    const cycle = () => {
+      if (cancelled) return;
+      setGChars(0);
+      setCChars(0);
+      setThinking(false);
+      setGlow(false);
+      for (let i = 1; i <= SEARCH_QUERY.length; i++) later(() => setGChars(i), 300 + i * 55);
+      const gDone = 300 + SEARCH_QUERY.length * 55;
+      for (let i = 1; i <= SEARCH_QUERY.length; i++)
+        later(() => setCChars(i), gDone + 700 + i * 45);
+      const cDone = gDone + 700 + SEARCH_QUERY.length * 45;
+      later(() => setThinking(true), cDone + 250);
+      later(() => {
+        setThinking(false);
+        setGlow(true);
+      }, cDone + 2050);
+      later(cycle, cDone + 3900);
+    };
+    cycle();
+
+    return () => {
+      cancelled = true;
+      for (const t of timers) window.clearTimeout(t);
+    };
+  }, [live]);
+
+  const caret = <span className="pitch-caret inline-block w-[2px] h-[1.05em] align-middle bg-white/80" />;
+
+  return (
+    <div className="flex flex-col items-center gap-[2.2vh] w-[min(46vw,760px)]">
+      {/* Google-ish: the classic rounded search field, typing live */}
+      <div className="w-full flex items-center gap-4 rounded-full bg-white/95 px-7 py-[1.6vh] shadow-lg text-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#5f6368" strokeWidth="2.4" strokeLinecap="round" className="w-[1.4vw] min-w-5 aspect-square shrink-0" aria-hidden>
+          <circle cx="11" cy="11" r="7" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+        <div className="flex-1 text-[clamp(16px,1.4vw,28px)] font-medium text-slate-700 whitespace-nowrap overflow-hidden">
+          {gChars > 0 ? SEARCH_QUERY.slice(0, gChars) : ""}
+          {gChars < SEARCH_QUERY.length && <span className="pitch-caret inline-block w-[2px] h-[1.05em] align-middle bg-slate-500" />}
+        </div>
+      </div>
+
+      {/* ChatGPT-ish: chat composer, lime highlight, types then thinks */}
+      <div
+        className={`w-[108%] flex items-center gap-4 rounded-3xl bg-white/[0.07] px-7 py-[2.2vh] border-2 transition-shadow duration-500 text-left ${
+          glow ? "pitch-ai-glow" : ""
+        }`}
+        style={{ borderColor: LIME, boxShadow: `0 0 44px ${LIME}30` }}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke={LIME} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[1.5vw] min-w-5 aspect-square shrink-0" aria-hidden>
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
+        </svg>
+        <div className="flex-1 text-[clamp(16px,1.4vw,28px)] font-medium text-white/85 whitespace-nowrap overflow-hidden">
+          {thinking ? (
+            <span className="inline-flex items-center gap-2" aria-label="Assistant thinking">
+              <span className="pitch-think-dot" />
+              <span className="pitch-think-dot" style={{ animationDelay: "160ms" }} />
+              <span className="pitch-think-dot" style={{ animationDelay: "320ms" }} />
+            </span>
+          ) : (
+            <>
+              {cChars > 0 ? SEARCH_QUERY.slice(0, cChars) : ""}
+              {cChars > 0 && cChars < SEARCH_QUERY.length && caret}
+            </>
+          )}
+        </div>
+        <span className="ml-auto inline-flex items-center justify-center rounded-full w-[2.4vw] min-w-8 aspect-square shrink-0" style={{ background: LIME }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke={NAVY} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-[45%]" aria-hidden>
+            <path d="M12 19V5M5 12l7-7 7 7" />
+          </svg>
+        </span>
+      </div>
+
+      {/* Voice: waveform, always listening */}
+      <div className="w-full flex items-center justify-center gap-[0.55vw] rounded-full bg-white/[0.05] border border-white/15 px-7 py-[1.7vh]">
+        {[34, 62, 88, 52, 96, 44, 72, 30].map((h, i) => (
+          <span
+            key={i}
+            className="pitch-wavebar w-[0.45vw] min-w-1.5 rounded-full"
+            style={{
+              height: `${(h / 100) * 3.4}vh`,
+              background: i % 2 ? BLUE : "rgba(255,255,255,0.65)",
+              animationDelay: `${i * 120}ms`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- S2a: the AI reading a site while it answers ---------- */
+
+function SiteScan() {
+  return (
+    <div className="relative w-[min(20vw,340px)] shrink-0" aria-hidden>
+      {/* Browser-ish card being read */}
+      <div className="relative overflow-hidden rounded-2xl bg-white/[0.06] border border-white/12">
+        <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-white/10">
+          <span className="w-2 h-2 rounded-full bg-white/25" />
+          <span className="w-2 h-2 rounded-full bg-white/25" />
+          <span className="w-2 h-2 rounded-full bg-white/25" />
+          <span className="ml-2 h-2 w-1/2 rounded-full bg-white/15" />
+        </div>
+        <div className="flex flex-col gap-[1.1vh] p-5">
+          {[88, 64, 76, 52, 70, 40].map((w, i) => (
+            <span
+              key={i}
+              className="pitch-scanline-item h-[0.9vh] min-h-1.5 rounded-full bg-white/25"
+              style={{ width: `${w}%`, animationDelay: `${i * 460}ms` }}
+            />
+          ))}
+        </div>
+        {/* The reading beam */}
+        <span className="pitch-scanbeam absolute left-0 right-0 h-10" />
+      </div>
+      <p className="mt-3 text-center text-[clamp(12px,0.95vw,18px)] uppercase tracking-[0.25em] text-white/35 font-semibold">
+        Reading your site
+      </p>
+    </div>
+  );
+}
+
+function FlowDots() {
+  // Dashes flowing from the scanned site into the answer.
+  return (
+    <svg viewBox="0 0 120 24" className="w-[min(7vw,120px)] shrink-0 opacity-70" fill="none" aria-hidden>
+      <path
+        d="M4 12h112"
+        stroke={LIME}
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeDasharray="10 14"
+        className="pitch-flow"
+      />
+      <path d="m104 4 12 8-12 8" stroke={LIME} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/* ---------- S3b: the conversion, illustrated ---------- */
+
+function BookingSim({ live }: { live: boolean }) {
+  return (
+    <div
+      className={`relative flex flex-col items-center gap-[2vh] rounded-3xl bg-white/[0.05] border border-white/10 px-[3vw] py-[4vh] ${
+        live ? "pitch-sim-live" : ""
+      }`}
+    >
+      <div className="h-[1vh] min-h-2 w-[9vw] rounded-full bg-white/15" />
+      <div className="h-[1vh] min-h-2 w-[12vw] rounded-full bg-white/10" />
+      <div className="pitch-sim-btn relative mt-[1.5vh] inline-flex items-center justify-center rounded-2xl px-[2.6vw] py-[2.2vh] text-[clamp(18px,1.5vw,30px)] font-extrabold overflow-hidden" style={{ background: LIME, color: NAVY }}>
+        <span className="pitch-sim-label inline-flex items-center gap-3">Book Appointment</span>
+        <span className="pitch-sim-booked absolute inset-0 inline-flex items-center justify-center gap-3">
+          <svg viewBox="0 0 24 24" fill="none" stroke={NAVY} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="w-[1.1em] h-[1.1em]" aria-hidden>
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+          Booked
+        </span>
+        <span className="pitch-sim-ripple absolute inset-0 rounded-2xl" />
+      </div>
+      {/* Cursor */}
+      <svg viewBox="0 0 24 24" className="pitch-sim-cursor absolute w-[2vw] min-w-7 drop-shadow-lg" style={{ left: "50%", top: "62%" }} aria-hidden>
+        <path d="M5 3l14 8-6 1.5L16 19l-3 1.5-3-6.5L5 18V3z" fill="#fff" stroke={NAVY} strokeWidth="1.5" />
+      </svg>
+    </div>
+  );
+}
+
+/* ---------- S4: scores that count up ---------- */
+
+function CountingGauges({ live }: { live: boolean }) {
+  const [scores, setScores] = useState<{ a: number; b: number }>({ a: 0, b: 0 });
+
+  useEffect(() => {
+    if (!live) return;
+    if (prefersReducedMotion()) {
+      setScores({ a: 42, b: 98 });
+      return;
+    }
+    setScores({ a: 0, b: 0 });
+    let raf = 0;
+    const started = performance.now();
+    const DURATION = 1600;
+    const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+    const step = (now: number) => {
+      const t = Math.min(1, (now - started) / DURATION);
+      const e = ease(t);
+      setScores({ a: Math.round(42 * e), b: Math.round(98 * e) });
+      if (t < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [live]);
+
+  return (
+    <div className="flex items-center gap-[8vw]">
+      <div className="pitch-rise" style={{ "--rise": "150ms" } as React.CSSProperties}>
+        <Gauge
+          score={scores.a}
+          size={340}
+          valueClass="text-8xl"
+          srLabel="Their site: performance score 42 of 100"
+        />
+      </div>
+      <div className="pitch-rise" style={{ "--rise": "300ms" } as React.CSSProperties}>
+        <Gauge
+          score={scores.b}
+          size={340}
+          valueClass="text-8xl"
+          srLabel="Our build: performance score 98 of 100"
+        />
+      </div>
+    </div>
   );
 }
 
@@ -201,13 +472,18 @@ export default function PitchClient() {
 
   const jumpTo = (index: number) => goTo(index);
 
+  /** Rise-in delay: pair with the `pitch-rise` class on the same element. */
+  const rise = (delayMs: number) => ({ "--rise": `${delayMs}ms` } as React.CSSProperties);
+
   const section = (index: number, children: React.ReactNode, extra = "") => (
     <section
       key={SECTIONS[index]}
       ref={(el) => {
         sectionRefs.current[index] = el;
       }}
-      className={`relative h-dvh snap-start flex flex-col items-center justify-center gap-[4vh] px-[7vw] text-center overflow-hidden ${extra}`}
+      className={`relative h-dvh snap-start flex flex-col items-center justify-center gap-[4vh] px-[7vw] text-center overflow-hidden ${
+        active === index ? "is-live" : ""
+      } ${extra}`}
     >
       {children}
     </section>
@@ -250,6 +526,8 @@ export default function PitchClient() {
             filter: "blur(80px)",
           }}
         />
+        {/* Ambient dot texture over the whole deck, very quiet */}
+        <div className="pitch-dotgrid absolute inset-0 opacity-[0.35]" />
       </div>
 
       {/* Progress dots */}
@@ -277,6 +555,7 @@ export default function PitchClient() {
       {section(
         0,
         <>
+          <DotGrid className="inset-x-[10vw] top-[8vh] h-[24vh] opacity-60 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/inflowmd-final.png"
@@ -284,9 +563,19 @@ export default function PitchClient() {
             draggable={false}
             width={788}
             height={118}
-            className="w-[min(44vw,780px)] h-auto"
+            className="w-[min(44vw,780px)] h-auto pitch-rise"
+            style={rise(0)}
           />
-          <p className={SUB}>AI-powered marketing for medical practices</p>
+          <p
+            className="text-[clamp(28px,2.6vw,52px)] font-extrabold tracking-tight text-white pitch-rise"
+            style={{ "--rise": "180ms" } as React.CSSProperties}
+          >
+            Get More <span style={{ color: LIME }}>Patients.</span> Powered by{" "}
+            <span style={{ color: LIME }}>AI</span>
+          </p>
+          <p className={`${SUB} pitch-rise`} style={{ "--rise": "340ms" } as React.CSSProperties}>
+            AI-powered marketing for medical practices
+          </p>
         </>
       )}
 
@@ -294,78 +583,51 @@ export default function PitchClient() {
       {section(
         1,
         <>
-          <h2 className={`${PRIMARY} max-w-[16em]`}>
+          <h2 className={`${PRIMARY} max-w-[16em] pitch-rise`} style={rise(0)}>
             How do patients find a vein specialist in 2026?
           </h2>
-          <div className="flex flex-col items-center gap-[2.2vh] w-[min(46vw,760px)]">
-            {/* Google-ish: the classic rounded search field */}
-            <div className="w-full flex items-center gap-4 rounded-full bg-white/95 px-7 py-[1.6vh] shadow-lg">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#5f6368" strokeWidth="2.4" strokeLinecap="round" className="w-[1.4vw] min-w-5 aspect-square" aria-hidden>
-                <circle cx="11" cy="11" r="7" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
-              <div className="h-[1.1vh] min-h-2 flex-1 max-w-[60%] rounded-full bg-slate-300" />
-            </div>
-            {/* ChatGPT-ish: chat composer, lime highlight, slightly larger */}
-            <div
-              className="w-[108%] flex items-center gap-4 rounded-3xl bg-white/[0.07] px-7 py-[2.2vh] border-2"
-              style={{ borderColor: LIME, boxShadow: `0 0 44px ${LIME}30` }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke={LIME} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[1.5vw] min-w-5 aspect-square" aria-hidden>
-                <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
-              </svg>
-              <div className="h-[1.1vh] min-h-2 flex-1 max-w-[55%] rounded-full bg-white/25" />
-              <span className="ml-auto inline-flex items-center justify-center rounded-full w-[2.4vw] min-w-8 aspect-square" style={{ background: LIME }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke={NAVY} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-[45%]" aria-hidden>
-                  <path d="M12 19V5M5 12l7-7 7 7" />
-                </svg>
-              </span>
-            </div>
-            {/* Voice: waveform motif */}
-            <div className="w-full flex items-center justify-center gap-[0.55vw] rounded-full bg-white/[0.05] border border-white/15 px-7 py-[1.7vh]">
-              {[34, 62, 88, 52, 96, 44, 72, 30].map((h, i) => (
-                <span
-                  key={i}
-                  className="w-[0.45vw] min-w-1.5 rounded-full"
-                  style={{
-                    height: `${(h / 100) * 3.4}vh`,
-                    background: i % 2 ? BLUE : "rgba(255,255,255,0.65)",
-                  }}
-                />
-              ))}
-            </div>
+          <div className="pitch-rise" style={rise(200)}>
+            <SearchBars live={active === 1} />
           </div>
-          <p className={SUB}>The answer changed. Most practice websites didn&rsquo;t.</p>
+          <p className={`${SUB} pitch-rise`} style={{ "--rise": "380ms" } as React.CSSProperties}>
+            The answer changed. Most practice websites didn&rsquo;t.
+          </p>
         </>
       )}
 
-      {/* S2a — chat exchange */}
+      {/* S2a — chat exchange + the AI reading the site */}
       {section(
         2,
         <>
-          <h2 className={`${PRIMARY} max-w-[14em]`}>
+          <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
             Patients are asking AI for doctor recommendations.
           </h2>
-          <div className="w-[min(44vw,720px)] flex flex-col gap-[2vh] text-left">
-            <div className="self-end max-w-[75%] rounded-3xl rounded-br-md bg-white/15 px-8 py-[1.8vh] text-[clamp(18px,1.5vw,30px)] font-medium text-white/90">
-              best vein specialist near me
+          <div className="flex items-center gap-[2.5vw] pitch-rise" style={{ "--rise": "220ms" } as React.CSSProperties}>
+            <div className="w-[min(34vw,600px)] flex flex-col gap-[2vh] text-left">
+              <div className="self-end max-w-[80%] rounded-3xl rounded-br-md bg-white/15 px-8 py-[1.8vh] text-[clamp(18px,1.5vw,30px)] font-medium text-white/90">
+                best vein specialist near me
+              </div>
+              <div className="self-start w-[92%] rounded-3xl rounded-bl-md bg-white/[0.06] border border-white/10 px-8 py-[2.2vh] flex flex-col gap-[1.6vh]">
+                {[82, 66, 74].map((w, i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <span
+                      className="inline-block w-[0.6vw] min-w-2 aspect-square rounded-full"
+                      style={{ background: i === 0 ? LIME : "rgba(255,255,255,0.35)" }}
+                    />
+                    <div
+                      className="pitch-answer-bar h-[1.2vh] min-h-2.5 rounded-full bg-white/30 blur-[3px]"
+                      style={{ width: `${w}%`, animationDelay: `${i * 700}ms` }}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="self-start w-[88%] rounded-3xl rounded-bl-md bg-white/[0.06] border border-white/10 px-8 py-[2.2vh] flex flex-col gap-[1.6vh]">
-              {[82, 66, 74].map((w, i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <span
-                    className="inline-block w-[0.6vw] min-w-2 aspect-square rounded-full"
-                    style={{ background: i === 0 ? LIME : "rgba(255,255,255,0.35)" }}
-                  />
-                  <div
-                    className="h-[1.2vh] min-h-2.5 rounded-full bg-white/30 blur-[3px]"
-                    style={{ width: `${w}%` }}
-                  />
-                </div>
-              ))}
-            </div>
+            <FlowDots />
+            <SiteScan />
           </div>
-          <p className={SUB}>AI answers from what it can read on your site.</p>
+          <p className={`${SUB} pitch-rise`} style={{ "--rise": "400ms" } as React.CSSProperties}>
+            AI answers from what it can read on your site.
+          </p>
         </>
       )}
 
@@ -373,7 +635,7 @@ export default function PitchClient() {
       {section(
         3,
         <>
-          <h2 className={`${PRIMARY} max-w-[13em]`}>
+          <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
             Most vein practice sites are invisible to AI.
           </h2>
           <ul className="flex flex-col items-start gap-[3vh] text-[clamp(24px,2.1vw,44px)] font-semibold">
@@ -415,7 +677,8 @@ export default function PitchClient() {
             <circle cx="520" cy="560" r="14" fill="#fff" />
             <path d="M430 240 620 420m0 0 170-160M620 420 520 560" stroke="#fff" strokeWidth="4" />
           </svg>
-          <h2 className={`${PRIMARY} max-w-[14em]`}>
+          <DotGrid className="right-[6vw] bottom-[10vh] w-[18vw] h-[26vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_72%)]" />
+          <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
             We build sites AI can read, understand, and recommend.
           </h2>
           <ul className="flex flex-col items-start gap-[3vh] text-[clamp(24px,2.1vw,44px)] font-semibold">
@@ -437,50 +700,57 @@ export default function PitchClient() {
         5,
         <>
           <div
-            className="font-extrabold leading-none tracking-tight text-[clamp(200px,30vh,320px)]"
-            style={{ color: LIME }}
+            className="font-extrabold leading-none tracking-tight text-[clamp(200px,30vh,320px)] pitch-rise"
+            style={{ color: LIME, "--rise": "0ms" } as React.CSSProperties}
           >
             53%
           </div>
-          <p className={`${PRIMARY} text-[clamp(32px,3vw,68px)] max-w-[16em]`}>
+          <p className={`${PRIMARY} text-[clamp(32px,3vw,68px)] max-w-[16em] pitch-rise`} style={{ "--rise": "200ms" } as React.CSSProperties}>
             of mobile visitors abandon after 3 seconds.
           </p>
-          <p className="text-[clamp(16px,1.2vw,24px)] text-white/40">Google / SOASTA</p>
+          <p className="text-[clamp(16px,1.2vw,24px)] text-white/40 pitch-rise" style={{ "--rise": "360ms" } as React.CSSProperties}>
+            Google / SOASTA
+          </p>
         </>
       )}
 
-      {/* S3b — 3x bars */}
+      {/* S3b — 3x bars + the conversion, illustrated */}
       {section(
         6,
         <>
-          <h2 className={`${PRIMARY} max-w-[15em]`}>
+          <h2 className={`${PRIMARY} max-w-[15em] pitch-rise`} style={rise(0)}>
             A 1-second site converts 3x better than a 5-second site.
           </h2>
-          <div className="flex items-end gap-[4vw] h-[34vh]">
-            <div className="flex flex-col items-center gap-3 h-full justify-end">
-              <div
-                className={`pitch-bar w-[9vw] min-w-24 rounded-t-2xl bg-white/20 ${
-                  active === 6 ? "" : "pitch-bar-hidden"
-                }`}
-                style={{ height: "33.3%" }}
-              />
-              <span className="text-[clamp(18px,1.5vw,30px)] font-semibold text-white/50">
-                5s site
-              </span>
+          <div className="flex items-center gap-[6vw] pitch-rise" style={{ "--rise": "220ms" } as React.CSSProperties}>
+            <div className="flex items-end gap-[4vw] h-[32vh]">
+              <div className="flex flex-col items-center gap-3 h-full justify-end">
+                <div
+                  className={`pitch-bar w-[8vw] min-w-24 rounded-t-2xl bg-white/20 ${
+                    active === 6 ? "" : "pitch-bar-hidden"
+                  }`}
+                  style={{ height: "33.3%" }}
+                />
+                <span className="text-[clamp(18px,1.5vw,30px)] font-semibold text-white/50">
+                  5s site
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-3 h-full justify-end">
+                <div
+                  className={`pitch-bar w-[8vw] min-w-24 rounded-t-2xl ${
+                    active === 6 ? "" : "pitch-bar-hidden"
+                  }`}
+                  style={{ height: "100%", background: LIME, transitionDelay: "150ms" }}
+                />
+                <span className="text-[clamp(18px,1.5vw,30px)] font-semibold" style={{ color: LIME }}>
+                  1s site
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col items-center gap-3 h-full justify-end">
-              <div
-                className={`pitch-bar w-[9vw] min-w-24 rounded-t-2xl ${
-                  active === 6 ? "" : "pitch-bar-hidden"
-                }`}
-                style={{ height: "100%", background: LIME, transitionDelay: "150ms" }}
-              />
-              <span className="text-[clamp(18px,1.5vw,30px)] font-semibold" style={{ color: LIME }}>
-                1s site
-              </span>
-            </div>
+            <BookingSim live={active === 6} />
           </div>
-          <p className={SUB}>Portent, 2022 — 100M+ pageviews, lead-generation sites</p>
+          <p className={`${SUB} pitch-rise`} style={{ "--rise": "400ms" } as React.CSSProperties}>
+            Portent, 2022 — 100M+ pageviews, lead-generation sites
+          </p>
         </>
       )}
 
@@ -508,10 +778,29 @@ export default function PitchClient() {
               strokeLinecap="round"
             />
           </svg>
-          <h2 className={`${PRIMARY} max-w-[13em]`}>
+          <DotGrid className="left-[8vw] top-[14vh] w-[20vw] h-[30vh] opacity-50 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
+          <DotGrid className="right-[10vw] bottom-[12vh] w-[16vw] h-[24vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
+          <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
             We build on the same architecture as the fastest sites on the web.
           </h2>
-          <p className={SUB}>Fast by design — not by plugin.</p>
+          <p className={`${SUB} pitch-rise`} style={{ "--rise": "200ms" } as React.CSSProperties}>
+            Fast by design — not by plugin.
+          </p>
+          <div
+            className="flex flex-wrap items-center justify-center gap-x-[1.6vw] gap-y-[1.4vh] max-w-[60vw] pitch-rise"
+            style={{ "--rise": "360ms" } as React.CSSProperties}
+          >
+            {FAST_SITES.map((name, i) => (
+              <span key={name} className="inline-flex items-center gap-[1.6vw]">
+                {i > 0 && (
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: `${LIME}66` }} />
+                )}
+                <span className="text-[clamp(14px,1.15vw,24px)] font-semibold uppercase tracking-[0.18em] text-white/45">
+                  {name}
+                </span>
+              </span>
+            ))}
+          </div>
         </>
       )}
 
@@ -519,22 +808,14 @@ export default function PitchClient() {
       {section(
         8,
         <>
-          <h2 className={`${PRIMARY} max-w-[13em]`}>Same test. Their site. Our build.</h2>
-          <div className="flex items-center gap-[8vw]">
-            <Gauge
-              score={44}
-              showValue={false}
-              size={340}
-              srLabel="Their site: performance score in the failing red zone"
-            />
-            <Gauge
-              score={94}
-              showValue={false}
-              size={340}
-              srLabel="Our build: performance score in the passing green zone"
-            />
-          </div>
-          <p className={SUB}>Run it live on any site — including this one.</p>
+          <DotGrid className="inset-x-[20vw] top-[8vh] h-[18vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
+          <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
+            Same test. Their site. Our build.
+          </h2>
+          <CountingGauges live={active === 8} />
+          <p className={`${SUB} pitch-rise`} style={{ "--rise": "450ms" } as React.CSSProperties}>
+            Run it live on any site — including this one.
+          </p>
         </>
       )}
 
@@ -542,16 +823,20 @@ export default function PitchClient() {
       {section(
         9,
         <>
-          <h2 className={PRIMARY}>Want to see yours?</h2>
+          <h2 className={`${PRIMARY} pitch-rise`} style={rise(0)}>
+            Want to see yours?
+          </h2>
           <a
             href="/audit"
             onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center justify-center min-h-[64px] rounded-2xl px-[3.5vw] py-[2.6vh] text-[clamp(24px,2vw,42px)] font-extrabold shadow-xl transition-transform hover:scale-[1.03]"
-            style={{ background: LIME, color: NAVY }}
+            className="pitch-rise inline-flex items-center justify-center min-h-[64px] rounded-2xl px-[3.5vw] py-[2.6vh] text-[clamp(24px,2vw,42px)] font-extrabold shadow-xl transition-transform hover:scale-[1.03]"
+            style={{ background: LIME, color: NAVY, "--rise": "200ms" } as React.CSSProperties}
           >
             Run your practice&rsquo;s audit
           </a>
-          <p className={SUB}>30 seconds. Google&rsquo;s own measurement.</p>
+          <p className={`${SUB} pitch-rise`} style={{ "--rise": "360ms" } as React.CSSProperties}>
+            30 seconds. Google&rsquo;s own measurement.
+          </p>
         </>
       )}
     </div>

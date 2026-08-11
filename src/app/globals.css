@@ -500,11 +500,186 @@ body {
   transform: scaleY(0.02);
 }
 
+/* --- Section entrances: children rise in with a stagger when their
+       section goes live. Idle sections sit at full opacity so manual
+       scrolling never passes a blank screen. --- */
+.pitch-rise {
+  opacity: 1;
+}
+.is-live .pitch-rise {
+  animation: pitch-rise 700ms cubic-bezier(0.22, 0.7, 0.3, 1) both;
+  animation-delay: var(--rise, 0ms);
+}
+@keyframes pitch-rise {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- Ambient dot-grid texture --- */
+.pitch-dotgrid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1.5px, transparent 1.5px);
+  background-size: 26px 26px;
+}
+
+/* --- S1: typing caret, thinking dots, waveform, answer glow --- */
+.pitch-caret {
+  animation: pitch-caret 900ms steps(1) infinite;
+}
+@keyframes pitch-caret {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0; }
+}
+.pitch-think-dot {
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.75);
+  animation: pitch-think 900ms ease-in-out infinite;
+}
+@keyframes pitch-think {
+  0%, 100% { transform: translateY(0); opacity: 0.45; }
+  40% { transform: translateY(-0.35em); opacity: 1; }
+}
+.pitch-wavebar {
+  animation: pitch-wave 1.15s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes pitch-wave {
+  0%, 100% { transform: scaleY(0.45); }
+  50% { transform: scaleY(1.15); }
+}
+.pitch-ai-glow {
+  box-shadow: 0 0 70px rgba(132, 184, 59, 0.55) !important;
+}
+
+/* --- S2a: the AI reading a site --- */
+.pitch-scanbeam {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(132, 184, 59, 0.22) 45%,
+    rgba(132, 184, 59, 0.55) 50%,
+    rgba(132, 184, 59, 0.22) 55%,
+    transparent
+  );
+  animation: pitch-scan 2.76s linear infinite;
+}
+@keyframes pitch-scan {
+  from { top: -12%; }
+  to { top: 104%; }
+}
+.pitch-scanline-item {
+  animation: pitch-scanline 2.76s linear infinite;
+}
+@keyframes pitch-scanline {
+  0%, 100% { background: rgba(255, 255, 255, 0.22); }
+  12% { background: rgba(132, 184, 59, 0.85); }
+  30% { background: rgba(255, 255, 255, 0.38); }
+}
+.pitch-flow {
+  animation: pitch-flow 900ms linear infinite;
+}
+@keyframes pitch-flow {
+  to { stroke-dashoffset: -24; }
+}
+.pitch-answer-bar {
+  animation: pitch-answer 4.2s ease-in-out infinite;
+}
+@keyframes pitch-answer {
+  0%, 100% { opacity: 0.55; }
+  12% { opacity: 1; }
+}
+
+/* --- S3b: the booking simulation. One shared 4s timeline; every part
+       keys its keyframes to the same clock. Runs only while live. --- */
+.pitch-sim-cursor,
+.pitch-sim-ripple,
+.pitch-sim-booked {
+  opacity: 0;
+}
+.pitch-sim-live .pitch-sim-cursor {
+  animation: pitch-sim-cursor 4s ease-in-out infinite;
+}
+.pitch-sim-live .pitch-sim-btn {
+  animation: pitch-sim-press 4s ease-in-out infinite;
+}
+.pitch-sim-live .pitch-sim-ripple {
+  animation: pitch-sim-ripple 4s ease-out infinite;
+}
+.pitch-sim-live .pitch-sim-label {
+  animation: pitch-sim-label 4s steps(1) infinite;
+}
+.pitch-sim-live .pitch-sim-booked {
+  animation: pitch-sim-booked 4s steps(1) infinite;
+}
+@keyframes pitch-sim-cursor {
+  0% { opacity: 0; transform: translate(9vw, 9vh); }
+  12% { opacity: 1; }
+  30% { transform: translate(0.6vw, -1.2vh); }
+  35% { transform: translate(0.6vw, -1.2vh) scale(0.82); }
+  40% { transform: translate(0.6vw, -1.2vh) scale(1); }
+  58% { opacity: 1; transform: translate(0.6vw, -1.2vh); }
+  70%, 100% { opacity: 0; transform: translate(3vw, 4vh); }
+}
+@keyframes pitch-sim-press {
+  0%, 32% { transform: scale(1); }
+  35% { transform: scale(0.94); }
+  39% { transform: scale(1); }
+}
+@keyframes pitch-sim-ripple {
+  0%, 34% { opacity: 0; box-shadow: 0 0 0 0 rgba(8, 28, 52, 0.35) inset, 0 0 0 0 rgba(132, 184, 59, 0.7); }
+  36% { opacity: 1; }
+  52% { opacity: 0; box-shadow: 0 0 0 0 rgba(8, 28, 52, 0) inset, 0 0 0 22px rgba(132, 184, 59, 0); }
+  100% { opacity: 0; }
+}
+@keyframes pitch-sim-label {
+  0%, 37% { opacity: 1; }
+  38%, 88% { opacity: 0; }
+  89%, 100% { opacity: 1; }
+}
+@keyframes pitch-sim-booked {
+  0%, 37% { opacity: 0; }
+  38%, 88% { opacity: 1; }
+  89%, 100% { opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pitch-pop {
     animation: none;
   }
   .pitch-bar {
     transition: none;
+  }
+  .is-live .pitch-rise,
+  .pitch-caret,
+  .pitch-think-dot,
+  .pitch-wavebar,
+  .pitch-scanbeam,
+  .pitch-scanline-item,
+  .pitch-flow,
+  .pitch-answer-bar,
+  .pitch-sim-live .pitch-sim-cursor,
+  .pitch-sim-live .pitch-sim-btn,
+  .pitch-sim-live .pitch-sim-ripple,
+  .pitch-sim-live .pitch-sim-label,
+  .pitch-sim-live .pitch-sim-booked {
+    animation: none;
+  }
+  .pitch-scanbeam,
+  .pitch-sim-cursor,
+  .pitch-sim-ripple {
+    opacity: 0;
+  }
+  .pitch-sim-booked {
+    opacity: 0;
+  }
+  .pitch-sim-label {
+    opacity: 1;
   }
 }
