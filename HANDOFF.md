@@ -5,7 +5,55 @@ pending. This file exists in case a session boundary hits mid-work; as of
 the last edit it did not — everything below already happened, in order,
 most recent first.
 
-## Latest: live-first picker, cache as silent fallback
+## Latest: patched the cache's speed gaps (--only-missing-speed)
+
+Follow-up to the live-first change: the cache had 20 of 58 entries with no
+performance data (PSI timeouts and transient 500s from the original
+pre-warm run, listed in full in the prior conversation turn). Added a
+targeted re-run mode to `scripts/prewarm.ts`:
+
+```
+npm run prewarm -- --only-missing-speed
+```
+
+Re-audits ONLY cache entries whose `performance.available` is false (or
+that have no cached entry yet) — every complete entry is carried forward
+byte-for-byte untouched, no network call, no delay, no re-timestamp
+(verified: exactly 20 entries' `fetchedAt` changed, 38 stayed identical).
+Sanity bounds (history comparison, outlier retry, stale-value keep) stay
+active for whatever IS re-audited. The audit + anomaly-retry logic was
+extracted into a shared `auditWithAnomalyCheck` helper so the normal pass
+and this targeted mode don't duplicate it.
+
+On top of that, a target that still has no performance data after its
+first fresh attempt gets ONE more full attempt (30s later, same
+anomaly-check machinery) before being accepted as an honest partial —
+"PSI timeouts are transient" held up: of the 20 re-audited, 3 needed that
+second attempt and all 3 succeeded on it. Only 1 (Vein and Wellness
+Centers of Texas — veinandwellnesscenters.com, timeout both times) is
+still missing after retry, listed by name in the run report's "Speed
+data still missing after retry" section and in the console output.
+
+**Before/after**: 38 of 58 → **57 of 58** cache entries have complete
+speed data. `scripts/prewarm.ts`'s report now also prints this count
+directly (`Speed data: X of Y cache entries have complete performance
+data.`) so it doesn't have to be computed by hand next time.
+
+Deployed: `npx vercel --prod --yes` → `https://www.inflowmd.com`. First
+deploy attempt failed on a transient Vercel build-infra issue (Google
+Fonts module resolution failure during the Turbopack build — unrelated
+to this change, a flaky network hiccup on Vercel's side); the immediate
+retry succeeded cleanly. Merged: `claude/musing-kepler` → `main` (merge
+commit `cb5aeec`), pushed to `origin/main`, confirmed HEAD matches.
+
+Open: Vein and Wellness Centers of Texas has no speed data at all — if
+that practice comes up at the booth, the live-first flow will attempt a
+real PSI run (which may well succeed live even though pre-warm's two
+attempts didn't), and if that also fails it'll render the cached partial
+honestly (`could_not_verify` styling, never a false failure) rather than
+a live speed number.
+
+## Earlier: live-first picker, cache as silent fallback
 
 Picker/browse-grid selections now run a REAL live audit (force:true, full
 scan sequence — the honest "Google is measuring this site" experience)
