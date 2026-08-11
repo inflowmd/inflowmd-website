@@ -6,8 +6,8 @@ import { Gauge } from "../audit/Gauge";
 /**
  * The booth pitch deck. Ten full-viewport sections; forward/back via
  * keyboard (presenter remotes send PageDown/PageUp), click-anywhere,
- * or the progress dots. Section S2b reveals its three lines one
- * keypress at a time before the deck moves on.
+ * or the progress dots. One press per section — every section loads
+ * its own content automatically on entry.
  *
  * Every section replays a staggered rise-in when it becomes active
  * (`is-live`), and the showpiece sections run looping CSS/JS motion:
@@ -22,8 +22,6 @@ const LIME = "#84B83B";
 const BLUE = "#3B6FBF";
 
 const SECTIONS = ["s0", "s1", "s2a", "s2b", "s2c", "s3a", "s3b", "s3c", "s4", "s5"] as const;
-const S2B = SECTIONS.indexOf("s2b");
-const S2B_LINES = 3;
 
 /** Shared type scale — readable from six feet on a 1440p booth monitor. */
 const PRIMARY = "text-[clamp(40px,4.5vw,104px)] font-extrabold leading-[1.08] tracking-tight text-white";
@@ -56,11 +54,13 @@ function prefersReducedMotion(): boolean {
 
 /* ---------- small shared pieces ---------- */
 
-function FailX() {
+function FailX({ delayMs = 0, animate = false }: { delayMs?: number; animate?: boolean }) {
   return (
     <span
-      className="inline-flex items-center justify-center shrink-0 rounded-full bg-red-500/15"
-      style={{ width: "1.5em", height: "1.5em" }}
+      className={`inline-flex items-center justify-center shrink-0 rounded-full bg-red-500/15 ${
+        animate ? "pitch-pop" : ""
+      }`}
+      style={{ width: "1.5em", height: "1.5em", animationDelay: `${delayMs}ms` }}
     >
       <svg
         viewBox="0 0 24 24"
@@ -307,6 +307,67 @@ function FlowDots() {
   );
 }
 
+/* ---------- S2b: the AI scanning a site and finding nothing ---------- */
+
+function BrokenScan() {
+  // Mirror of S2a's reading card, but the read fails: sparse fragments,
+  // dashed empty slots, a red beam, and ✗ marks where content should be.
+  const rows: Array<{ w: number; empty?: boolean }> = [
+    { w: 58 },
+    { w: 0, empty: true },
+    { w: 26 },
+    { w: 0, empty: true },
+    { w: 40 },
+    { w: 0, empty: true },
+  ];
+  return (
+    <div className="relative w-[min(20vw,340px)] shrink-0" aria-hidden>
+      <div className="relative overflow-hidden rounded-2xl bg-white/[0.06] border border-white/12">
+        <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-white/10">
+          <span className="w-2 h-2 rounded-full bg-white/25" />
+          <span className="w-2 h-2 rounded-full bg-white/25" />
+          <span className="w-2 h-2 rounded-full bg-white/25" />
+          <span className="ml-2 h-2 w-1/2 rounded-full bg-white/15" />
+        </div>
+        <div className="flex flex-col gap-[1.15vh] p-5">
+          {rows.map((row, i) =>
+            row.empty ? (
+              <span
+                key={i}
+                className="flex items-center gap-3 h-[1.6vh] min-h-3"
+                style={{ width: "78%" }}
+              >
+                <span className="flex-1 h-full rounded-full border border-dashed border-white/20" />
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#f87171"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  className="pitch-scanfail-x w-[1vw] min-w-3.5 aspect-square"
+                  style={{ animationDelay: `${i * 460}ms` }}
+                >
+                  <path d="M6 6l12 12M18 6 6 18" />
+                </svg>
+              </span>
+            ) : (
+              <span
+                key={i}
+                className="pitch-scanfail-item h-[0.9vh] min-h-1.5 rounded-full bg-white/20"
+                style={{ width: `${row.w}%`, animationDelay: `${i * 460}ms` }}
+              />
+            )
+          )}
+        </div>
+        <span className="pitch-scanbeam pitch-scanbeam-fail absolute left-0 right-0 h-10" />
+      </div>
+      <p className="mt-3 text-center text-[clamp(12px,0.95vw,18px)] uppercase tracking-[0.25em] text-red-300/60 font-semibold">
+        Nothing to read
+      </p>
+    </div>
+  );
+}
+
 /* ---------- S3b: the conversion, illustrated ---------- */
 
 function BookingSim({ live }: { live: boolean }) {
@@ -388,13 +449,12 @@ function CountingGauges({ live }: { live: boolean }) {
 
 export default function PitchClient() {
   const [active, setActive] = useState(0);
-  const [reveals, setReveals] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
 
   // Handlers live on window; refs keep them reading fresh state.
-  const stateRef = useRef({ active: 0, reveals: 0 });
-  stateRef.current = { active, reveals };
+  const stateRef = useRef({ active: 0 });
+  stateRef.current = { active };
 
   // Programmatic smooth scrolls must not let the IntersectionObserver roll
   // `active` back through the sections they pass — presenter keypresses read
@@ -402,17 +462,9 @@ export default function PitchClient() {
   const scrollingRef = useRef(false);
   const scrollTimerRef = useRef<number | undefined>(undefined);
 
-  /** S2b's reveal state is derived from travel direction on EVERY arrival:
-      entering from below restarts the beat, from above shows it complete. */
-  const reconcileReveals = useCallback((from: number, to: number) => {
-    if (to !== S2B || from === S2B) return;
-    setReveals(from < S2B ? 0 : S2B_LINES);
-  }, []);
-
   const goTo = useCallback(
     (index: number) => {
       const clamped = Math.max(0, Math.min(SECTIONS.length - 1, index));
-      reconcileReveals(stateRef.current.active, clamped);
       setActive(clamped);
       scrollingRef.current = true;
       window.clearTimeout(scrollTimerRef.current);
@@ -422,31 +474,12 @@ export default function PitchClient() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       sectionRefs.current[clamped]?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
     },
-    [reconcileReveals]
+    []
   );
 
-  const advance = useCallback(() => {
-    const { active: a, reveals: r } = stateRef.current;
-    if (a === S2B && r < S2B_LINES) {
-      setReveals(r + 1);
-      return;
-    }
-    goTo(a + 1);
-  }, [goTo]);
-
-  const back = useCallback(() => {
-    const { active: a, reveals: r } = stateRef.current;
-    if (a === S2B && r > 0) {
-      setReveals(r - 1);
-      return;
-    }
-    goTo(a - 1);
-  }, [goTo]);
-
-  const reset = useCallback(() => {
-    setReveals(0);
-    goTo(0);
-  }, [goTo]);
+  const advance = useCallback(() => goTo(stateRef.current.active + 1), [goTo]);
+  const back = useCallback(() => goTo(stateRef.current.active - 1), [goTo]);
+  const reset = useCallback(() => goTo(0), [goTo]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -487,7 +520,6 @@ export default function PitchClient() {
           if (!entry.isIntersecting) continue;
           const index = sectionRefs.current.indexOf(entry.target as HTMLElement);
           if (index >= 0 && index !== stateRef.current.active) {
-            reconcileReveals(stateRef.current.active, index);
             setActive(index);
           }
         }
@@ -504,7 +536,7 @@ export default function PitchClient() {
       observer.disconnect();
       container?.removeEventListener("scrollend", onScrollEnd);
     };
-  }, [reconcileReveals]);
+  }, []);
 
   const jumpTo = (index: number) => goTo(index);
 
@@ -687,30 +719,31 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* S2b — invisible, three reveals */}
+      {/* S2b — invisible: the scan comes up empty, lines load on entry */}
       {section(
         3,
         <>
           <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
             Most vein practice sites are invisible to AI.
           </h2>
-          <ul className="flex flex-col items-start gap-[3vh] text-[clamp(24px,2.1vw,44px)] font-semibold">
-            {INVISIBLE_LINES.map(([head, tail], i) => (
-              <li
-                key={head}
-                className={`flex items-center gap-5 transition-opacity duration-300 ${
-                  reveals > i ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                {reveals > i && <span className="pitch-pop inline-flex"><FailX /></span>}
-                {reveals <= i && <FailX />}
-                <span className="text-white/90">
-                  {head}
-                  <span className="text-white/50 font-normal"> — {tail}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
+          <div className="flex items-center gap-[4vw] pitch-rise" style={rise(200)}>
+            <ul className="flex flex-col items-start gap-[3vh] text-[clamp(24px,2.1vw,44px)] font-semibold">
+              {INVISIBLE_LINES.map(([head, tail], i) => (
+                <li
+                  key={head}
+                  className="flex items-center gap-5 pitch-rise"
+                  style={rise(350 + i * 250)}
+                >
+                  <FailX animate={active === 3} delayMs={350 + i * 250} />
+                  <span className="text-white/90">
+                    {head}
+                    <span className="text-white/50 font-normal"> — {tail}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <BrokenScan />
+          </div>
         </>
       )}
 
@@ -884,6 +917,8 @@ export default function PitchClient() {
           </h2>
           <a
             href="/audit"
+            target="_blank"
+            rel="noopener"
             onClick={(e) => e.stopPropagation()}
             className="pitch-rise inline-flex items-center justify-center min-h-[64px] rounded-2xl px-[3.5vw] py-[2.6vh] text-[clamp(24px,2vw,42px)] font-extrabold shadow-xl transition-transform hover:scale-[1.03]"
             style={{ background: LIME, color: NAVY, "--rise": "200ms" } as React.CSSProperties}

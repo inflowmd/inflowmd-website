@@ -645,6 +645,37 @@ body {
   12% { opacity: 1; }
 }
 
+/* --- S2b: the failed scan — red beam, lines flashing red, ✗ marks
+       popping where content should be. Same clock as the S2a read. --- */
+.pitch-scanbeam-fail {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(248, 113, 113, 0.2) 45%,
+    rgba(248, 113, 113, 0.5) 50%,
+    rgba(248, 113, 113, 0.2) 55%,
+    transparent
+  );
+}
+.pitch-scanfail-item {
+  animation: pitch-scanfail 2.76s linear infinite;
+}
+@keyframes pitch-scanfail {
+  0%, 100% { background: rgba(255, 255, 255, 0.18); }
+  12% { background: rgba(248, 113, 113, 0.75); }
+  30% { background: rgba(255, 255, 255, 0.18); }
+}
+.pitch-scanfail-x {
+  opacity: 0;
+  animation: pitch-scanfail-x 2.76s linear infinite;
+}
+@keyframes pitch-scanfail-x {
+  0%, 8% { opacity: 0; transform: scale(0.4); }
+  14% { opacity: 1; transform: scale(1); }
+  46% { opacity: 0.6; }
+  64%, 100% { opacity: 0; }
+}
+
 /* --- S3b: the booking simulation. One shared 4s timeline; every part
        keys its keyframes to the same clock. Runs only while live. --- */
 .pitch-sim-cursor,
@@ -713,6 +744,8 @@ body {
   .pitch-wavebar,
   .pitch-scanbeam,
   .pitch-scanline-item,
+  .pitch-scanfail-item,
+  .pitch-scanfail-x,
   .pitch-flow,
   .pitch-answer-bar,
   .pitch-sim-live .pitch-sim-cursor,
@@ -726,6 +759,9 @@ body {
   .pitch-sim-cursor,
   .pitch-sim-ripple {
     opacity: 0;
+  }
+  .pitch-scanfail-x {
+    opacity: 0.6;
   }
   .pitch-sim-booked {
     opacity: 0;
