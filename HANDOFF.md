@@ -5,7 +5,82 @@ pending. This file exists in case a session boundary hits mid-work; as of
 the last edit it did not — everything below already happened, in order,
 most recent first.
 
-## Latest: patched the cache's speed gaps (--only-missing-speed)
+## Latest: audit categories regrouped by question, weighted scoring
+
+The old four categories grouped checks by technical family, which let the
+booth contradict itself out loud: "Medical practice identification" could
+FAIL — meaning AI cannot tell this is a vein practice — while "AI
+readiness" still scored 90, because the most important AI signal lived in
+a different category. Regrouped around the question each category answers.
+
+**New categories** (all 20 checks reassigned; detection logic, labels and
+explanations untouched — regrouping and rescoring only):
+
+| Category | Checks |
+|---|---|
+| Can AI find you? | AI assistant access, crawler instructions file, AI content guide (llms.txt), redirect chain |
+| Can AI understand you? | medical practice identification, machine-readable practice details, local listing details, organization details, page structure for AI, content depth, heading structure, FAQ |
+| Can patients find you? | page title, search result description, main heading, mobile display, preferred address, social preview, image descriptions, secure connection |
+| How fast is it? | Google Lighthouse performance, unchanged |
+
+(The spec said "19 existing checks" but listed 20; the engine produces 20
+and all 20 are assigned exactly once — a test asserts this can't drift.)
+
+**Weighted scoring** replaced flat pass=1/warn=0.5/fail=0. Within "Can AI
+find you?": crawler access 3, robots.txt 2, llms.txt 2, redirects 1.
+Within "Can AI understand you?": medical identification 3, machine-readable
+details 3, all others 1. "Can patients find you?": all 1.
+
+**Hard ceilings**: a category is capped at 40 when its gate check FAILS —
+medical identification for "Can AI understand you?", crawler access for
+"Can AI find you?". Deliberate nuance: `could_not_verify` does NOT trigger
+a ceiling, because an unread check is not a failure — that would be the
+exact false accusation the engine refuses to make. `could_not_verify` is
+still excluded from the denominator and the minimum-verified floor is
+unchanged.
+
+**Architecture note that matters for future work**: categories are DERIVED
+from the raw checks by a shared pure table (`src/lib/categories.ts`) that
+the server (`runAudit`, pre-warm) and the booth UI both call. Two
+consequences: live and cached results can never disagree about a number,
+and a result measured before this change renders under the new categories
+with correct new numbers — **no re-warm was required**. `AuditResult.seo /
+.schema / .aiReadiness` are now raw MODULE output, not display groupings;
+read categories via `buildCategories()`, never by assuming those arrays are
+user-facing. The shipped cache's stored `scores` were normalized onto the
+new shape by pure recomputation — every measurement and timestamp is
+byte-identical (asserted during the rewrite, aborts if anything moved).
+
+**Attribution fixed**: only "How fast is it?" credits Google PageSpeed
+Insights; the other three carry a small "InflowMD analysis" label. The
+picker intro line no longer implies the whole tool is Google's.
+
+Also updated: llms.txt explanation copy; "What we'd fix" strip and the
+comparison block remapped; findings list grouped under the category
+headings in order with per-category scores; scan-stage outcomes rewired;
+prewarm/summarize report the new categories (summarize derives, so it
+reads pre-restructure entries correctly). The flat scorer in `scoring.ts`
+is gone — that file now holds only the invariants both sides share.
+
+**Tests**: `src/lib/categories.test.ts` (`npm run test:categories`), 18
+checks including the two required ceiling assertions, membership
+completeness (every engine check assigned exactly once, no unknown ids),
+weight sensitivity, `could_not_verify` handling, and a regression test for
+the exact contradiction this change exists to fix. Full suite (model,
+security, attendees, categories) passes; tsc/eslint/build clean.
+
+**Effect, on real data**: Vein-ity previously read "AI readiness 100" with
+medical identification failing; it now reads "Can AI understand you? 40".
+Across the 58 attending practices the median "ai understands" score is
+**40** — i.e. the median practice hits the medical-identification ceiling.
+That is a strong, defensible booth talking point.
+
+Deployed: `npx vercel --prod --yes` → `https://www.inflowmd.com`, verified
+live (all four category labels render, 3 "InflowMD analysis" labels + 1
+Google label, old labels gone). Merged: `claude/musing-kepler` → `main`
+(merge commit `c37a4f6`), pushed to `origin/main`, HEAD confirmed.
+
+## Earlier: patched the cache's speed gaps (--only-missing-speed)
 
 Follow-up to the live-first change: the cache had 20 of 58 entries with no
 performance data (PSI timeouts and transient 500s from the original
