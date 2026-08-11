@@ -1,63 +1,25 @@
-Pre-warming 58 unique sites (59 attendees with a URL, 8 with no website found)
+Re-auditing 20 of 58 unique sites — 38 already have complete speed data and are untouched.
 
-[ 1/58] akribisveinsandvitality.com … [ok] perf  97 | seo  85 | schema  90 | ai  90 | WordPress
-[ 2/58] www.alaskaveincare.com … [ok] perf   – | seo  75 | schema  80 | ai  90 | Duda
-[ 3/58] www.andersonveinandwellness.com … [ok] perf   – | seo  75 | schema  70 | ai  90 | Squarespace
-[ 4/58] artemis-colorado.com … [ok] perf  71 | seo  85 | schema  90 | ai  90 | WordPress 7.0.3 + Elementor
-[ 5/58] atlantaveincenter.com … [ok] perf  41 | seo  55 | schema  10 | ai  80 | WordPress + WPBakery
-[ 6/58] www.bucksveinandbody.com … [ok] perf  39 | seo  90 | schema  70 | ai  90 | Squarespace
-[ 7/58] cardiacassociatesnj.com … [ok] perf  93 | seo  75 | schema  90 | ai 100 | WordPress
-[ 8/58] carolinaveincare.com … [ok] perf  46 | seo  80 | schema  50 | ai  80 | WordPress + Elementor, Divi
-[ 9/58] yourhealthyveins.com … [ok] perf  54 | seo  70 | schema 100 | ai  90 | WordPress + Elementor
-[10/58] centerforveincareandsurgery.com … [ok] perf  18 | seo  55 | schema  10 | ai  80 | WordPress 6.6.6 + WPBakery
-[11/58] chesapeakeveinandmedspa.com … [ok] perf  36 | seo  80 | schema  90 | ai 100 | WordPress + Beaver Builder
-[12/58] dominionvascular.com … [ok] perf   – | seo  55 | schema  10 | ai  70 | WordPress 6.5.4 + Elementor
-[13/58] www.eternaaesthetic.com … [ok] perf   – | seo  85 | schema  70 | ai  90 | WordPress
-[14/58] www.floridaveincenter.com … [ok] perf   – | seo  90 | schema 100 | ai  80 | unknown platform
-[15/58] www.hawaiivein.com … [ok] perf   – | seo  85 | schema  70 | ai  90 | WordPress + Elementor
-[16/58] integrativecardio.com … [failed] perf  88 | seo   – | schema   – | ai  67 | unknown platform | FETCH FAILED: The site returned status 503.
-[17/58] www.drozcan.com … [ok] perf   – | seo  70 | schema  40 | ai  80 | WordPress 6.6.6 + Divi
-[18/58] www.livingwatervein.com … [ok] perf   – | seo  75 | schema  90 | ai  80 | WordPress + Elementor
-[19/58] www.medicalveinclinic.com … [ok] perf   – | seo  85 | schema  90 | ai  90 | WordPress + Beaver Builder
-[20/58] www.millervein.com … [ok] perf  32 | seo  85 | schema  90 | ai  90 | Wix
-[21/58] missouriveincare.com … [ok] perf  73 | seo  80 | schema  40 | ai  70 | WordPress + Elementor
-[22/58] ngvascular.com … [ok] perf  49 | seo  95 | schema  90 | ai  90 | WordPress 7.0.3 + Elementor, WPBakery
-[23/58] www.northgeorgiavein.com … [ok] perf  47 | seo  75 | schema  50 | ai  80 | WordPress 5.9.2 + Elementor, Divi, WPBakery
-[24/58] www.nwveins.com … [ok] perf  63 | seo  70 | schema  50 | ai  80 | WordPress 7.0.3
-[25/58] oohsovein.com … [ok] perf   – | seo  85 | schema  10 | ai  80 | Starfield
-[26/58] ozarkregionalveincenter.com … [ok] perf   – | seo  90 | schema  90 | ai  90 | WordPress
-[27/58] refinevein.com … [ok] perf  57 | seo  75 | schema  70 | ai  90 | WordPress
-[28/58] salcedomedicalcenter.com … [ok] perf  51 | seo  95 | schema  90 | ai 100 | WordPress + Beaver Builder [shared by: Salcedo Medical Center, Salcedo Medical Center And Vein Institute]
-[29/58] www.soundvascular.com … [ok] perf  63 | seo  90 | schema  90 | ai  80 | WordPress 7.0.3 + Elementor
-[30/58] www.southshorevein.com … [ok] perf  85 | seo  80 | schema  80 | ai  80 | unknown platform (PatientPop)
-[31/58] www.summitveincare.com … [ok] perf  26 | seo  80 | schema  80 | ai  90 | WordPress
-[32/58] www.hiet.com … [ok] perf  42 | seo  80 | schema  90 | ai  90 | WordPress + Beaver Builder
-[33/58] beltlinehealth.com … [ok] perf  46 | seo  95 | schema  10 | ai  90 | unknown platform
-[34/58] veinclinicofdallas.com … [ok] perf  69 | seo 100 | schema  40 | ai  90 | WordPress 7.0.3 + Elementor
-[35/58] www.yourveininstitute.com … [ok] perf   – | seo  90 | schema  50 | ai  90 | Duda
-[36/58] theveininstituteofhunterdon.com … [ok] perf  43 | seo  75 | schema  40 | ai  80 | WordPress 7.0.3 + WPBakery
-[37/58] www.ilveins.com … [ok] perf  84 | seo  75 | schema  10 | ai  90 | Duda
-[38/58] www.tridentvein.com … [ok] perf   – | seo  85 | schema 100 | ai  80 | WordPress 7.0.2 + Elementor
-[39/58] tulsaveininstitute.com … [ok] perf   – | seo  70 | schema  70 | ai  80 | WordPress 7.0.3
-[40/58] upsvis.com … [ok] perf  53 | seo  65 | schema  10 | ai  90 | WordPress 6.0.1
-[41/58] www.mygreatveins.com … [failed] perf  47 | seo   – | schema   – | ai   – | unknown platform | FETCH FAILED: fetch failed
-[42/58] vanishlegveins.com … [failed] perf  53 | seo   – | schema   – | ai 100 | unknown platform | FETCH FAILED: The site did not respond within 8 seconds.
-[43/58] vascularinstituteofthepines.com … [ok] perf  66 | seo  45 | schema  10 | ai  70 | unknown platform
-[44/58] www.vasc-solutions.com … [ok] perf  84 | seo  95 | schema  90 | ai  90 | Duda
-[45/58] www.veinvascular.com … [ok] perf  45 | seo  75 | schema 100 | ai  90 | WordPress 7.0.2 + Elementor
-[46/58] veinandskinstudio.com … [ok] perf   – | seo  75 | schema  70 | ai  90 | WordPress
-[47/58] veinandvascularcenters.com … [ok] perf   – | seo  70 | schema  90 | ai  60 | WordPress
-[48/58] veinandwellnesscenters.com … [ok] perf   – | seo  65 | schema 100 | ai  80 | WordPress 7.0.3 + Elementor, Divi
-[49/58] veincenternorthtexas.com … [ok] perf  66 | seo  95 | schema  90 | ai  60 | WordPress 7.0.3 + Elementor (Optimized360)
-[50/58] veincenterofwisconsin.com … [ok] perf  60 | seo  80 | schema  10 | ai  80 | Webflow
-[51/58] www.veinandmedspa.com … [ok] perf   – | seo  80 | schema 100 | ai  80 | WordPress 7.0.3
-[52/58] www.veinkc.com … [ok] perf  57 | seo  90 | schema  40 | ai  80 | WordPress + WPBakery
-[53/58] www.veinhealthclinics.com … [ok] perf  56 | seo  85 | schema  80 | ai  80 | WordPress + Elementor
-[54/58] www.weknowveins.com … [ok] perf   – | seo  85 | schema  90 | ai  90 | WordPress + Elementor, WPBakery
-[55/58] vein-ity.com … [ok] perf  47 | seo  65 | schema  50 | ai 100 | WordPress + Elementor
-[56/58] vein911.com … [ok] perf   – | seo  80 | schema  50 | ai  90 | WordPress + Elementor
-[57/58] www.versailleshealthandwellness.com … [ok] perf  59 | seo  60 | schema  50 | ai  70 | WordPress 7.0.3 + Elementor
-[58/58] amarillovaricoseveins.com … [ok] perf  52 | seo  65 | schema  10 | ai  70 | unknown platform
+[ 1/20] www.alaskaveincare.com … [ok] perf  59 | seo  75 | schema  80 | ai  90 | Duda
+[ 2/20] www.andersonveinandwellness.com … [ok] perf  37 | seo  75 | schema  70 | ai  90 | Squarespace
+[ 3/20] dominionvascular.com … [ok] perf  63 | seo  55 | schema  10 | ai  70 | WordPress 6.5.4 + Elementor
+[ 4/20] www.eternaaesthetic.com … [ok] perf  64 | seo  85 | schema  70 | ai  90 | WordPress
+[ 5/20] www.floridaveincenter.com … [ok] perf  33 | seo  90 | schema 100 | ai  80 | unknown platform
+[ 6/20] www.hawaiivein.com … [ok] perf  72 | seo  85 | schema  70 | ai  90 | WordPress + Elementor
+[ 7/20] www.drozcan.com … [ok] perf  64 | seo  70 | schema  40 | ai  80 | WordPress 6.6.6 + Divi
+[ 8/20] www.livingwatervein.com … [ok] perf  39 | seo  75 | schema  90 | ai  80 | WordPress + Elementor
+[ 9/20] www.medicalveinclinic.com … [ok] perf  34 | seo  85 | schema  90 | ai  90 | WordPress + Beaver Builder
+[10/20] oohsovein.com … [ok] perf  60 | seo  85 | schema  10 | ai  80 | Starfield
+[11/20] ozarkregionalveincenter.com … [ok] perf  28 | seo  90 | schema  90 | ai  90 | WordPress
+[12/20] www.yourveininstitute.com … [ok] perf  42 | seo  90 | schema  50 | ai  90 | Duda
+[13/20] www.tridentvein.com … [ok] perf  38 | seo  85 | schema 100 | ai  80 | WordPress 7.0.2 + Elementor
+[14/20] tulsaveininstitute.com … [ok] perf  83 | seo  70 | schema  70 | ai  80 | WordPress 7.0.3
+[15/20] veinandskinstudio.com … [ok] perf  77 | seo  75 | schema  70 | ai  90 | WordPress
+[16/20] veinandvascularcenters.com … [ok] perf  67 | seo  70 | schema  90 | ai  60 | WordPress
+[17/20] veinandwellnesscenters.com … [ok] perf   – | seo  65 | schema 100 | ai  80 | WordPress 7.0.3 + Elementor, Divi
+[18/20] www.veinandmedspa.com … [ok] perf  62 | seo  80 | schema 100 | ai  80 | WordPress 7.0.3
+[19/20] www.weknowveins.com … [ok] perf  28 | seo  85 | schema  90 | ai  90 | WordPress + Elementor, WPBakery
+[20/20] vein911.com … [ok] perf  44 | seo  80 | schema  50 | ai  90 | WordPress + Elementor
 
 No website on file (8):
   — Arelis Almonte-Independent Doctor (Santiago De Los Cabelleros, Dominican Republic) … [no website]
@@ -69,11 +31,15 @@ No website on file (8):
   — Lamees Rehab Solutions (Canton, MI) … [no website]
   — Meta Health And Vascular (Roswell, GA) … [no website]
 
+Speed data still missing after retry (1):
+  — Vein and Wellness Centers of Texas (veinandwellnesscenters.com) … PageSpeed did not finish measuring this page in time.
+
 Wrote 58 results to /Users/claytonpeterson/Projects/inflowmd/.claude/worktrees/musing-kepler/data/prewarmed-audits.json
 History updated at /Users/claytonpeterson/Projects/inflowmd/.claude/worktrees/musing-kepler/data/prewarm-history.json
 
 No score moved ±10 or more since the last run.
 
-STATUS SUMMARY: 55 ok, 0 blocked, 3 failed, 8 no website (58 unique sites audited for 59 attendees)
+STATUS SUMMARY: 55 ok, 0 blocked, 3 failed, 8 no website (20 unique sites audited for 59 attendees)
+Speed data: 57 of 58 cache entries have complete performance data.
 
 Run `npm run summarize` for the aggregate picture.

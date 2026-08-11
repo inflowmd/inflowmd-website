@@ -1,6 +1,6 @@
 ================================================================
 PLATFORM CLUSTERING — 58 attending practice sites
-Generated 2026-08-11T18:54:07.118Z
+Generated 2026-08-11T23:30:20.293Z
 ================================================================
 
 BY PLATFORM
@@ -13,17 +13,10 @@ BY PLATFORM
       · Center For Advanced Vein Care
       · Center For Vein Care
       · Chesapeake Vein Center and MedSpa
-      · Dominion Vascular Surgical Specialists
-      · Eterna Vein & Medical Aesthetics
-      · Hawaii Vein Institute
-      · Ismail Ozcan MD
-      · Living Water Vein Institute
-      · Medical Vein Clinic
       · Missouri Vein Care
       · NG Vascular And Vein Center
       · North Georgia Vein & Aesthetics
       · Northwest Vein and Aesthetic Center
-      · Ozark Regional Vein & Artery Center
       · Refine Vein Center
       · Salcedo Medical Center
       · Sound Vascular
@@ -31,23 +24,29 @@ BY PLATFORM
       · The Heart Institute of East Texas, P.A.
       · The Vein Clinic of Dallas
       · The Vein Institute of Hunterdon
-      · Trident Vein Center
-      · Tulsa Vein Institute
       · U.P. Superior Vascular Interventional Specia
       · Vein & Vascular Institute
+      · Vein Center of North Texas
+      · Vein Clinic of Greater Kansas City
+      · Vein Health Clinics
+      · Vein-ity: Vein Care Centers of Kansas
+      · Versailles Health and Wellness
+      · Dominion Vascular Surgical Specialists
+      · Eterna Vein & Medical Aesthetics
+      · Hawaii Vein Institute
+      · Ismail Ozcan MD
+      · Living Water Vein Institute
+      · Medical Vein Clinic
+      · Ozark Regional Vein & Artery Center
+      · Trident Vein Center
+      · Tulsa Vein Institute
       · Vein and Skin Studio
       · Vein and Vascular Centers
       · Vein and Wellness Centers of Texas
-      · Vein Center of North Texas
       · Vein Clinic & Med Spa
-      · Vein Clinic of Greater Kansas City
-      · Vein Health Clinics
       · Vein Specialists
-      · Vein-ity: Vein Care Centers of Kansas
       · Vein911 Vein Treatment Centers
-      · Versailles Health and Wellness
   unknown                                          8  (14%)
-      · Florida Vein Center
       · Integrative Cardiology and Vein Clinic
       · South Shore Vein and Aesthetic Medicine
       · The Vein Clinic at Beltline Health
@@ -55,65 +54,66 @@ BY PLATFORM
       · Vanish Advanced Vein Treatment
       · Vascular Institute of the Pines
       · Well Life Medical
+      · Florida Vein Center
   Duda                                             4  (7%)
-      · Alaska Vein Care
-      · The Vein Institute of Chattanooga
       · The Vein Specialists
       · Vascular Solutions
+      · Alaska Vein Care
+      · The Vein Institute of Chattanooga
   Squarespace                                      2  (3%)
-      · Anderson Vein and Wellness Heart and Vascula
       · Bucks Vein and Body
+      · Anderson Vein and Wellness Heart and Vascula
   Wix                                              1  (2%)
-  Starfield                                        1  (2%)
   Webflow                                          1  (2%)
+  Starfield                                        1  (2%)
 
 BY PAGE BUILDER
   (none detected)                                 29  (50%)
       · Akribis Veins & Vitality
-      · Alaska Vein Care
-      · Anderson Vein and Wellness Heart and Vascula
       · Bucks Vein and Body
       · Cardiac Associates Of North Jersey
-      · Eterna Vein & Medical Aesthetics
-      · Florida Vein Center
       · Integrative Cardiology and Vein Clinic
       · Miller Vein
       · Northwest Vein and Aesthetic Center
-      · Ooh so vein
-      · Ozark Regional Vein & Artery Center
       · Refine Vein Center
       · South Shore Vein and Aesthetic Medicine
       · Summit Vein Care
       · The Vein Clinic at Beltline Health
-      · The Vein Institute of Chattanooga
       · The Vein Specialists
-      · Tulsa Vein Institute
       · U.P. Superior Vascular Interventional Specia
       · University Medicine and Cardiology
       · Vanish Advanced Vein Treatment
       · Vascular Institute of the Pines
       · Vascular Solutions
+      · Vein Center of Wisconsin
+      · Well Life Medical
+      · Alaska Vein Care
+      · Anderson Vein and Wellness Heart and Vascula
+      · Eterna Vein & Medical Aesthetics
+      · Florida Vein Center
+      · Ooh so vein
+      · Ozark Regional Vein & Artery Center
+      · The Vein Institute of Chattanooga
+      · Tulsa Vein Institute
       · Vein and Skin Studio
       · Vein and Vascular Centers
-      · Vein Center of Wisconsin
       · Vein Clinic & Med Spa
-      · Well Life Medical
   Elementor                                       15  (26%)
       · Artemis Vein Center
       · Center For Advanced Vein Care
-      · Dominion Vascular Surgical Specialists
-      · Hawaii Vein Institute
-      · Living Water Vein Institute
       · Missouri Vein Care
       · Sound Vascular
       · The Vein Clinic of Dallas
-      · Trident Vein Center
       · Vein & Vascular Institute
       · Vein Center of North Texas
       · Vein Health Clinics
       · Vein-ity: Vein Care Centers of Kansas
-      · Vein911 Vein Treatment Centers
       · Versailles Health and Wellness
+      · Dominion Vascular Surgical Specialists
+      · Hawaii Vein Institute
+      · Living Water Vein Institute
+      · Trident Vein Center
+      · Vein911 Vein Treatment Centers
   WPBakery                                         4  (7%)
       · Atlanta Vein Center
       · Center For Vein Care
@@ -121,23 +121,21 @@ BY PAGE BUILDER
       · Vein Clinic of Greater Kansas City
   Beaver Builder                                   4  (7%)
       · Chesapeake Vein Center and MedSpa
-      · Medical Vein Clinic
       · Salcedo Medical Center
       · The Heart Institute of East Texas, P.A.
+      · Medical Vein Clinic
   Divi + Elementor                                 2  (3%)
       · Carolina Vein Care & Aesthetics
       · Vein and Wellness Centers of Texas
   Elementor + WPBakery                             2  (3%)
       · NG Vascular And Vein Center
       · Vein Specialists
-  Divi                                             1  (2%)
   Divi + Elementor + WPBakery                      1  (2%)
+  Divi                                             1  (2%)
 
 BY MEDICAL WEB VENDOR
   unknown                                         56  (97%)
       · Akribis Veins & Vitality
-      · Alaska Vein Care
-      · Anderson Vein and Wellness Heart and Vascula
       · Artemis Vein Center
       · Atlanta Vein Center
       · Bucks Vein and Body
@@ -146,21 +144,12 @@ BY MEDICAL WEB VENDOR
       · Center For Advanced Vein Care
       · Center For Vein Care
       · Chesapeake Vein Center and MedSpa
-      · Dominion Vascular Surgical Specialists
-      · Eterna Vein & Medical Aesthetics
-      · Florida Vein Center
-      · Hawaii Vein Institute
       · Integrative Cardiology and Vein Clinic
-      · Ismail Ozcan MD
-      · Living Water Vein Institute
-      · Medical Vein Clinic
       · Miller Vein
       · Missouri Vein Care
       · NG Vascular And Vein Center
       · North Georgia Vein & Aesthetics
       · Northwest Vein and Aesthetic Center
-      · Ooh so vein
-      · Ozark Regional Vein & Artery Center
       · Refine Vein Center
       · Salcedo Medical Center
       · Sound Vascular
@@ -168,29 +157,40 @@ BY MEDICAL WEB VENDOR
       · The Heart Institute of East Texas, P.A.
       · The Vein Clinic at Beltline Health
       · The Vein Clinic of Dallas
-      · The Vein Institute of Chattanooga
       · The Vein Institute of Hunterdon
       · The Vein Specialists
-      · Trident Vein Center
-      · Tulsa Vein Institute
       · U.P. Superior Vascular Interventional Specia
       · University Medicine and Cardiology
       · Vanish Advanced Vein Treatment
       · Vascular Institute of the Pines
       · Vascular Solutions
       · Vein & Vascular Institute
+      · Vein Center of Wisconsin
+      · Vein Clinic of Greater Kansas City
+      · Vein Health Clinics
+      · Vein-ity: Vein Care Centers of Kansas
+      · Versailles Health and Wellness
+      · Well Life Medical
+      · Alaska Vein Care
+      · Anderson Vein and Wellness Heart and Vascula
+      · Dominion Vascular Surgical Specialists
+      · Eterna Vein & Medical Aesthetics
+      · Florida Vein Center
+      · Hawaii Vein Institute
+      · Ismail Ozcan MD
+      · Living Water Vein Institute
+      · Medical Vein Clinic
+      · Ooh so vein
+      · Ozark Regional Vein & Artery Center
+      · The Vein Institute of Chattanooga
+      · Trident Vein Center
+      · Tulsa Vein Institute
       · Vein and Skin Studio
       · Vein and Vascular Centers
       · Vein and Wellness Centers of Texas
-      · Vein Center of Wisconsin
       · Vein Clinic & Med Spa
-      · Vein Clinic of Greater Kansas City
-      · Vein Health Clinics
       · Vein Specialists
-      · Vein-ity: Vein Care Centers of Kansas
       · Vein911 Vein Treatment Centers
-      · Versailles Health and Wellness
-      · Well Life Medical
   PatientPop                                       1  (2%)
   Optimized360                                     1  (2%)
 
@@ -198,44 +198,39 @@ BY EXACT TEMPLATE SIGNATURE (platform + builders + vendor)
   WordPress / Elementor / no-vendor               14  (24%)
       · Artemis Vein Center
       · Center For Advanced Vein Care
-      · Dominion Vascular Surgical Specialists
-      · Hawaii Vein Institute
-      · Living Water Vein Institute
       · Missouri Vein Care
       · Sound Vascular
       · The Vein Clinic of Dallas
-      · Trident Vein Center
       · Vein & Vascular Institute
       · Vein Health Clinics
       · Vein-ity: Vein Care Centers of Kansas
-      · Vein911 Vein Treatment Centers
       · Versailles Health and Wellness
+      · Dominion Vascular Surgical Specialists
+      · Hawaii Vein Institute
+      · Living Water Vein Institute
+      · Trident Vein Center
+      · Vein911 Vein Treatment Centers
   WordPress / no-builder / no-vendor              12  (21%)
       · Akribis Veins & Vitality
       · Cardiac Associates Of North Jersey
-      · Eterna Vein & Medical Aesthetics
       · Northwest Vein and Aesthetic Center
-      · Ozark Regional Vein & Artery Center
       · Refine Vein Center
       · Summit Vein Care
-      · Tulsa Vein Institute
       · U.P. Superior Vascular Interventional Specia
+      · Eterna Vein & Medical Aesthetics
+      · Ozark Regional Vein & Artery Center
+      · Tulsa Vein Institute
       · Vein and Skin Studio
       · Vein and Vascular Centers
       · Vein Clinic & Med Spa
   unknown / no-builder / no-vendor                 7  (12%)
-      · Florida Vein Center
       · Integrative Cardiology and Vein Clinic
       · The Vein Clinic at Beltline Health
       · University Medicine and Cardiology
       · Vanish Advanced Vein Treatment
       · Vascular Institute of the Pines
       · Well Life Medical
-  Duda / no-builder / no-vendor                    4  (7%)
-      · Alaska Vein Care
-      · The Vein Institute of Chattanooga
-      · The Vein Specialists
-      · Vascular Solutions
+      · Florida Vein Center
   WordPress / WPBakery / no-vendor                 4  (7%)
       · Atlanta Vein Center
       · Center For Vein Care
@@ -243,22 +238,27 @@ BY EXACT TEMPLATE SIGNATURE (platform + builders + vendor)
       · Vein Clinic of Greater Kansas City
   WordPress / Beaver Builder / no-vendor           4  (7%)
       · Chesapeake Vein Center and MedSpa
-      · Medical Vein Clinic
       · Salcedo Medical Center
       · The Heart Institute of East Texas, P.A.
+      · Medical Vein Clinic
+  Duda / no-builder / no-vendor                    4  (7%)
+      · The Vein Specialists
+      · Vascular Solutions
+      · Alaska Vein Care
+      · The Vein Institute of Chattanooga
   Squarespace / no-builder / no-vendor             2  (3%)
-      · Anderson Vein and Wellness Heart and Vascula
       · Bucks Vein and Body
+      · Anderson Vein and Wellness Heart and Vascula
   WordPress / Divi+Elementor / no-vendor           2  (3%)
       · Carolina Vein Care & Aesthetics
       · Vein and Wellness Centers of Texas
   WordPress / Elementor+WPBakery / no-vendor       2  (3%)
       · NG Vascular And Vein Center
       · Vein Specialists
-  WordPress / Divi / no-vendor                     1  (2%)
   Wix / no-builder / no-vendor                     1  (2%)
   WordPress / Divi+Elementor+WPBakery / no-vendor   1  (2%)
-  Starfield / no-builder / no-vendor               1  (2%)
   unknown / no-builder / PatientPop                1  (2%)
   WordPress / Elementor / Optimized360             1  (2%)
   Webflow / no-builder / no-vendor                 1  (2%)
+  WordPress / Divi / no-vendor                     1  (2%)
+  Starfield / no-builder / no-vendor               1  (2%)
