@@ -558,6 +558,55 @@ body {
   box-shadow: 0 0 70px rgba(132, 184, 59, 0.55) !important;
 }
 
+/* Voice door: while "hearing" the query the waveform surges. */
+.pitch-speaking .pitch-wavebar {
+  animation-duration: 0.5s;
+}
+
+/* --- S0 slogan: words cascade in with blur-to-sharp overshoot; the
+       lime words bloom with a glow once they settle. --- */
+.pitch-word {
+  opacity: 1;
+}
+.is-live .pitch-word {
+  animation: pitch-word 650ms cubic-bezier(0.2, 0.8, 0.25, 1.05) both;
+  animation-delay: var(--word, 0ms);
+}
+.is-live .pitch-word-lime {
+  animation:
+    pitch-word 650ms cubic-bezier(0.2, 0.8, 0.25, 1.05) both,
+    pitch-word-bloom 1.5s ease-out both;
+  animation-delay: var(--word, 0ms), calc(var(--word, 0ms) + 520ms);
+}
+@keyframes pitch-word {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.94);
+    filter: blur(8px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.015);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes pitch-word-bloom {
+  0% {
+    text-shadow: 0 0 0 rgba(132, 184, 59, 0);
+  }
+  35% {
+    text-shadow: 0 0 36px rgba(132, 184, 59, 0.9);
+  }
+  100% {
+    text-shadow: 0 0 14px rgba(132, 184, 59, 0.28);
+  }
+}
+
 /* --- S2a: the AI reading a site --- */
 .pitch-scanbeam {
   background: linear-gradient(
@@ -657,6 +706,8 @@ body {
     transition: none;
   }
   .is-live .pitch-rise,
+  .is-live .pitch-word,
+  .is-live .pitch-word-lime,
   .pitch-caret,
   .pitch-think-dot,
   .pitch-wavebar,

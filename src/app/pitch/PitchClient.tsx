@@ -109,20 +109,26 @@ function DotGrid({ className }: { className: string }) {
 /* ---------- S1: search bars that type, think, and listen ---------- */
 
 function SearchBars({ live }: { live: boolean }) {
-  // One looping timeline: Google types → holds → ChatGPT types → thinks →
-  // glows → everything resets. Driven by chained timeouts so cleanup is easy.
+  // One looping story: the SAME question walks through all three doors.
+  // Google types it → the AI assistant types it and thinks → the voice
+  // assistant hears it (waveform surges, transcript appears). Chained
+  // timeouts so cleanup is a single cancel.
   const [gChars, setGChars] = useState(0);
   const [cChars, setCChars] = useState(0);
   const [thinking, setThinking] = useState(false);
   const [glow, setGlow] = useState(false);
+  const [vChars, setVChars] = useState(0);
+  const [speaking, setSpeaking] = useState(false);
 
   useEffect(() => {
     if (!live) return;
     if (prefersReducedMotion()) {
       setGChars(SEARCH_QUERY.length);
       setCChars(SEARCH_QUERY.length);
+      setVChars(SEARCH_QUERY.length);
       setThinking(false);
       setGlow(true);
+      setSpeaking(false);
       return;
     }
     let cancelled = false;
@@ -131,23 +137,33 @@ function SearchBars({ live }: { live: boolean }) {
       timers.push(window.setTimeout(() => !cancelled && fn(), ms));
     };
 
+    const L = SEARCH_QUERY.length;
     const cycle = () => {
       if (cancelled) return;
       setGChars(0);
       setCChars(0);
+      setVChars(0);
       setThinking(false);
       setGlow(false);
-      for (let i = 1; i <= SEARCH_QUERY.length; i++) later(() => setGChars(i), 300 + i * 55);
-      const gDone = 300 + SEARCH_QUERY.length * 55;
-      for (let i = 1; i <= SEARCH_QUERY.length; i++)
-        later(() => setCChars(i), gDone + 700 + i * 45);
-      const cDone = gDone + 700 + SEARCH_QUERY.length * 45;
+      setSpeaking(false);
+      // Door 1: Google
+      for (let i = 1; i <= L; i++) later(() => setGChars(i), 300 + i * 55);
+      const gDone = 300 + L * 55;
+      // Door 2: the AI assistant
+      for (let i = 1; i <= L; i++) later(() => setCChars(i), gDone + 600 + i * 45);
+      const cDone = gDone + 600 + L * 45;
       later(() => setThinking(true), cDone + 250);
       later(() => {
         setThinking(false);
         setGlow(true);
-      }, cDone + 2050);
-      later(cycle, cDone + 3900);
+      }, cDone + 1900);
+      // Door 3: voice
+      const vStart = cDone + 2600;
+      later(() => setSpeaking(true), vStart - 150);
+      for (let i = 1; i <= L; i++) later(() => setVChars(i), vStart + i * 50);
+      const vDone = vStart + L * 50;
+      later(() => setSpeaking(false), vDone + 900);
+      later(cycle, vDone + 2600);
     };
     cycle();
 
@@ -157,66 +173,86 @@ function SearchBars({ live }: { live: boolean }) {
     };
   }, [live]);
 
-  const caret = <span className="pitch-caret inline-block w-[2px] h-[1.05em] align-middle bg-white/80" />;
+  const label = (text: string) => (
+    <p className="mb-[0.7vh] text-left text-[clamp(12px,0.95vw,18px)] font-bold uppercase tracking-[0.3em] text-white/40">
+      {text}
+    </p>
+  );
 
   return (
-    <div className="flex flex-col items-center gap-[2.2vh] w-[min(46vw,760px)]">
-      {/* Google-ish: the classic rounded search field, typing live */}
-      <div className="w-full flex items-center gap-4 rounded-full bg-white/95 px-7 py-[1.6vh] shadow-lg text-left">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#5f6368" strokeWidth="2.4" strokeLinecap="round" className="w-[1.4vw] min-w-5 aspect-square shrink-0" aria-hidden>
-          <circle cx="11" cy="11" r="7" />
-          <path d="m21 21-4.3-4.3" />
-        </svg>
-        <div className="flex-1 text-[clamp(16px,1.4vw,28px)] font-medium text-slate-700 whitespace-nowrap overflow-hidden">
-          {gChars > 0 ? SEARCH_QUERY.slice(0, gChars) : ""}
-          {gChars < SEARCH_QUERY.length && <span className="pitch-caret inline-block w-[2px] h-[1.05em] align-middle bg-slate-500" />}
-        </div>
-      </div>
-
-      {/* ChatGPT-ish: chat composer, lime highlight, types then thinks */}
-      <div
-        className={`w-[108%] flex items-center gap-4 rounded-3xl bg-white/[0.07] px-7 py-[2.2vh] border-2 transition-shadow duration-500 text-left ${
-          glow ? "pitch-ai-glow" : ""
-        }`}
-        style={{ borderColor: LIME, boxShadow: `0 0 44px ${LIME}30` }}
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke={LIME} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[1.5vw] min-w-5 aspect-square shrink-0" aria-hidden>
-          <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
-        </svg>
-        <div className="flex-1 text-[clamp(16px,1.4vw,28px)] font-medium text-white/85 whitespace-nowrap overflow-hidden">
-          {thinking ? (
-            <span className="inline-flex items-center gap-2" aria-label="Assistant thinking">
-              <span className="pitch-think-dot" />
-              <span className="pitch-think-dot" style={{ animationDelay: "160ms" }} />
-              <span className="pitch-think-dot" style={{ animationDelay: "320ms" }} />
-            </span>
-          ) : (
-            <>
-              {cChars > 0 ? SEARCH_QUERY.slice(0, cChars) : ""}
-              {cChars > 0 && cChars < SEARCH_QUERY.length && caret}
-            </>
-          )}
-        </div>
-        <span className="ml-auto inline-flex items-center justify-center rounded-full w-[2.4vw] min-w-8 aspect-square shrink-0" style={{ background: LIME }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke={NAVY} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-[45%]" aria-hidden>
-            <path d="M12 19V5M5 12l7-7 7 7" />
+    <div className="flex flex-col items-center gap-[2.4vh] w-[min(46vw,760px)]">
+      {/* Door 1 — Google */}
+      <div className="w-full">
+        {label("Google")}
+        <div className="w-full flex items-center gap-4 rounded-full bg-white/95 px-7 py-[1.6vh] shadow-lg text-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#5f6368" strokeWidth="2.4" strokeLinecap="round" className="w-[1.4vw] min-w-5 aspect-square shrink-0" aria-hidden>
+            <circle cx="11" cy="11" r="7" />
+            <path d="m21 21-4.3-4.3" />
           </svg>
-        </span>
+          <div className="flex-1 text-[clamp(16px,1.4vw,28px)] font-medium text-slate-700 whitespace-nowrap overflow-hidden">
+            {gChars > 0 ? SEARCH_QUERY.slice(0, gChars) : ""}
+            {gChars < SEARCH_QUERY.length && <span className="pitch-caret inline-block w-[2px] h-[1.05em] align-middle bg-slate-500" />}
+          </div>
+        </div>
       </div>
 
-      {/* Voice: waveform, always listening */}
-      <div className="w-full flex items-center justify-center gap-[0.55vw] rounded-full bg-white/[0.05] border border-white/15 px-7 py-[1.7vh]">
-        {[34, 62, 88, 52, 96, 44, 72, 30].map((h, i) => (
-          <span
-            key={i}
-            className="pitch-wavebar w-[0.45vw] min-w-1.5 rounded-full"
-            style={{
-              height: `${(h / 100) * 3.4}vh`,
-              background: i % 2 ? BLUE : "rgba(255,255,255,0.65)",
-              animationDelay: `${i * 120}ms`,
-            }}
-          />
-        ))}
+      {/* Door 2 — the AI assistant, lime highlight, slightly larger */}
+      <div className="w-[108%]">
+        {label("ChatGPT & AI assistants")}
+        <div
+          className={`w-full flex items-center gap-4 rounded-3xl bg-white/[0.07] px-7 py-[2.2vh] border-2 transition-shadow duration-500 text-left ${
+            glow ? "pitch-ai-glow" : ""
+          }`}
+          style={{ borderColor: LIME, boxShadow: `0 0 44px ${LIME}30` }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke={LIME} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[1.5vw] min-w-5 aspect-square shrink-0" aria-hidden>
+            <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
+          </svg>
+          <div className="flex-1 text-[clamp(16px,1.4vw,28px)] font-medium text-white/85 whitespace-nowrap overflow-hidden">
+            {thinking ? (
+              <span className="inline-flex items-center gap-2" aria-label="Assistant thinking">
+                <span className="pitch-think-dot" />
+                <span className="pitch-think-dot" style={{ animationDelay: "160ms" }} />
+                <span className="pitch-think-dot" style={{ animationDelay: "320ms" }} />
+              </span>
+            ) : (
+              <>
+                {cChars > 0 ? SEARCH_QUERY.slice(0, cChars) : ""}
+                {cChars > 0 && cChars < SEARCH_QUERY.length && (
+                  <span className="pitch-caret inline-block w-[2px] h-[1.05em] align-middle bg-white/80" />
+                )}
+              </>
+            )}
+          </div>
+          <span className="ml-auto inline-flex items-center justify-center rounded-full w-[2.4vw] min-w-8 aspect-square shrink-0" style={{ background: LIME }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke={NAVY} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-[45%]" aria-hidden>
+              <path d="M12 19V5M5 12l7-7 7 7" />
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      {/* Door 3 — voice: the waveform surges while the words are heard */}
+      <div className="w-full">
+        {label("Siri & voice")}
+        <div className={`w-full flex items-center gap-5 rounded-full bg-white/[0.05] border border-white/15 px-7 py-[1.7vh] ${speaking ? "pitch-speaking" : ""}`}>
+          <span className="flex items-center gap-[0.4vw] shrink-0">
+            {[34, 62, 88, 52, 96, 44, 72, 30].map((h, i) => (
+              <span
+                key={i}
+                className="pitch-wavebar w-[0.45vw] min-w-1.5 rounded-full"
+                style={{
+                  height: `${(h / 100) * 3.4}vh`,
+                  background: i % 2 ? BLUE : "rgba(255,255,255,0.65)",
+                  animationDelay: `${i * 120}ms`,
+                }}
+              />
+            ))}
+          </span>
+          <div className="flex-1 text-left text-[clamp(16px,1.4vw,28px)] font-medium italic text-white/75 whitespace-nowrap overflow-hidden">
+            {vChars > 0 ? `\u201C${SEARCH_QUERY.slice(0, vChars)}${vChars === SEARCH_QUERY.length ? "\u201D" : ""}` : ""}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -567,11 +603,31 @@ export default function PitchClient() {
             style={rise(0)}
           />
           <p
-            className="text-[clamp(28px,2.6vw,52px)] font-extrabold tracking-tight text-white pitch-rise"
-            style={{ "--rise": "180ms" } as React.CSSProperties}
+            className="text-[clamp(28px,2.6vw,52px)] font-extrabold tracking-tight text-white"
+            aria-label="Get More Patients. Powered by AI"
           >
-            Get More <span style={{ color: LIME }}>Patients.</span> Powered by{" "}
-            <span style={{ color: LIME }}>AI</span>
+            {(
+              [
+                ["Get", false],
+                ["More", false],
+                ["Patients.", true],
+                ["Powered", false],
+                ["by", false],
+                ["AI", true],
+              ] as const
+            ).map(([word, lime], i) => (
+              <span
+                key={word + i}
+                aria-hidden
+                className={`pitch-word inline-block will-change-transform ${
+                  lime ? "pitch-word-lime" : ""
+                }`}
+                style={{ "--word": `${240 + i * 95}ms`, ...(lime ? { color: LIME } : {}) } as React.CSSProperties}
+              >
+                {word}
+                {i < 5 ? "\u00A0" : ""}
+              </span>
+            ))}
           </p>
           <p className={`${SUB} pitch-rise`} style={{ "--rise": "340ms" } as React.CSSProperties}>
             AI-powered marketing for medical practices
