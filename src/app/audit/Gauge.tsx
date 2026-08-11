@@ -22,6 +22,7 @@ export function Gauge({
   valueClass = "text-3xl",
   showValue = true,
   srLabel,
+  source,
 }: {
   score: number | null;
   label?: string;
@@ -33,6 +34,8 @@ export function Gauge({
   showValue?: boolean;
   /** Accessible description for label-less rings (e.g. the /pitch deck). */
   srLabel?: string;
+  /** Who measured this number. Only the Lighthouse gauge may credit Google. */
+  source?: string;
 }) {
   const color = gaugeColor(score);
   const radius = 54;
@@ -86,6 +89,9 @@ export function Gauge({
         <div className="text-[11px] text-white/35 mt-0.5 tabular-nums">
           {verified} of {total} verified
         </div>
+      )}
+      {source && (
+        <div className="text-[10px] text-white/30 mt-1 text-center leading-tight">{source}</div>
       )}
     </div>
   );

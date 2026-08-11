@@ -1,7 +1,10 @@
-import type { Check } from "@/types/audit";
-
 /**
- * Turns a set of checks into a 0–100 score.
+ * Shared scoring invariants.
+ *
+ * The scoring itself is WEIGHTED and lives in src/lib/categories.ts, alongside
+ * the category table it depends on — a check's weight is a property of the
+ * category it sits in, so the two cannot sensibly live apart. What remains here
+ * is the rule both sides must agree on regardless of weighting.
  *
  * `could_not_verify` entries are excluded from the denominator entirely — they
  * are neither credit nor penalty. Scoring an unread page as a failure is the
@@ -15,35 +18,10 @@ import type { Check } from "@/types/audit";
 /** Below this many verified checks, we report no score rather than a hollow one. */
 export const MIN_VERIFIED_CHECKS = 3;
 
-const WEIGHTS: Record<Exclude<Check["status"], "could_not_verify">, number> = {
-  pass: 1,
-  warn: 0.5,
-  fail: 0,
-};
-
 export interface CategoryScore {
   score: number | null;
+  /** Checks in this category that returned a definite verdict. */
   verified: number;
+  /** Checks in this category overall, verified or not. */
   total: number;
-}
-
-export function scoreCategory(checks: Check[]): CategoryScore {
-  const scorable = checks.filter((c) => c.status !== "could_not_verify");
-  const verified = scorable.length;
-  const total = checks.length;
-
-  if (verified < MIN_VERIFIED_CHECKS) {
-    return { score: null, verified, total };
-  }
-
-  const earned = scorable.reduce(
-    (sum, c) => sum + WEIGHTS[c.status as keyof typeof WEIGHTS],
-    0
-  );
-  return { score: Math.round((earned / verified) * 100), verified, total };
-}
-
-/** Convenience wrapper when only the number is needed. */
-export function scoreChecks(checks: Check[]): number | null {
-  return scoreCategory(checks).score;
 }

@@ -8,6 +8,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { AuditResult, Check } from "../src/types/audit";
+import { deriveScores } from "../src/lib/categories";
 
 interface PrewarmedFile {
   generatedAt: string | null;
@@ -139,11 +140,14 @@ async function main(): Promise<void> {
   );
 
   // --- Scores ---------------------------------------------------------------
+  // Derived from the raw checks rather than read from `scores`, so entries
+  // written before the category restructure are reported on the current table.
   console.log("\nSCORES");
-  printScoreStats("performance", results, (r) => r.scores.performance);
-  printScoreStats("seo", results, (r) => r.scores.seo);
-  printScoreStats("schema", results, (r) => r.scores.schema);
-  printScoreStats("ai readiness", results, (r) => r.scores.aiReadiness);
+  const derived = new Map(results.map((r) => [r, deriveScores(r)]));
+  printScoreStats("how fast", results, (r) => derived.get(r)!.performance);
+  printScoreStats("ai can find", results, (r) => derived.get(r)!.aiFind);
+  printScoreStats("ai understands", results, (r) => derived.get(r)!.aiUnderstand);
+  printScoreStats("patients find", results, (r) => derived.get(r)!.patientsFind);
 
   // --- Headline findings ----------------------------------------------------
   const readable = results.filter((r) => r.htmlFetch.ok);

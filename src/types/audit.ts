@@ -57,22 +57,26 @@ export interface HtmlFetchResult {
   error?: string;
 }
 
+/**
+ * Category scores. Categories are grouped by the QUESTION each answers — see
+ * src/lib/categories.ts for the check membership, weights, and hard ceilings.
+ *
+ * Every non-performance score is null when too few checks in the category could
+ * actually be verified. Scoring 100 off a single check is a false compliment,
+ * which damages credibility just as surely as a false accusation.
+ */
 export interface AuditScores {
+  /** Google Lighthouse — the only Google-sourced number in the set. */
   performance: number | null;
-  /**
-   * Null when too few checks in the category could actually be verified.
-   * Scoring 100 off a single check is a false compliment, which damages
-   * credibility just as surely as a false accusation.
-   */
-  seo: number | null;
-  seoVerified: number;
-  seoTotal: number;
-  schema: number | null;
-  schemaVerified: number;
-  schemaTotal: number;
-  aiReadiness: number | null;
-  aiReadinessVerified: number;
-  aiReadinessTotal: number;
+  aiFind: number | null;
+  aiFindVerified: number;
+  aiFindTotal: number;
+  aiUnderstand: number | null;
+  aiUnderstandVerified: number;
+  aiUnderstandTotal: number;
+  patientsFind: number | null;
+  patientsFindVerified: number;
+  patientsFindTotal: number;
 }
 
 /** Informational only — never scored, never pass/fail. */
@@ -105,6 +109,14 @@ export interface AuditResult {
   performance: PerformanceResult;
   htmlFetch: HtmlFetchResult;
   platform: PlatformInfo;
+  /**
+   * Raw check output, keyed by the MODULE that produced it — not by display
+   * category. Categories regroup these by the question each answers; see
+   * src/lib/categories.ts. Consumers should read categories through
+   * `buildCategories()` rather than assuming these arrays are user-facing
+   * groupings, which is also what lets a result measured before the category
+   * restructure render correctly under the new categories.
+   */
   seo: Check[];
   schema: Check[];
   aiReadiness: Check[];
