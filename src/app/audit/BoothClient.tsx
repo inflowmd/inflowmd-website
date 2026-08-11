@@ -15,9 +15,24 @@ import { attendeeMatches, hasNoWebsite, letterOf, type Attendee } from "@/lib/at
 /* ============================================================
    Booth audit UI.
 
-   Two paths in: a type-ahead picker over the pre-warmed practices, which
-   renders instantly, and a URL field for walk-ups, which runs live with a
-   progressive reveal. Escape returns to input; R re-runs live.
+   Live-first, cache as a silent fallback. Picking a practice from the
+   type-ahead picker or the browse grid runs a REAL live audit — the full
+   scan sequence, a real PSI call — under the attendee's own name. If that
+   live attempt fails (timeout, blocked, network error, or drags past
+   FALLBACK_TIMEOUT_MS) it falls back to the pre-warmed cache SILENTLY: no
+   error state, just the report with a small "pre-run audit" note. The
+   walk-up URL field is unchanged — it runs live via the same runLive path
+   without fallback, keeping its existing honest failure/retry screen.
+
+   Escape returns to input. R re-runs live (no fallback — a deliberate
+   re-run should show the truth if it fails). C is the mid-demo escape
+   hatch: force-load the pre-warmed version immediately, from either the
+   running or result screen.
+
+   Total network death (offline, or the API unreachable at page load) flips
+   the picker itself to cache-first automatically — selections render the
+   pre-warmed result with no live attempt at all — flagged only by a small
+   dot in the corner, subtle enough that only the presenter would notice.
    ============================================================ */
 
 const BG = "#081C34";
@@ -27,6 +42,14 @@ type Phase = "input" | "running" | "result" | "no-website" | "browse";
 
 /** Matches the route's maxDuration so the client never gives up first. */
 const CLIENT_TIMEOUT_MS = 150_000;
+
+/**
+ * Live-first picker selections get a shorter budget than a deliberate
+ * re-run: if PSI is still dragging past 75s, the pre-warmed result is a
+ * better answer for a doctor standing at the booth than a longer wait.
+ * Only paths that pass `attemptFallback: true` use this ceiling.
+ */
+const FALLBACK_TIMEOUT_MS = 75_000;
 
 /** The site the comparison button audits, live. Swappable in one line.
  *  Canonical final URL — auditing the apex would eat a ~780ms redirect penalty. */
@@ -672,6 +695,17 @@ export default function BoothClient({
   const [ctaFlipped, setCtaFlipped] = useState(false);
   /** True once a comparison has completed — the CTA sub-line references it. */
   const [comparisonRan, setComparisonRan] = useState(false);
+  /** ISO fetchedAt of a cached result currently on screen in place of a live
+   *  one — drives the "Showing our pre-run audit from ..." line. Null means
+   *  either a genuinely live result, or a cache render that doesn't need
+   *  explaining (total-network-death mode, already flagged by the corner dot). */
+  const [fallbackNote, setFallbackNote] = useState<string | null>(null);
+  /** "live" tries a real audit first; "cache-first" — set automatically when
+   *  the booth's network looks dead — skips straight to the pre-warmed
+   *  result. Never surfaced to the visitor, only via the corner dot. */
+  const [networkMode, setNetworkMode] = useState<"live" | "cache-first">(() =>
+    typeof navigator !== "undefined" && navigator.onLine === false ? "cache-first" : "live"
+  );
 
   // Conversion-model inputs — all default, none blank.
   const [monthlyVisitors, setMonthlyVisitors] = useState(800);
@@ -720,6 +754,25 @@ export default function BoothClient({
    *  it fires from a picker selection, consumed (and cleared) at the top of
    *  runLive so a later manual entry never inherits a stale attendee name. */
   const pendingDisplayNameRef = useRef<string | null>(null);
+  /** The display name for the CURRENTLY active run, held for its whole
+   *  lifetime (unlike pendingDisplayNameRef, which is consumed at the
+   *  start) — so a mid-run cache override (the C key) still shows the
+   *  right attendee name, not the pre-warmed cache's own stored name. */
+  const activeDisplayNameRef = useRef<string | null>(null);
+  /** The URL of the run currently in flight — the C key's cache lookup key
+   *  while phase is "running", before there's a `result` to read it from. */
+  const activeTargetRef = useRef<string>("");
+  /** True for exactly one abort: set right before we deliberately cancel an
+   *  in-flight fetch (Escape, the C key) so that run's own catch block
+   *  doesn't ALSO try to handle the abort — otherwise a user-initiated
+   *  cancel could race a stale fallback render on top of the fresh one. */
+  const intentionalAbortRef = useRef(false);
+  /** The options the current/last run started with, so "Try again" retries
+   *  with the same force/fallback intent rather than silently downgrading. */
+  const lastRunOptionsRef = useRef<{ force: boolean; attemptFallback: boolean }>({
+    force: false,
+    attemptFallback: false,
+  });
 
   const clearTimers = useCallback(() => {
     if (revealTimer.current) clearInterval(revealTimer.current);
@@ -733,10 +786,13 @@ export default function BoothClient({
   }, []);
 
   const reset = useCallback(() => {
+    intentionalAbortRef.current = true;
     clearTimers();
     abortRef.current?.abort();
     abortRef.current = null;
     pendingDisplayNameRef.current = null;
+    activeDisplayNameRef.current = null;
+    activeTargetRef.current = "";
     setPhase("input");
     setResult(null);
     setError(null);
@@ -751,32 +807,56 @@ export default function BoothClient({
     setCtaFlipped(false);
     setComparisonRan(false);
     setNoWebsiteAttendee(null);
+    setFallbackNote(null);
   }, [clearTimers]);
 
-  /** Cached path — no network, no reveal sequence. */
-  const selectPractice = useCallback(
-    (p: AuditResult) => {
+  /** Renders a pre-warmed result as the current report — no network, no
+   *  reveal sequence. Shared by the live-run fallback, the C-key escape
+   *  hatch, and total-network-death cache-first mode. Callers that are
+   *  interrupting an ACTIVE fetch (not this one, which handles its own
+   *  cleanup) are responsible for the abort dance themselves. */
+  const renderCachedResult = useCallback(
+    (cached: AuditResult, displayName: string | null, showNote: boolean) => {
       clearTimers();
       setError(null);
-      setResult(p);
+      setRunFailed(false);
+      setResult({ ...cached, practiceName: displayName ?? cached.practiceName });
       setRevealed(999);
       setShowMath(false);
       setCtaFlipped(false);
       setComparisonRan(false);
       setPhase("result");
+      setFallbackNote(showNote ? cached.fetchedAt : null);
     },
     [clearTimers]
   );
 
-  /** Live path — progressive reveal of RESOLVED results only. */
+  /**
+   * Live path — progressive reveal of RESOLVED results only.
+   *
+   * `attemptFallback: true` (picker/grid selections) makes this fail
+   * SILENTLY into the pre-warmed cache — no error state, just the report,
+   * with a small note explaining it's a pre-run number. Manual walk-ups
+   * and deliberate re-runs (R, "Try again") pass it as false and keep the
+   * honest failure/retry screen, matching their existing behavior exactly.
+   */
   const runLive = useCallback(
-    async (rawUrl: string, force = false) => {
+    async (rawUrl: string, options: { force?: boolean; attemptFallback?: boolean } = {}) => {
       const target = rawUrl.trim();
       if (!target) return;
-      // Consumed immediately so a later manual URL entry (or a failed run)
-      // never inherits a stale attendee name from a prior picker selection.
+      const force = options.force ?? false;
+      const attemptFallback = options.attemptFallback ?? false;
+      lastRunOptionsRef.current = { force, attemptFallback };
+
+      // Consumed immediately so a later manual URL entry never inherits a
+      // stale attendee name from a prior picker selection — but kept alive
+      // in activeDisplayNameRef for this run's whole lifetime, so a mid-run
+      // cache override (the C key) still shows the right attendee name.
       const displayNameOverride = pendingDisplayNameRef.current;
       pendingDisplayNameRef.current = null;
+      activeDisplayNameRef.current = displayNameOverride;
+      activeTargetRef.current = target;
+
       clearTimers();
       setError(null);
       setResult(null);
@@ -786,6 +866,7 @@ export default function BoothClient({
       setShowMath(false);
       setCtaFlipped(false);
       setComparisonRan(false);
+      setFallbackNote(null);
       setPhase("running");
       setScanStage(0);
       setPendingUrl(target);
@@ -797,10 +878,26 @@ export default function BoothClient({
         setScanStage((s) => Math.min(s + 1, PSI_STAGE - 1));
       }, 1600);
 
-      // Matches the route's 150s ceiling so the client never gives up first.
+      // Fallback-eligible runs get a shorter budget than the route's own
+      // 150s ceiling — see FALLBACK_TIMEOUT_MS.
+      const timeoutMs = attemptFallback ? FALLBACK_TIMEOUT_MS : CLIENT_TIMEOUT_MS;
       const controller = new AbortController();
       abortRef.current = controller;
-      const clientTimeout = setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS);
+      const clientTimeout = setTimeout(() => controller.abort(), timeoutMs);
+
+      /** Silently substitutes the pre-warmed result for this run's target,
+       *  if one exists. Returns false (does nothing) when there is none to
+       *  fall back to — the caller then shows the normal failure screen. */
+      const fallBackToCache = (reason: string): boolean => {
+        const cached = cacheByUrl.get(cacheKey(target));
+        if (!cached) return false;
+        console.warn(
+          `[BOOTH] Live audit for ${domainOf(target)} ${reason} — showing the pre-run ` +
+            `result from ${cached.fetchedAt} instead. The visitor never saw a failure.`
+        );
+        renderCachedResult(cached, displayNameOverride, true);
+        return true;
+      };
 
       try {
         const res = await fetch("/api/audit", {
@@ -814,6 +911,7 @@ export default function BoothClient({
         // error page, and blindly calling .json() on it turned every distinct
         // failure into the same useless "could not reach" message.
         if (!res.ok) {
+          if (attemptFallback && fallBackToCache(`returned ${res.status}`)) return;
           let message = `The audit service returned ${res.status}.`;
           try {
             const body = await res.json();
@@ -832,6 +930,23 @@ export default function BoothClient({
         const data = (await res.json()) as AuditResult;
         if (displayNameOverride) data.practiceName = displayNameOverride;
         clearTimers();
+
+        // Sanity check: a live score wildly different from what we measured
+        // before is worth a loud flag before anyone quotes it out loud. The
+        // live result is still what renders — this is a log, not a gate.
+        const cachedForCompare =
+          cacheByUrl.get(cacheKey(data.url)) ?? cacheByUrl.get(cacheKey(target));
+        if (cachedForCompare) {
+          const live = data.scores.performance;
+          const wasCached = cachedForCompare.scores.performance;
+          if (live !== null && wasCached !== null && Math.abs(live - wasCached) >= 25) {
+            console.warn(
+              `BOOTH ALERT: performance discrepancy for ${domainOf(data.url)} — cached ` +
+                `${wasCached}, live ${live} (Δ${live - wasCached}). Verify before quoting this number.`
+            );
+          }
+        }
+
         // The response is here — each line may now resolve, and only from what
         // the data actually says. A stage whose work did not complete stays
         // neutral rather than ticking green. Everything below merely PACES the
@@ -864,8 +979,18 @@ export default function BoothClient({
           }
         }, RESOLVE_STAGGER_MS);
       } catch (err) {
-        clearTimers();
+        // A deliberate cancel (Escape, the C key) lands here too — it must
+        // not fight whatever that cancel already did (reset, or its own
+        // cache render) with a second, stale state update.
+        if (intentionalAbortRef.current) {
+          intentionalAbortRef.current = false;
+          return;
+        }
         const aborted = err instanceof Error && err.name === "AbortError";
+        if (attemptFallback && fallBackToCache(aborted ? "timed out" : "hit a network error")) {
+          return;
+        }
+        clearTimers();
         setError(
           aborted
             ? "The audit took too long to finish. Try again."
@@ -877,13 +1002,17 @@ export default function BoothClient({
         abortRef.current = null;
       }
     },
-    [clearTimers]
+    [clearTimers, cacheByUrl, renderCachedResult]
   );
 
   /** Picker/browse-grid selection: the single entry point for both layers.
    *  A no-website attendee routes to a dedicated opportunity screen — never
-   *  an error. A URL with a pre-warmed result renders instantly; otherwise
-   *  it falls back to a live run under the attendee's own name. */
+   *  an error. Otherwise this is LIVE-FIRST: a real audit runs, watched in
+   *  the full scan sequence — the pre-warmed cache is only a silent safety
+   *  net inside runLive if that live attempt fails. The one exception is
+   *  total network death (networkMode === "cache-first"), where there is no
+   *  point pretending to try: it renders the cache immediately, same as the
+   *  booth's original behavior, so the demo is never visibly broken. */
   const selectAttendee = useCallback(
     (a: Attendee) => {
       clearTimers();
@@ -898,16 +1027,41 @@ export default function BoothClient({
         setError(`Could not use the website address on file for ${a.name}.`);
         return;
       }
-      const cached = cacheByUrl.get(cacheKey(normalized));
-      if (cached) {
-        selectPractice({ ...cached, practiceName: a.name });
+
+      if (networkMode === "cache-first") {
+        const cached = cacheByUrl.get(cacheKey(normalized));
+        if (cached) {
+          renderCachedResult(cached, a.name, false);
+          return;
+        }
+        setError(`No pre-warmed result for ${a.name}, and the network looks unreachable.`);
         return;
       }
+
       pendingDisplayNameRef.current = a.name;
-      void runLive(normalized);
+      void runLive(normalized, { force: true, attemptFallback: true });
     },
-    [clearTimers, cacheByUrl, selectPractice, runLive]
+    [clearTimers, cacheByUrl, renderCachedResult, runLive, networkMode]
   );
+
+  /** C — the mid-demo escape hatch: bail out of a dragging live run (or
+   *  swap a landed live result) for the pre-warmed version, instantly.
+   *  Active on the running and result screens only. */
+  const forceLoadCache = useCallback(() => {
+    const url =
+      phase === "running" ? activeTargetRef.current : result?.requestedUrl ?? result?.url ?? "";
+    if (!url) return;
+    const cached = cacheByUrl.get(cacheKey(url));
+    if (!cached) {
+      console.log(`[BOOTH] C pressed — no cached result available for ${domainOf(url)}.`);
+      return;
+    }
+    intentionalAbortRef.current = true;
+    abortRef.current?.abort();
+    abortRef.current = null;
+    console.log(`[BOOTH] C pressed — force-loaded the cached result for ${domainOf(url)}.`);
+    renderCachedResult(cached, activeDisplayNameRef.current, true);
+  }, [phase, result, cacheByUrl, renderCachedResult]);
 
   // Stop the reveal timer once every beat is showing.
   useEffect(() => {
@@ -920,7 +1074,7 @@ export default function BoothClient({
 
   useEffect(() => () => clearTimers(), [clearTimers]);
 
-  // Escape returns to input; R re-runs live with force.
+  // Escape returns to input; R re-runs live with force; C force-loads cache.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
@@ -933,16 +1087,59 @@ export default function BoothClient({
       }
       if (!typing && (e.key === "r" || e.key === "R") && result) {
         e.preventDefault();
-        void runLive(result.url, true);
+        void runLive(result.url, { force: true });
+        return;
+      }
+      if (!typing && (e.key === "c" || e.key === "C") && (phase === "running" || phase === "result")) {
+        e.preventDefault();
+        forceLoadCache();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [reset, runLive, result]);
+  }, [reset, runLive, result, phase, forceLoadCache]);
 
   useEffect(() => {
     if (phase === "input") searchRef.current?.focus();
   }, [phase]);
+
+  /**
+   * Booth-mode network safety. navigator.onLine catches the obvious case
+   * (airplane mode, wifi off) instantly; the page-load probe catches dead
+   * venue wifi that LOOKS connected but can't actually reach our API — a
+   * lightweight same-origin request (any response, even a 405, proves the
+   * network path works; a thrown error means it doesn't). This can't detect
+   * a wifi that reaches us but not Google/PSI specifically — that failure
+   * mode is instead caught per-run by the fallback logic in runLive.
+   */
+  useEffect(() => {
+    let cancelled = false;
+
+    async function probe() {
+      try {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), 4000);
+        await fetch("/api/audit", { method: "GET", signal: controller.signal, cache: "no-store" });
+        clearTimeout(t);
+        if (!cancelled && navigator.onLine !== false) setNetworkMode("live");
+      } catch {
+        if (!cancelled) setNetworkMode("cache-first");
+      }
+    }
+    void probe();
+
+    const goLive = () => {
+      if (navigator.onLine) setNetworkMode("live");
+    };
+    const goCacheFirst = () => setNetworkMode("cache-first");
+    window.addEventListener("online", goLive);
+    window.addEventListener("offline", goCacheFirst);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("online", goLive);
+      window.removeEventListener("offline", goCacheFirst);
+    };
+  }, []);
 
   /* ---------- no-website screen ---------- */
   // Not an error — the opportunity framing carries the same weight as a
@@ -953,6 +1150,13 @@ export default function BoothClient({
     return (
       <main className="relative min-h-screen text-white overflow-hidden" style={{ background: BG }}>
         <MeshBg />
+        {networkMode === "cache-first" && (
+          <div
+            className="fixed top-3 right-3 z-50 w-2 h-2 rounded-full bg-amber-400/60"
+            title="Network unreachable — showing pre-run results only"
+            aria-hidden
+          />
+        )}
         <div className="relative z-10 max-w-3xl mx-auto px-5 sm:px-8 py-10 sm:py-14">
           <div className="flex items-center justify-between gap-4 mb-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1015,6 +1219,13 @@ export default function BoothClient({
     return (
       <main className="relative min-h-screen text-white overflow-hidden" style={{ background: BG }}>
         <MeshBg />
+        {networkMode === "cache-first" && (
+          <div
+            className="fixed top-3 right-3 z-50 w-2 h-2 rounded-full bg-amber-400/60"
+            title="Network unreachable — showing pre-run results only"
+            aria-hidden
+          />
+        )}
         <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 py-8 sm:py-10">
           <div className="flex items-center justify-between gap-4 mb-6">
             <div>
@@ -1085,6 +1296,13 @@ export default function BoothClient({
     return (
       <main className="relative min-h-screen text-white overflow-hidden" style={{ background: BG }}>
         <MeshBg />
+        {networkMode === "cache-first" && (
+          <div
+            className="fixed top-3 right-3 z-50 w-2 h-2 rounded-full bg-amber-400/60"
+            title="Network unreachable — showing pre-run results only"
+            aria-hidden
+          />
+        )}
 
         <div className="relative z-10 max-w-4xl mx-auto px-5 sm:px-8 py-10 sm:py-14">
           <div className="flex items-center justify-between gap-4 mb-8">
@@ -1124,6 +1342,9 @@ export default function BoothClient({
                   <div className="booth-sweep-track mt-4" aria-hidden>
                     <div className="booth-sweep-bar" />
                   </div>
+                  {cacheByUrl.has(cacheKey(pendingUrl)) && (
+                    <p className="text-white/25 text-xs mt-4">C — show our pre-run version now</p>
+                  )}
                 </div>
               )}
 
@@ -1133,7 +1354,7 @@ export default function BoothClient({
                   <div className="mt-5 flex gap-3">
                     <button
                       type="button"
-                      onClick={() => void runLive(pendingUrl, true)}
+                      onClick={() => void runLive(pendingUrl, lastRunOptionsRef.current)}
                       className="rounded-lg px-6 font-bold text-[#081C34]"
                       style={{ background: ACCENT, minHeight: 44 }}
                     >
@@ -1272,6 +1493,16 @@ export default function BoothClient({
               {result.practiceName ?? domainOf(result.url)}
             </h1>
             <div className="text-white/45 text-sm">{domainOf(result.url)}</div>
+            {fallbackNote && (
+              <div className="text-white/35 text-xs mt-1">
+                Showing our pre-run audit from{" "}
+                {new Date(fallbackNote).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </div>
+            )}
           </div>
           <button
             type="button"
@@ -1282,6 +1513,13 @@ export default function BoothClient({
             Esc — New
           </button>
         </div>
+        {networkMode === "cache-first" && (
+          <div
+            className="fixed top-3 right-3 z-50 w-2 h-2 rounded-full bg-amber-400/60"
+            title="Network unreachable — showing pre-run results only"
+            aria-hidden
+          />
+        )}
 
         {/* HERO — the Lighthouse performance score, PSI-style */}
         <div className="flex flex-col items-center mb-8">
@@ -1617,7 +1855,7 @@ export default function BoothClient({
         </div>
 
         <div className="mt-8 text-white/25 text-xs">
-          Esc — new audit · R — re-run live
+          Esc — new audit · R — re-run live · C — pre-run version
         </div>
       </div>
     </main>
