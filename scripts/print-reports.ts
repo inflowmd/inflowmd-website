@@ -50,7 +50,22 @@ function slugify(name: string): string {
 async function selectPractice(page: Page, name: string): Promise<boolean> {
   const search = page.locator('input[aria-label="Search practices"]');
   await search.fill(name);
-  await page.waitForTimeout(250);
+
+  // Wait for REACT to respond, not just for time to pass. The picker is
+  // server-rendered, so its markup exists before hydration and a click can
+  // land on a button that has no handler yet — the click is swallowed and the
+  // result screen never appears. A filtered list proves the component is live.
+  await page.waitForFunction(
+    (needle) => {
+      const rows = Array.from(document.querySelectorAll("button")).filter((b) =>
+        (b.textContent ?? "").includes(needle)
+      );
+      const all = document.querySelectorAll('button[aria-label*="jump"], button').length;
+      return rows.length > 0 && all < 40;
+    },
+    name,
+    { timeout: 15_000 }
+  );
 
   const rows = page.locator("button").filter({ hasText: name });
   const count = await rows.count();
@@ -86,11 +101,21 @@ async function printOne(
     });
     await page.goto(`${BASE_URL}/audit`, { waitUntil: "networkidle", timeout: 45_000 });
 
-    if (!(await selectPractice(page, name))) {
-      return { ok: false, reason: "no matching row in the picker" };
+    let opened = false;
+    for (let attempt = 1; attempt <= 3 && !opened; attempt++) {
+      if (attempt > 1) {
+        await page.goto(`${BASE_URL}/audit`, { waitUntil: "networkidle", timeout: 45_000 });
+      }
+      if (!(await selectPractice(page, name))) {
+        return { ok: false, reason: "no matching row in the picker" };
+      }
+      // The result screen is up once the findings anchor exists.
+      opened = await page
+        .waitForSelector("#findings-ai", { timeout: 12_000 })
+        .then(() => true)
+        .catch(() => false);
     }
-    // The result screen is up once the findings anchor exists.
-    await page.waitForSelector("#findings-ai", { timeout: 20_000 });
+    if (!opened) return { ok: false, reason: "result screen never rendered after 3 attempts" };
     await page.waitForTimeout(400);
 
     const heading = (await page.locator("h1").first().innerText()).trim();

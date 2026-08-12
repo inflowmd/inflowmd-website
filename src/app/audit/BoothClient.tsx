@@ -956,10 +956,14 @@ export default function BoothClient({
   const [fallbackNote, setFallbackNote] = useState<string | null>(null);
   /** "live" tries a real audit first; "cache-first" — set automatically when
    *  the booth's network looks dead — skips straight to the pre-warmed
-   *  result. Never surfaced to the visitor, only via the corner dot. */
-  const [networkMode, setNetworkMode] = useState<"live" | "cache-first">(() =>
-    typeof navigator !== "undefined" && navigator.onLine === false ? "cache-first" : "live"
-  );
+   *  result. Never surfaced to the visitor, only via the corner dot.
+   *
+   *  Always starts "live" so the server and the first client render agree.
+   *  Reading navigator.onLine during render made the two disagree whenever
+   *  the browser was offline, which threw a hydration error and forced React
+   *  to re-render the whole tree on the client — the page recovered, but
+   *  slowly and unpredictably. The offline check runs in an effect below. */
+  const [networkMode, setNetworkMode] = useState<"live" | "cache-first">("live");
 
   // Conversion-model inputs — all default, none blank.
   const [monthlyVisitors, setMonthlyVisitors] = useState(800);
@@ -1387,6 +1391,10 @@ export default function BoothClient({
    */
   useEffect(() => {
     let cancelled = false;
+
+    // Offline is knowable immediately; the probe below covers "online but the
+    // API is unreachable". Done in an effect so SSR and hydration agree.
+    if (navigator.onLine === false) setNetworkMode("cache-first");
 
     async function probe() {
       try {
