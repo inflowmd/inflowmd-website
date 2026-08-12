@@ -5,7 +5,63 @@ pending. This file exists in case a session boundary hits mid-work; as of
 the last edit it did not — everything below already happened, in order,
 most recent first.
 
-## Latest: quota-exhaustion cache fallback (shipped) + anonymous-call diagnosis (reported, fix pending)
+## Latest: PSI authentication hardening (fixes the anonymous-call quota leak)
+
+Google Cloud showed PSI traffic split between the named key
+(`pagespeed-audit-key`, 248 requests) and **Anonymous**. Anonymous calls
+land in Google's small shared public quota, which is why ~100 of our own
+calls exhausted a "per day" limit.
+
+**The product code was never the leak.** Both committed paths that reach
+PageSpeed — `/api/audit` → `runAudit` and `scripts/prewarm.ts` → `runAudit`
+— attach the key, and a machine-wide grep found no other repo calling
+`pagespeedonline`. The leak was **ad-hoc invocations**: `npx tsx -e "...
+runPageSpeed ..."` and a bare `curl`, neither of which loads `.env.local`
+(verified empirically: bare `npx tsx -e` cannot see the key;
+`--env-file-if-exists=.env.local` can). Both patterns were used for
+diagnostics during these sessions. The enabling design flaw was a client
+that silently omitted the key rather than complaining.
+
+Three changes shipped:
+
+1. **A keyless call is now loud.** `requestOnce` warns on every
+   unauthenticated request — naming the behavior, the consequence, both
+   fixes (`.env.local` locally, project env vars on Vercel) and the target
+   that went out keyless. The same warning fires in the **`/api/audit`
+   route** on the live path, so if the Vercel env var ever goes missing it
+   appears in production logs instead of the route quietly degrading.
+   Checked only before a live run — a cache hit never touches PageSpeed.
+   The placeholder rule now lives in one exported `resolveApiKey()` so the
+   route, the script and the client can't drift on what a usable key is.
+
+2. **Every `tsx` entry point loads `.env.local`**, not just the pre-warm
+   script, so a script that grows a PageSpeed call later inherits the key
+   instead of silently going anonymous.
+
+3. **The pre-warm script refuses to start without a key** — hard `exit 1`,
+   before any network call, with a message saying how to fix it. It makes
+   one call per site, so a keyless run would fire ~58 anonymous requests
+   and burn the shared quota, potentially the morning of the conference.
+   There is no scenario where running it keyless is correct, so it does not
+   degrade. Verified by invoking it without the env file (refuses, exit 1,
+   audits nothing) and confirming it passes the guard under `npm run
+   prewarm`.
+
+Tests: 4 new checks in `src/lib/pagespeed.test.ts` (14 total) — an
+authenticated call attaches the key to the query string and stays silent; a
+missing key warns once with fix instructions and sends no key; a
+placeholder counts as missing; every retry of a keyless call warns, because
+a keyless batch should be impossible to miss.
+
+Deployed: `https://www.inflowmd.com` (READY, aliased, `/audit` 200).
+Merged: merge commit `019283a` on `origin/main`.
+
+**Still worth doing by hand:** check the quota page for GCP project
+`583797351490`. The anonymous traffic is now stopped at the source, but if
+the *authenticated* per-day limit is also set unusually low, that's a
+separate ceiling worth raising before the conference.
+
+## Earlier: quota-exhaustion cache fallback (shipped)
 
 **Shipped: the booth now falls back to cache when a live run returns no
 speed data.** The live-first fallback previously fired only on transport
@@ -37,7 +93,7 @@ live run untouched).
 Deployed: `https://www.inflowmd.com` (READY, aliased, `/audit` 200).
 Merged: merge commit `e382b5d` on `origin/main`.
 
-**Diagnosed, NOT yet fixed — PSI calls are going out unauthenticated.**
+**Diagnosed here, fixed in the section above — PSI calls were going out unauthenticated.**
 Google Cloud shows traffic split between the named key
 (`pagespeed-audit-key`, 248 requests) and **Anonymous**, which lands in
 Google's shared low quota and explains exhausting after ~100 of our own
@@ -62,9 +118,7 @@ Root enabler: `resolveApiKey()` in `src/lib/pagespeed.ts` returns null when
 the key is absent, and `requestOnce` then does `if (key) params.set(...)` —
 silently proceeding unauthenticated. That converts "misconfigured
 environment" into "quietly consuming Google's shared anonymous quota" with
-no signal anywhere. Proposed fix (awaiting go-ahead): log a loud warning
-every time a call goes out without a key, so any future anonymous call
-announces itself in pre-warm output and Vercel logs.
+no signal anywhere. Fixed — see the authentication-hardening section above.
 
 ## Earlier: PageSpeed backoff + API key findings
 
