@@ -145,8 +145,7 @@ async function main(): Promise<void> {
   console.log("\nSCORES");
   const derived = new Map(results.map((r) => [r, deriveScores(r)]));
   printScoreStats("how fast", results, (r) => derived.get(r)!.performance);
-  printScoreStats("ai can find", results, (r) => derived.get(r)!.aiFind);
-  printScoreStats("ai understands", results, (r) => derived.get(r)!.aiUnderstand);
+  printScoreStats("ai optimized", results, (r) => derived.get(r)!.ai);
   printScoreStats("patients find", results, (r) => derived.get(r)!.patientsFind);
 
   // --- Headline findings ----------------------------------------------------

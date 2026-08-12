@@ -11,7 +11,13 @@ import {
 import { normalizeUrl } from "@/lib/normalizeUrl";
 import { cacheKey } from "@/lib/cache";
 import { attendeeMatches, hasNoWebsite, letterOf, type Attendee } from "@/lib/attendees";
-import { buildCategories, type ResolvedCategory } from "@/lib/categories";
+import {
+  buildCategories,
+  type CategoryItem,
+  type CategoryKey,
+  type ResolvedCategory,
+} from "@/lib/categories";
+import { speedMetrics, type SpeedBand } from "@/lib/speedMetrics";
 import { missingSpeedFallbackReason } from "@/lib/liveFallback";
 
 /* ============================================================
@@ -108,6 +114,32 @@ const domainOf = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/,
 
 /** Attribution shown under each category gauge. Only the Lighthouse score is
  *  Google's — the other three are our own analysis and must say so. */
+/** The "checking medical practice identification" stage resolves when that
+ *  check actually returned a verdict — not merely when the run finished. */
+function medicalIdentificationResolved(r: AuditResult): boolean {
+  const check = [...(r.seo ?? []), ...(r.schema ?? []), ...(r.aiReadiness ?? [])].find(
+    (c) => c.id === "schema.medical"
+  );
+  return check !== undefined && check.status !== "could_not_verify";
+}
+
+/** Anchor a gauge can scroll to. */
+const sectionId = (key: CategoryKey) => `findings-${key}`;
+
+function scrollToSection(key: CategoryKey): void {
+  const el = document.getElementById(sectionId(key));
+  if (!el) return;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+}
+
+/** Google's own wording for the metric bands, colored like the gauges. */
+const SPEED_BAND_STYLE: Record<SpeedBand, { label: string; color: string }> = {
+  good: { label: "Good", color: "#0cce6b" },
+  "needs-improvement": { label: "Needs improvement", color: "#ffa400" },
+  poor: { label: "Poor", color: "#ff4e42" },
+};
+
 const SOURCE_LABEL: Record<string, string> = {
   google: "Google PageSpeed Insights",
   inflowmd: "InflowMD analysis",
@@ -202,8 +234,19 @@ const CHECK_EXPLANATIONS: Record<string, string> = {
     "How much readable text the page carries. AI assistants and search engines need enough substance to draw an answer from.",
 };
 
+/**
+ * What this check cost, in the category's own points. Shown only for weighted
+ * categories — an unweighted one has no meaningful per-check arithmetic.
+ */
+function impactLine(item: CategoryItem): string {
+  if (!item.counted) return `${item.weight} points excluded \u2014 not checked`;
+  if (item.pointsLost === 0) return `${item.weight} of ${item.weight} points earned`;
+  const lost = Number.isInteger(item.pointsLost) ? item.pointsLost : item.pointsLost.toFixed(1);
+  return `${lost} of ${item.weight} points lost`;
+}
+
 /** One findings row — collapsed exactly as before, expandable for the why. */
-function FindingRow({ check }: { check: Check }) {
+function FindingRow({ check, impact }: { check: Check; impact?: CategoryItem }) {
   const [open, setOpen] = useState(false);
   const st = STATUS_STYLE[check.status];
   const explanation = CHECK_EXPLANATIONS[check.id];
@@ -223,7 +266,18 @@ function FindingRow({ check }: { check: Check }) {
         style={{ minHeight: 44 }}
       >
         <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${st.dot}`} />
-        <span className="text-sm text-white/80 flex-1 min-w-0 truncate">{check.label}</span>
+        <span className="flex-1 min-w-0">
+          <span className="block text-sm text-white/80 truncate">{check.label}</span>
+          {impact && (
+            <span
+              className={`block text-[11px] tabular-nums ${
+                impact.pointsLost > 0 ? "text-white/55" : "text-white/35"
+              }`}
+            >
+              {impactLine(impact)}
+            </span>
+          )}
+        </span>
         <span className={`text-[11px] font-bold uppercase tracking-wider ${st.text}`}>
           {st.label}
         </span>
@@ -251,6 +305,76 @@ function FindingRow({ check }: { check: Check }) {
           )}
           <p className="text-xs text-white/40 mt-1.5 leading-snug">{check.detail}</p>
         </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * The speed section's body: the patient-wait sentence the model already
+ * produces, then the Lighthouse metrics behind the score with Google's own
+ * thresholds. These are Google's numbers, not our checks — no weights, no
+ * point costs, and a metric we do not have a value for is omitted rather
+ * than rendered as a hole.
+ */
+function SpeedSection({
+  performance,
+  model,
+}: {
+  performance: AuditResult["performance"];
+  model: { headline: string } | null;
+}) {
+  const metrics = speedMetrics(performance);
+
+  if (!performance.available) {
+    return (
+      <div className="rounded-lg border border-dashed border-white/20 bg-white/[0.02] p-4">
+        <p className="text-white/55 text-sm">
+          {performance.error ?? "Google did not return a speed measurement for this page."}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {model && (
+        <p className="text-white/80 text-base sm:text-lg font-semibold leading-snug mb-4">
+          {model.headline}
+        </p>
+      )}
+      <div className="grid sm:grid-cols-2 gap-2">
+        {metrics.map((m) => {
+          const band = SPEED_BAND_STYLE[m.band];
+          return (
+            <div key={m.id} className="rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-sm text-white/80 min-w-0">{m.label}</span>
+                <span
+                  className="text-lg font-extrabold tabular-nums shrink-0"
+                  style={{ color: band.color }}
+                >
+                  {m.display}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between gap-3 mt-0.5">
+                <span className="text-[11px] text-white/40">{m.thresholdNote}</span>
+                <span
+                  className="text-[11px] font-bold uppercase tracking-wider shrink-0"
+                  style={{ color: band.color }}
+                >
+                  {band.label}
+                </span>
+              </div>
+              <p className="text-xs text-white/45 mt-1.5 leading-snug">{m.meaning}</p>
+            </div>
+          );
+        })}
+      </div>
+      {metrics.length === 0 && (
+        <p className="text-white/45 text-sm">
+          Google returned a score but no individual metrics for this page.
+        </p>
       )}
     </div>
   );
@@ -466,8 +590,8 @@ function ComparisonBlock({ their, onRan }: { their: AuditResult; onRan: () => vo
       setOutcomes([
         data.htmlFetch.ok,
         data.scores.patientsFind !== null,
-        data.scores.aiFind !== null,
-        data.scores.aiUnderstand !== null,
+        data.scores.ai !== null,
+        medicalIdentificationResolved(data),
         data.performance.available,
       ]);
       let flipped = 0;
@@ -987,8 +1111,8 @@ export default function BoothClient({
         setStageOutcomes([
           data.htmlFetch.ok,
           data.scores.patientsFind !== null,
-          data.scores.aiFind !== null,
-          data.scores.aiUnderstand !== null,
+          data.scores.ai !== null,
+          medicalIdentificationResolved(data),
           data.performance.available,
         ]);
         setResolvedCount(0);
@@ -1586,17 +1710,27 @@ export default function BoothClient({
           )}
         </div>
 
-        {/* The four categories, each answering its own question. Attribution is
-            per-gauge: only the Lighthouse score is Google's. */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        {/* The three categories. AI leads and is rendered larger — it is the
+            headline. Each gauge scrolls to its own findings section, and
+            attribution is per-gauge: only the Lighthouse score is Google's. */}
+        <div className="grid grid-cols-1 sm:grid-cols-[1.4fr_1fr_1fr] gap-4 mb-8 items-start">
           {categories.map((c) => (
-            <Gauge
+            <button
               key={c.key}
-              label={c.label}
-              score={c.score}
-              {...(c.key === "speed" ? {} : { verified: c.verified, total: c.total })}
-              source={SOURCE_LABEL[c.source]}
-            />
+              type="button"
+              onClick={() => scrollToSection(c.key)}
+              className="rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-[#84B83B]/40 transition-colors py-4 px-2"
+              aria-label={`${c.label} — jump to findings`}
+            >
+              <Gauge
+                label={c.label}
+                score={c.score}
+                size={c.key === "ai" ? 150 : 110}
+                valueClass={c.key === "ai" ? "text-4xl" : "text-3xl"}
+                {...(c.key === "speed" ? {} : { verified: c.verified, total: c.total })}
+                source={SOURCE_LABEL[c.source]}
+              />
+            </button>
           ))}
         </div>
 
@@ -1614,27 +1748,14 @@ export default function BoothClient({
               ),
             },
             {
-              key: "aiUnderstand",
-              score: byKey.aiUnderstand.score,
+              key: "ai",
+              score: byKey.ai.score,
               text: "Add medical practice schema so Google and AI know exactly who you are",
               icon: (
                 <svg viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden>
                   <path d="M7 8 3 12l4 4" />
                   <path d="m17 8 4 4-4 4" />
                   <path d="m14 4-4 16" />
-                </svg>
-              ),
-            },
-            {
-              key: "aiFind",
-              score: byKey.aiFind.score,
-              text: "Open the site to AI assistants and publish a guide they can read",
-              icon: (
-                <svg viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden>
-                  <path d="M12 3v3" />
-                  <rect x="5" y="6" width="14" height="12" rx="2" />
-                  <path d="M9 12h.01M15 12h.01" />
-                  <path d="M9 16h6" />
                 </svg>
               ),
             },
@@ -1846,35 +1967,42 @@ export default function BoothClient({
             />
           )}
 
-        {/* check detail, grouped under the question each category answers —
-            could_not_verify styled neutrally, never as failure */}
+        {/* Three sections, one per category, in gauge order. Within each,
+            checks are ordered by what they actually cost — biggest point
+            losses first, passes last — so the top of a section is the work
+            list. could_not_verify stays neutral, never styled as failure. */}
         <div className="mt-10">
           <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-3">
             What we checked
           </div>
-          <div className="space-y-6">
-            {categories
-              .filter((c) => c.checks.length > 0)
-              .map((c) => (
-                <div key={c.key}>
-                  <div className="flex items-baseline justify-between gap-3 mb-2">
-                    <h3 className="text-base sm:text-lg font-extrabold text-white/90">
-                      {c.label}
-                    </h3>
-                    <span
-                      className="text-sm font-extrabold tabular-nums shrink-0"
-                      style={{ color: gaugeColor(c.score) }}
-                    >
-                      {c.score === null ? "—" : c.score}
-                    </span>
-                  </div>
+          <div className="space-y-8">
+            {categories.map((c) => (
+              <section key={c.key} id={sectionId(c.key)} className="scroll-mt-6">
+                <div className="flex items-baseline justify-between gap-3 mb-3 border-b border-white/10 pb-2">
+                  <h3 className="text-lg sm:text-xl font-extrabold text-white/90">{c.label}</h3>
+                  <span
+                    className="text-lg font-extrabold tabular-nums shrink-0"
+                    style={{ color: gaugeColor(c.score) }}
+                  >
+                    {c.score === null ? "—" : c.score}
+                  </span>
+                </div>
+
+                {c.key === "speed" ? (
+                  <SpeedSection performance={result.performance} model={model} />
+                ) : (
                   <div className="grid sm:grid-cols-2 gap-2">
-                    {c.checks.map((check) => (
-                      <FindingRow key={check.id} check={check} />
+                    {c.items.map((item) => (
+                      <FindingRow
+                        key={item.check.id}
+                        check={item.check}
+                        impact={c.weighted ? item : undefined}
+                      />
                     ))}
                   </div>
-                </div>
-              ))}
+                )}
+              </section>
+            ))}
           </div>
         </div>
 

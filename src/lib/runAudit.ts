@@ -118,6 +118,7 @@ function failedPerformance(reason: string): PerformanceResult {
     available: false,
     lighthouseScore: null,
     lcp: null,
+    fcp: null,
     cls: null,
     tbt: null,
     speedIndex: null,

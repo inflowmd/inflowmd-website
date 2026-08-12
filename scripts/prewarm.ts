@@ -118,6 +118,7 @@ function erroredResult(url: string, message: string): AuditResult {
       available: false,
       lighthouseScore: null,
       lcp: null,
+      fcp: null,
       cls: null,
       tbt: null,
       speedIndex: null,
@@ -132,12 +133,9 @@ function erroredResult(url: string, message: string): AuditResult {
     aiReadiness: [],
     scores: {
       performance: null,
-      aiFind: null,
-      aiFindVerified: 0,
-      aiFindTotal: 0,
-      aiUnderstand: null,
-      aiUnderstandVerified: 0,
-      aiUnderstandTotal: 0,
+      ai: null,
+      aiVerified: 0,
+      aiTotal: 0,
       patientsFind: null,
       patientsFindVerified: 0,
       patientsFindTotal: 0,
@@ -402,11 +400,9 @@ async function main(): Promise<void> {
           : "ok";
 
       log(
-        `${counter} ${display} … [${status}] speed ${fmtScore(s.performance)} | ai-find ${fmtScore(
-          s.aiFind
-        )} | ai-understand ${fmtScore(s.aiUnderstand)} | patients-find ${fmtScore(
-          s.patientsFind
-        )} | ${platform}${fetchNote}${staleNote}${sharedNote}`
+        `${counter} ${display} … [${status}] speed ${fmtScore(s.performance)} | ai ${fmtScore(
+          s.ai
+        )} | patients-find ${fmtScore(s.patientsFind)} | ${platform}${fetchNote}${staleNote}${sharedNote}`
       );
     } catch (err) {
       // One bad URL must never kill the run.
