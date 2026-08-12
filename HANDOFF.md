@@ -5,7 +5,68 @@ pending. This file exists in case a session boundary hits mid-work; as of
 the last edit it did not — everything below already happened, in order,
 most recent first.
 
-## Latest: PageSpeed backoff + API key findings
+## Latest: quota-exhaustion cache fallback (shipped) + anonymous-call diagnosis (reported, fix pending)
+
+**Shipped: the booth now falls back to cache when a live run returns no
+speed data.** The live-first fallback previously fired only on transport
+failures (non-2xx, network error, client timeout). It missed the failure
+mode that actually bites at a conference: PageSpeed's daily quota runs out
+and the audit *succeeds* — fast HTTP 200, well-formed `AuditResult`, quota
+message where the speed score should be. Nothing "failed", so the fallback
+never triggered and the booth rendered a blank speed gauge while a measured
+result sat in the cache.
+
+The rule is now about the DATA, not the transport: live
+`performance.available === false` AND a cached entry with
+`performance.available === true` → render the cached result with the usual
+"Showing our pre-run audit from [date]" line, and log the reason. Applies
+equally to a quota rejection, a Lighthouse 500 that outlived its retries,
+or any future partial. Unchanged where it should be: walk-ups with nothing
+cached still show the honest partial; a cached entry that also lacks speed
+is not swapped in; a live run that DID return speed always stands (even
+when it diverges — that's the discrepancy warning's job).
+
+The decision lives in `src/lib/liveFallback.ts` as a pure function so the
+rule is unit-testable rather than only reachable by driving a browser.
+Tests: `npm run test:livefallback`, 9 checks led by the quota case using
+the real quota message. Also verified end-to-end in a browser against a
+stubbed 200-with-no-speed response (cached 97 renders with the pre-run
+note, no error state; walk-up still shows "Speed not measured"; healthy
+live run untouched).
+
+Deployed: `https://www.inflowmd.com` (READY, aliased, `/audit` 200).
+Merged: merge commit `e382b5d` on `origin/main`.
+
+**Diagnosed, NOT yet fixed — PSI calls are going out unauthenticated.**
+Google Cloud shows traffic split between the named key
+(`pagespeed-audit-key`, 248 requests) and **Anonymous**, which lands in
+Google's shared low quota and explains exhausting after ~100 of our own
+calls. Findings:
+
+| Path | Key attached? |
+|---|---|
+| `/api/audit` route on Vercel (the booth's live audits) | Yes — env var set for Production + Preview |
+| `npm run prewarm` | Yes — script passes `--env-file-if-exists=.env.local`; verified the key is visible |
+| Local `next dev` / `next start` | Yes — Next.js auto-loads `.env.local` |
+| **Ad-hoc `npx tsx -e "... runPageSpeed ..."`** | **NO — anonymous.** No env flag, so `process.env.PAGESPEED_API_KEY` is undefined. Verified empirically. This exact pattern was used for smoke tests during this session. |
+| **Direct `curl` to the endpoint without `&key=`** | **NO — anonymous.** Used once during earlier diagnosis. |
+| `npm run summarize`, all `test:*` scripts | No env file, but none of them reach PSI (summarize reads JSON; the pagespeed test stubs `fetch`), so no leak today — they would be silently anonymous if they ever did call. |
+
+Only two committed code paths reach PSI (`/api/audit` → `runAudit` and
+`scripts/prewarm.ts` → `runAudit`), and both are authenticated. A
+machine-wide grep found no other repo calling `pagespeedonline`. **So the
+anonymous traffic is coming from ad-hoc/diagnostic invocations, not from
+the product.**
+
+Root enabler: `resolveApiKey()` in `src/lib/pagespeed.ts` returns null when
+the key is absent, and `requestOnce` then does `if (key) params.set(...)` —
+silently proceeding unauthenticated. That converts "misconfigured
+environment" into "quietly consuming Google's shared anonymous quota" with
+no signal anywhere. Proposed fix (awaiting go-ahead): log a loud warning
+every time a call goes out without a key, so any future anonymous call
+announces itself in pre-warm output and Vercel logs.
+
+## Earlier: PageSpeed backoff + API key findings
 
 **Backoff.** `src/lib/pagespeed.ts` now retries server errors: wait 2s,
 retry; wait 5s, retry; then give up and return the honest partial. The
