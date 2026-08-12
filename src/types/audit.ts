@@ -33,6 +33,12 @@ export interface PerformanceResult {
   lighthouseScore: number | null;
   /** Largest Contentful Paint, in seconds. */
   lcp: number | null;
+  /**
+   * First Contentful Paint, in seconds. Added after the original cache was
+   * written, so results measured before that carry null — render it only when
+   * present rather than showing a hole.
+   */
+  fcp: number | null;
   /** Cumulative Layout Shift, unitless. */
   cls: number | null;
   /** Total Blocking Time, in milliseconds. */
@@ -68,12 +74,9 @@ export interface HtmlFetchResult {
 export interface AuditScores {
   /** Google Lighthouse — the only Google-sourced number in the set. */
   performance: number | null;
-  aiFind: number | null;
-  aiFindVerified: number;
-  aiFindTotal: number;
-  aiUnderstand: number | null;
-  aiUnderstandVerified: number;
-  aiUnderstandTotal: number;
+  ai: number | null;
+  aiVerified: number;
+  aiTotal: number;
   patientsFind: number | null;
   patientsFindVerified: number;
   patientsFindTotal: number;

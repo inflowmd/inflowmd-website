@@ -50,6 +50,7 @@ function emptyResult(error?: string): PerformanceResult {
     available: false,
     lighthouseScore: null,
     lcp: null,
+    fcp: null,
     cls: null,
     tbt: null,
     speedIndex: null,
@@ -172,6 +173,7 @@ function parseResponse(status: number, body: Json | null): PerformanceResult {
     available: true,
     lighthouseScore: rawScore === null ? null : Math.round(rawScore * 100),
     lcp: msToSeconds(auditValue(audits, "largest-contentful-paint")),
+    fcp: msToSeconds(auditValue(audits, "first-contentful-paint")),
     cls: (() => {
       const raw = numeric(auditValue(audits, "cumulative-layout-shift"));
       return raw === null ? null : Math.round(raw * 1000) / 1000;
