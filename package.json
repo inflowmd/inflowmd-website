@@ -12,11 +12,12 @@
     "test:model": "tsx --env-file-if-exists=.env.local src/lib/conversionModel.test.ts",
     "test:security": "tsx --env-file-if-exists=.env.local src/lib/ssrfGuard.test.ts",
     "test:attendees": "tsx --env-file-if-exists=.env.local src/lib/attendees.test.ts",
-    "test": "npm run test:model && npm run test:security && npm run test:attendees && npm run test:categories && npm run test:pagespeed && npm run test:livefallback && npm run test:speedmetrics",
+    "test": "npm run test:model && npm run test:security && npm run test:attendees && npm run test:categories && npm run test:pagespeed && npm run test:livefallback && npm run test:speedmetrics && npm run test:verdict",
     "test:categories": "tsx --env-file-if-exists=.env.local src/lib/categories.test.ts",
     "test:pagespeed": "tsx --env-file-if-exists=.env.local src/lib/pagespeed.test.ts",
     "test:livefallback": "tsx --env-file-if-exists=.env.local src/lib/liveFallback.test.ts",
-    "test:speedmetrics": "tsx --env-file-if-exists=.env.local src/lib/speedMetrics.test.ts"
+    "test:speedmetrics": "tsx --env-file-if-exists=.env.local src/lib/speedMetrics.test.ts",
+    "test:verdict": "tsx --env-file-if-exists=.env.local src/lib/verdict.test.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.79",

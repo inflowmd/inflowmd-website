@@ -18,6 +18,7 @@ import {
   type ResolvedCategory,
 } from "@/lib/categories";
 import { speedMetrics, type SpeedBand } from "@/lib/speedMetrics";
+import { buildVerdict, type Verdict, type VerdictTone } from "@/lib/verdict";
 import { missingSpeedFallbackReason } from "@/lib/liveFallback";
 
 /* ============================================================
@@ -397,26 +398,23 @@ function CheckList({ category }: { category: ResolvedCategory }) {
 const measuredOn = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-/**
- * The verdict — one sentence, readable across a booth aisle, driven entirely
- * by whether an AI assistant can tell what this practice IS.
- *
- * Deliberately silent when that check is anything other than a definite pass
- * or fail. `could_not_verify` means we could not read the page, and asserting
- * either verdict off an unread page is the one thing this engine must never
- * do — the same rule the scoring follows.
- *
- * The "more than half the practices at this conference" line is factual
- * against our own pre-warm: 30 of the 58 attending practices fail this check.
- */
-function VerdictBanner({ result }: { result: AuditResult }) {
-  const medical = [...result.seo, ...result.schema, ...result.aiReadiness].find(
-    (c) => c.id === "schema.medical"
-  );
-  if (!medical || (medical.status !== "fail" && medical.status !== "pass")) return null;
+/** Banner accent per verdict tone. */
+const VERDICT_TONE_COLOR: Record<VerdictTone, string> = {
+  critical: "#ff4e42",
+  weak: "#ffa400",
+  fine: ACCENT,
+};
 
-  const failed = medical.status === "fail";
-  const accent = failed ? "#ff4e42" : ACCENT;
+/**
+ * The verdict — one headline, readable across a booth aisle, chosen from all
+ * three category scores by the matrix in src/lib/verdict.ts.
+ *
+ * Silent when nothing could be verified: with no measured category there is
+ * no honest statement to make.
+ */
+function VerdictBanner({ verdict }: { verdict: Verdict | null }) {
+  if (!verdict) return null;
+  const accent = VERDICT_TONE_COLOR[verdict.tone];
   return (
     <div
       className="rounded-2xl border-2 p-6 sm:p-8 mb-8"
@@ -428,15 +426,9 @@ function VerdictBanner({ result }: { result: AuditResult }) {
       >
         Verdict
       </div>
-      <h2 className="text-2xl sm:text-4xl font-extrabold leading-tight">
-        {failed
-          ? "AI cannot identify this as a vein practice."
-          : "AI can identify this as a vein practice."}
-      </h2>
+      <h2 className="text-2xl sm:text-4xl font-extrabold leading-tight">{verdict.headline}</h2>
       <p className="text-white/70 text-base sm:text-xl mt-3 max-w-3xl leading-snug">
-        {failed
-          ? "No medical schema found. When a patient asks ChatGPT for a vein specialist, this site gives AI nothing to work with."
-          : "Medical schema found — that puts this site ahead of more than half the practices at this conference."}
+        {verdict.subline}
       </p>
     </div>
   );
@@ -1769,6 +1761,12 @@ export default function BoothClient({
     ResolvedCategory
   >;
   const perfScore = byKey.speed.score;
+  // Driven by all three category scores; unverified categories are excluded.
+  const verdict = buildVerdict({
+    ai: byKey.ai.score,
+    patientsFind: byKey.patientsFind.score,
+    speed: byKey.speed.score,
+  });
 
   return (
     <main className="min-h-screen text-white" style={{ background: BG }}>
@@ -1815,7 +1813,7 @@ export default function BoothClient({
             the single check that decides whether AI knows what this practice
             is. Silent when that check could not be verified: an unread page
             is not evidence for either claim. */}
-        <VerdictBanner result={result} />
+        <VerdictBanner verdict={verdict} />
 
         {/* The three categories, equal weight visually — each scrolls to its
             own findings section. Attribution is per-gauge: only the speed
