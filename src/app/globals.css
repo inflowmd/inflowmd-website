@@ -770,3 +770,179 @@ body {
     opacity: 1;
   }
 }
+
+/* ============================================================
+   Audit report — print / PDF.
+
+   The booth screen is dark navy by design; a printed page must not be.
+   This sheet flips the ground to white, forces dark text, drops every
+   interactive affordance, and reveals content the screen keeps collapsed.
+
+   Collapsed detail is rendered into the DOM and hidden with
+   `.booth-collapsed` rather than conditionally rendered, precisely so this
+   sheet can un-hide it — a stylesheet cannot reach markup that was never
+   rendered.
+   ============================================================ */
+
+.booth-print-only {
+  display: none;
+}
+
+/* Detail the screen keeps hidden. It stays in the DOM so the print sheet can
+   reveal it — see the note above. */
+.booth-collapsed {
+  display: none;
+}
+
+@media print {
+  /* --- ground: white paper, dark ink --- */
+  html,
+  body {
+    background: #fff !important;
+    color: #14181f !important;
+  }
+  main {
+    background: #fff !important;
+    min-height: 0 !important;
+  }
+
+  /* Tailwind's white text/borders/fills are tuned for the dark screen.
+     Rewrite them for paper, but leave inline colors alone — the score
+     numbers and status labels carry meaning in their color. */
+  [class*="text-white"] {
+    color: #14181f !important;
+  }
+  [class*="border-white"] {
+    border-color: #d5dae2 !important;
+  }
+  [class*="bg-white"],
+  [class*="bg-black"] {
+    background: transparent !important;
+  }
+
+  /* --- drop the decoration and the chrome --- */
+  .mesh-blob-1,
+  .mesh-blob-2,
+  .mesh-blob-3,
+  .booth-no-print,
+  .booth-screen-header,
+  nav,
+  button.booth-no-print {
+    display: none !important;
+  }
+  .booth-gauge-card {
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* --- reveal everything the screen collapses --- */
+  .booth-collapsed {
+    display: block !important;
+  }
+  .booth-collapsed.grid {
+    display: grid !important;
+  }
+
+  /* --- print-only furniture --- */
+  .booth-print-only {
+    display: block !important;
+  }
+  .booth-print-masthead {
+    display: flex !important;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    border-bottom: 2px solid #14181f;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+  .booth-print-masthead img {
+    width: 190px;
+    height: auto;
+  }
+  .booth-print-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+    font-size: 11pt;
+    line-height: 1.35;
+  }
+  .booth-print-meta strong {
+    font-size: 13pt;
+  }
+  .booth-print-footer {
+    margin-top: 18px;
+    padding-top: 10px;
+    border-top: 1px solid #d5dae2;
+    font-size: 9pt;
+    color: #55606f !important;
+  }
+
+  /* --- layout: one column, nothing clipped --- */
+  .booth-audit-report {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+  .grid {
+    display: block !important;
+  }
+  .booth-gauge-row {
+    display: flex !important;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .booth-gauge-row > * {
+    flex: 1 1 0;
+  }
+
+  /* Findings read better as a single column on paper. */
+  #findings-ai .grid,
+  #findings-patientsFind .grid,
+  #findings-speed .grid {
+    display: block !important;
+  }
+  #findings-ai .grid > *,
+  #findings-patientsFind .grid > *,
+  #findings-speed .grid > * {
+    margin-bottom: 6px;
+  }
+
+  /* --- pagination: keep a heading with its content --- */
+  h1,
+  h2,
+  h3 {
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
+  section,
+  .booth-print-break {
+    break-before: page;
+    page-break-before: always;
+  }
+  section:first-of-type {
+    break-before: auto;
+    page-break-before: auto;
+  }
+  /* A finding, a metric card or the verdict must never split across pages. */
+  #findings-ai > div > *,
+  #findings-patientsFind > div > *,
+  #findings-speed > div > *,
+  .booth-verdict,
+  .booth-model-summary {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  @page {
+    margin: 14mm 12mm;
+  }
+}
