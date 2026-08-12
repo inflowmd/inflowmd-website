@@ -5,7 +5,76 @@ pending. This file exists in case a session boundary hits mid-work; as of
 the last edit it did not — everything below already happened, in order,
 most recent first.
 
-## Latest: audit categories regrouped by question, weighted scoring
+## Latest: PageSpeed backoff + API key findings
+
+**Backoff.** `src/lib/pagespeed.ts` now retries server errors: wait 2s,
+retry; wait 5s, retry; then give up and return the honest partial. The
+retries share ONE deadline rather than multiplying the timeout — the 55s
+ceiling is unchanged and now bounds the whole sequence, with each attempt
+capped by whatever budget remains and a retry only starting when there's
+room for both the wait and a real attempt after it. This matters: the
+module's own history comment records that stacked full-length attempts are
+exactly what previously handed callers a dead connection instead of a
+report. Worst case the caller still waits 55s, never more.
+
+Deliberately NOT retried:
+- **timeouts** — a page slow enough to exhaust the budget will be slow
+  again, and proving it costs the caller the partial report it could have
+  had (pre-existing documented lesson, kept)
+- **4xx, including 429 quota rejections** — retrying a quota rejection only
+  makes it worse
+
+Retries log a warning with status/target/attempt, so the pattern shows up
+in pre-warm output and Vercel logs. Tests:
+`src/lib/pagespeed.test.ts` (`npm run test:pagespeed`), 10 checks with
+`fetch` stubbed and no network, including a pin on the real 2s/5s/55s
+values so the spec can't drift.
+
+**API key: dedicated at the app level — no separate key needed for
+isolation.** Verified via the Vercel API across all 16 projects in the
+account: only `inflowmd` defines `PAGESPEED_API_KEY`. A grep across all
+local repos confirms only the inflowmd codebase references it. So no
+sibling project is competing for the booth's quota.
+
+**But the quota is the real problem, and a new key alone won't fix it.**
+The daily quota was exhausted twice on 2026-08-11 after only roughly ~100
+calls total (58-site pre-warm + 20-site speed-gap run + ad-hoc
+diagnostics). PageSpeed Insights' documented default with an API key is
+25,000 queries/day, so ~100 calls should not come close. Either the Google
+Cloud project's PSI quota is set unusually low, or something outside this
+repo is consuming it. The quota is billed to **GCP project number
+583797351490** (from the error body). `gcloud` isn't installed on this
+machine, so the quota page for that project has to be checked by hand —
+that's the action item, ahead of minting a new key.
+
+Distinguishing the two failure modes, since they were being conflated:
+- **Quota**: HTTP 429, explicit `Quota exceeded for quota metric
+  'Queries' and limit 'Queries per day'` message, returns in well under a
+  second. Confirmed live during this work.
+- **Transient Lighthouse failure**: HTTP 500, `Lighthouse returned error:
+  Something went wrong`. These are what the backoff targets, and they
+  succeeded on a later attempt every time in the pre-warm — including 3
+  that needed the retry in the `--only-missing-speed` run.
+
+So the earlier hypothesis that the 11 "API error (500)" responses were
+rate-limiting does not hold: rate limiting presents as 429 with a quota
+message, not 500.
+
+**Open item worth deciding before the conference.** A quota-exhausted live
+audit does NOT trigger the booth's cache fallback, because the audit
+itself *succeeds* — it just comes back with `performance.available: false`.
+The fallback only fires on API/network failure. Net effect: if quota is
+out at the booth, a picker selection renders a report with no speed score
+instead of the cached report that has one. Fixing that means treating "live
+result came back with no speed data, but we hold a cached result that has
+it" as a fallback condition. That's a behavior change to the live-first
+rules, so it's flagged rather than assumed.
+
+Deployed: `npx vercel --prod --yes` → `https://www.inflowmd.com`
+(readyState READY, aliased, `/audit` 200). Merged: `claude/musing-kepler`
+→ `main` (merge commit `cd74d32`), pushed to `origin/main`.
+
+## Earlier: audit categories regrouped by question, weighted scoring
 
 The old four categories grouped checks by technical family, which let the
 booth contradict itself out loud: "Medical practice identification" could
