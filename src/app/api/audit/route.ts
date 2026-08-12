@@ -3,6 +3,7 @@ import { normalizeUrl, runAudit } from "@/lib/runAudit";
 import { getCached } from "@/lib/cache";
 import { assertSafeUrl } from "@/lib/ssrfGuard";
 import { clientIp, rateLimit } from "@/lib/rateLimit";
+import { UNAUTHENTICATED_WARNING, resolveApiKey } from "@/lib/pagespeed";
 
 /**
  * 150s ceiling. PageSpeed alone can take the better part of a minute on a
@@ -76,6 +77,14 @@ export async function POST(request: Request) {
   const verdict = await assertSafeUrl(url);
   if (!verdict.ok) {
     return NextResponse.json(REFUSED, { status: 400, headers: { "Cache-Control": "no-store" } });
+  }
+
+  // Surfaced here as well as at the call site: if the Vercel environment
+  // variable ever goes missing, this is the line that says so in production
+  // logs instead of the route quietly degrading to anonymous quota. Checked
+  // only on the live path — a cache hit never touches PageSpeed.
+  if (!resolveApiKey()) {
+    console.error(`${UNAUTHENTICATED_WARNING} Route: /api/audit, target: ${url}`);
   }
 
   const result = await runAudit(url);

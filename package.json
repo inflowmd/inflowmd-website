@@ -8,14 +8,14 @@
     "start": "next start",
     "lint": "eslint",
     "prewarm": "tsx --env-file-if-exists=.env.local scripts/prewarm.ts",
-    "summarize": "tsx scripts/summarize.ts",
-    "test:model": "tsx src/lib/conversionModel.test.ts",
-    "test:security": "tsx src/lib/ssrfGuard.test.ts",
-    "test:attendees": "tsx src/lib/attendees.test.ts",
+    "summarize": "tsx --env-file-if-exists=.env.local scripts/summarize.ts",
+    "test:model": "tsx --env-file-if-exists=.env.local src/lib/conversionModel.test.ts",
+    "test:security": "tsx --env-file-if-exists=.env.local src/lib/ssrfGuard.test.ts",
+    "test:attendees": "tsx --env-file-if-exists=.env.local src/lib/attendees.test.ts",
     "test": "npm run test:model && npm run test:security && npm run test:attendees && npm run test:categories && npm run test:pagespeed && npm run test:livefallback",
-    "test:categories": "tsx src/lib/categories.test.ts",
-    "test:pagespeed": "tsx src/lib/pagespeed.test.ts",
-    "test:livefallback": "tsx src/lib/liveFallback.test.ts"
+    "test:categories": "tsx --env-file-if-exists=.env.local src/lib/categories.test.ts",
+    "test:pagespeed": "tsx --env-file-if-exists=.env.local src/lib/pagespeed.test.ts",
+    "test:livefallback": "tsx --env-file-if-exists=.env.local src/lib/liveFallback.test.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.79",
