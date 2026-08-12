@@ -1078,7 +1078,11 @@ export default function BoothClient({
       clearTimers();
       setError(null);
       setRunFailed(false);
-      setResult({ ...cached, practiceName: displayName ?? cached.practiceName });
+      // fromCache must be true here regardless of what the embedded JSON says:
+      // the build-time import carries the flag as written by the pre-warm
+      // (false, because it was live AT THAT TIME). Without this the header
+      // reads "Measured just now" over a measurement that is days old.
+      setResult({ ...cached, fromCache: true, practiceName: displayName ?? cached.practiceName });
       setRevealed(999);
       setShowMath(false);
       setCtaFlipped(false);
@@ -1305,7 +1309,14 @@ export default function BoothClient({
         return;
       }
 
-      if (networkMode === "cache-first") {
+      // Consult the browser directly, not just the state. `networkMode` starts
+      // "live" so the server and first client render agree, and an effect flips
+      // it — which leaves a brief window after load where the state still says
+      // "live" on a machine that is plainly offline. A click landing in that
+      // window would fire a doomed live audit instead of serving the cache, so
+      // the decision reads navigator.onLine at the moment it is made.
+      const offlineNow = typeof navigator !== "undefined" && navigator.onLine === false;
+      if (networkMode === "cache-first" || offlineNow) {
         const cached = cacheByUrl.get(cacheKey(normalized));
         if (cached) {
           renderCachedResult(cached, a.name, false);

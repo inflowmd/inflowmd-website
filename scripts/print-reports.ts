@@ -92,13 +92,18 @@ async function printOne(
 ): Promise<{ ok: boolean; file?: string; reason?: string }> {
   const name = result.practiceName ?? result.url.replace(/^https?:\/\//, "");
   const counter = `[${String(index + 1).padStart(String(total).length)}/${total}]`;
-  const page = await browser.newPage({ viewport: { width: 1280, height: 1600 } });
+
+  // A CONTEXT per practice, closed in finally. browser.newPage() implicitly
+  // opens a context, and closing only the page leaves it behind — 58 of those
+  // starve the browser and time out clicks that work fine in isolation.
+  const context = await browser.newContext({ viewport: { width: 1280, height: 1600 } });
+  // Cache-first: instant render, zero PageSpeed calls.
+  await context.addInitScript(() => {
+    Object.defineProperty(window.navigator, "onLine", { get: () => false, configurable: true });
+  });
+  const page = await context.newPage();
 
   try {
-    // Cache-first: instant render, zero PageSpeed calls.
-    await page.addInitScript(() => {
-      Object.defineProperty(window.navigator, "onLine", { get: () => false, configurable: true });
-    });
     await page.goto(`${BASE_URL}/audit`, { waitUntil: "networkidle", timeout: 45_000 });
 
     let opened = false;
@@ -107,6 +112,7 @@ async function printOne(
         await page.goto(`${BASE_URL}/audit`, { waitUntil: "networkidle", timeout: 45_000 });
       }
       if (!(await selectPractice(page, name))) {
+        console.log(`${counter} ${name} … FAILED — no matching row in the picker`);
         return { ok: false, reason: "no matching row in the picker" };
       }
       // The result screen is up once the findings anchor exists.
@@ -115,7 +121,17 @@ async function printOne(
         .then(() => true)
         .catch(() => false);
     }
-    if (!opened) return { ok: false, reason: "result screen never rendered after 3 attempts" };
+    if (!opened) {
+      // Dump what the page actually shows — a silent timeout tells us nothing.
+      const state = await page
+        .locator("main")
+        .innerText()
+        .then((t) => t.replace(/\s+/g, " ").slice(0, 160))
+        .catch(() => "(could not read page)");
+      console.log(`${counter} ${name} … FAILED — result screen never rendered`);
+      console.log(`         page shows: ${state}`);
+      return { ok: false, reason: `result screen never rendered — page showed: ${state}` };
+    }
     await page.waitForTimeout(400);
 
     const heading = (await page.locator("h1").first().innerText()).trim();
@@ -136,7 +152,7 @@ async function printOne(
     console.log(`${counter} ${name} … FAILED — ${reason}`);
     return { ok: false, reason };
   } finally {
-    await page.close();
+    await context.close();
   }
 }
 
