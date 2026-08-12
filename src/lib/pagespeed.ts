@@ -35,6 +35,16 @@ export const RETRY_DELAYS_MS = [2_000, 5_000];
 /** Below this much remaining budget, starting another attempt is pointless. */
 const MIN_ATTEMPT_MS = 3_000;
 
+/**
+ * Said the same way everywhere a keyless call is detected, so the fix is
+ * obvious wherever it surfaces — pre-warm output, Vercel logs, a local run.
+ */
+export const UNAUTHENTICATED_WARNING =
+  "[PAGESPEED] PAGESPEED_API_KEY is missing or a placeholder — calling PageSpeed " +
+  "ANONYMOUSLY. Anonymous calls share Google's small public quota and will exhaust " +
+  "it fast. Set PAGESPEED_API_KEY (locally in .env.local, on Vercel in the project's " +
+  "environment variables) before running audits.";
+
 function emptyResult(error?: string): PerformanceResult {
   return {
     available: false,
@@ -81,8 +91,12 @@ function sleep(ms: number): Promise<void> {
  * The API works unauthenticated at a low quota. Sending a placeholder value
  * from a checked-in .env would hard-fail every request with "API key not
  * valid", so we treat obvious placeholders as absent.
+ *
+ * Exported so the API route and the pre-warm script can test for a usable key
+ * against this exact definition rather than re-implementing the placeholder
+ * rule and drifting from it.
  */
-function resolveApiKey(): string | null {
+export function resolveApiKey(): string | null {
   const key = process.env.PAGESPEED_API_KEY?.trim();
   if (!key) return null;
   if (/^(your_|placeholder|changeme|xxx|<)/i.test(key)) return null;
@@ -99,7 +113,17 @@ async function requestOnce(
     category: "performance",
   });
   const key = resolveApiKey();
-  if (key) params.set("key", key);
+  if (key) {
+    params.set("key", key);
+  } else {
+    // Unauthenticated calls do not fail — they quietly land in Google's shared
+    // public quota, which is small and shared with every other keyless caller
+    // on the internet. That is how ~100 of our own calls exhausted a "per day"
+    // limit. A missing key must never be silent again.
+    console.warn(
+      `${UNAUTHENTICATED_WARNING} Target: ${url}`
+    );
+  }
 
   const res = await fetch(`${ENDPOINT}?${params.toString()}`, {
     signal,

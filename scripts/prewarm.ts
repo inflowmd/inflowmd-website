@@ -21,6 +21,7 @@ import type { AuditResult } from "../src/types/audit";
 import { normalizeUrl, runAudit } from "../src/lib/runAudit";
 import { cacheKey, writeCache } from "../src/lib/cache";
 import { withDerivedScores } from "../src/lib/categories";
+import { resolveApiKey } from "../src/lib/pagespeed";
 import { describePlatform } from "../src/lib/platform";
 
 /** PSI is rate-limited; the batch is small enough that speed is irrelevant. */
@@ -208,6 +209,27 @@ async function auditWithAnomalyCheck(
 }
 
 async function main(): Promise<void> {
+  // HARD REQUIREMENT, checked before anything else runs.
+  //
+  // A keyless batch is the worst possible way to discover a missing key: this
+  // script makes one PageSpeed call per site, so a full run would fire ~58
+  // anonymous requests into Google's small shared public quota and burn it —
+  // potentially the morning of the conference. There is no scenario where
+  // running this unauthenticated is the right outcome, so it refuses rather
+  // than degrading.
+  if (!resolveApiKey()) {
+    console.error(
+      "\nREFUSING TO RUN — PAGESPEED_API_KEY is missing or is a placeholder.\n\n" +
+        "  This script makes one PageSpeed call per site. Without a key those calls go\n" +
+        "  out anonymously into Google's small shared public quota and will exhaust it,\n" +
+        "  taking the booth's live audits down with them.\n\n" +
+        "  Fix: put a real key in .env.local as\n" +
+        "      PAGESPEED_API_KEY=...\n" +
+        "  and run `npm run prewarm` again (the script loads .env.local itself).\n"
+    );
+    process.exit(1);
+  }
+
   const attendeesPath = path.resolve(process.cwd(), "data/hps-practices.json");
 
   let attendees: Attendee[];

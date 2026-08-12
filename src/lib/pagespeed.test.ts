@@ -38,10 +38,16 @@ const OK_BODY = {
 type Reply = { status: number; body?: unknown } | { throws: Error };
 
 /** Installs a fetch stub that replies from `queue`, in order. */
-function stubFetch(queue: Reply[]): { calls: () => number; restore: () => void } {
+function stubFetch(queue: Reply[]): {
+  calls: () => number;
+  urls: () => string[];
+  restore: () => void;
+} {
   const original = globalThis.fetch;
   let calls = 0;
-  globalThis.fetch = (async () => {
+  const urls: string[] = [];
+  globalThis.fetch = (async (input: unknown) => {
+    urls.push(String(input));
     const reply = queue[Math.min(calls, queue.length - 1)];
     calls++;
     if ("throws" in reply) throw reply.throws;
@@ -52,10 +58,33 @@ function stubFetch(queue: Reply[]): { calls: () => number; restore: () => void }
   }) as typeof fetch;
   return {
     calls: () => calls,
+    urls: () => urls,
     restore: () => {
       globalThis.fetch = original;
     },
   };
+}
+
+/** Runs `fn` with a specific key value (or none), capturing console.warn. */
+async function withKey(
+  key: string | undefined,
+  fn: (warnings: string[]) => Promise<void>
+): Promise<void> {
+  const savedKey = process.env.PAGESPEED_API_KEY;
+  const savedWarn = console.warn;
+  const warnings: string[] = [];
+  if (key === undefined) delete process.env.PAGESPEED_API_KEY;
+  else process.env.PAGESPEED_API_KEY = key;
+  console.warn = (...args: unknown[]) => {
+    warnings.push(args.map(String).join(" "));
+  };
+  try {
+    await fn(warnings);
+  } finally {
+    console.warn = savedWarn;
+    if (savedKey === undefined) delete process.env.PAGESPEED_API_KEY;
+    else process.env.PAGESPEED_API_KEY = savedKey;
+  }
 }
 
 /** Fast backoff so the suite doesn't burn the real 2s + 5s. */
@@ -193,6 +222,78 @@ async function main(): Promise<void> {
     } finally {
       stub.restore();
     }
+  });
+
+  /* ---------- authentication: a keyless call must never be silent ---------- */
+
+  await check("an authenticated call attaches the key and warns about nothing", async () => {
+    await withKey("AIzaSyTestKeyNotReal", async (warnings) => {
+      const stub = stubFetch([{ status: 200, body: OK_BODY }]);
+      try {
+        const result = await runPageSpeed("https://example.com", FAST);
+        assert.equal(result.available, true);
+        assert.ok(
+          stub.urls()[0].includes("key=AIzaSyTestKeyNotReal"),
+          `the key must actually reach the query string: ${stub.urls()[0]}`
+        );
+        assert.equal(
+          warnings.filter((w) => w.includes("PAGESPEED_API_KEY")).length,
+          0,
+          "a healthy authenticated call must be silent"
+        );
+      } finally {
+        stub.restore();
+      }
+    });
+  });
+
+  await check("a MISSING key warns loudly and says exactly how to fix it", async () => {
+    await withKey(undefined, async (warnings) => {
+      const stub = stubFetch([{ status: 200, body: OK_BODY }]);
+      try {
+        await runPageSpeed("https://example.com", FAST);
+        assert.ok(!stub.urls()[0].includes("key="), "no key should be sent");
+        const warned = warnings.filter((w) => w.includes("PAGESPEED_API_KEY is missing"));
+        assert.equal(warned.length, 1, `expected one loud warning, got ${warnings.length}`);
+        assert.match(warned[0], /ANONYMOUSLY/, "must name the actual behavior");
+        assert.match(warned[0], /quota/i, "must explain the consequence");
+        assert.match(warned[0], /\.env\.local/, "must say how to fix it locally");
+        assert.match(warned[0], /Vercel/, "must say how to fix it in production");
+        assert.match(warned[0], /example\.com/, "must name the target that went out keyless");
+      } finally {
+        stub.restore();
+      }
+    });
+  });
+
+  await check("a PLACEHOLDER key counts as missing and warns", async () => {
+    await withKey("your_key_here", async (warnings) => {
+      const stub = stubFetch([{ status: 200, body: OK_BODY }]);
+      try {
+        await runPageSpeed("https://example.com", FAST);
+        assert.ok(!stub.urls()[0].includes("key="), "a placeholder must not be sent");
+        assert.ok(warnings.some((w) => w.includes("PAGESPEED_API_KEY is missing")));
+      } finally {
+        stub.restore();
+      }
+    });
+  });
+
+  await check("every retry of a keyless call warns — the noise is the point", async () => {
+    await withKey(undefined, async (warnings) => {
+      const stub = stubFetch([{ status: 500 }]);
+      try {
+        await runPageSpeed("https://example.com", FAST);
+        assert.equal(stub.calls(), 3);
+        assert.equal(
+          warnings.filter((w) => w.includes("PAGESPEED_API_KEY is missing")).length,
+          3,
+          "a keyless batch should be impossible to miss in the logs"
+        );
+      } finally {
+        stub.restore();
+      }
+    });
   });
 
   console.log(`\n${passed} pagespeed checks passed.`);
