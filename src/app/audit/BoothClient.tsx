@@ -246,8 +246,16 @@ function impactLine(item: CategoryItem): string {
 }
 
 /** One findings row — collapsed exactly as before, expandable for the why. */
-function FindingRow({ check, impact }: { check: Check; impact?: CategoryItem }) {
-  const [open, setOpen] = useState(false);
+function FindingRow({
+  check,
+  impact,
+  defaultOpen = false,
+}: {
+  check: Check;
+  impact?: CategoryItem;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
   const st = STATUS_STYLE[check.status];
   const explanation = CHECK_EXPLANATIONS[check.id];
   return (
@@ -311,19 +319,137 @@ function FindingRow({ check, impact }: { check: Check; impact?: CategoryItem }) 
 }
 
 /**
+ * A category's checks, split by what the doctor needs to see.
+ *
+ * Anything costing points is shown expanded — that is the evidence for the
+ * score, and it should not take a click to read. Passing checks collapse
+ * behind a count so the section stays short without hiding anything.
+ *
+ * could_not_verify sits with the visible rows rather than under "passing":
+ * it is not a pass, and filing it there would quietly overstate the site.
+ * It stays collapsed, because there is nothing to act on yet.
+ */
+function CheckList({ category }: { category: ResolvedCategory }) {
+  const [showPassing, setShowPassing] = useState(false);
+  const passing = category.items.filter((i) => i.check.status === "pass");
+  const rest = category.items.filter((i) => i.check.status !== "pass");
+
+  return (
+    <>
+      {rest.length > 0 && (
+        <div className="grid sm:grid-cols-2 gap-2">
+          {rest.map((item) => (
+            <FindingRow
+              key={item.check.id}
+              check={item.check}
+              impact={category.weighted ? item : undefined}
+              defaultOpen={item.check.status === "fail" || item.check.status === "warn"}
+            />
+          ))}
+        </div>
+      )}
+
+      {rest.length === 0 && (
+        <p className="text-white/50 text-sm mb-2">Everything we could check here passed.</p>
+      )}
+
+      {passing.length > 0 && (
+        <div className={rest.length > 0 ? "mt-3" : ""}>
+          <button
+            type="button"
+            onClick={() => setShowPassing((v) => !v)}
+            aria-expanded={showPassing}
+            className="inline-flex items-center gap-2 rounded-lg border border-white/12 px-4 py-2 text-sm font-bold text-white/60 hover:text-white hover:border-white/30 transition-colors"
+            style={{ minHeight: 44 }}
+          >
+            {passing.length} passing check{passing.length === 1 ? "" : "s"}
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`w-4 h-4 transition-transform ${showPassing ? "rotate-180" : ""}`}
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+          {showPassing && (
+            <div className="grid sm:grid-cols-2 gap-2 mt-2">
+              {passing.map((item) => (
+                <FindingRow
+                  key={item.check.id}
+                  check={item.check}
+                  impact={category.weighted ? item : undefined}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+/** Short date for the speed gauge's attribution line. */
+const measuredOn = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+/**
+ * The verdict — one sentence, readable across a booth aisle, driven entirely
+ * by whether an AI assistant can tell what this practice IS.
+ *
+ * Deliberately silent when that check is anything other than a definite pass
+ * or fail. `could_not_verify` means we could not read the page, and asserting
+ * either verdict off an unread page is the one thing this engine must never
+ * do — the same rule the scoring follows.
+ *
+ * The "more than half the practices at this conference" line is factual
+ * against our own pre-warm: 30 of the 58 attending practices fail this check.
+ */
+function VerdictBanner({ result }: { result: AuditResult }) {
+  const medical = [...result.seo, ...result.schema, ...result.aiReadiness].find(
+    (c) => c.id === "schema.medical"
+  );
+  if (!medical || (medical.status !== "fail" && medical.status !== "pass")) return null;
+
+  const failed = medical.status === "fail";
+  const accent = failed ? "#ff4e42" : ACCENT;
+  return (
+    <div
+      className="rounded-2xl border-2 p-6 sm:p-8 mb-8"
+      style={{ borderColor: `${accent}66`, background: `${accent}14` }}
+    >
+      <div
+        className="text-[11px] font-bold tracking-[0.22em] uppercase mb-2"
+        style={{ color: accent }}
+      >
+        Verdict
+      </div>
+      <h2 className="text-2xl sm:text-4xl font-extrabold leading-tight">
+        {failed
+          ? "AI cannot identify this as a vein practice."
+          : "AI can identify this as a vein practice."}
+      </h2>
+      <p className="text-white/70 text-base sm:text-xl mt-3 max-w-3xl leading-snug">
+        {failed
+          ? "No medical schema found. When a patient asks ChatGPT for a vein specialist, this site gives AI nothing to work with."
+          : "Medical schema found — that puts this site ahead of more than half the practices at this conference."}
+      </p>
+    </div>
+  );
+}
+
+/**
  * The speed section's body: the patient-wait sentence the model already
  * produces, then the Lighthouse metrics behind the score with Google's own
  * thresholds. These are Google's numbers, not our checks — no weights, no
  * point costs, and a metric we do not have a value for is omitted rather
  * than rendered as a hole.
  */
-function SpeedSection({
-  performance,
-  model,
-}: {
-  performance: AuditResult["performance"];
-  model: { headline: string } | null;
-}) {
+function SpeedSection({ performance }: { performance: AuditResult["performance"] }) {
   const metrics = speedMetrics(performance);
 
   if (!performance.available) {
@@ -338,9 +464,10 @@ function SpeedSection({
 
   return (
     <div>
-      {model && (
+      {performance.lcp !== null && (
         <p className="text-white/80 text-base sm:text-lg font-semibold leading-snug mb-4">
-          {model.headline}
+          On a typical phone connection, a patient waits {performance.lcp} seconds for the main
+          content to appear.
         </p>
       )}
       <div className="grid sm:grid-cols-2 gap-2">
@@ -1684,54 +1811,69 @@ export default function BoothClient({
           />
         )}
 
-        {/* HERO — the Lighthouse performance score, PSI-style */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="mb-4">
-            <ProvenanceTag provenance="measured" />
-          </div>
-          <Gauge
-            score={perfScore}
-            size={240}
-            valueClass="text-7xl sm:text-8xl"
-          />
-          <div className="text-sm text-white/40 mt-4">
-            Google PageSpeed Insights · measured{" "}
-            {new Date(result.fetchedAt).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </div>
-          {perfScore === null && (
-            <p className="text-white/45 mt-2 max-w-xl text-center text-sm">
-              {result.performance.error ??
-                "The performance test did not return a result."}
-            </p>
-          )}
-        </div>
+        {/* VERDICT — the one sentence a doctor should leave with, driven by
+            the single check that decides whether AI knows what this practice
+            is. Silent when that check could not be verified: an unread page
+            is not evidence for either claim. */}
+        <VerdictBanner result={result} />
 
-        {/* The three categories. AI leads and is rendered larger — it is the
-            headline. Each gauge scrolls to its own findings section, and
-            attribution is per-gauge: only the Lighthouse score is Google's. */}
-        <div className="grid grid-cols-1 sm:grid-cols-[1.4fr_1fr_1fr] gap-4 mb-8 items-start">
+        {/* The three categories, equal weight visually — each scrolls to its
+            own findings section. Attribution is per-gauge: only the speed
+            number is Google's. */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 items-start">
           {categories.map((c) => (
             <button
               key={c.key}
               type="button"
               onClick={() => scrollToSection(c.key)}
-              className="rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-[#84B83B]/40 transition-colors py-4 px-2"
+              className="rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-[#84B83B]/40 transition-colors py-5 px-2"
               aria-label={`${c.label} — jump to findings`}
             >
               <Gauge
                 label={c.label}
                 score={c.score}
-                size={c.key === "ai" ? 150 : 110}
-                valueClass={c.key === "ai" ? "text-4xl" : "text-3xl"}
+                size={140}
+                valueClass="text-4xl"
                 {...(c.key === "speed" ? {} : { verified: c.verified, total: c.total })}
-                source={SOURCE_LABEL[c.source]}
+                source={
+                  c.key === "speed"
+                    ? `${SOURCE_LABEL[c.source]} · measured ${measuredOn(result.fetchedAt)}`
+                    : SOURCE_LABEL[c.source]
+                }
               />
             </button>
           ))}
+        </div>
+
+        {/* Three sections, one per category, in gauge order. Within each,
+            checks are ordered by what they actually cost — biggest point
+            losses first, passes last — so the top of a section is the work
+            list. could_not_verify stays neutral, never styled as failure. */}
+        <div className="mt-10">
+          <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-3">
+            What we checked
+          </div>
+          <div className="space-y-8">
+            {categories.map((c) => (
+              <section key={c.key} id={sectionId(c.key)} className="scroll-mt-6">
+                <div className="flex items-baseline justify-between gap-3 mb-3 border-b border-white/10 pb-2">
+                  <h3 className="text-lg sm:text-xl font-extrabold text-white/90">{c.label}</h3>
+                  <span
+                    className="text-lg font-extrabold tabular-nums shrink-0"
+                    style={{ color: gaugeColor(c.score) }}
+                  >
+                    {c.score === null ? "—" : c.score}
+                  </span>
+                </div>
+
+                {c.key === "speed" ? (
+                  <SpeedSection performance={result.performance} />
+                ) : (
+                  <CheckList category={c} />
+                )}
+              </section>
+            ))}
+          </div>
         </div>
 
         {/* WHAT WE'D FIX — direction, not proposal. <70 qualifies, worst first. */}
@@ -1776,7 +1918,7 @@ export default function BoothClient({
             .slice(0, 4);
           if (fixes.length === 0) return null;
           return (
-            <div className="mb-8">
+            <div className="mt-10 mb-8">
               <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-3">
                 What we&rsquo;d fix
               </div>
@@ -1796,38 +1938,6 @@ export default function BoothClient({
             </div>
           );
         })()}
-
-        {/* LCP — demoted to a labeled, defined metric row */}
-        {result.performance.lcp !== null ? (
-          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 mb-10">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <div className="text-white/60 text-sm sm:text-base">
-                  Largest Contentful Paint
-                </div>
-                <div className="text-2xl sm:text-3xl font-extrabold mt-0.5">
-                  {result.performance.lcp}s{" "}
-                  <span className="text-white/50 text-base sm:text-lg font-semibold">
-                    on a simulated mobile connection
-                  </span>
-                </div>
-                <p className="text-white/45 text-sm mt-2 max-w-2xl leading-snug">
-                  This is how long the main content takes to appear for a patient on a
-                  typical phone network — not on office wifi.
-                </p>
-              </div>
-              <ProvenanceTag provenance="measured" />
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-xl border border-dashed border-white/25 bg-white/[0.03] p-5 mb-10">
-            <div className="text-lg font-extrabold text-white/70">Speed not measured</div>
-            <p className="text-white/45 mt-1 max-w-2xl text-sm">
-              {result.performance.error ??
-                "The performance test did not return a result, so the speed model is unavailable."}
-            </p>
-          </div>
-        )}
 
         {/* conversion model */}
         {model ? (
@@ -1966,45 +2076,6 @@ export default function BoothClient({
               onRan={() => setComparisonRan(true)}
             />
           )}
-
-        {/* Three sections, one per category, in gauge order. Within each,
-            checks are ordered by what they actually cost — biggest point
-            losses first, passes last — so the top of a section is the work
-            list. could_not_verify stays neutral, never styled as failure. */}
-        <div className="mt-10">
-          <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-3">
-            What we checked
-          </div>
-          <div className="space-y-8">
-            {categories.map((c) => (
-              <section key={c.key} id={sectionId(c.key)} className="scroll-mt-6">
-                <div className="flex items-baseline justify-between gap-3 mb-3 border-b border-white/10 pb-2">
-                  <h3 className="text-lg sm:text-xl font-extrabold text-white/90">{c.label}</h3>
-                  <span
-                    className="text-lg font-extrabold tabular-nums shrink-0"
-                    style={{ color: gaugeColor(c.score) }}
-                  >
-                    {c.score === null ? "—" : c.score}
-                  </span>
-                </div>
-
-                {c.key === "speed" ? (
-                  <SpeedSection performance={result.performance} model={model} />
-                ) : (
-                  <div className="grid sm:grid-cols-2 gap-2">
-                    {c.items.map((item) => (
-                      <FindingRow
-                        key={item.check.id}
-                        check={item.check}
-                        impact={c.weighted ? item : undefined}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
-            ))}
-          </div>
-        </div>
 
         {/* CLOSING CTA — the conversation, not a form */}
         <div
