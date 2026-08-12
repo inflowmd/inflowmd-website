@@ -5,7 +5,68 @@ pending. This file exists in case a session boundary hits mid-work; as of
 the last edit it did not — everything below already happened, in order,
 most recent first.
 
-## Latest: PSI authentication hardening (fixes the anonymous-call quota leak)
+## Latest: one weighted AI category (no ceilings) + findings reorganized
+
+**Scoring.** The two AI categories merged into **"Is your website optimized
+for AI?"**, and both hard ceilings are gone — weighting does that work now,
+and does it better. The ceiling produced a near-binary distribution: of the
+58 cached practices, 30 sat at exactly 40 with nothing between 50 and 69.
+The same practices now spread **22–99 (median 67)** because medical
+identification carries 30 of 100 points rather than tripping a cap.
+
+Weights out of 100: medical identification 30, machine-readable details 18,
+content depth 10, page structure 10, local listing 8, organization 6,
+heading structure 6, AI assistant access 4, FAQ 4, robots.txt 2, llms.txt 2.
+**Redirect chain moved out of AI entirely** (it's a patient wait, not an
+AI-comprehension signal) and lives only in "Can patients find you?", which
+is now 9 checks. Scoring otherwise unchanged: pass 1.0 / needs-work 0.5 /
+fail 0, `could_not_verify` excluded with remaining weights rescaling.
+
+**New weight-based floor on the AI category**: below **70% of category
+weight verified**, no score. The old head-count floor let a practice publish
+100 while the decisive 30-point check went unread — Vanish Advanced Vein
+Treatment did exactly that. Three practices now correctly report no score
+(Vanish, Integrative Cardiology, University Medicine — all with
+`schema.medical` unverified). Other categories keep the 3-check floor.
+
+Useful bound to know for the booth: a practice that **fails** medical
+identification can never exceed **70**, even with everything else perfect —
+the weighting enforces what the ceiling used to. No real practice reaches
+it; the highest failing practice in the cache is 69.
+
+**Findings.** One flat list became **three sections**, one per category, in
+gauge order, all visible. Within a section, checks are ordered by what they
+cost — biggest point losses first, unverified next, passes last — so the top
+of a section is the work list. The AI section shows the arithmetic per row
+("30 of 30 points lost", "4 of 4 points earned"); unweighted categories keep
+their existing display.
+
+**The speed section is no longer empty.** It leads with the patient-wait
+sentence and lists the Lighthouse metrics behind the score — LCP, FCP, TBT,
+CLS, Speed Index — each with value, band, and Google's own published
+threshold (`src/lib/speedMetrics.ts`). **FCP was not previously parsed**; it
+is now, so live audits carry it. Results cached before this show four
+metrics rather than a hole — a re-warm backfills the fifth.
+
+Gauges are tappable and smooth-scroll to their section (honoring
+prefers-reduced-motion); AI leads and renders larger.
+
+Cached scores were normalized onto the new model by pure recomputation —
+every measurement and timestamp byte-identical, asserted during the rewrite.
+
+**Tests**: `categories.test.ts` rewritten (22 checks) — ceiling tests
+removed; added the weight floor at its exact boundary, the
+100-with-unverified-medical bug, the 70-point bound, that failing practices
+spread rather than stack, and findings ordering by point impact. New
+`speedMetrics.test.ts` (7 checks) pins Google's thresholds and omission of
+missing metrics. Full suite: **99 checks across 7 files**, plus a browser
+pass over the live site.
+
+Deployed: `https://www.inflowmd.com` (READY, aliased; verified in-browser on
+production — new labels, point costs, speed metrics, 3 tappable gauges).
+Merged: merge commit `d35af7a` on `origin/main`.
+
+## Earlier: PSI authentication hardening (fixes the anonymous-call quota leak)
 
 Google Cloud showed PSI traffic split between the named key
 (`pagespeed-audit-key`, 248 requests) and **Anonymous**. Anonymous calls
