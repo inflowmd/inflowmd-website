@@ -48,6 +48,14 @@ function slugify(name: string): string {
  * substring match on its own would silently print the wrong practice.
  */
 async function selectPractice(page: Page, name: string): Promise<boolean> {
+  // Wait for the booth to actually BE in cache-first mode before touching it.
+  // The corner dot only renders once the offline effect has applied, so it is
+  // proof — not a guess — that a click will read the cache instead of firing a
+  // live audit. Without this the run is a race: a click that lands too early
+  // starts a real PageSpeed audit, which is slow, burns quota, and was the
+  // cause of every "result screen never rendered" failure in earlier runs.
+  await page.waitForSelector('[title*="Network unreachable"]', { timeout: 20_000 });
+
   const search = page.locator('input[aria-label="Search practices"]');
   await search.fill(name);
 
@@ -98,10 +106,24 @@ async function printOne(
   // starve the browser and time out clicks that work fine in isolation.
   const context = await browser.newContext({ viewport: { width: 1280, height: 1600 } });
   // Cache-first: instant render, zero PageSpeed calls.
-  await context.addInitScript(() => {
-    Object.defineProperty(window.navigator, "onLine", { get: () => false, configurable: true });
+  //
+  // Passed as a STRING, not a function, and that detail is load-bearing.
+  // Playwright serializes a function argument with toString(), but this file
+  // is TypeScript run through tsx/esbuild, which instruments functions with
+  // its own helper wrappers. The serialized body then referenced a helper the
+  // page had never heard of, the init script threw before it ran, and
+  // navigator.onLine stayed true — so every practice quietly ran a LIVE audit
+  // instead of reading the cache. A string is handed to the page verbatim.
+  await context.addInitScript({
+    content:
+      'Object.defineProperty(window.navigator, "onLine", { get: function () { return false; }, configurable: true });',
   });
   const page = await context.newPage();
+
+  const livePosts: string[] = [];
+  page.on("request", (r) => {
+    if (r.url().includes("/api/audit") && r.method() === "POST") livePosts.push(r.url());
+  });
 
   try {
     await page.goto(`${BASE_URL}/audit`, { waitUntil: "networkidle", timeout: 45_000 });
@@ -145,7 +167,8 @@ async function printOne(
       printBackground: true,
       margin: { top: "14mm", bottom: "14mm", left: "12mm", right: "12mm" },
     });
-    console.log(`${counter} ${name} … ${path.basename(file)}${mismatch}`);
+    const liveNote = livePosts.length > 0 ? ` [WARNING: ${livePosts.length} live audit(s) fired]` : "";
+    console.log(`${counter} ${name} … ${path.basename(file)}${mismatch}${liveNote}`);
     return { ok: true, file };
   } catch (err) {
     const reason = err instanceof Error ? err.message.split("\n")[0] : "unknown error";
