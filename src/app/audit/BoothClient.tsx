@@ -12,6 +12,7 @@ import { normalizeUrl } from "@/lib/normalizeUrl";
 import { cacheKey } from "@/lib/cache";
 import { attendeeMatches, hasNoWebsite, letterOf, type Attendee } from "@/lib/attendees";
 import { buildCategories, type ResolvedCategory } from "@/lib/categories";
+import { missingSpeedFallbackReason } from "@/lib/liveFallback";
 
 /* ============================================================
    Booth audit UI.
@@ -943,11 +944,30 @@ export default function BoothClient({
         if (displayNameOverride) data.practiceName = displayNameOverride;
         clearTimers();
 
+        // A run can come back 200-and-useless: PageSpeed's daily quota runs
+        // out and the audit succeeds carrying no speed number. Nothing
+        // "failed", so the transport-level fallbacks above never fire — but
+        // a cached result with a real measurement is strictly better than a
+        // blank speed gauge, so swap to it silently. Same treatment as any
+        // other fallback: no error state, just the pre-run note and a log.
+        const cachedForCompare =
+          cacheByUrl.get(cacheKey(data.url)) ?? cacheByUrl.get(cacheKey(target));
+        if (attemptFallback) {
+          const missingSpeed = missingSpeedFallbackReason(data, cachedForCompare);
+          if (missingSpeed && cachedForCompare) {
+            console.warn(
+              `[BOOTH] Live audit for ${domainOf(data.url)} returned no speed data ` +
+                `(${missingSpeed}) — showing the pre-run result from ` +
+                `${cachedForCompare.fetchedAt} instead. The visitor never saw a failure.`
+            );
+            renderCachedResult(cachedForCompare, displayNameOverride, true);
+            return;
+          }
+        }
+
         // Sanity check: a live score wildly different from what we measured
         // before is worth a loud flag before anyone quotes it out loud. The
         // live result is still what renders — this is a log, not a gate.
-        const cachedForCompare =
-          cacheByUrl.get(cacheKey(data.url)) ?? cacheByUrl.get(cacheKey(target));
         if (cachedForCompare) {
           const live = data.scores.performance;
           const wasCached = cachedForCompare.scores.performance;
