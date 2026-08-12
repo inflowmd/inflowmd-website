@@ -300,21 +300,21 @@ function FindingRow({
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`w-4 h-4 shrink-0 text-white/40 transition-transform ${
+          className={`booth-no-print w-4 h-4 shrink-0 text-white/40 transition-transform ${
             open ? "rotate-180" : ""
           }`}
         >
           <path d="m6 9 6 6 6-6" />
         </svg>
       </button>
-      {open && (
-        <div className="px-4 pb-3.5 pl-[38px]">
-          {explanation && (
-            <p className="text-sm text-white/60 leading-snug">{explanation}</p>
-          )}
-          <p className="text-xs text-white/40 mt-1.5 leading-snug">{check.detail}</p>
-        </div>
-      )}
+      {/* Always in the DOM, hidden by class — print reveals every detail, and
+          a stylesheet cannot un-hide markup that was never rendered. */}
+      <div className={`px-4 pb-3.5 pl-[38px] ${open ? "" : "booth-collapsed"}`}>
+        {explanation && (
+          <p className="text-sm text-white/60 leading-snug">{explanation}</p>
+        )}
+        <p className="text-xs text-white/40 mt-1.5 leading-snug">{check.detail}</p>
+      </div>
     </div>
   );
 }
@@ -360,7 +360,7 @@ function CheckList({ category }: { category: ResolvedCategory }) {
             type="button"
             onClick={() => setShowPassing((v) => !v)}
             aria-expanded={showPassing}
-            className="inline-flex items-center gap-2 rounded-lg border border-white/12 px-4 py-2 text-sm font-bold text-white/60 hover:text-white hover:border-white/30 transition-colors"
+            className="booth-no-print inline-flex items-center gap-2 rounded-lg border border-white/12 px-4 py-2 text-sm font-bold text-white/60 hover:text-white hover:border-white/30 transition-colors"
             style={{ minHeight: 44 }}
           >
             {passing.length} passing check{passing.length === 1 ? "" : "s"}
@@ -372,22 +372,20 @@ function CheckList({ category }: { category: ResolvedCategory }) {
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`w-4 h-4 transition-transform ${showPassing ? "rotate-180" : ""}`}
+              className={`booth-no-print w-4 h-4 transition-transform ${showPassing ? "rotate-180" : ""}`}
             >
               <path d="m6 9 6 6 6-6" />
             </svg>
           </button>
-          {showPassing && (
-            <div className="grid sm:grid-cols-2 gap-2 mt-2">
-              {passing.map((item) => (
-                <FindingRow
-                  key={item.check.id}
-                  check={item.check}
-                  impact={category.weighted ? item : undefined}
-                />
-              ))}
-            </div>
-          )}
+          <div className={`grid sm:grid-cols-2 gap-2 mt-2 ${showPassing ? "" : "booth-collapsed"}`}>
+            {passing.map((item) => (
+              <FindingRow
+                key={item.check.id}
+                check={item.check}
+                impact={category.weighted ? item : undefined}
+              />
+            ))}
+          </div>
         </div>
       )}
     </>
@@ -417,7 +415,7 @@ function VerdictBanner({ verdict }: { verdict: Verdict | null }) {
   const accent = VERDICT_TONE_COLOR[verdict.tone];
   return (
     <div
-      className="rounded-2xl border-2 p-6 sm:p-8 mb-8"
+      className="booth-verdict rounded-2xl border-2 p-6 sm:p-8 mb-8"
       style={{ borderColor: `${accent}66`, background: `${accent}14` }}
     >
       <div
@@ -521,7 +519,7 @@ function Slider({
   onChange: (v: number) => void;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-white/20 bg-white/[0.03] p-4">
+    <div className="booth-no-print rounded-xl border border-dashed border-white/20 bg-white/[0.03] p-4">
       <div className="flex items-center justify-between gap-3 mb-1">
         <label className="text-sm sm:text-base font-semibold text-white/85 leading-snug">
           {label}
@@ -1770,9 +1768,22 @@ export default function BoothClient({
 
   return (
     <main className="min-h-screen text-white" style={{ background: BG }}>
-      <div className="max-w-5xl mx-auto px-5 sm:px-8 py-8 sm:py-12">
-        {/* header */}
-        <div className="flex items-start justify-between gap-4 mb-8">
+      <div className="booth-audit-report max-w-5xl mx-auto px-5 sm:px-8 py-8 sm:py-12">
+        {/* Print masthead — screen already shows the logo on the picker, but a
+            printed page has to identify itself on its own. */}
+        <div className="booth-print-only booth-print-masthead">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/inflowmd-final.png" alt="InflowMD" width={788} height={118} />
+          <div className="booth-print-meta">
+            <strong>{result.practiceName ?? domainOf(result.url)}</strong>
+            <span>{domainOf(result.url)}</span>
+            <span>Audited {measuredOn(result.fetchedAt)}</span>
+          </div>
+        </div>
+
+        {/* header — replaced by the print masthead on paper, which carries the
+            same identity plus an accurate audit date. */}
+        <div className="booth-screen-header flex items-start justify-between gap-4 mb-8">
           <div className="min-w-0">
             <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40">
               {result.fromCache ? "Pre-measured" : "Measured just now"}
@@ -1792,14 +1803,24 @@ export default function BoothClient({
               </div>
             )}
           </div>
-          <button
-            type="button"
-            onClick={reset}
-            className="shrink-0 rounded-lg border border-white/15 px-4 text-sm font-bold text-white/70 hover:text-white hover:border-white/40 transition-colors"
-            style={{ minHeight: 44 }}
-          >
-            Esc — New
-          </button>
+          <div className="booth-no-print shrink-0 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="rounded-lg border px-4 text-sm font-bold transition-colors"
+              style={{ minHeight: 44, borderColor: `${ACCENT}66`, color: ACCENT }}
+            >
+              Download report
+            </button>
+            <button
+              type="button"
+              onClick={reset}
+              className="rounded-lg border border-white/15 px-4 text-sm font-bold text-white/70 hover:text-white hover:border-white/40 transition-colors"
+              style={{ minHeight: 44 }}
+            >
+              Esc — New
+            </button>
+          </div>
         </div>
         {networkMode === "cache-first" && (
           <div
@@ -1818,13 +1839,13 @@ export default function BoothClient({
         {/* The three categories, equal weight visually — each scrolls to its
             own findings section. Attribution is per-gauge: only the speed
             number is Google's. */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 items-start">
+        <div className="booth-gauge-row grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 items-start">
           {categories.map((c) => (
             <button
               key={c.key}
               type="button"
               onClick={() => scrollToSection(c.key)}
-              className="rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-[#84B83B]/40 transition-colors py-5 px-2"
+              className="booth-gauge-card rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-[#84B83B]/40 transition-colors py-5 px-2"
               aria-label={`${c.label} — jump to findings`}
             >
               <Gauge
@@ -1941,7 +1962,7 @@ export default function BoothClient({
         {model ? (
           <>
             <div
-              className="rounded-2xl border-2 p-6 sm:p-8 mb-8"
+              className="booth-model-summary rounded-2xl border-2 p-6 sm:p-8 mb-8"
               style={{ borderColor: `${ACCENT}66`, background: `${ACCENT}14` }}
             >
               <div className="text-[11px] font-bold tracking-[0.22em] uppercase mb-3" style={{ color: ACCENT }}>
@@ -1974,7 +1995,7 @@ export default function BoothClient({
               type="button"
               onClick={() => setShowMath((v) => !v)}
               aria-expanded={showMath}
-              className="mt-4 inline-flex items-center gap-2 rounded-lg border border-white/15 px-5 text-sm sm:text-base font-bold text-white/80 hover:text-white hover:border-white/40 transition-colors"
+              className="booth-no-print mt-4 inline-flex items-center gap-2 rounded-lg border border-white/15 px-5 text-sm sm:text-base font-bold text-white/80 hover:text-white hover:border-white/40 transition-colors"
               style={{ minHeight: 44 }}
             >
               {showMath ? "Hide the math" : "Show the math"}
@@ -2068,11 +2089,13 @@ export default function BoothClient({
         {perfScore !== null &&
           perfScore < 90 &&
           domainOf(result.url).replace(/^www\./, "") !== COMPARISON_HOST && (
-            <ComparisonBlock
-              key={`${result.url}-${result.fetchedAt}`}
-              their={result}
-              onRan={() => setComparisonRan(true)}
-            />
+            <div className="booth-no-print">
+              <ComparisonBlock
+                key={`${result.url}-${result.fetchedAt}`}
+                their={result}
+                onRan={() => setComparisonRan(true)}
+              />
+            </div>
           )}
 
         {/* CLOSING CTA — the conversation, not a form */}
@@ -2097,7 +2120,7 @@ export default function BoothClient({
               <button
                 type="button"
                 onClick={() => setCtaFlipped(true)}
-                className="mt-6 rounded-xl px-8 py-4 font-extrabold text-lg text-[#081C34] transition-opacity hover:opacity-90"
+                className="booth-no-print mt-6 rounded-xl px-8 py-4 font-extrabold text-lg text-[#081C34] transition-opacity hover:opacity-90"
                 style={{ background: ACCENT, minHeight: 44 }}
               >
                 Talk to us at the booth
@@ -2106,8 +2129,14 @@ export default function BoothClient({
           )}
         </div>
 
-        <div className="mt-8 text-white/25 text-xs">
+        <div className="booth-no-print mt-8 text-white/25 text-xs">
           Esc — new audit · R — re-run live · C — pre-run version
+        </div>
+
+        {/* Print footer — a printed page has to say where it came from. */}
+        <div className="booth-print-only booth-print-footer">
+          inflowmd.com · Speed measured by Google PageSpeed Insights. Search and AI readiness
+          analyzed by InflowMD.
         </div>
       </div>
     </main>

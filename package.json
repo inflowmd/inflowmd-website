@@ -17,7 +17,8 @@
     "test:pagespeed": "tsx --env-file-if-exists=.env.local src/lib/pagespeed.test.ts",
     "test:livefallback": "tsx --env-file-if-exists=.env.local src/lib/liveFallback.test.ts",
     "test:speedmetrics": "tsx --env-file-if-exists=.env.local src/lib/speedMetrics.test.ts",
-    "test:verdict": "tsx --env-file-if-exists=.env.local src/lib/verdict.test.ts"
+    "test:verdict": "tsx --env-file-if-exists=.env.local src/lib/verdict.test.ts",
+    "print-reports": "tsx --env-file-if-exists=.env.local scripts/print-reports.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.79",
