@@ -98,7 +98,7 @@ check("BOTH emails carry the monitored reply-to address", () => {
 });
 
 check("reply-to is a monitored inbox, not the sending identity", () => {
-  assert.equal(REPLY_TO, "team@inflowmd.com");
+  assert.equal(REPLY_TO, "clayton@inflowmd.com");
   // The whole point: a reply must not bounce back at the transport address,
   // which may be Resend's shared sender until inflowmd.com is verified.
   for (const email of run.sent) {
