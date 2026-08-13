@@ -33,6 +33,18 @@ const INVISIBLE_LINES = [
   ["Unstructured content", "AI can’t parse what you offer"],
 ] as const;
 
+/**
+ * S2c — what we DO about it. Deliberately not the S2b list with the marks
+ * flipped: a mirrored list reads as the same slide twice, so these are stated
+ * as actions. Split lead/rest only for the deck's two-tone rhythm — the two
+ * halves concatenate to the exact line.
+ */
+const BUILD_LINES = [
+  ["Medical schema", " that tells AI exactly what you treat and where"],
+  ["Content structured so AI can parse your services", ", not guess at them"],
+  ["Built for every AI crawler", " — ChatGPT, Perplexity, Claude, and whatever comes next"],
+] as const;
+
 /** Household names from the Next.js showcase — the architecture we build on. */
 const FAST_SITES = [
   "OpenAI",
@@ -770,13 +782,21 @@ export default function PitchClient() {
           <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
             We build sites AI can read, understand, and recommend.
           </h2>
-          <ul className="flex flex-col items-start gap-[3vh] text-[clamp(24px,2.1vw,44px)] font-semibold">
-            {INVISIBLE_LINES.map(([head, tail], i) => (
-              <li key={head} className="flex items-center gap-5">
-                <PassCheck animate={active === 4} delayMs={i * 200} />
-                <span className="text-white/90">
-                  {head}
-                  <span className="text-white/50 font-normal"> — {tail}</span>
+          {/* Longer sentences than S2b, so a step down in size and room to
+              wrap — these are read from the back of a booth. */}
+          <ul className="flex flex-col items-start gap-[3vh] text-[clamp(20px,1.6vw,34px)] font-semibold max-w-[40em] text-left">
+            {BUILD_LINES.map(([lead, rest], i) => (
+              <li
+                key={lead}
+                className="flex items-start gap-5 pitch-rise"
+                style={rise(300 + i * 250)}
+              >
+                <span className="shrink-0 mt-[0.1em]">
+                  <PassCheck animate={active === 4} delayMs={300 + i * 250} />
+                </span>
+                <span className="text-white/90 leading-snug">
+                  {lead}
+                  <span className="text-white/50 font-normal">{rest}</span>
                 </span>
               </li>
             ))}
