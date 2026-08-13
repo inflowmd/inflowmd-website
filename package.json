@@ -12,7 +12,7 @@
     "test:model": "tsx --env-file-if-exists=.env.local src/lib/conversionModel.test.ts",
     "test:security": "tsx --env-file-if-exists=.env.local src/lib/ssrfGuard.test.ts",
     "test:attendees": "tsx --env-file-if-exists=.env.local src/lib/attendees.test.ts",
-    "test": "npm run test:model && npm run test:security && npm run test:attendees && npm run test:categories && npm run test:pagespeed && npm run test:livefallback && npm run test:speedmetrics && npm run test:verdict && npm run test:lead && npm run test:lead-delivery",
+    "test": "npm run test:model && npm run test:security && npm run test:attendees && npm run test:categories && npm run test:pagespeed && npm run test:livefallback && npm run test:speedmetrics && npm run test:verdict && npm run test:lead && npm run test:lead-delivery && npm run test:prewarm-bounds",
     "test:categories": "tsx --env-file-if-exists=.env.local src/lib/categories.test.ts",
     "test:pagespeed": "tsx --env-file-if-exists=.env.local src/lib/pagespeed.test.ts",
     "test:livefallback": "tsx --env-file-if-exists=.env.local src/lib/liveFallback.test.ts",
@@ -20,7 +20,8 @@
     "test:verdict": "tsx --env-file-if-exists=.env.local src/lib/verdict.test.ts",
     "print-reports": "tsx --env-file-if-exists=.env.local scripts/print-reports.ts",
     "test:lead": "tsx --env-file-if-exists=.env.local src/lib/lead.test.ts",
-    "test:lead-delivery": "tsx --env-file-if-exists=.env.local src/lib/leadDelivery.test.ts"
+    "test:lead-delivery": "tsx --env-file-if-exists=.env.local src/lib/leadDelivery.test.ts",
+    "test:prewarm-bounds": "tsx --env-file-if-exists=.env.local src/lib/prewarmBounds.test.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.79",

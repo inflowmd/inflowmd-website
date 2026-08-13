@@ -22,6 +22,12 @@ import { normalizeUrl, runAudit } from "../src/lib/runAudit";
 import { cacheKey, writeCache } from "../src/lib/cache";
 import { withDerivedScores } from "../src/lib/categories";
 import { resolveApiKey } from "../src/lib/pagespeed";
+import {
+  anomalyReason,
+  resolveRejected,
+  toHistoryEntry,
+  type HistoryEntry,
+} from "../src/lib/prewarmBounds";
 import { describePlatform } from "../src/lib/platform";
 
 /** PSI is rate-limited; the batch is small enough that speed is irrelevant. */
@@ -31,71 +37,15 @@ const DELAY_MS = 2_000;
 const RETRY_DELAY_MS = 30_000;
 
 /* ============================================================
-   Sanity bounds. PSI occasionally returns garbage — a challenge page
-   measuring 100/0.77s, or a cold-path 66 on a site that is really a 90.
-   An outlier must never silently ship to the booth.
+   Sanity bounds live in src/lib/prewarmBounds.ts — importable, and tested
+   in src/lib/prewarmBounds.test.ts without starting a real pre-warm.
    ============================================================ */
-
-interface HistoryEntry {
-  practiceName?: string;
-  url: string;
-  score: number | null;
-  lcp: number | null;
-  fetchedAt: string;
-}
 
 interface HistoryFile {
   generatedAt: string | null;
   /** Snapshot of the run before `current` — what "changed since last run" compares against. */
   previous: Record<string, HistoryEntry> | null;
   current: Record<string, HistoryEntry> | null;
-}
-
-function toHistoryEntry(r: AuditResult): HistoryEntry {
-  return {
-    ...(r.practiceName ? { practiceName: r.practiceName } : {}),
-    url: r.url,
-    score: r.scores.performance,
-    lcp: r.performance.lcp,
-    fetchedAt: r.fetchedAt,
-  };
-}
-
-/**
- * Returns the reason a fresh result looks anomalous against the prior one,
- * or null when it looks sane.
- */
-function anomalyReason(fresh: AuditResult, prior: HistoryEntry | undefined): string | null {
-  // Our fetcher was served a bot challenge — PSI likely saw the same page.
-  if (fresh.htmlFetch.blocked) {
-    return "fetcher hit a bot-challenge page";
-  }
-  if (!prior) return null;
-
-  const newLcp = fresh.performance.lcp;
-  const oldLcp = prior.lcp;
-  if (newLcp !== null && oldLcp !== null && newLcp < 1.5 && oldLcp > 5) {
-    return `LCP ${newLcp}s on a site whose prior LCP was ${oldLcp}s (challenge-page signature)`;
-  }
-
-  const newScore = fresh.scores.performance;
-  const oldScore = prior.score;
-
-  // A measurement we HAD and no longer have is a regression, not an update.
-  // PSI times out on slow sites often enough that a full re-warm would
-  // otherwise trade good data for nothing — silently, since a null trips no
-  // other rule here. Treating it as anomalous routes it through the same
-  // retry-then-keep-prior path as a wild value, so the booth never loses a
-  // number it already had. (This is what cost 11 entries their speed data on
-  // the 2026-08-13 re-warm.)
-  if (newScore === null && oldScore !== null) {
-    return `PageSpeed returned no score for a site previously measured at ${oldScore}`;
-  }
-
-  if (newScore !== null && oldScore !== null && Math.abs(newScore - oldScore) > 25) {
-    return `performance swung ${oldScore} → ${newScore} (more than 25 points)`;
-  }
-  return null;
 }
 
 interface Attendee {
@@ -189,29 +139,16 @@ async function auditWithAnomalyCheck(
     if (!retryReason) {
       result = retry;
     } else {
-      // Twice anomalous: never silently ship an outlier. Keep the prior
-      // result, marked stale, with both values on the record.
-      const kept = priorFull.get(key);
-      if (kept) {
-        anomaly =
-          `${displayName || display}: fresh measurement rejected twice (${retryReason}). ` +
-          `Cache keeps the prior result (perf ${kept.scores.performance}, LCP ${kept.performance.lcp}s); ` +
-          `rejected: perf ${retry.scores.performance}, LCP ${retry.performance.lcp}s.`;
-        result = {
-          ...kept,
-          stale: true,
-          staleNote:
-            `Kept prior measurement of ${kept.fetchedAt} (perf ${kept.scores.performance}, ` +
-            `LCP ${kept.performance.lcp}s). Fresh run rejected twice: ${retryReason}; ` +
-            `rejected values perf ${retry.scores.performance}, LCP ${retry.performance.lcp}s.`,
-        };
-      } else {
-        // No prior to fall back to — ship the fresh one, loudly.
-        anomaly =
-          `${displayName || display}: measurement looks anomalous (${retryReason}) ` +
-          `and there is NO prior result to keep. Shipped as measured — verify by hand.`;
-        result = retry;
-      }
+      // Twice anomalous: never silently ship an outlier, and never lose a
+      // measurement we already had.
+      const resolved = resolveRejected(
+        displayName || display,
+        retry,
+        retryReason,
+        priorFull.get(key)
+      );
+      result = resolved.result;
+      anomaly = resolved.anomaly;
     }
   }
 
