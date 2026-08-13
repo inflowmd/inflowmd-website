@@ -19,6 +19,8 @@ import {
 } from "@/lib/categories";
 import { speedMetrics, type SpeedBand } from "@/lib/speedMetrics";
 import { buildVerdict, type Verdict, type VerdictTone } from "@/lib/verdict";
+import { CHECK_EXPLANATIONS } from "@/lib/checkExplanations";
+import { isValidEmail } from "@/lib/lead";
 import { missingSpeedFallbackReason } from "@/lib/liveFallback";
 
 /* ============================================================
@@ -188,54 +190,6 @@ function ProvenanceTag({ provenance }: { provenance: Provenance }) {
 }
 
 /**
- * Plain-language explanations for every check, in patient/practice terms.
- * Shown when a findings row is expanded — what was checked, and why a
- * physician should care. Factual register, no scare copy.
- */
-const CHECK_EXPLANATIONS: Record<string, string> = {
-  "seo.redirect-chain":
-    "How many hops a patient's browser takes before your page starts loading. Each redirect adds waiting time before anything appears on screen.",
-  "seo.https":
-    "Whether the connection between a patient's browser and this site is encrypted. Browsers mark unencrypted sites “Not secure,” and Google ranks them lower.",
-  "seo.title":
-    "The headline Google shows in search results — often the first thing a prospective patient reads about the practice.",
-  "seo.meta-description":
-    "The sentence under the headline in Google results. When it's missing, Google improvises one from page text — often the wrong text.",
-  "seo.h1":
-    "The page's main heading, the digital equivalent of the name at the top of a chart. Search engines use it to work out what the page is about.",
-  "seo.heading-order":
-    "Whether headings follow a clean outline. Search engines and screen readers navigate the page by that outline.",
-  "seo.viewport":
-    "The setting that makes the site resize properly on phones. Without it, patients pinch and zoom — and most leave instead.",
-  "seo.canonical":
-    "The page's declared official address. It stops search engines treating copies of the same page as competing pages.",
-  "seo.open-graph":
-    "The preview shown when the site is shared in a text or on social media. Without it, shared links appear bare — no image, no title.",
-  "seo.image-alt":
-    "Text alternatives for images. Search engines and screen readers can't see photos — they read these instead.",
-  "schema.present":
-    "Machine-readable code summarizing the practice for search engines and AI assistants. Without any, they work from guesswork.",
-  "schema.medical":
-    "Structured code that tells Google and AI assistants this is a medical practice — who you are, what you treat, where you are. Without it, search engines guess.",
-  "schema.local-business":
-    "The address, phone number, and hours in a form search engines read directly — it's how a practice earns its place in local map results.",
-  "schema.faq":
-    "Patient questions marked up so they can appear as expandable answers directly in Google results — visibility a competitor claims otherwise.",
-  "schema.organization":
-    "The practice described as an organization, connecting its name, logo, and profiles so search engines treat it as one entity.",
-  "ai.robots-file":
-    "The file that tells crawlers what they may read — it's how a site controls what search engines and AI tools can see.",
-  "ai.crawler-access":
-    "Whether ChatGPT, Perplexity, and other AI tools are allowed to read this site. Blocked means invisible when patients ask an AI for a doctor.",
-  "ai.llms-txt":
-    "An emerging standard that tells AI assistants how to read and summarize your site. Few practices have one yet — which is exactly the opportunity.",
-  "ai.semantic-structure":
-    "Whether the page's structure lets an AI assistant find the passage that answers a patient's question. Clean outlines get quoted; jumbles get skipped.",
-  "ai.content-depth":
-    "How much readable text the page carries. AI assistants and search engines need enough substance to draw an answer from.",
-};
-
-/**
  * What this check cost, in the category's own points. Shown only for weighted
  * categories — an unweighted one has no meaningful per-check arithmetic.
  */
@@ -389,6 +343,166 @@ function CheckList({ category }: { category: ResolvedCategory }) {
         </div>
       )}
     </>
+  );
+}
+
+/**
+ * Lead capture. Two fields, because a third is a reason to walk away.
+ *
+ * The practice, its URL, the scores and the findings all come from the report
+ * already on screen — a doctor should never be asked to retype what we just
+ * measured for them.
+ *
+ * The submit never fails in the visitor's face: the route answers 200 even
+ * when the mail service is down, so the only error path here is a network
+ * drop, and that offers a retry rather than a dead end.
+ */
+function LeadForm({
+  result,
+  categories,
+  verdict,
+}: {
+  result: AuditResult;
+  categories: ResolvedCategory[];
+  verdict: Verdict | null;
+}) {
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [sentTo, setSentTo] = useState("");
+
+  const byKey = Object.fromEntries(categories.map((c) => [c.key, c])) as Record<
+    ResolvedCategory["key"],
+    ResolvedCategory
+  >;
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!isValidEmail(email)) {
+      setState("error");
+      return;
+    }
+    setState("sending");
+
+    const issues = categories
+      .flatMap((c) => c.items)
+      .filter((i) => i.check.status === "fail" || i.check.status === "warn")
+      .map((i) => ({ id: i.check.id, label: i.check.label, status: i.check.status }));
+
+    try {
+      const res = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim(),
+          phone: phone.trim(),
+          report: {
+            practiceName: result.practiceName ?? null,
+            url: result.url,
+            measuredAt: result.fetchedAt,
+            fromCache: result.fromCache,
+            verdict: verdict ? { headline: verdict.headline, subline: verdict.subline } : null,
+            scores: {
+              ai: byKey.ai.score,
+              patientsFind: byKey.patientsFind.score,
+              speed: byKey.speed.score,
+            },
+            issues,
+          },
+        }),
+      });
+      if (!res.ok) throw new Error(`lead endpoint returned ${res.status}`);
+      setSentTo(email.trim());
+      setState("sent");
+    } catch (err) {
+      console.error("[LEAD] submit failed", err);
+      setState("error");
+    }
+  }
+
+  if (state === "sent") {
+    return (
+      <div
+        className="booth-no-print mt-10 rounded-2xl border-2 p-6 sm:p-10 text-center"
+        style={{ borderColor: `${ACCENT}66`, background: `${ACCENT}14` }}
+      >
+        <h2 className="text-2xl sm:text-3xl font-extrabold leading-tight">Sent to {sentTo}</h2>
+        <p className="text-white/70 text-base sm:text-lg mt-2">
+          Check your inbox — I&rsquo;ll follow up next week.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="booth-no-print mt-10 rounded-2xl border-2 p-6 sm:p-10"
+      style={{ borderColor: `${ACCENT}66`, background: "rgba(0,0,0,0.25)" }}
+    >
+      <h2 className="text-2xl sm:text-4xl font-extrabold leading-tight text-center">
+        Want this report?
+      </h2>
+      <p className="text-white/60 text-base sm:text-lg mt-2 mb-6 text-center">
+        We&rsquo;ll email you the full audit, plus what we&rsquo;d fix first.
+      </p>
+
+      <form onSubmit={submit} className="max-w-2xl mx-auto grid sm:grid-cols-2 gap-3">
+        <label className="flex flex-col gap-1.5">
+          <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/45">
+            Email
+          </span>
+          <input
+            type="email"
+            required
+            autoComplete="email"
+            inputMode="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (state === "error") setState("idle");
+            }}
+            placeholder="you@practice.com"
+            aria-label="Email address"
+            className="rounded-xl bg-white/[0.06] border border-white/15 px-5 text-lg sm:text-xl text-white placeholder:text-white/25 outline-none focus:border-[#84B83B]/70"
+            style={{ minHeight: 64 }}
+          />
+        </label>
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/45">
+            Phone <span className="text-white/25">(optional)</span>
+          </span>
+          <input
+            type="tel"
+            autoComplete="tel"
+            inputMode="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="(555) 555-5555"
+            aria-label="Phone number, optional"
+            className="rounded-xl bg-white/[0.06] border border-white/15 px-5 text-lg sm:text-xl text-white placeholder:text-white/25 outline-none focus:border-[#84B83B]/70"
+            style={{ minHeight: 64 }}
+          />
+        </label>
+
+        <button
+          type="submit"
+          disabled={state === "sending"}
+          className="sm:col-span-2 rounded-xl px-8 font-extrabold text-lg text-[#081C34] transition-opacity hover:opacity-90 disabled:opacity-60"
+          style={{ background: ACCENT, minHeight: 64 }}
+        >
+          {state === "sending" ? "Sending…" : "Send me this report"}
+        </button>
+
+        {state === "error" && (
+          <p className="sm:col-span-2 text-amber-300 text-sm text-center">
+            {isValidEmail(email)
+              ? "That didn't go through. Tap send once more."
+              : "Please enter a valid email address."}
+          </p>
+        )}
+      </form>
+    </div>
   );
 }
 
@@ -651,7 +765,7 @@ function StageList({
  * never cached — the point is watching it happen. Self-contained state so a
  * failure here can never corrupt the main report.
  */
-function ComparisonBlock({ their, onRan }: { their: AuditResult; onRan: () => void }) {
+function ComparisonBlock({ their }: { their: AuditResult }) {
   const [state, setState] = useState<"prompt" | "running" | "done" | "failed">("prompt");
   const [scanStage, setScanStage] = useState(0);
   const [outcomes, setOutcomes] = useState<boolean[] | null>(null);
@@ -730,7 +844,6 @@ function ComparisonBlock({ their, onRan }: { their: AuditResult; onRan: () => vo
             }
             setComparison(data);
             setState("done");
-            onRan();
           }, RESOLVE_HOLD_MS);
         }
       }, RESOLVE_STAGGER_MS);
@@ -742,7 +855,7 @@ function ComparisonBlock({ their, onRan }: { their: AuditResult; onRan: () => vo
       clearTimeout(clientTimeout);
       timers.current.abort = null;
     }
-  }, [clearAll, onRan]);
+  }, [clearAll]);
 
   /* ---------- render ---------- */
 
@@ -947,8 +1060,6 @@ export default function BoothClient({
   const [showMath, setShowMath] = useState(false);
   /** Booth CTA card flips to the in-person instruction when tapped. */
   const [ctaFlipped, setCtaFlipped] = useState(false);
-  /** True once a comparison has completed — the CTA sub-line references it. */
-  const [comparisonRan, setComparisonRan] = useState(false);
   /** ISO fetchedAt of a cached result currently on screen in place of a live
    *  one — drives the "Showing our pre-run audit from ..." line. Null means
    *  either a genuinely live result, or a cache render that doesn't need
@@ -1063,7 +1174,6 @@ export default function BoothClient({
     setResolvedCount(0);
     setShowMath(false);
     setCtaFlipped(false);
-    setComparisonRan(false);
     setNoWebsiteAttendee(null);
     setFallbackNote(null);
   }, [clearTimers]);
@@ -1086,8 +1196,7 @@ export default function BoothClient({
       setRevealed(999);
       setShowMath(false);
       setCtaFlipped(false);
-      setComparisonRan(false);
-      setPhase("result");
+        setPhase("result");
       setFallbackNote(showNote ? cached.fetchedAt : null);
     },
     [clearTimers]
@@ -1127,8 +1236,7 @@ export default function BoothClient({
       setResolvedCount(0);
       setShowMath(false);
       setCtaFlipped(false);
-      setComparisonRan(false);
-      setFallbackNote(null);
+        setFallbackNote(null);
       setPhase("running");
       setScanStage(0);
       setPendingUrl(target);
@@ -1977,6 +2085,9 @@ export default function BoothClient({
           );
         })()}
 
+        {/* LEAD CAPTURE — the evidence has landed; ask before the money talk. */}
+        <LeadForm result={result} categories={categories} verdict={verdict} />
+
         {/* conversion model */}
         {model ? (
           <>
@@ -2109,48 +2220,9 @@ export default function BoothClient({
           perfScore < 90 &&
           domainOf(result.url).replace(/^www\./, "") !== COMPARISON_HOST && (
             <div className="booth-no-print">
-              <ComparisonBlock
-                key={`${result.url}-${result.fetchedAt}`}
-                their={result}
-                onRan={() => setComparisonRan(true)}
-              />
+              <ComparisonBlock key={`${result.url}-${result.fetchedAt}`} their={result} />
             </div>
           )}
-
-        {/* CLOSING CTA — the conversation, not a form */}
-        <div
-          className="mt-10 rounded-2xl border-2 p-6 sm:p-10 text-center"
-          style={{ borderColor: `${ACCENT}66`, background: "rgba(0,0,0,0.25)" }}
-        >
-          {ctaFlipped ? (
-            <p className="text-2xl sm:text-3xl font-extrabold leading-tight">
-              Ask for Clayton — or leave the site up and we&rsquo;ll find you.
-            </p>
-          ) : (
-            <>
-              <h2 className="text-2xl sm:text-4xl font-extrabold leading-tight">
-                Every one of these is fixable.
-              </h2>
-              <p className="text-white/55 text-base sm:text-lg mt-2 max-w-2xl mx-auto">
-                {comparisonRan
-                  ? "You just watched the difference. We rebuild medical practice sites to pass this exact audit — most in under 30 days."
-                  : "We rebuild medical practice sites to pass this exact audit — most in under 30 days."}
-              </p>
-              <button
-                type="button"
-                onClick={() => setCtaFlipped(true)}
-                className="booth-no-print mt-6 rounded-xl px-8 py-4 font-extrabold text-lg text-[#081C34] transition-opacity hover:opacity-90"
-                style={{ background: ACCENT, minHeight: 44 }}
-              >
-                Talk to us at the booth
-              </button>
-            </>
-          )}
-        </div>
-
-        <div className="booth-no-print mt-8 text-white/25 text-xs">
-          Esc — new audit · R — re-run live · C — pre-run version
-        </div>
 
         {/* Print footer — a printed page has to say where it came from. */}
         <div className="booth-print-only booth-print-footer">
