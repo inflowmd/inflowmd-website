@@ -1928,7 +1928,7 @@ function Closing() {
         <FadeIn delay={0.22}>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <a
-              href="mailto:inflowmd@gmail.com?subject=Prevosti%20audit%20follow-up"
+              href="mailto:clayton@inflowmd.com?subject=Prevosti%20audit%20follow-up"
               className="inline-block px-8 py-4 bg-accent text-white font-semibold rounded-lg text-base sm:text-lg glow-blue hover:bg-accent-light transition-colors"
             >
               Let&apos;s talk about the plan →
