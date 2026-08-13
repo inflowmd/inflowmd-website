@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { normalizeUrl, runAudit } from "@/lib/runAudit";
 import { recordAudit } from "@/lib/auditCounter";
 import { getCached } from "@/lib/cache";
@@ -90,12 +90,16 @@ export async function POST(request: Request) {
 
   const result = await runAudit(url);
 
-  // Booth counter: unique domains audited LIVE at the event. Deliberately not
-  // awaited — the visitor is waiting on this response, and a GitHub round trip
-  // for a number on a poster is not worth a millisecond of it. recordAudit
-  // swallows its own failures; the catch is belt and braces so an unhandled
-  // rejection can never surface as a failed audit.
-  void recordAudit(url).catch(() => {});
+  // Booth counter: unique domains audited LIVE at the event.
+  //
+  // after(), not a bare floating promise. The visitor should not wait on a
+  // GitHub round trip for a number on a poster, but on Vercel the function is
+  // frozen the moment the response is sent — a `void recordAudit(...)` was
+  // silently killed mid-flight and nothing was ever recorded in production.
+  // after() is the supported way to keep the work alive past the response.
+  after(async () => {
+    await recordAudit(url).catch(() => {});
+  });
 
   return NextResponse.json(result, {
     headers: {
