@@ -182,7 +182,7 @@ check("notification says so when no phone was given", () => {
 });
 
 check("the notification goes to the InflowMD inbox", () => {
-  assert.equal(NOTIFY_TO, "inflowmd@gmail.com");
+  assert.equal(NOTIFY_TO, "clayton@inflowmd.com");
 });
 
 /* ---------- report email (to the doctor) ---------- */
