@@ -80,6 +80,18 @@ function anomalyReason(fresh: AuditResult, prior: HistoryEntry | undefined): str
 
   const newScore = fresh.scores.performance;
   const oldScore = prior.score;
+
+  // A measurement we HAD and no longer have is a regression, not an update.
+  // PSI times out on slow sites often enough that a full re-warm would
+  // otherwise trade good data for nothing — silently, since a null trips no
+  // other rule here. Treating it as anomalous routes it through the same
+  // retry-then-keep-prior path as a wild value, so the booth never loses a
+  // number it already had. (This is what cost 11 entries their speed data on
+  // the 2026-08-13 re-warm.)
+  if (newScore === null && oldScore !== null) {
+    return `PageSpeed returned no score for a site previously measured at ${oldScore}`;
+  }
+
   if (newScore !== null && oldScore !== null && Math.abs(newScore - oldScore) > 25) {
     return `performance swung ${oldScore} → ${newScore} (more than 25 points)`;
   }
