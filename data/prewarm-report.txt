@@ -1,25 +1,17 @@
-Re-auditing 20 of 58 unique sites — 38 already have complete speed data and are untouched.
+Re-auditing 12 of 58 unique sites — 46 already have complete speed data and are untouched.
 
-[ 1/20] www.alaskaveincare.com … [ok] perf  59 | seo  75 | schema  80 | ai  90 | Duda
-[ 2/20] www.andersonveinandwellness.com … [ok] perf  37 | seo  75 | schema  70 | ai  90 | Squarespace
-[ 3/20] dominionvascular.com … [ok] perf  63 | seo  55 | schema  10 | ai  70 | WordPress 6.5.4 + Elementor
-[ 4/20] www.eternaaesthetic.com … [ok] perf  64 | seo  85 | schema  70 | ai  90 | WordPress
-[ 5/20] www.floridaveincenter.com … [ok] perf  33 | seo  90 | schema 100 | ai  80 | unknown platform
-[ 6/20] www.hawaiivein.com … [ok] perf  72 | seo  85 | schema  70 | ai  90 | WordPress + Elementor
-[ 7/20] www.drozcan.com … [ok] perf  64 | seo  70 | schema  40 | ai  80 | WordPress 6.6.6 + Divi
-[ 8/20] www.livingwatervein.com … [ok] perf  39 | seo  75 | schema  90 | ai  80 | WordPress + Elementor
-[ 9/20] www.medicalveinclinic.com … [ok] perf  34 | seo  85 | schema  90 | ai  90 | WordPress + Beaver Builder
-[10/20] oohsovein.com … [ok] perf  60 | seo  85 | schema  10 | ai  80 | Starfield
-[11/20] ozarkregionalveincenter.com … [ok] perf  28 | seo  90 | schema  90 | ai  90 | WordPress
-[12/20] www.yourveininstitute.com … [ok] perf  42 | seo  90 | schema  50 | ai  90 | Duda
-[13/20] www.tridentvein.com … [ok] perf  38 | seo  85 | schema 100 | ai  80 | WordPress 7.0.2 + Elementor
-[14/20] tulsaveininstitute.com … [ok] perf  83 | seo  70 | schema  70 | ai  80 | WordPress 7.0.3
-[15/20] veinandskinstudio.com … [ok] perf  77 | seo  75 | schema  70 | ai  90 | WordPress
-[16/20] veinandvascularcenters.com … [ok] perf  67 | seo  70 | schema  90 | ai  60 | WordPress
-[17/20] veinandwellnesscenters.com … [ok] perf   – | seo  65 | schema 100 | ai  80 | WordPress 7.0.3 + Elementor, Divi
-[18/20] www.veinandmedspa.com … [ok] perf  62 | seo  80 | schema 100 | ai  80 | WordPress 7.0.3
-[19/20] www.weknowveins.com … [ok] perf  28 | seo  85 | schema  90 | ai  90 | WordPress + Elementor, WPBakery
-[20/20] vein911.com … [ok] perf  44 | seo  80 | schema  50 | ai  90 | WordPress + Elementor
+[ 1/12] centerforveincareandsurgery.com … [ok] speed   – | ai  27 | patients-find  56 | WordPress 6.6.7 + WPBakery
+[ 2/12] www.eternaaesthetic.com … [ok] speed  71 | ai  60 | patients-find  89 | WordPress
+[ 3/12] www.livingwatervein.com … [ok] speed   – | ai  89 | patients-find  78 | WordPress + Elementor
+[ 4/12] missouriveincare.com … [ok] speed  68 | ai  43 | patients-find  83 | WordPress + Elementor
+[ 5/12] ngvascular.com … [ok] speed  36 | ai  97 | patients-find  94 | WordPress 7.0.4 + Elementor, WPBakery
+[ 6/12] oohsovein.com … [ok] speed  49 | ai  23 | patients-find  89 | Starfield
+[ 7/12] beltlinehealth.com … [ok] speed  64 | ai  35 | patients-find  94 | unknown platform
+[ 8/12] www.tridentvein.com … [ok] speed  35 | ai  91 | patients-find  89 | WordPress 7.0.2 + Elementor
+[ 9/12] vanishlegveins.com … [ok] speed  50 | ai  60 | patients-find  83 | WordPress 7.0.3 + Divi
+[10/12] veinandwellnesscenters.com … [ok] speed  37 | ai  91 | patients-find  67 | WordPress 7.0.3 + Elementor, Divi
+[11/12] www.weknowveins.com … [failed] speed   – | ai   – | patients-find   – | unknown platform | FETCH FAILED: The site did not respond within 8 seconds.
+[12/12] vein911.com … [ok] speed   – | ai  52 | patients-find  83 | WordPress + Elementor
 
 No website on file (8):
   — Arelis Almonte-Independent Doctor (Santiago De Los Cabelleros, Dominican Republic) … [no website]
@@ -31,15 +23,18 @@ No website on file (8):
   — Lamees Rehab Solutions (Canton, MI) … [no website]
   — Meta Health And Vascular (Roswell, GA) … [no website]
 
-Speed data still missing after retry (1):
-  — Vein and Wellness Centers of Texas (veinandwellnesscenters.com) … PageSpeed did not finish measuring this page in time.
+Speed data still missing after retry (4):
+  — Center For Vein Care (centerforveincareandsurgery.com) … PageSpeed did not finish measuring this page in time.
+  — Living Water Vein Institute (www.livingwatervein.com) … PageSpeed did not finish measuring this page in time.
+  — Vein Specialists (www.weknowveins.com) … Lighthouse returned error: FAILED_DOCUMENT_REQUEST. Lighthouse was unable to reliably load the page you requested. Make sure you are testing the correct URL and that the server is properly responding to all requests. (Details: net::ERR_TIMED_OUT)
+  — Vein911 Vein Treatment Centers (vein911.com) … PageSpeed did not finish measuring this page in time.
 
 Wrote 58 results to /Users/claytonpeterson/Projects/inflowmd/.claude/worktrees/musing-kepler/data/prewarmed-audits.json
 History updated at /Users/claytonpeterson/Projects/inflowmd/.claude/worktrees/musing-kepler/data/prewarm-history.json
 
 No score moved ±10 or more since the last run.
 
-STATUS SUMMARY: 55 ok, 0 blocked, 3 failed, 8 no website (20 unique sites audited for 59 attendees)
-Speed data: 57 of 58 cache entries have complete performance data.
+STATUS SUMMARY: 55 ok, 0 blocked, 3 failed, 8 no website (12 unique sites audited for 59 attendees)
+Speed data: 54 of 58 cache entries have complete performance data.
 
 Run `npm run summarize` for the aggregate picture.
