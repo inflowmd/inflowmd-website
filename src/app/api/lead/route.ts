@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   NOTIFY_TO,
+  REPLY_TO,
   composeNotification,
   composeReport,
   parseLeadPayload,
@@ -46,6 +47,10 @@ async function sendEmail(
       body: JSON.stringify({
         from: FROM,
         to: [to],
+        // Both emails, deliberately: a doctor replying to their report and a
+        // doctor replying to a forwarded notification should both land in the
+        // monitored inbox, not on the sending identity.
+        reply_to: REPLY_TO,
         subject: email.subject,
         html: email.html,
         text: email.text,
