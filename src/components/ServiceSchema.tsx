@@ -20,7 +20,7 @@ export default function ServiceSchema({
     provider: {
       "@type": "ProfessionalService",
       name: "InflowMD",
-      url: "https://inflowmd.vercel.app",
+      url: "https://www.inflowmd.com",
     },
     areaServed: "United States",
     audience: {

@@ -4,7 +4,7 @@ import CvcReviewClient from "./CvcReviewClient";
 const canonical = "https://www.inflowmd.com/clients/cvc-2026-q2-review";
 const title = "Q2 2026 Performance Review — Comprehensive Vein Care";
 const description =
-  "Private digital performance review prepared by InflowMD for Comprehensive Vein Care.";
+  "Private digital performance review prepared by InflowMD for Comprehensive Vein Care: search rankings, patient enquiries, and where Q3 effort should go.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.inflowmd.com"),

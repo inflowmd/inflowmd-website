@@ -45,8 +45,8 @@ export default function GetStartedClient() {
     <>
       <BreadcrumbSchema
         items={[
-          { name: "Home", url: "https://inflowmd.vercel.app" },
-          { name: "Get Started", url: "https://inflowmd.vercel.app/get-started" },
+          { name: "Home", url: "https://www.inflowmd.com" },
+          { name: "Get Started", url: "https://www.inflowmd.com/get-started" },
         ]}
       />
       <Navbar />

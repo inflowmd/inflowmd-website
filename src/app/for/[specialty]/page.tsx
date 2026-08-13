@@ -6,7 +6,7 @@ import {
 } from "@/lib/specialties";
 import SpecialtyClient from "./SpecialtyClient";
 
-const SITE_URL = "https://inflowmd.vercel.app";
+const SITE_URL = "https://www.inflowmd.com";
 
 export const dynamicParams = false;
 

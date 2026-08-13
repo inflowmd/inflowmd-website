@@ -57,7 +57,7 @@ export default function Footer() {
 
           {/* Solutions */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Solutions</h4>
+            <h2 className="text-white font-semibold mb-4">Solutions</h2>
             <ul className="space-y-2.5">
               {solutionLinks.map((link) => (
                 <li key={link.href}>
@@ -74,7 +74,7 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Company</h4>
+            <h2 className="text-white font-semibold mb-4">Company</h2>
             <ul className="space-y-2.5">
               {companyLinks.map((link) => (
                 <li key={link.href}>

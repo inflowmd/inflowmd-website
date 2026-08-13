@@ -349,16 +349,22 @@ export function runSeoChecks({ url, html, htmlOk, redirects }: SeoCheckInput): S
       evidence: "0 images found",
     });
   } else {
+    // Decorative images marked alt="" count as handled, not as missing —
+    // that is the standard way to tell a screen reader to skip an image.
     const coverage = alt.withAlt / alt.total;
-    const evidence = `${alt.withAlt} of ${alt.total} images have alt text`;
+    const described = alt.withAlt - alt.decorative;
+    const evidence =
+      alt.decorative > 0
+        ? `${described} of ${alt.total} images described, ${alt.decorative} marked decorative`
+        : `${alt.withAlt} of ${alt.total} images have alt text`;
     checks.push({
       id: "seo.image-alt",
       label: "Image descriptions",
       status: coverage === 1 ? "pass" : coverage >= 0.8 ? "warn" : "fail",
       detail:
         coverage === 1
-          ? "Every image has a written description, which helps both search engines and patients using screen readers."
-          : `${alt.total - alt.withAlt} of your ${alt.total} images have no written description, so search engines and screen readers cannot tell what they show.`,
+          ? "Every image is either described or deliberately marked as decorative, which is what search engines and screen readers need."
+          : `${alt.missing} of your ${alt.total} images have no written description, so search engines and screen readers cannot tell what they show.`,
       evidence,
     });
   }

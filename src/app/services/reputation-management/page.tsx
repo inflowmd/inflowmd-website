@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: "Doctor Reputation Management",
   description:
     "Monitor, grow, and protect your online reviews. Automated review generation, sentiment analysis, and competitor tracking for medical practices.",
-  alternates: { canonical: "https://inflowmd.vercel.app/services/reputation-management" },
+  alternates: { canonical: "https://www.inflowmd.com/services/reputation-management" },
   openGraph: {
     title: "Doctor Reputation Management | InflowMD",
     description:
       "Monitor, grow, and protect your online reviews. Automated review generation, sentiment analysis, and competitor tracking for medical practices.",
-    url: "https://inflowmd.vercel.app/services/reputation-management",
+    url: "https://www.inflowmd.com/services/reputation-management",
   },
 };
 

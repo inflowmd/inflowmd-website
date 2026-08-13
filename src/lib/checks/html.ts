@@ -147,18 +147,42 @@ export function findHeadingSkip(headings: Heading[]): HeadingOrderIssue | null {
 
 export interface ImageAltStats {
   total: number;
+  /** Images carrying an alt ATTRIBUTE — described or deliberately decorative. */
   withAlt: number;
+  /** Of those, the ones marked decorative with alt="". */
+  decorative: number;
+  /** Images with no alt attribute at all — the only real defect here. */
+  missing: number;
 }
 
-/** Counts images carrying non-empty alt text. */
+/**
+ * Counts alt coverage the way accessibility tooling does.
+ *
+ * `alt=""` is NOT a missing description — it is the correct, standards-defined
+ * way to mark an image as decorative so screen readers skip it. axe and
+ * Lighthouse both treat it as valid; only a missing alt attribute is a defect.
+ *
+ * We previously counted `alt=""` as missing, which told every practice that
+ * correctly-marked decorative images were a failure — and failed our own site,
+ * whose single decorative hero background is marked exactly as the standard
+ * prescribes. Penalising correct markup is worse than not checking at all.
+ */
 export function getImageAltStats(html: string): ImageAltStats {
   const tags = html.match(/<img\b[^>]*>/gi) ?? [];
-  let withAlt = 0;
+  let described = 0;
+  let decorative = 0;
   for (const tag of tags) {
     const alt = getAttr(tag, "alt");
-    if (alt && alt.length > 0) withAlt++;
+    if (alt === null || alt === undefined) continue;
+    if (alt.trim().length > 0) described++;
+    else decorative++;
   }
-  return { total: tags.length, withAlt };
+  return {
+    total: tags.length,
+    withAlt: described + decorative,
+    decorative,
+    missing: tags.length - described - decorative,
+  };
 }
 
 export interface JsonLdExtraction {

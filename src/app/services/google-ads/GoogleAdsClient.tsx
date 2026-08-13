@@ -11,14 +11,14 @@ export default function GoogleAdsClient() {
     <>
       <BreadcrumbSchema
         items={[
-          { name: "Home", url: "https://inflowmd.vercel.app" },
-          { name: "Google Ads", url: "https://inflowmd.vercel.app/services/google-ads" },
+          { name: "Home", url: "https://www.inflowmd.com" },
+          { name: "Google Ads", url: "https://www.inflowmd.com/services/google-ads" },
         ]}
       />
       <ServiceSchema
         name="Google Ads for Medical Practices"
         description="AI-optimized Google Ads campaigns for doctors. Drive qualified patient leads while minimizing wasted ad spend. Every dollar tracked."
-        url="https://inflowmd.vercel.app/services/google-ads"
+        url="https://www.inflowmd.com/services/google-ads"
       />
       <Navbar />
       <main>

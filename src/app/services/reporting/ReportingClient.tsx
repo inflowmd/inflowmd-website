@@ -11,14 +11,14 @@ export default function ReportingClient() {
     <>
       <BreadcrumbSchema
         items={[
-          { name: "Home", url: "https://inflowmd.vercel.app" },
-          { name: "Reporting & Analytics", url: "https://inflowmd.vercel.app/services/reporting" },
+          { name: "Home", url: "https://www.inflowmd.com" },
+          { name: "Reporting & Analytics", url: "https://www.inflowmd.com/services/reporting" },
         ]}
       />
       <ServiceSchema
         name="Medical Marketing Analytics"
         description="AI-powered dashboards and monthly reports that tie every marketing dollar to real patient inquiries. Full attribution, no vanity metrics."
-        url="https://inflowmd.vercel.app/services/reporting"
+        url="https://www.inflowmd.com/services/reporting"
       />
       <Navbar />
       <main>

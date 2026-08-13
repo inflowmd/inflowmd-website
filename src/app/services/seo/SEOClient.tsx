@@ -11,14 +11,14 @@ export default function SEOClient() {
     <>
       <BreadcrumbSchema
         items={[
-          { name: "Home", url: "https://inflowmd.vercel.app" },
-          { name: "SEO & AI Visibility", url: "https://inflowmd.vercel.app/services/seo" },
+          { name: "Home", url: "https://www.inflowmd.com" },
+          { name: "SEO & AI Visibility", url: "https://www.inflowmd.com/services/seo" },
         ]}
       />
       <ServiceSchema
         name="Healthcare SEO & AI Visibility"
         description="Rank higher on Google and get found by AI assistants. Medical practice SEO that drives organic patient growth with proven results."
-        url="https://inflowmd.vercel.app/services/seo"
+        url="https://www.inflowmd.com/services/seo"
       />
       <Navbar />
       <main>
