@@ -1,4 +1,5 @@
 import type { Check } from "@/types/audit";
+import { nonPracticeEntry } from "@/lib/nonPracticeDomains";
 import { getJsonLd, stripComments } from "./html";
 
 /**
@@ -10,6 +11,11 @@ import { getJsonLd, stripComments } from "./html";
 export interface SchemaCheckInput {
   html: string;
   htmlOk: boolean;
+  /**
+   * The audited URL. Used ONLY to look up the explicit non-practice config —
+   * never to infer anything about the business from the address itself.
+   */
+  url?: string;
 }
 
 /** schema.org types that identify a medical practice. */
@@ -96,7 +102,7 @@ function unverified(id: string, label: string, detail: string, evidence?: string
   };
 }
 
-export function runSchemaChecks({ html, htmlOk }: SchemaCheckInput): Check[] {
+export function runSchemaChecks({ html, htmlOk, url }: SchemaCheckInput): Check[] {
   if (!htmlOk) {
     const reason =
       "We could not read this page, so we did not check this. It may well be fine.";
@@ -124,6 +130,18 @@ export function runSchemaChecks({ html, htmlOk }: SchemaCheckInput): Check[] {
   const typeList = allTypes.join(", ");
   const checks: Check[] = [];
 
+  // A configured non-practice domain is excused from the medical check on
+  // every path below — by explicit list only, never inferred from the page.
+  const nonPractice = url ? nonPracticeEntry(url) : null;
+  const medicalNotApplicable: Check | null = nonPractice
+    ? {
+        id: "schema.medical",
+        label: "Medical practice identification",
+        status: "not_applicable",
+        detail: nonPractice.explanation,
+      }
+    : null;
+
   // --- Any structured data at all -------------------------------------------
   if (allTypes.length === 0) {
     checks.push({
@@ -135,13 +153,15 @@ export function runSchemaChecks({ html, htmlOk }: SchemaCheckInput): Check[] {
     });
     // Without any structured data, the specific checks below are genuine
     // absences, not unverifiable — we read the page successfully.
-    checks.push({
-      id: "schema.medical",
-      label: "Medical practice identification",
-      status: "fail",
-      detail:
-        "Search engines cannot tell that this site belongs to a medical practice rather than any other kind of business.",
-    });
+    checks.push(
+      medicalNotApplicable ?? {
+        id: "schema.medical",
+        label: "Medical practice identification",
+        status: "fail",
+        detail:
+          "Search engines cannot tell that this site belongs to a medical practice rather than any other kind of business.",
+      }
+    );
     checks.push({
       id: "schema.local-business",
       label: "Local listing details",
@@ -179,7 +199,9 @@ export function runSchemaChecks({ html, htmlOk }: SchemaCheckInput): Check[] {
   // --- Medical identity -----------------------------------------------------
   const medical = matches(found, MEDICAL_TYPES);
   checks.push(
-    medical.length > 0
+    medicalNotApplicable
+      ? medicalNotApplicable
+      : medical.length > 0
       ? {
           id: "schema.medical",
           label: "Medical practice identification",

@@ -53,7 +53,10 @@ export interface CategoryDefinition {
 }
 
 /** Credit earned per weight unit. could_not_verify never reaches here. */
-const STATUS_CREDIT: Record<Exclude<Check["status"], "could_not_verify">, number> = {
+const STATUS_CREDIT: Record<
+  Exclude<Check["status"], "could_not_verify" | "not_applicable">,
+  number
+> = {
   pass: 1,
   warn: 0.5,
   fail: 0,
@@ -143,8 +146,17 @@ export interface CategoryItem {
   /** weight × (1 − credit). Zero for a pass and for anything unverified. */
   pointsLost: number;
   pointsEarned: number;
-  /** False for could_not_verify — excluded from both sides of the score. */
+  /**
+   * False for could_not_verify AND not_applicable — excluded from both sides
+   * of the score.
+   */
   counted: boolean;
+  /**
+   * False only for not_applicable. Inapplicable checks also drop out of the
+   * verification floor's denominator, which is what separates "does not apply
+   * to this business" from "we could not read it".
+   */
+  applicable: boolean;
 }
 
 /**
@@ -153,7 +165,10 @@ export interface CategoryItem {
  * A failing 30-point check has to appear above a failing 4-point one.
  */
 function orderByImpact(items: CategoryItem[]): CategoryItem[] {
-  const rank = (i: CategoryItem) => (i.pointsLost > 0 ? 0 : !i.counted ? 1 : 2);
+  // Losers first, then unverified, then passes, then inapplicable last —
+  // a check that does not apply is the least actionable thing on the list.
+  const rank = (i: CategoryItem) =>
+    i.pointsLost > 0 ? 0 : !i.applicable ? 3 : !i.counted ? 1 : 2;
   return [...items].sort(
     (a, b) => rank(a) - rank(b) || b.pointsLost - a.pointsLost || b.weight - a.weight
   );
@@ -165,11 +180,15 @@ function buildItems(checks: Check[], definition: CategoryDefinition): CategoryIt
   for (const [id, weight] of Object.entries(definition.weights)) {
     const check = byId.get(id);
     if (!check) continue;
-    const counted = check.status !== "could_not_verify";
+    // not_applicable leaves the universe; could_not_verify stays in it but
+    // earns nothing. Both are `counted: false`, only one is `applicable`.
+    const applicable = check.status !== "not_applicable";
+    const counted = applicable && check.status !== "could_not_verify";
     const credit = counted ? STATUS_CREDIT[check.status as keyof typeof STATUS_CREDIT] : 0;
     items.push({
       check,
       weight,
+      applicable,
       counted,
       pointsEarned: counted ? weight * credit : 0,
       pointsLost: counted ? weight * (1 - credit) : 0,
@@ -190,11 +209,15 @@ export function scoreCategoryWeighted(
   definition: CategoryDefinition
 ): CategoryScore {
   const items = buildItems(checks, definition);
-  const counted = items.filter((i) => i.counted);
+  // Everything below is computed over APPLICABLE checks only. A check that
+  // does not apply to this business is not a gap in our knowledge, so it must
+  // not shrink the floor's numerator the way an unverifiable check does.
+  const applicable = items.filter((i) => i.applicable);
+  const counted = applicable.filter((i) => i.counted);
   const verified = counted.length;
-  const total = items.length;
+  const total = applicable.length;
 
-  const totalWeight = items.reduce((sum, i) => sum + i.weight, 0);
+  const totalWeight = applicable.reduce((sum, i) => sum + i.weight, 0);
   const verifiedWeight = counted.reduce((sum, i) => sum + i.weight, 0);
 
   const belowFloor =

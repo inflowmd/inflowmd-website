@@ -6,7 +6,6 @@ import { Gauge, gaugeColor } from "./Gauge";
 import {
   buildConversionModel,
   MODEL_DEFAULTS,
-  type Provenance,
 } from "@/lib/conversionModel";
 import { normalizeUrl } from "@/lib/normalizeUrl";
 import { cacheKey } from "@/lib/cache";
@@ -110,9 +109,6 @@ const RESOLVE_HOLD_MS = 1_500;
 
 /* ---------- formatting ---------- */
 
-const usd = (n: number) =>
-  `$${Math.round(n).toLocaleString("en-US")}`;
-const pct = (r: number) => `${Math.round(r * 100)}%`;
 const domainOf = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
 /** Attribution shown under each category gauge. Only the Lighthouse score is
@@ -150,22 +146,6 @@ const SOURCE_LABEL: Record<string, string> = {
 
 /* ---------- provenance + status styling ---------- */
 
-const PROVENANCE_STYLE: Record<Provenance, { label: string; className: string }> = {
-  measured: {
-    label: "Measured",
-    className: "border-[#84B83B]/60 bg-[#84B83B]/10 text-[#84B83B]",
-  },
-  cited: {
-    label: "Cited",
-    className: "border-sky-400/50 bg-sky-400/10 text-sky-300",
-  },
-  estimate: {
-    // Dashed, muted — an assumption must never look like a measurement.
-    label: "Estimate",
-    className: "border-dashed border-white/30 bg-white/[0.04] text-white/60",
-  },
-};
-
 /** could_not_verify is deliberately neutral — never styled like a failure. */
 const STATUS_STYLE: Record<Check["status"], { dot: string; text: string; label: string }> = {
   pass: { dot: "bg-[#84B83B]", text: "text-[#84B83B]", label: "Pass" },
@@ -176,24 +156,23 @@ const STATUS_STYLE: Record<Check["status"], { dot: string; text: string; label: 
     text: "text-white/45",
     label: "Not checked",
   },
+  // Neutral grey, and deliberately NOT the could_not_verify treatment either:
+  // "we did not check" and "this does not apply to you" are different claims.
+  not_applicable: {
+    dot: "bg-slate-500/60",
+    text: "text-slate-400",
+    label: "Not applicable",
+  },
 };
-
-function ProvenanceTag({ provenance }: { provenance: Provenance }) {
-  const s = PROVENANCE_STYLE[provenance];
-  return (
-    <span
-      className={`inline-flex items-center shrink-0 text-[10px] font-bold tracking-[0.16em] uppercase px-2 py-1 rounded border ${s.className}`}
-    >
-      {s.label}
-    </span>
-  );
-}
 
 /**
  * What this check cost, in the category's own points. Shown only for weighted
  * categories — an unweighted one has no meaningful per-check arithmetic.
  */
 function impactLine(item: CategoryItem): string {
+  // An inapplicable check has no points line at all — there is nothing lost,
+  // nothing earned, and nothing for the reader to act on.
+  if (!item.applicable) return "";
   if (!item.counted) return `${item.weight} points excluded \u2014 not checked`;
   if (item.pointsLost === 0) return `${item.weight} of ${item.weight} points earned`;
   const lost = Number.isInteger(item.pointsLost) ? item.pointsLost : item.pointsLost.toFixed(1);
@@ -212,13 +191,20 @@ function FindingRow({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const st = STATUS_STYLE[check.status];
-  const explanation = CHECK_EXPLANATIONS[check.id];
+  // The stock explanation tells the reader how to FIX the check. For a check
+  // that does not apply there is nothing to fix, and showing "add medical
+  // schema" under "Not applicable" would contradict the status. check.detail
+  // carries the reason instead.
+  const explanation =
+    check.status === "not_applicable" ? undefined : CHECK_EXPLANATIONS[check.id];
   return (
     <div
       className={`rounded-lg border bg-white/[0.02] ${
         check.status === "could_not_verify"
           ? "border-dashed border-white/15"
-          : "border-white/10"
+          : check.status === "not_applicable"
+            ? "border-slate-500/25"
+            : "border-white/10"
       }`}
     >
       <button
@@ -231,7 +217,7 @@ function FindingRow({
         <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${st.dot}`} />
         <span className="flex-1 min-w-0">
           <span className="block text-sm text-white/80 truncate">{check.label}</span>
-          {impact && (
+          {impact && impactLine(impact) && (
             <span
               className={`block text-[11px] tabular-nums ${
                 impact.pointsLost > 0 ? "text-white/55" : "text-white/35"
@@ -347,6 +333,42 @@ function CheckList({ category }: { category: ResolvedCategory }) {
 }
 
 /**
+ * The two routes out that sit beside the email capture.
+ *
+ * Deliberately quieter than the send button — a text link and an outline
+ * button against its solid lime fill — so the email stays the primary action.
+ * Rendered in BOTH the form and the confirmation state: someone who has just
+ * handed over their address is the most engaged they will be all day, and
+ * that is the worst possible moment to remove the next step.
+ */
+function SecondaryActions({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`booth-no-print mt-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 ${className}`}
+    >
+      <a
+        href={CALENDLY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center text-sm sm:text-base text-white/60 hover:text-white underline decoration-white/25 underline-offset-4 hover:decoration-white/60 transition-colors"
+        style={{ minHeight: 44 }}
+      >
+        Or book a call now →
+      </a>
+      <a
+        href="/why-nextjs"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center justify-center rounded-lg border border-white/20 px-5 text-sm sm:text-base font-semibold text-white/80 hover:text-white hover:border-white/45 transition-colors"
+        style={{ minHeight: 48 }}
+      >
+        How we fix all of this →
+      </a>
+    </div>
+  );
+}
+
+/**
  * Lead capture. Two fields, because a third is a reason to walk away.
  *
  * The practice, its URL, the scores and the findings all come from the report
@@ -430,6 +452,7 @@ function LeadForm({
         <p className="text-white/70 text-base sm:text-lg mt-2">
           Check your inbox — I&rsquo;ll follow up next week.
         </p>
+        <SecondaryActions className="sm:justify-center" />
       </div>
     );
   }
@@ -502,9 +525,14 @@ function LeadForm({
           </p>
         )}
       </form>
+
+      <SecondaryActions />
     </div>
   );
 }
+
+/** Booking link offered beside the email capture. */
+const CALENDLY_URL = "https://calendly.com/inflowmd/strategy-call";
 
 /** Short date for the speed gauge's attribution line. */
 const measuredOn = (iso: string) =>
@@ -612,55 +640,6 @@ function SpeedSection({ performance }: { performance: AuditResult["performance"]
 }
 
 /* Gauge lives in ./Gauge — shared with the /pitch deck. */
-
-/* ---------- slider ---------- */
-
-function Slider({
-  label,
-  value,
-  min,
-  max,
-  step,
-  display,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  display: string;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div className="booth-no-print rounded-xl border border-dashed border-white/20 bg-white/[0.03] p-4">
-      <div className="flex items-center justify-between gap-3 mb-1">
-        <label className="text-sm sm:text-base font-semibold text-white/85 leading-snug">
-          {label}
-        </label>
-        <span
-          className="text-xl sm:text-2xl font-extrabold tabular-nums whitespace-nowrap"
-          style={{ color: ACCENT }}
-        >
-          {display}
-        </span>
-      </div>
-      <div className="mb-2">
-        <ProvenanceTag provenance="estimate" />
-      </div>
-      <input
-        type="range"
-        className="booth-slider"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        aria-label={label}
-        onChange={(e) => onChange(Number(e.target.value))}
-      />
-    </div>
-  );
-}
 
 /**
  * The staged scan list, shared by the main run and the comparison run.
@@ -1050,14 +1029,10 @@ export default function BoothClient({
   /** The run finished without a result — stages must show "not completed". */
   const [runFailed, setRunFailed] = useState(false);
   const [pendingUrl, setPendingUrl] = useState("");
-  /** How many model beats are visible; large number = all (cached path). */
-  const [revealed, setRevealed] = useState(999);
   /** Per-stage outcomes, set only once the response has actually arrived. */
   const [stageOutcomes, setStageOutcomes] = useState<boolean[] | null>(null);
   /** How many stage lines (top-down) have flipped to their final state. */
   const [resolvedCount, setResolvedCount] = useState(0);
-  /** The full chain and secondary sliders live behind this. */
-  const [showMath, setShowMath] = useState(false);
   /** Booth CTA card flips to the in-person instruction when tapped. */
   const [ctaFlipped, setCtaFlipped] = useState(false);
   /** ISO fetchedAt of a cached result currently on screen in place of a live
@@ -1076,16 +1051,15 @@ export default function BoothClient({
    *  slowly and unpredictably. The offline check runs in an effect below. */
   const [networkMode, setNetworkMode] = useState<"live" | "cache-first">("live");
 
-  // Conversion-model inputs — all default, none blank.
-  const [monthlyVisitors, setMonthlyVisitors] = useState(800);
-  const [gapCaptureRate, setGapCaptureRate] = useState<number>(MODEL_DEFAULTS.gapCaptureRate);
-  const [closeRate, setCloseRate] = useState<number>(MODEL_DEFAULTS.closeRate);
-  const [avgPatientValue, setAvgPatientValue] = useState<number>(
-    MODEL_DEFAULTS.avgPatientValue
-  );
+  // Conversion-model inputs. Fixed, not adjustable: the sliders are gone, so
+  // these are the published assumptions behind the sentence on screen rather
+  // than dials a visitor can turn until they like the number.
+  const monthlyVisitors = 800;
+  const gapCaptureRate = MODEL_DEFAULTS.gapCaptureRate;
+  const closeRate = MODEL_DEFAULTS.closeRate;
+  const avgPatientValue = MODEL_DEFAULTS.avgPatientValue;
 
   const searchRef = useRef<HTMLInputElement>(null);
-  const revealTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const scanTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const resolveTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1144,11 +1118,9 @@ export default function BoothClient({
   });
 
   const clearTimers = useCallback(() => {
-    if (revealTimer.current) clearInterval(revealTimer.current);
     if (scanTimer.current) clearInterval(scanTimer.current);
     if (resolveTimer.current) clearInterval(resolveTimer.current);
     if (holdTimer.current) clearTimeout(holdTimer.current);
-    revealTimer.current = null;
     scanTimer.current = null;
     resolveTimer.current = null;
     holdTimer.current = null;
@@ -1167,12 +1139,10 @@ export default function BoothClient({
     setError(null);
     setQuery("");
     setUrlInput("");
-    setRevealed(999);
     setRunFailed(false);
     setPendingUrl("");
     setStageOutcomes(null);
     setResolvedCount(0);
-    setShowMath(false);
     setCtaFlipped(false);
     setNoWebsiteAttendee(null);
     setFallbackNote(null);
@@ -1193,8 +1163,6 @@ export default function BoothClient({
       // (false, because it was live AT THAT TIME). Without this the header
       // reads "Measured just now" over a measurement that is days old.
       setResult({ ...cached, fromCache: true, practiceName: displayName ?? cached.practiceName });
-      setRevealed(999);
-      setShowMath(false);
       setCtaFlipped(false);
         setPhase("result");
       setFallbackNote(showNote ? cached.fetchedAt : null);
@@ -1234,7 +1202,6 @@ export default function BoothClient({
       setRunFailed(false);
       setStageOutcomes(null);
       setResolvedCount(0);
-      setShowMath(false);
       setCtaFlipped(false);
         setFallbackNote(null);
       setPhase("running");
@@ -1360,10 +1327,6 @@ export default function BoothClient({
             holdTimer.current = setTimeout(() => {
               setResult(data);
               setPhase("result");
-              setRevealed(0);
-              revealTimer.current = setInterval(() => {
-                setRevealed((n) => n + 1);
-              }, 380);
             }, RESOLVE_HOLD_MS);
           }
         }, RESOLVE_STAGGER_MS);
@@ -1458,15 +1421,6 @@ export default function BoothClient({
     console.log(`[BOOTH] C pressed — force-loaded the cached result for ${domainOf(url)}.`);
     renderCachedResult(cached, activeDisplayNameRef.current, true);
   }, [phase, result, cacheByUrl, renderCachedResult]);
-
-  // Stop the reveal timer once every beat is showing.
-  useEffect(() => {
-    const steps = model?.steps.length ?? 0;
-    if (revealTimer.current && revealed > steps) {
-      clearInterval(revealTimer.current);
-      revealTimer.current = null;
-    }
-  }, [revealed, model]);
 
   useEffect(() => () => clearTimers(), [clearTimers]);
 
@@ -2088,131 +2042,36 @@ export default function BoothClient({
         {/* LEAD CAPTURE — the evidence has landed; ask before the money talk. */}
         <LeadForm result={result} categories={categories} verdict={verdict} />
 
-        {/* conversion model */}
+        {/* PATIENT VALUE — one statement, the stat behind it, the caveat.
+            The sliders, the 12-step chain and the "show the math" toggle are
+            gone: at a booth nobody tunes a model, and a doctor reading a
+            number they just watched someone drag is reading our arithmetic,
+            not their site. The full chain still exists in conversionModel.ts
+            and still backs this sentence. */}
         {model ? (
-          <>
+          <div className="mb-8">
             <div
-              className="booth-model-summary rounded-2xl border-2 p-6 sm:p-8 mb-8"
+              className="rounded-2xl border-2 p-6 sm:p-8"
               style={{ borderColor: `${ACCENT}66`, background: `${ACCENT}14` }}
             >
-              <div className="text-[11px] font-bold tracking-[0.22em] uppercase mb-3" style={{ color: ACCENT }}>
+              <div
+                className="text-[11px] font-bold tracking-[0.22em] uppercase mb-3"
+                style={{ color: ACCENT }}
+              >
                 {model.bandLabel}
               </div>
               <p className="text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight">
-                {model.headline}
+                {model.valueStatement}
               </p>
-            </div>
-
-            {/* Default view: the number, one lever, the caveat. */}
-            <div className="max-w-xl">
-              <Slider
-                label="Monthly visitors"
-                value={monthlyVisitors}
-                min={100}
-                max={5000}
-                step={100}
-                display={monthlyVisitors.toLocaleString("en-US")}
-                onChange={setMonthlyVisitors}
-              />
+              <p className="mt-5 text-base sm:text-lg font-semibold text-white/80 leading-snug">
+                {model.supportingStat}
+              </p>
             </div>
 
             <div className="mt-4 rounded-xl border border-white/10 bg-black/25 p-5">
               <p className="text-white/50 text-sm leading-relaxed">{model.caveat}</p>
             </div>
-
-            {/* The full chain and remaining levers, behind an invitation to check us. */}
-            <button
-              type="button"
-              onClick={() => setShowMath((v) => !v)}
-              aria-expanded={showMath}
-              className="booth-no-print mt-4 inline-flex items-center gap-2 rounded-lg border border-white/15 px-5 text-sm sm:text-base font-bold text-white/80 hover:text-white hover:border-white/40 transition-colors"
-              style={{ minHeight: 44 }}
-            >
-              {showMath ? "Hide the math" : "Show the math"}
-              <span
-                aria-hidden
-                className={`transition-transform ${showMath ? "rotate-180" : ""}`}
-              >
-                ▾
-              </span>
-            </button>
-
-            {showMath && (
-              <div className="mt-5">
-                <div className="grid lg:grid-cols-[1fr_360px] gap-6">
-                  {/* the chain, provenance intact */}
-                  <ol className="space-y-2">
-                    {model.steps.map((step, i) => (
-                      <li
-                        key={step.label}
-                        className={`rounded-xl border border-white/10 bg-white/[0.03] p-4 transition-all duration-500 ${
-                          i < revealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="min-w-0">
-                            <div className="text-white/60 text-sm sm:text-base">{step.label}</div>
-                            <div className="text-xl sm:text-2xl font-extrabold mt-0.5">
-                              {step.value}
-                            </div>
-                          </div>
-                          <ProvenanceTag provenance={step.provenance} />
-                        </div>
-                        {step.source && (
-                          <div className="text-[11px] text-white/35 mt-2">
-                            {step.sourceUrl ? (
-                              <a
-                                href={step.sourceUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="underline decoration-white/20 hover:decoration-white/60"
-                              >
-                                {step.source}
-                              </a>
-                            ) : (
-                              step.source
-                            )}
-                          </div>
-                        )}
-                      </li>
-                    ))}
-                  </ol>
-
-                  {/* the remaining levers */}
-                  <div className="space-y-3">
-                    <Slider
-                      label="How much of the gap is speed?"
-                      value={gapCaptureRate}
-                      min={0}
-                      max={1}
-                      step={0.05}
-                      display={pct(gapCaptureRate)}
-                      onChange={setGapCaptureRate}
-                    />
-                    <Slider
-                      label="Inquiries that become patients"
-                      value={closeRate}
-                      min={0.05}
-                      max={1}
-                      step={0.05}
-                      display={pct(closeRate)}
-                      onChange={setCloseRate}
-                    />
-                    <Slider
-                      label="Value per patient"
-                      value={avgPatientValue}
-                      min={500}
-                      max={10000}
-                      step={250}
-                      display={usd(avgPatientValue)}
-                      onChange={setAvgPatientValue}
-                    />
-                  </div>
-                </div>
-                <p className="mt-4 text-white/35 text-xs">{model.supportingStat}</p>
-              </div>
-            )}
-          </>
+          </div>
         ) : null}
 
         {/* COMPARISON — only against a failing score, never against ourselves */}

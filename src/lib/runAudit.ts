@@ -192,7 +192,13 @@ export async function runAudit(
     htmlOk: htmlResult.ok,
     redirects: resolution,
   });
-  const schema = runSchemaChecks({ html: htmlResult.html, htmlOk: htmlResult.ok });
+  const schema = runSchemaChecks({
+    html: htmlResult.html,
+    htmlOk: htmlResult.ok,
+    // `target` is the final URL after redirects — the same value the SEO
+    // checks are given, so both judge the page we actually landed on.
+    url: target,
+  });
   const aiReadiness = runAiReadinessChecks({
     html: htmlResult.html,
     htmlOk: htmlResult.ok,

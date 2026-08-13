@@ -75,6 +75,16 @@ export interface ConversionModel {
   /** Rendered near the revenue figure — the correlation-not-causation note. */
   caveat: string;
   supportingStat: string;
+  /**
+   * The one-line claim the booth screen leads with.
+   *
+   * Band-aware on purpose. "Likely costing thousands per month" is true of a
+   * slow site and FALSE of a fast one, and the fast band exists precisely to
+   * say page load is not the problem here. It also names the computed range
+   * instead of saying "thousands" when the modelled value does not reach
+   * $1,000 — the word has to be earned by the arithmetic.
+   */
+  valueStatement: string;
 }
 
 export const MODEL_DEFAULTS = {
@@ -91,7 +101,7 @@ const PORTENT_URL =
 const PAGESPEED_SOURCE = "Google PageSpeed Insights, Lighthouse LCP (mobile)";
 
 export const SUPPORTING_STAT =
-  "53% of mobile visits are abandoned if a page takes longer than 3 seconds to load — Google / SOASTA, 2016";
+  "53% of mobile visitors abandon a page that takes longer than 3 seconds to load — Google / SOASTA, 2016";
 
 export const MODEL_CAVEAT =
   "Portent compared different sites to each other. Faster sites also tend to be better designed and better optimized overall, so speed is one contributing factor rather than the sole cause. This estimate assumes only a portion of the gap is attributable to speed.";
@@ -310,6 +320,9 @@ export function buildConversionModel(
       headline: `Your site loads in ${formatSeconds(
         lcpSeconds
       )}. At this speed, page load is not costing you inquiries.`,
+      valueStatement: `At ${formatSeconds(
+        lcpSeconds
+      )}, page load is not costing this practice patient value.`,
       caveat: MODEL_CAVEAT,
       supportingStat: SUPPORTING_STAT,
     };
@@ -387,6 +400,16 @@ export function buildConversionModel(
     )} of that gap to speed, that is ${formatCurrencyRange(
       revenueRange
     )} in patient value.`,
+    valueStatement:
+      revenueRange[0] >= 1_000
+        ? `At ${formatSeconds(
+            lcpSeconds
+          )}, this site is likely costing thousands per month in patient value.`
+        : `At ${formatSeconds(
+            lcpSeconds
+          )}, this site is likely costing ${formatCurrencyRange(
+            revenueRange
+          )} per month in patient value.`,
     caveat: MODEL_CAVEAT,
     supportingStat: SUPPORTING_STAT,
   };

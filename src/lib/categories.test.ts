@@ -369,4 +369,95 @@ check("deriveScores agrees with buildCategories", () => {
   assert.equal(scores.ai, 70, "failing medical id caps AI at its 70-point bound");
 });
 
+/* ---------- not_applicable ---------- */
+
+check("NOT_APPLICABLE leaves the score's universe entirely", () => {
+  // Everything passes except the 30-point medical check, which does not apply.
+  // The score must be 100 — not 70 — because those 30 points were never on
+  // the table for this business.
+  const checks = allAt("ai", "pass").map((c) =>
+    c.id === "schema.medical" ? mk(c.id, "not_applicable") : c
+  );
+  const r = scoreCategoryWeighted(checks, CATEGORY_BY_KEY.ai);
+  assert.equal(r.score, 100);
+  assert.equal(r.total, 10, "the inapplicable check drops out of the count");
+  assert.equal(r.verified, 10);
+});
+
+check("not_applicable rescales the remaining weights, like could_not_verify", () => {
+  // medical (30) inapplicable; content-depth (10) fails; everything else passes.
+  // Denominator is 70, earned is 60 → 86.
+  const checks = allAt("ai", "pass").map((c) => {
+    if (c.id === "schema.medical") return mk(c.id, "not_applicable");
+    if (c.id === "ai.content-depth") return mk(c.id, "fail");
+    return c;
+  });
+  assert.equal(scoreCategoryWeighted(checks, CATEGORY_BY_KEY.ai).score, 86);
+});
+
+check("THE DISTINCTION: not_applicable clears the floor where could_not_verify does not", () => {
+  // The AI floor needs 70% of category WEIGHT verified. medical is 30 points.
+  const base = allAt("ai", "pass");
+
+  // Unreadable: 70 of 100 weight verified — exactly at the floor, but the
+  // 30 points still count against it, so nothing above it may go unverified.
+  const unreadable = base.map((c) =>
+    c.id === "schema.medical" ? mk(c.id, "could_not_verify") : c
+  );
+  const withOneMore = unreadable.map((c) =>
+    c.id === "schema.organization" ? mk(c.id, "could_not_verify") : c
+  );
+  assert.equal(
+    scoreCategoryWeighted(withOneMore, CATEGORY_BY_KEY.ai).score,
+    null,
+    "64 of 100 weight verified is below the floor — no score"
+  );
+
+  // Inapplicable: the same two checks, but medical does not apply. The floor
+  // is now measured over the 70 applicable points, of which 64 are verified
+  // — 91%, comfortably clear.
+  const inapplicable = withOneMore.map((c) =>
+    c.id === "schema.medical" ? mk(c.id, "not_applicable") : c
+  );
+  const r = scoreCategoryWeighted(inapplicable, CATEGORY_BY_KEY.ai);
+  assert.ok(r.score !== null, "an inapplicable check must not consume the floor");
+  assert.equal(r.score, 100, "the six unverified points rescale away too");
+});
+
+check("an inapplicable check earns and loses nothing", () => {
+  const checks = allAt("ai", "fail").map((c) =>
+    c.id === "schema.medical" ? mk(c.id, "not_applicable") : c
+  );
+  const cats = buildCategories({ schema: checks, seo: [], aiReadiness: [] });
+  const item = cats
+    .find((c) => c.key === "ai")!
+    .items.find((i) => i.check.id === "schema.medical")!;
+  assert.equal(item.pointsLost, 0, "nothing was lost");
+  assert.equal(item.pointsEarned, 0, "and nothing was earned");
+  assert.equal(item.counted, false);
+  assert.equal(item.applicable, false);
+});
+
+check("inapplicable checks sort last — below passes, not among the failures", () => {
+  const checks = [
+    mk("schema.medical", "not_applicable"),
+    mk("schema.present", "fail"),
+    mk("ai.content-depth", "pass"),
+  ];
+  const items = buildCategories({ schema: checks, seo: [], aiReadiness: [] }).find(
+    (c) => c.key === "ai"
+  )!.items;
+  assert.equal(items[0].check.id, "schema.present", "the point-loser leads");
+  assert.equal(
+    items[items.length - 1].check.id,
+    "schema.medical",
+    "the inapplicable check is last"
+  );
+});
+
+check("a category of nothing but inapplicable checks yields no score, not 100", () => {
+  const r = scoreCategoryWeighted(allAt("ai", "not_applicable"), CATEGORY_BY_KEY.ai);
+  assert.equal(r.score, null, "scoring nothing must never read as a perfect score");
+});
+
 console.log(`\n${passed} category checks passed.`);

@@ -13,7 +13,18 @@
  * from an independent request that did succeed (e.g. robots.txt).
  */
 
-export type CheckStatus = "pass" | "fail" | "warn" | "could_not_verify";
+/**
+ * `could_not_verify` and `not_applicable` are both excluded from scoring, but
+ * they mean different things and are NOT interchangeable:
+ *
+ *   could_not_verify — we tried and failed to read it. It still counts against
+ *     the category's verification floor, because a site we could barely read
+ *     should not receive a confident score.
+ *   not_applicable — the check does not apply to this business at all. It
+ *     leaves the universe entirely: out of the score, and out of the floor's
+ *     denominator too, since there is nothing here we failed to establish.
+ */
+export type CheckStatus = "pass" | "fail" | "warn" | "could_not_verify" | "not_applicable";
 
 export interface Check {
   /** Stable machine id, e.g. "seo.title-length". */
