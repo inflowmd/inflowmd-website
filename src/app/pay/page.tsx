@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.inflowmd.com"),
   title: "Update Your Payment Method",
   description:
-    "Securely update the card on file for your InflowMD service. Payments are processed by Cognito Forms.",
+    "Securely update the card on file for your InflowMD service. Payments are processed by Cognito Forms, so your card details never touch our own systems.",
   alternates: { canonical: CANONICAL },
   robots: {
     index: false,

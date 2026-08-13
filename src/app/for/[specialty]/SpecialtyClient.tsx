@@ -8,7 +8,7 @@ import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 import ServiceSchema from "@/components/ServiceSchema";
 import type { SpecialtyData } from "@/lib/specialties";
 
-const SITE_URL = "https://inflowmd.vercel.app";
+const SITE_URL = "https://www.inflowmd.com";
 
 export default function SpecialtyClient({ data }: { data: SpecialtyData }) {
   const pageUrl = `${SITE_URL}/for/${data.slug}`;

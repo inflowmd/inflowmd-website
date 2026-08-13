@@ -36,6 +36,11 @@ export default function Navbar() {
 
   return (
     <LazyMotion features={domAnimation} strict>
+    {/* The nav sits INSIDE a <header> so a page exposes both landmarks:
+        <header> says "this is the site header", <nav> says "these are the
+        links". Wrapping, not replacing — swapping the nav out would trade
+        one landmark for the other. */}
+    <header>
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
@@ -237,6 +242,7 @@ export default function Navbar() {
         )}
       </AnimatePresence>
     </nav>
+    </header>
     </LazyMotion>
   );
 }

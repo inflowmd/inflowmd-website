@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: "Medical Marketing Pricing Plans",
   description:
     "Transparent pricing for healthcare marketing. Website, SEO, Google Ads, and reputation management plans starting at $500/mo.",
-  alternates: { canonical: "https://inflowmd.vercel.app/pricing" },
+  alternates: { canonical: "https://www.inflowmd.com/pricing" },
   openGraph: {
     title: "Medical Marketing Pricing Plans | InflowMD",
     description:
       "Transparent pricing for healthcare marketing. Website, SEO, Google Ads, and reputation management plans starting at $500/mo.",
-    url: "https://inflowmd.vercel.app/pricing",
+    url: "https://www.inflowmd.com/pricing",
   },
 };
 

@@ -122,8 +122,8 @@ export default function PricingClient() {
     <>
       <BreadcrumbSchema
         items={[
-          { name: "Home", url: "https://inflowmd.vercel.app" },
-          { name: "Pricing", url: "https://inflowmd.vercel.app/pricing" },
+          { name: "Home", url: "https://www.inflowmd.com" },
+          { name: "Pricing", url: "https://www.inflowmd.com/pricing" },
         ]}
       />
       <FAQSchema faqs={faqs} />
@@ -345,7 +345,10 @@ function PricingCard({
       <div
         className={`px-6 pb-6 text-center bg-gradient-to-b from-[#1A1A2E] to-[#232340] ${tier.popular ? "pt-10" : "pt-6"}`}
       >
-        <h3 className="text-white font-bold text-lg mb-1">{tier.name}</h3>
+        {/* h2, not h3: each plan is a top-level item of the pricing section.
+            The hero h1 is the only heading above it, so an h3 here skipped a
+            level. Size is set by the class, so nothing moves visually. */}
+        <h2 className="text-white font-bold text-lg mb-1">{tier.name}</h2>
         <p className="text-gray-400 text-sm mb-4 min-h-[2.5rem]">{tier.tagline}</p>
         <div className="flex items-end justify-center gap-1">
           <span className="text-white text-4xl font-extrabold">

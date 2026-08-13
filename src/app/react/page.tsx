@@ -4,7 +4,7 @@ import ReactClient from "./ReactClient";
 export const metadata: Metadata = {
   title: "Why We Build on React (and Next.js) | InflowMD",
   description:
-    "Why InflowMD builds every medical practice website on React and Next.js — speed, security, AI-search readiness, and the foundation patient-acquisition runs on in 2026.",
+    "Why InflowMD builds every medical practice website on React and Next.js: speed, security, AI-search readiness, and the foundation patient growth runs on.",
   alternates: { canonical: "https://www.inflowmd.com/react" },
   openGraph: {
     title: "Why We Build on React | InflowMD",

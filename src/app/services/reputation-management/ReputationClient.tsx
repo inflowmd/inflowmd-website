@@ -11,14 +11,14 @@ export default function ReputationClient() {
     <>
       <BreadcrumbSchema
         items={[
-          { name: "Home", url: "https://inflowmd.vercel.app" },
-          { name: "Reputation Management", url: "https://inflowmd.vercel.app/services/reputation-management" },
+          { name: "Home", url: "https://www.inflowmd.com" },
+          { name: "Reputation Management", url: "https://www.inflowmd.com/services/reputation-management" },
         ]}
       />
       <ServiceSchema
         name="Doctor Reputation Management"
         description="Monitor, grow, and protect your online reviews. Automated review generation, sentiment analysis, and competitor tracking for medical practices."
-        url="https://inflowmd.vercel.app/services/reputation-management"
+        url="https://www.inflowmd.com/services/reputation-management"
       />
       <Navbar />
       <main>

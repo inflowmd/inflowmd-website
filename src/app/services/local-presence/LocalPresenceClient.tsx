@@ -11,14 +11,14 @@ export default function LocalPresenceClient() {
     <>
       <BreadcrumbSchema
         items={[
-          { name: "Home", url: "https://inflowmd.vercel.app" },
-          { name: "Local SEO & Maps", url: "https://inflowmd.vercel.app/services/local-presence" },
+          { name: "Home", url: "https://www.inflowmd.com" },
+          { name: "Local SEO & Maps", url: "https://www.inflowmd.com/services/local-presence" },
         ]}
       />
       <ServiceSchema
         name="Local SEO & Maps for Medical Practices"
         description="Dominate Google Maps and local search. 60+ directory listings, citation management, and NAP consistency for healthcare practices."
-        url="https://inflowmd.vercel.app/services/local-presence"
+        url="https://www.inflowmd.com/services/local-presence"
       />
       <Navbar />
       <main>

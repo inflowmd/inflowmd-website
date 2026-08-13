@@ -11,14 +11,14 @@ export default function WebDesignClient() {
     <>
       <BreadcrumbSchema
         items={[
-          { name: "Home", url: "https://inflowmd.vercel.app" },
-          { name: "Website Design & Development", url: "https://inflowmd.vercel.app/services/web-design" },
+          { name: "Home", url: "https://www.inflowmd.com" },
+          { name: "Website Design & Development", url: "https://www.inflowmd.com/services/web-design" },
         ]}
       />
       <ServiceSchema
         name="Medical Website Design & Development"
         description="High-converting, mobile-first medical websites. ADA compliant, HIPAA-aware forms, and blazing fast performance for healthcare practices."
-        url="https://inflowmd.vercel.app/services/web-design"
+        url="https://www.inflowmd.com/services/web-design"
       />
       <Navbar />
       <main>

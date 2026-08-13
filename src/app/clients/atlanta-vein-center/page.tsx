@@ -6,7 +6,7 @@ import RoiCalculator from "./RoiCalculator";
 const CANONICAL = "https://www.inflowmd.com/clients/atlanta-vein-center";
 const TITLE = "Confidential Growth Strategy — Prepared for Atlanta Vein Center";
 const DESCRIPTION =
-  "Market analysis and growth plan for Atlanta Vein Center, prepared July 2026 by InflowMD.";
+  "Market analysis and growth plan for Atlanta Vein Center, prepared July 2026 by InflowMD: local search position, competitor gaps, and projected patient growth.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.inflowmd.com"),

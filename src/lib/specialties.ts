@@ -103,7 +103,7 @@ const varicoseVeinDoctors: SpecialtyData = {
   meta: {
     title: "Marketing for Varicose Vein Doctors",
     description:
-      "Digital marketing built for vein specialists. We turn surgeon-led credentials into measurable patient growth — SEO, web design, Google Ads, local presence, and reputation management for vein practices.",
+      "Digital marketing built for vein specialists. We turn surgeon-led credentials into measurable patient growth with SEO, web design, and Google Ads.",
   },
   problem: {
     heading: "Credentialed doesn't mean chosen",

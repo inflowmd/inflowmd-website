@@ -254,7 +254,7 @@ function SpeedRace() {
           </div>
           {/* Next.js */}
           <div>
-            <BrowserFrame label="inflowmd.vercel.app" color="green">
+            <BrowserFrame label="www.inflowmd.com" color="green">
               {playing && <NXLoad />}
             </BrowserFrame>
             <div className="mt-4 flex items-center justify-between px-2">
