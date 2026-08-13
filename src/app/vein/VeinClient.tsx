@@ -459,7 +459,7 @@ function Closing() {
         </FadeIn>
         <FadeIn delay={0.22}>
           <a
-            href="mailto:inflowmd@gmail.com?subject=Vein%20practice%20website"
+            href="mailto:clayton@inflowmd.com?subject=Vein%20practice%20website"
             className="inline-block px-8 py-4 bg-accent text-white font-semibold rounded-lg text-base sm:text-lg glow-blue hover:bg-accent-light transition-colors"
           >
             Start a Conversation →

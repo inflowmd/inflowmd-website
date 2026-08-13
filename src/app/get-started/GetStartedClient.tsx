@@ -119,10 +119,10 @@ export default function GetStartedClient() {
                 <p className="mt-8 text-gray-500 text-sm">
                   Questions? Email us at{" "}
                   <a
-                    href="mailto:inflowmd@gmail.com"
+                    href="mailto:clayton@inflowmd.com"
                     className="text-accent hover:underline font-medium"
                   >
-                    inflowmd@gmail.com
+                    clayton@inflowmd.com
                   </a>
                 </p>
               </FadeIn>
