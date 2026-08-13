@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { normalizeUrl, runAudit } from "@/lib/runAudit";
+import { recordAudit } from "@/lib/auditCounter";
 import { getCached } from "@/lib/cache";
 import { assertSafeUrl } from "@/lib/ssrfGuard";
 import { clientIp, rateLimit } from "@/lib/rateLimit";
@@ -88,6 +89,13 @@ export async function POST(request: Request) {
   }
 
   const result = await runAudit(url);
+
+  // Booth counter: unique domains audited LIVE at the event. Deliberately not
+  // awaited — the visitor is waiting on this response, and a GitHub round trip
+  // for a number on a poster is not worth a millisecond of it. recordAudit
+  // swallows its own failures; the catch is belt and braces so an unhandled
+  // rejection can never surface as a failed audit.
+  void recordAudit(url).catch(() => {});
 
   return NextResponse.json(result, {
     headers: {
