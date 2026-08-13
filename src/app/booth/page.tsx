@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import RotatingHeadline from "./RotatingHeadline";
 
 /**
  * Conference booth display — a full-screen poster for a propped-up iPad.
@@ -44,9 +45,7 @@ export default function BoothDisplayPage() {
             height={118}
             className="h-[clamp(30px,5vmin,54px)] w-auto"
           />
-          <h1 className="mt-[2.5vmin] max-w-[16em] text-[clamp(30px,6.4vmin,72px)] font-extrabold leading-[1.06] tracking-tight text-white">
-            Is your website costing you patients?
-          </h1>
+          <RotatingHeadline />
           <p className="mt-[2.5vmin] max-w-[26em] text-[clamp(16px,2.9vmin,30px)] font-light leading-snug text-slate-300">
             Free audit of your practice&rsquo;s site — findings in under a minute
           </p>
