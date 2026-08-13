@@ -946,3 +946,25 @@ body {
     margin: 14mm 12mm;
   }
 }
+
+/* Booth audit counter — the number's entrance when it increments. Keyed on a
+   tick so React remounts the span and the animation replays. Motion only:
+   the number itself is already on screen either way. */
+@keyframes booth-count-bump {
+  0% {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.booth-count-bump {
+  animation: booth-count-bump 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .booth-count-bump {
+    animation: none;
+  }
+}

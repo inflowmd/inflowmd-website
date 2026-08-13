@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import AuditCounter from "./AuditCounter";
 import RotatingHeadline from "./RotatingHeadline";
 
 /**
@@ -69,6 +70,13 @@ export default function BoothDisplayPage() {
         </div>
       </div>
 
+      {/* Live counter. Renders nothing until it has a number worth showing,
+          so this strip is simply empty for most of the conference's first
+          hour — reserved height keeps the stage above it from shifting when
+          it does appear. */}
+      <div className="flex h-[5vmin] shrink-0 items-center justify-center px-[6vmin]">
+        <AuditCounter />
+      </div>
     </main>
   );
 }

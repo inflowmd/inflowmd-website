@@ -30,6 +30,8 @@ interface Slide {
   segments: Segment[];
   /** Milliseconds at FULL opacity, before the fade-out begins. */
   holdMs: number;
+  /** Smaller supporting line, fading with the state that owns it. */
+  subline?: string;
 }
 
 const ACCENT = "#84B83B";
@@ -77,6 +79,19 @@ const SLIDES: Slide[] = [
       { text: "?" },
     ],
     holdMs: 4000,
+  },
+  {
+    // The room stat. Both figures come from our own pre-warm of the attendee
+    // list: 42 of the 59 attendee URLs are WordPress (71%), and 31 of the 56
+    // practices we could score sit below 75 on AI visibility (56%).
+    segments: [
+      { text: "More than half the practices at this conference are " },
+      { text: "invisible to AI", accent: true },
+      { text: "." },
+    ],
+    subline:
+      "We audited every attending practice. 71% are on WordPress. 56% score below 75 on AI visibility.",
+    holdMs: 6000,
   },
   {
     segments: [
@@ -154,15 +169,22 @@ export default function RotatingHeadline() {
               } as React.CSSProperties
             }
           >
-            {slide.segments.map((segment) => (
-              <span
-                key={segment.text}
-                className={segment.accent ? "font-extrabold" : "font-medium"}
-                style={segment.accent ? { color: ACCENT } : undefined}
-              >
-                {segment.text}
+            <span className="block">
+              {slide.segments.map((segment) => (
+                <span
+                  key={segment.text}
+                  className={segment.accent ? "font-extrabold" : "font-medium"}
+                  style={segment.accent ? { color: ACCENT } : undefined}
+                >
+                  {segment.text}
+                </span>
+              ))}
+            </span>
+            {slide.subline && (
+              <span className="mt-[1.6vmin] block max-w-[30em] text-[clamp(14px,2.2vmin,24px)] font-light leading-snug text-slate-300">
+                {slide.subline}
               </span>
-            ))}
+            )}
           </span>
         );
       })}
