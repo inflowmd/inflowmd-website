@@ -36,20 +36,20 @@ export default function ContentReviewPage() {
     <div className="min-h-screen bg-warm-bg text-foreground flex flex-col">
       <main className="flex-1">
         <div className="max-w-[900px] mx-auto px-5 sm:px-8 py-12 sm:py-16">
-          {/* The logo is white artwork on transparency — it disappears on this
-              warm background, so it sits on a dark plaque rather than being
-              replaced with a text wordmark. */}
+          {/* The practice's own light-ground lockup — gold mark, dark wordmark,
+              on transparency — so it sits directly on the background with no
+              plaque. The brand kit's other lockups are all built for dark
+              grounds and are baked onto solid black rectangles; any of those
+              would have shown up here as a black box. */}
           <div className="flex justify-center">
-            <span className="inline-flex items-center rounded-xl bg-dark px-6 py-4">
-              <Image
-                src="/inflowmd-final.png"
-                alt="InflowMD"
-                width={788}
-                height={118}
-                priority
-                className="h-8 sm:h-9 w-auto"
-              />
-            </span>
+            <Image
+              src="/veinity-logo.png"
+              alt="Vein-ity Vein Care Centers of Kansas"
+              width={582}
+              height={188}
+              priority
+              className="h-16 sm:h-20 w-auto"
+            />
           </div>
 
           <header className="mt-10 sm:mt-12 text-center">
@@ -64,8 +64,12 @@ export default function ContentReviewPage() {
 
           {/* Full-bleed within the container. overflow-hidden is the guard: if
               the embed ever reports a width wider than its column, the page
-              must not scroll sideways on a phone. */}
-          <div className="mt-10 sm:mt-14 overflow-hidden rounded-2xl bg-white border border-black/[0.07] shadow-sm">
+              must not scroll sideways on a phone.
+
+              The vertical padding is inside the card so the form breathes
+              against its own edges as well as against the heading and footer:
+              32px on a phone, 56px from the sm breakpoint up. */}
+          <div className="mt-10 sm:mt-14 mb-10 sm:mb-14 overflow-hidden rounded-2xl bg-white border border-black/[0.07] shadow-sm py-8 sm:py-14">
             <iframe
               src="https://www.cognitoforms.com/f/_uaaiFEytEy94LxTIBfO1w/274"
               allow="payment"
