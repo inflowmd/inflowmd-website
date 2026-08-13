@@ -36,6 +36,13 @@ export interface LeadPayload {
 }
 
 export const NOTIFY_TO = "inflowmd@gmail.com";
+
+/**
+ * Where replies land. The sending address is a no-reply transport identity
+ * (and may be Resend's shared sender until inflowmd.com is verified), so a
+ * doctor who simply hits Reply must be routed to a monitored inbox instead.
+ */
+export const REPLY_TO = "team@inflowmd.com";
 export const CONTACT_LINE = "Clayton Peterson · InflowMD · inflowmd.com";
 
 /**
