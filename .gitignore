@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Generated PDF reports
 /output/
+
+# Captured leads — real contact details, never committed
+/data/leads.json
