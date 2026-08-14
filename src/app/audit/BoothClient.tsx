@@ -62,8 +62,11 @@ const CLIENT_TIMEOUT_MS = 150_000;
 const FALLBACK_TIMEOUT_MS = 75_000;
 
 /** The site the comparison button audits, live. Swappable in one line.
- *  Canonical final URL — auditing the apex would eat a ~780ms redirect penalty. */
-const COMPARISON_SITE = "https://www.inflowmd.com";
+ *  Canonical final URL — auditing the apex would eat a ~780ms redirect penalty.
+ *  Whatever sits here must also be in NON_COUNTED_DOMAINS: this runs a real
+ *  live audit every time a report is opened, so otherwise the booth counter
+ *  would fill up with our own comparison runs. */
+const COMPARISON_SITE = "https://centerforveincareandsurgery.com";
 const COMPARISON_HOST = COMPARISON_SITE.replace(/^https?:\/\//, "").replace(/^www\./, "");
 
 /**

@@ -8486,16 +8486,16 @@
     },
     {
       "url": "https://centerforveincareandsurgery.com",
-      "fetchedAt": "2026-08-14T05:14:47.047Z",
+      "fetchedAt": "2026-08-14T16:50:07.791Z",
       "fromCache": false,
       "performance": {
         "available": true,
-        "lighthouseScore": 74,
-        "lcp": 5.1,
-        "fcp": 2.64,
+        "lighthouseScore": 88,
+        "lcp": 3.38,
+        "fcp": 1.13,
         "cls": 0,
-        "tbt": 45,
-        "speedIndex": 4.61,
+        "tbt": 158,
+        "speedIndex": 4.15,
         "fieldDataAvailable": false,
         "fieldLcp": null
       },
@@ -8658,7 +8658,7 @@
         }
       ],
       "scores": {
-        "performance": 74,
+        "performance": 88,
         "ai": 100,
         "aiVerified": 11,
         "aiTotal": 11,
