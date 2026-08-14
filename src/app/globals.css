@@ -439,30 +439,6 @@ body {
   -webkit-user-drag: none;
 }
 
-/* Portrait: stacked and centered. Landscape (the propped-iPad case):
-   copy on the left, QR on the right. */
-.kiosk-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4vmin;
-}
-.kiosk-stage .kiosk-copy {
-  align-items: center;
-  text-align: center;
-}
-@media (orientation: landscape) {
-  .kiosk-stage {
-    flex-direction: row;
-    gap: 6vmin;
-  }
-  .kiosk-stage .kiosk-copy {
-    align-items: flex-start;
-    text-align: left;
-  }
-}
-
 /* ============================================================
    Pitch deck (/pitch)
    ============================================================ */
