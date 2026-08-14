@@ -35,9 +35,14 @@ interface Slide {
 
 const ACCENT = "#84B83B";
 
-/** Out and in, back to back — 800ms end to end, never overlapping. */
-const FADE_OUT_MS = 400;
-const FADE_IN_MS = 400;
+/**
+ * Out and in, back to back — 1.2s end to end, never overlapping. The drift
+ * that rides along with the fade lives in globals.css (.booth-state): the
+ * outgoing state lifts as it goes, the incoming one rises into place, so the
+ * duration is shared with CSS and both have to move together if either does.
+ */
+const FADE_OUT_MS = 600;
+const FADE_IN_MS = 600;
 
 /**
  * At most one accent phrase per state; everything else stays white. The
@@ -55,29 +60,24 @@ const SLIDES: Slide[] = [
       { text: "does your name come up", accent: true },
       { text: "?" },
     ],
-    holdMs: 4000,
+    holdMs: 5500,
   },
   {
     segments: [
       { text: "Your competitors are being recommended by AI. " },
       { text: "Are you?", accent: true },
     ],
-    holdMs: 4000,
-  },
-  // 3 and 4 are one beat: the setup, then the finding. The setup carries no
-  // accent at all — holding the green back is what makes it land on the next
-  // state instead of competing with it.
-  {
-    segments: [{ text: "We audited every practice at this conference." }],
-    holdMs: 4000,
+    holdMs: 5500,
   },
   {
+    // One state, not two. Split across frames, a glance caught either the
+    // setup with no finding or the finding with no basis for it.
     segments: [
-      { text: "More than half are " },
+      { text: "We audited every practice at this conference. More than half are " },
       { text: "invisible to AI", accent: true },
       { text: "." },
     ],
-    holdMs: 5000,
+    holdMs: 7000,
   },
   {
     segments: [
@@ -85,7 +85,7 @@ const SLIDES: Slide[] = [
       { text: "before your site finishes loading", accent: true },
       { text: "?" },
     ],
-    holdMs: 4000,
+    holdMs: 5500,
   },
   {
     segments: [
@@ -93,7 +93,7 @@ const SLIDES: Slide[] = [
       { text: "your own website", accent: true },
       { text: "?" },
     ],
-    holdMs: 4000,
+    holdMs: 5500,
   },
   {
     segments: [
@@ -101,11 +101,11 @@ const SLIDES: Slide[] = [
       { text: "60 seconds", accent: true },
       { text: "." },
     ],
-    holdMs: 6000,
+    holdMs: 7000,
   },
   {
     segments: [{ text: "Scan to " }, { text: "audit your practice", accent: true }],
-    holdMs: 6000,
+    holdMs: 8000,
   },
 ];
 
@@ -151,25 +151,19 @@ export default function RotatingHeadline() {
   }, []);
 
   return (
-    <h1 className="mt-[2vmin] grid max-w-[15em] text-[clamp(26px,5.4vmin,62px)] leading-[1.08] tracking-tight text-white">
+    <h1 className="mt-[4.5vmin] grid max-w-[15em] text-[clamp(26px,5.4vmin,62px)] leading-[1.08] tracking-tight text-white">
       {SLIDES.map((slide, i) => {
         const showing = i === index && visible;
         return (
           <span
             key={keyOf(slide)}
             aria-hidden={!showing}
-            // The duration rides in on a custom property rather than an inline
-            // `transition`, so motion-reduce:transition-none can still win —
-            // an inline transition would outrank the class and animate anyway.
-            className="[grid-area:1/1] transition-opacity duration-[var(--fade)] ease-in-out motion-reduce:transition-none"
-            style={
-              {
-                opacity: showing ? 1 : 0,
-                // Asymmetric on purpose: a state leaves in FADE_OUT_MS and the
-                // next arrives in FADE_IN_MS, so they never share the screen.
-                "--fade": `${showing ? FADE_IN_MS : FADE_OUT_MS}ms`,
-              } as React.CSSProperties
-            }
+            /* active | out | parked. Three states, not two: the one leaving
+               lifts upward, while the ones waiting sit BELOW the line so the
+               next arrival rises into place. A single "hidden" style would
+               have made every incoming state drop in from above. */
+            data-state={showing ? "active" : i === index ? "out" : "parked"}
+            className="booth-state [grid-area:1/1]"
           >
             {/* The accented phrase always starts its own line — from across
                 a booth that green line is read first, and it should never
