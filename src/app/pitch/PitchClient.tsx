@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Gauge } from "../audit/Gauge";
+import CviStages, { CVI_STAGES } from "@/components/CviStages";
 
 /**
  * The booth pitch deck. Ten full-viewport sections; forward/back via
@@ -21,7 +22,26 @@ const NAVY = "#081C34";
 const LIME = "#84B83B";
 const BLUE = "#3B6FBF";
 
-const SECTIONS = ["s0", "s1", "s2a", "s2b", "s2c", "s3a", "s3b", "s3c", "s4", "s5"] as const;
+const SECTIONS = [
+  "s0",
+  "s1",
+  "s2a",
+  "s2b",
+  "s2c",
+  // Act 3 — how we build. Sits between "AI cannot find you" and "and it is
+  // slow", because a site nobody can find is a different problem from a site
+  // that gets found and still does not convert.
+  "s3a",
+  "s3b",
+  "s3c",
+  "s3d",
+  "s3e",
+  "s4a",
+  "s4b",
+  "s4c",
+  "s5",
+  "s6",
+] as const;
 
 /** Shared type scale — readable from six feet on a 1440p booth monitor. */
 const PRIMARY = "text-[clamp(40px,4.5vw,104px)] font-extrabold leading-[1.08] tracking-tight text-white";
@@ -116,6 +136,63 @@ function PassCheck({ delayMs, animate }: { delayMs: number; animate: boolean }) 
 /** Subtle dot-grid texture patch — the deck's ambient ornament. */
 function DotGrid({ className }: { className: string }) {
   return <div className={`pitch-dotgrid pointer-events-none absolute ${className}`} aria-hidden />;
+}
+
+/* ---------- S3c: the stages, walked ---------- */
+
+/**
+ * Advances the lime accent along the CVI progression once the screen is live.
+ * One press brings the screen up and the progression walks itself — the deck's
+ * rule is one keypress per section, so this must not need four.
+ */
+function StageWalk({ live }: { live: boolean }) {
+  const [reached, setReached] = useState(0);
+
+  useEffect(() => {
+    if (!live) {
+      setReached(0);
+      return;
+    }
+    if (prefersReducedMotion()) {
+      setReached(CVI_STAGES.length);
+      return;
+    }
+    const timers: number[] = [];
+    for (let i = 1; i <= CVI_STAGES.length; i++) {
+      timers.push(window.setTimeout(() => setReached(i), 500 + i * 700));
+    }
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [live]);
+
+  return <CviStages variant="stage" reached={reached} />;
+}
+
+/* ---------- S3a: the billboard silhouette ---------- */
+
+/** A generic practice site, drawn as shapes. No copy — the point is that every
+ *  one of these looks the same and says the same thing: here is a clinic. */
+function BillboardSilhouette() {
+  return (
+    <div className="w-[min(52vw,760px)] rounded-[1.4vw] border border-white/12 bg-white/[0.04] p-[1.6vw] shadow-2xl">
+      <div className="flex gap-[0.5vw] pb-[1.2vw]">
+        {[0, 1, 2].map((i) => (
+          <span key={i} className="h-[0.7vw] w-[0.7vw] rounded-full bg-white/15" />
+        ))}
+      </div>
+      {/* hero */}
+      <div className="h-[9vw] w-full rounded-[0.8vw] bg-white/[0.09]" />
+      {/* treatment list */}
+      <div className="mt-[1.4vw] flex flex-col gap-[0.8vw]">
+        {[0.9, 0.75, 0.6].map((w, i) => (
+          <div key={i} className="h-[1.5vw] rounded-full bg-white/[0.07]" style={{ width: `${w * 100}%` }} />
+        ))}
+      </div>
+      {/* phone number bar */}
+      <div className="mt-[1.6vw] flex justify-center">
+        <div className="h-[2.2vw] w-[16vw] rounded-full bg-white/[0.12]" />
+      </div>
+    </div>
+  );
 }
 
 /* ---------- S1: search bars that type, think, and listen ---------- */
@@ -804,9 +881,111 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* S3a — 53% */}
+      {/* ═══ ACT 3 — HOW WE BUILD ═══ */}
+
+      {/* S3a — the billboard */}
       {section(
         5,
+        <>
+          <h2 className={`${PRIMARY} max-w-[15em] pitch-rise`} style={rise(0)}>
+            Most vein websites are built for patients who already decided.
+          </h2>
+          <div className="pitch-rise" style={rise(220)}>
+            <BillboardSilhouette />
+          </div>
+          <p className={`${SUB} pitch-rise`} style={rise(420)}>
+            That&rsquo;s a small fraction of the people searching.
+          </p>
+        </>
+      )}
+
+      {/* S3b — what patients actually believe */}
+      {section(
+        6,
+        <>
+          <DotGrid className="left-[10vw] top-[16vh] w-[18vw] h-[26vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_72%)]" />
+          <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
+            Most patients don&rsquo;t know CVI is progressive.
+          </h2>
+          {/* The words carry this one; the fragments are barely there. */}
+          <div className="flex flex-wrap items-center justify-center gap-x-[4vw] gap-y-[2vh]">
+            {["“Just tired legs.”", "“It runs in the family.”", "“It&rsquo;s only cosmetic.”"].map(
+              (fragment, i) => (
+                <span
+                  key={fragment}
+                  className="pitch-rise text-[clamp(18px,1.9vw,38px)] font-light italic text-white/25"
+                  style={rise(400 + i * 320)}
+                  dangerouslySetInnerHTML={{ __html: fragment }}
+                />
+              )
+            )}
+          </div>
+          <p className={`${SUB} pitch-rise`} style={rise(1400)}>
+            They think it&rsquo;s tired legs. Or genetics. Or cosmetic.
+          </p>
+        </>
+      )}
+
+      {/* S3c — THE CENTREPIECE: the stages, walked */}
+      {section(
+        7,
+        <>
+          <h2 className={`${PRIMARY} pitch-rise`} style={rise(0)}>
+            So we teach the stages.
+          </h2>
+          <div className="w-[min(84vw,1500px)] pitch-rise" style={rise(200)}>
+            <StageWalk live={active === 7} />
+          </div>
+          <p className={`${SUB} pitch-rise`} style={rise(420)}>
+            Patients who understand progression don&rsquo;t wait.
+          </p>
+        </>
+      )}
+
+      {/* S3d — the assessment, real UI */}
+      {section(
+        8,
+        <>
+          <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
+            Then we ask them to count their symptoms.
+          </h2>
+          <div className="pitch-rise" style={rise(220)}>
+            {/* Device frame around a real capture of the live assessment. */}
+            <div className="rounded-[2.6vh] border-[0.5vh] border-white/15 bg-black p-[0.5vh] shadow-[0_30px_90px_rgba(0,0,0,0.6)]">
+              <img
+                src="/veinquiz-symptoms.png"
+                alt="A patient's vein assessment, four symptoms selected"
+                width={337}
+                height={614}
+                draggable={false}
+                className="block h-[46vh] w-auto rounded-[2.1vh]"
+              />
+            </div>
+          </div>
+          <p className={`${SUB} pitch-rise`} style={rise(420)}>
+            Interactive assessment — not a contact form.
+          </p>
+        </>
+      )}
+
+      {/* S3e — the turn */}
+      {section(
+        9,
+        <>
+          <DotGrid className="right-[8vw] bottom-[14vh] w-[20vw] h-[28vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
+          <h2 className={`${PRIMARY} max-w-[15em] pitch-rise`} style={rise(0)}>
+            That&rsquo;s what turns a browser into a{" "}
+            <span style={{ color: LIME }}>screening</span>.
+          </h2>
+          <p className={`${SUB} pitch-rise`} style={rise(260)}>
+            Education first. The appointment follows.
+          </p>
+        </>
+      )}
+
+      {/* S4a — 53% */}
+      {section(
+        10,
         <>
           <div
             className="font-extrabold leading-none tracking-tight text-[clamp(200px,30vh,320px)] pitch-rise"
@@ -823,9 +1002,9 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* S3b — 3x bars + the conversion, illustrated */}
+      {/* S4b — 3x bars + the conversion, illustrated */}
       {section(
-        6,
+        11,
         <>
           <h2 className={`${PRIMARY} max-w-[15em] pitch-rise`} style={rise(0)}>
             A 1-second site converts 3x better than a 5-second site.
@@ -835,7 +1014,7 @@ export default function PitchClient() {
               <div className="flex flex-col items-center gap-3 h-full justify-end">
                 <div
                   className={`pitch-bar w-[8vw] min-w-24 rounded-t-2xl bg-white/20 ${
-                    active === 6 ? "" : "pitch-bar-hidden"
+                    active === 11 ? "" : "pitch-bar-hidden"
                   }`}
                   style={{ height: "33.3%" }}
                 />
@@ -846,7 +1025,7 @@ export default function PitchClient() {
               <div className="flex flex-col items-center gap-3 h-full justify-end">
                 <div
                   className={`pitch-bar w-[8vw] min-w-24 rounded-t-2xl ${
-                    active === 6 ? "" : "pitch-bar-hidden"
+                    active === 11 ? "" : "pitch-bar-hidden"
                   }`}
                   style={{ height: "100%", background: LIME, transitionDelay: "150ms" }}
                 />
@@ -855,7 +1034,7 @@ export default function PitchClient() {
                 </span>
               </div>
             </div>
-            <BookingSim live={active === 6} />
+            <BookingSim live={active === 11} />
           </div>
           <p className={`${SUB} pitch-rise`} style={{ "--rise": "400ms" } as React.CSSProperties}>
             Portent, 2022 — 100M+ pageviews, lead-generation sites
@@ -863,9 +1042,9 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* S3c — architecture */}
+      {/* S4c — architecture */}
       {section(
-        7,
+        12,
         <>
           <svg
             viewBox="0 0 1200 320"
@@ -913,24 +1092,24 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* S4 — PROOF */}
+      {/* S5 — PROOF */}
       {section(
-        8,
+        13,
         <>
           <DotGrid className="inset-x-[20vw] top-[8vh] h-[18vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
           <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
             Same test. Their site. Our build.
           </h2>
-          <CountingGauges live={active === 8} />
+          <CountingGauges live={active === 13} />
           <p className={`${SUB} pitch-rise`} style={{ "--rise": "450ms" } as React.CSSProperties}>
             Run it live on any site — including this one.
           </p>
         </>
       )}
 
-      {/* S5 — HANDOFF */}
+      {/* S6 — HANDOFF */}
       {section(
-        9,
+        14,
         <>
           <h2 className={`${PRIMARY} pitch-rise`} style={rise(0)}>
             Want to see yours?
