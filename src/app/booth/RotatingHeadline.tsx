@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 
 /**
- * The booth poster's rotating question sequence.
+ * The booth poster's rotating sequence — the only large text on the page.
  *
- * Four questions, then the two-part call to action, cycling forever.
+ * Eight states: four questions, a two-state census beat (setup, then the
+ * finding), and the two-part call to action, cycling forever.
  *
  * THE CROSSFADE IS SEQUENTIAL, NOT SIMULTANEOUS. Fading both states at once
  * over the same 800ms put them both near half opacity in the middle of every
@@ -14,10 +15,10 @@ import { useEffect, useState } from "react";
  * only then does the incoming one start from 0. At most one state is ever
  * readable, and for ~50ms between them the block is empty on purpose.
  *
- * THE QR CODE MUST NOT MOVE. In landscape the stage is a centred flex row
- * with the copy left and the QR right, so a copy block that changed height
- * between states would nudge the QR all day. Every state is stacked in the
- * SAME grid cell, which sizes the block once to the tallest line and holds it
+ * THE QR CODE MUST NOT MOVE. The poster is a centred column with the QR
+ * directly below this block, so a headline that changed height between states
+ * would push the code up and down all day. Every state is stacked in the SAME
+ * grid cell, which sizes the block once to the tallest state and holds it
  * there — a fixed-height stack, with no per-state height to maintain by hand.
  */
 
@@ -39,8 +40,9 @@ const FADE_OUT_MS = 400;
 const FADE_IN_MS = 400;
 
 /**
- * One accent phrase per state; everything else stays white. The trailing "?"
- * sits outside the accent span where the phrase itself does not include it.
+ * At most one accent phrase per state; everything else stays white. The
+ * trailing "?" sits outside the accent span where the phrase does not
+ * include it.
  *
  * The CTA pair hold longer than the questions: a question only has to be read,
  * but "scan" has to be read, believed, and acted on — six seconds is roughly
@@ -61,6 +63,21 @@ const SLIDES: Slide[] = [
       { text: "Are you?", accent: true },
     ],
     holdMs: 4000,
+  },
+  // 3 and 4 are one beat: the setup, then the finding. The setup carries no
+  // accent at all — holding the green back is what makes it land on the next
+  // state instead of competing with it.
+  {
+    segments: [{ text: "We audited every practice at this conference." }],
+    holdMs: 4000,
+  },
+  {
+    segments: [
+      { text: "More than half are " },
+      { text: "invisible to AI", accent: true },
+      { text: "." },
+    ],
+    holdMs: 5000,
   },
   {
     segments: [
@@ -154,29 +171,35 @@ export default function RotatingHeadline() {
               } as React.CSSProperties
             }
           >
-            {/* Two blocks, always: the setup, then the accented phrase on a
-                line of its own. From across a booth the green line is the
-                part that gets read first, and it should never start
-                mid-sentence at the end of someone else's line. Trailing
-                punctuation rides with the accent so a stray "?" never lands
-                alone on the next line. */}
-            <span className="block font-medium">
-              {slide.segments
-                .slice(0, slide.segments.findIndex((s) => s.accent))
-                .map((s) => s.text)
-                .join("")
-                .trimEnd()}
-            </span>
-            <span className="block font-extrabold">
-              {slide.segments.slice(slide.segments.findIndex((s) => s.accent)).map((segment) => (
-                <span
-                  key={segment.text}
-                  style={segment.accent ? { color: ACCENT } : undefined}
-                >
-                  {segment.text}
-                </span>
-              ))}
-            </span>
+            {/* The accented phrase always starts its own line — from across
+                a booth that green line is read first, and it should never
+                begin halfway along someone else's. A state with NO accent
+                (the census setup) renders as a single block: findIndex would
+                return -1 here and slice(0, -1) would quietly eat its last
+                segment. */}
+            {(() => {
+              const accentAt = slide.segments.findIndex((seg) => seg.accent);
+              if (accentAt === -1) {
+                return (
+                  <span className="block font-medium">
+                    {slide.segments.map((seg) => seg.text).join("")}
+                  </span>
+                );
+              }
+              const lead = slide.segments.slice(0, accentAt).map((seg) => seg.text).join("").trimEnd();
+              return (
+                <>
+                  {lead && <span className="block font-medium">{lead}</span>}
+                  <span className="block font-extrabold">
+                    {slide.segments.slice(accentAt).map((segment) => (
+                      <span key={segment.text} style={segment.accent ? { color: ACCENT } : undefined}>
+                        {segment.text}
+                      </span>
+                    ))}
+                  </span>
+                </>
+              );
+            })()}
           </span>
         );
       })}
