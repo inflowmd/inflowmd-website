@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import CviStages from "@/components/CviStages";
 import FadeIn from "./FadeIn";
 import PhoneMockup from "./PhoneMockup";
 
@@ -141,34 +142,7 @@ function BrowserMockup() {
             <div className="bg-[#f8fafc] px-5 py-5 border-y border-gray-100">
               <p className="text-[#2D6CDF] text-[7px] font-semibold uppercase tracking-wider mb-1 text-center">Understanding Your Condition</p>
               <p className="text-gray-900 text-[10px] font-bold mb-3 text-center">The Stages of Venous Disease</p>
-              <div className="flex items-start gap-0">
-                {[
-                  { stage: 1, name: "Spider Veins", desc: "Small, visible veins beneath the skin", color: "#7db4f7" },
-                  { stage: 2, name: "Varicose Veins", desc: "Bulging, twisted veins causing discomfort", color: "#2D6CDF" },
-                  { stage: 3, name: "Skin Changes", desc: "Swelling, discoloration around ankles", color: "#f59e0b" },
-                  { stage: 4, name: "Venous Ulcers", desc: "Open wounds requiring immediate care", color: "#ef4444" },
-                ].map((item, i) => (
-                  <div key={item.stage} className="flex items-start flex-1">
-                    <div className="flex flex-col items-center text-center flex-1">
-                      <div
-                        className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[7px] font-bold mb-1"
-                        style={{ backgroundColor: item.color }}
-                      >
-                        {item.stage}
-                      </div>
-                      <p className="text-gray-900 text-[7px] font-semibold leading-tight mb-0.5">{item.name}</p>
-                      <p className="text-gray-400 text-[5.5px] leading-tight px-0.5">{item.desc}</p>
-                    </div>
-                    {i < 3 && (
-                      <div className="flex items-center pt-2.5 px-0.5 text-gray-300">
-                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <CviStages />
             </div>
 
             {/* Doctor Spotlight - Horizontal Card */}

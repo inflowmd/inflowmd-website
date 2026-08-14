@@ -856,7 +856,7 @@ function ComparisonBlock({ their }: { their: AuditResult }) {
           className="mt-5 rounded-xl px-8 py-4 font-extrabold text-base sm:text-lg text-[#081C34] transition-opacity hover:opacity-90"
           style={{ background: ACCENT, minHeight: 44 }}
         >
-          Run this same test on a site we built
+          Run this same test on a modern build
         </button>
       </div>
     );
@@ -925,8 +925,14 @@ function ComparisonBlock({ their }: { their: AuditResult }) {
       {/* the two performance gauges */}
       <div className="flex items-start justify-center gap-10 sm:gap-20">
         <Gauge score={theirPerf} label="Their practice site" size={150} valueClass="text-4xl" />
-        <Gauge score={ourPerf} label="Built by InflowMD" size={150} valueClass="text-4xl" />
+        <Gauge score={ourPerf} label="Modern architecture" size={150} valueClass="text-4xl" />
       </div>
+
+      {/* Names what the two rings differ BY. Without it the right-hand ring is
+          just a better number; with it, it is a different way of building. */}
+      <p className="mt-4 text-center text-sm sm:text-base font-semibold tracking-wide text-white/45">
+        Same test. Same day. Different architecture.
+      </p>
 
       {/* the patient-wait line — the centerpiece */}
       {theirLcp !== null && ourLcp !== null && (
@@ -942,7 +948,7 @@ function ComparisonBlock({ their }: { their: AuditResult }) {
       <div className="mt-8 grid grid-cols-2 gap-4 max-w-2xl mx-auto">
         {[
           { title: "Their practice site", r: their },
-          { title: "Built by InflowMD", r: comparison },
+          { title: "Modern architecture", r: comparison },
         ].map(({ title, r }) => (
           <div key={title} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
             <div className="text-[11px] font-bold tracking-wider uppercase text-white/45 mb-3">
@@ -978,6 +984,13 @@ function ComparisonBlock({ their }: { their: AuditResult }) {
           </div>
         ))}
       </div>
+
+      {/* Small and muted on purpose: this answers the objection the two rings
+          provoke ("so tune mine"), and an objection-killer that shouts reads
+          as a sales line rather than an explanation. */}
+      <p className="mt-6 text-center text-sm text-white/40 leading-snug">
+        The gap isn&rsquo;t tuning. It&rsquo;s what the site is built on.
+      </p>
     </div>
   );
 }
@@ -2041,6 +2054,21 @@ export default function BoothClient({
             </div>
           );
         })()}
+
+        {/* Our answer to the findings, stated once and without a pitch. Sits
+            after the evidence and before the ask: the reader has just seen
+            what is wrong, and this says what we would do instead. Deliberately
+            architecture-neutral — /why-nextjs is where the stack is named. */}
+        <div className="mt-10 mb-8 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-7">
+          <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-3">
+            What we&rsquo;d do differently
+          </div>
+          <p className="text-base sm:text-lg text-white/80 leading-relaxed max-w-3xl">
+            We don&rsquo;t optimize old platforms — we rebuild on modern architecture. Fast by
+            design, structured so AI can read it, and built to move patients from symptoms to a
+            screening.
+          </p>
+        </div>
 
         {/* LEAD CAPTURE — the evidence has landed; ask before the money talk. */}
         <LeadForm result={result} categories={categories} verdict={verdict} />
