@@ -38,7 +38,7 @@ export default function BoothDisplayPage() {
       {/* Stage and census centre as ONE group. With the stage taking flex-1
           alone, it centred inside its own slack and left a hole between the
           copy and the census band below it. */}
-      <div className="flex min-h-0 flex-1 flex-col justify-center gap-[3.5vmin]">
+      <div className="flex min-h-0 flex-1 flex-col justify-center gap-[5.5vmin]">
       {/* Stage: column in portrait, row in landscape (see globals.css). */}
       <div className="kiosk-stage min-h-0 px-[5vmin]">
         <div className="kiosk-copy flex flex-col">
@@ -80,7 +80,7 @@ export default function BoothDisplayPage() {
                 width={3000}
                 height={3000}
               />
-              <p className="mt-[1.4vmin] text-center text-[clamp(13px,1.9vmin,20px)] font-semibold leading-snug text-[#081C34]">
+              <p className="mt-[2.6vmin] text-center text-[clamp(13px,1.9vmin,20px)] font-semibold leading-snug text-[#081C34]">
                 <span className="block">Scan for your free audit</span>
                 <span className="block">inflowmd.com/audit</span>
               </p>
@@ -103,9 +103,16 @@ export default function BoothDisplayPage() {
           More than half the practices at this conference are{" "}
           <span style={{ color: "#84B83B" }}>invisible to AI</span>.
         </p>
-        <p className="mx-auto mt-[1.4vmin] max-w-[44em] text-[clamp(15px,2.6vmin,28px)] font-light leading-snug text-slate-300">
-          We audited every attending practice. 71% are on WordPress. 56% score below 75 on
-          AI visibility.
+        <p className="mx-auto mt-[1.4vmin] max-w-[44em] text-[clamp(15px,2.6vmin,28px)] leading-snug">
+          <span className="block font-light text-slate-300">
+            We audited every attending practice. 71% are on WordPress.
+          </span>
+          <span
+            className="mt-[0.8vmin] block font-bold tracking-tight"
+            style={{ color: "#84B83B" }}
+          >
+            56% score below 75 on AI visibility.
+          </span>
         </p>
       </div>
 
