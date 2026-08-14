@@ -968,3 +968,52 @@ body {
     animation: none;
   }
 }
+
+/* Booth QR glow — a diffuse lime halo that breathes behind the code.
+
+   Deliberately a SIBLING behind the card, not a filter or shadow on it: the
+   QR bitmap must never scale, blur or animate, or a phone camera is reading a
+   moving target. This layer only ever paints light around it.
+
+   An invitation, not an alarm — 3.6s, small scale delta, low opacity. */
+.booth-qr-glow {
+  position: absolute;
+  /* Reaches well past the card: a halo tucked behind it is a halo nobody
+     sees. This is the visible spread, not the card's own footprint. */
+  inset: -34%;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    rgba(132, 184, 59, 0.5) 0%,
+    rgba(132, 184, 59, 0.34) 34%,
+    rgba(132, 184, 59, 0.16) 55%,
+    rgba(132, 184, 59, 0.04) 72%,
+    rgba(132, 184, 59, 0) 84%
+  );
+  filter: blur(4.5vmin);
+  animation: booth-qr-breathe 3600ms ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes booth-qr-breathe {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(0.93);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+/* Static glow, still present — the invitation stays, the movement goes. */
+@media (prefers-reduced-motion: reduce) {
+  .booth-qr-glow {
+    animation: none;
+    opacity: 0.8;
+    transform: scale(1);
+  }
+}

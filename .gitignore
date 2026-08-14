@@ -46,3 +46,11 @@ next-env.d.ts
 
 # Captured leads — real contact details, never committed
 /data/leads.json
+
+# Verification screenshots — scratch, never shipped
+/booth-*.png
+/glow-*.png
+/cr-*.png
+/logo-*.png
+/audit-*.png
+/pitch-*.png

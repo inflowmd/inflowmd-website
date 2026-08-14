@@ -53,18 +53,42 @@ export default function BoothDisplayPage() {
         </div>
 
         <div className="kiosk-qr flex flex-col items-center">
-          <div className="rounded-[3vmin] bg-white p-[3.5vmin] shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
-            <img
-              src="/inflowmd-audit-qr.png"
-              alt="QR code for a free website audit at inflowmd.com/audit"
-              draggable={false}
-              className="block h-[40vmin] w-[40vmin]"
-              width={3000}
-              height={3000}
-            />
-            <p className="mt-[2vmin] text-center text-[clamp(13px,2vmin,20px)] font-semibold leading-snug text-[#081C34]">
-              <span className="block">Scan for your free audit</span>
-              <span className="block">inflowmd.com/audit</span>
+          <div className="relative">
+            {/* Breathing lime glow. Sits BEHIND the card in its own layer and
+                is purely decorative — the card and the QR bitmap never scale,
+                blur or animate, so what a phone camera reads is always the
+                crisp original. */}
+            <div className="booth-qr-glow" aria-hidden />
+            <div className="relative rounded-[3vmin] bg-white p-[3.5vmin] shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+              <img
+                src="/inflowmd-audit-qr.png"
+                alt="QR code for a free website audit at inflowmd.com/audit"
+                draggable={false}
+                className="block h-[40vmin] w-[40vmin]"
+                width={3000}
+                height={3000}
+              />
+              <p className="mt-[2vmin] text-center text-[clamp(13px,2vmin,20px)] font-semibold leading-snug text-[#081C34]">
+                <span className="block">Scan for your free audit</span>
+                <span className="block">inflowmd.com/audit</span>
+              </p>
+            </div>
+          </div>
+
+          {/* The census finding, permanent. It used to cycle through the
+              headline; as a second headline under the QR it is on screen for
+              every visitor rather than one in six. Both figures are ours: 42
+              of the 59 attendee URLs run WordPress (71%), and 31 of the 56
+              practices we could score sit below 75 on AI visibility (56%) —
+              which is also what makes "more than half" a count, not a phrase. */}
+          <div className="mt-[4vmin] max-w-[20em] text-center">
+            <p className="text-[clamp(20px,4.2vmin,46px)] font-extrabold leading-[1.12] tracking-tight text-white">
+              More than half the practices at this conference are{" "}
+              <span style={{ color: "#84B83B" }}>invisible to AI</span>.
+            </p>
+            <p className="mt-[1.8vmin] text-[clamp(14px,2.4vmin,26px)] font-light leading-snug text-slate-300">
+              We audited every attending practice. 71% are on WordPress. 56% score below 75
+              on AI visibility.
             </p>
           </div>
         </div>
