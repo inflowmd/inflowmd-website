@@ -993,3 +993,80 @@ body {
     transform: scale(1);
   }
 }
+
+/* ============================================================
+   Booth rotating headline — fade with a drift
+   ============================================================ */
+
+/* The motion lives here rather than in inline styles so that reduced motion
+   can actually override it: an inline transform outranks any class. */
+.booth-state {
+  transition:
+    opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+/* Three positions, not two. `out` lifts as it leaves; `parked` waits BELOW
+   the line so the next state rises into place instead of dropping in from
+   above. 12px — enough to feel intentional, not enough to read as sliding. */
+.booth-state[data-state="active"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+.booth-state[data-state="out"] {
+  opacity: 0;
+  transform: translateY(-12px);
+}
+.booth-state[data-state="parked"] {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+/* Plain fade: the drift goes, the crossfade stays. Later in the file than the
+   rules above, so it wins on equal specificity without !important. */
+@media (prefers-reduced-motion: reduce) {
+  .booth-state[data-state] {
+    transform: none;
+  }
+}
+
+/* ============================================================
+   Booth background texture — a fine dot grid, barely there
+   ============================================================ */
+
+/* Texture, not decoration: one hairline dot every 34px at ~5% white on the
+   navy. Up close it should read as paper grain rather than as a pattern. */
+.booth-dots {
+  position: absolute;
+  /* Oversized by more than one tile so the drift never exposes an edge. */
+  inset: -60px;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.055) 1px,
+    transparent 1.4px
+  );
+  background-size: 34px 34px;
+  /* Exactly one tile per cycle, linear, so the loop has no seam and no
+     visible restart. 48s to cross 34px — slow enough to notice only if you
+     stare at it, which nobody at a booth will. */
+  animation: booth-dots-drift 48s linear infinite;
+  will-change: transform;
+}
+
+@keyframes booth-dots-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(34px, 34px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .booth-dots {
+    animation: none;
+  }
+}

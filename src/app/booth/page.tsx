@@ -43,10 +43,14 @@ export const viewport: Viewport = {
 export default function BoothDisplayPage() {
   return (
     <main className="kiosk-lock fixed inset-0 flex flex-col overflow-hidden bg-[#081C34] text-white">
+      {/* Background texture, behind everything. Sits under the QR glow and the
+          text, and drifts one tile per 48s so the navy never reads as flat. */}
+      <div className="booth-dots" aria-hidden />
+
       {/* One centred column in both orientations. The landscape two-column
           split is gone: the poster reads top to bottom now, so nothing sits
           beside the headline competing for the same glance. */}
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-[7vmin] px-[6vmin] text-center">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center gap-[7vmin] px-[6vmin] text-center">
         <div className="flex flex-col items-center">
           <img
             src="/inflowmd-final.png"
@@ -91,7 +95,7 @@ export default function BoothDisplayPage() {
           so this strip is simply empty for most of the conference's first
           hour — reserved height keeps the zones above it from shifting when
           it does appear. */}
-      <div className="flex h-[5vmin] shrink-0 items-center justify-center px-[6vmin]">
+      <div className="relative z-10 flex h-[5vmin] shrink-0 items-center justify-center px-[6vmin]">
         <AuditCounter />
       </div>
     </main>
