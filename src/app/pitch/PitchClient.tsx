@@ -21,6 +21,8 @@ import CviStages, { CVI_STAGES } from "@/components/CviStages";
 const NAVY = "#081C34";
 const LIME = "#84B83B";
 const BLUE = "#3B6FBF";
+/** The assessment result: concerning, not alarming. */
+const AMBER = "#f59e0b";
 
 const SECTIONS = [
   "s0",
@@ -28,10 +30,12 @@ const SECTIONS = [
   "s2a",
   "s2b",
   "s2c",
-  // Act 3 — speed.
+  // Act 3 — speed. The side-by-side proof sits inside it now, as evidence for
+  // the argument rather than as a coda after everything else.
   "s3a",
   "s3b",
   "s3c",
+  "s3d",
   // Act 4 — how we build. Education and speed are both conversion arguments,
   // so they sit adjacent, and the deck ends on the differentiator rather than
   // passing through it on the way to a statistic.
@@ -42,6 +46,7 @@ const SECTIONS = [
   "s4e",
   "s5",
   "s6",
+  "s7",
 ] as const;
 
 /** Shared type scale — readable from six feet on a 1440p booth monitor. */
@@ -168,34 +173,6 @@ function StageWalk({ live }: { live: boolean }) {
   return <CviStages variant="stage" reached={reached} />;
 }
 
-/* ---------- S3a: the billboard silhouette ---------- */
-
-/** A generic practice site, drawn as shapes. No copy — the point is that every
- *  one of these looks the same and says the same thing: here is a clinic. */
-function BillboardSilhouette() {
-  return (
-    <div className="w-[min(52vw,760px)] rounded-[1.4vw] border border-white/12 bg-white/[0.04] p-[1.6vw] shadow-2xl">
-      <div className="flex gap-[0.5vw] pb-[1.2vw]">
-        {[0, 1, 2].map((i) => (
-          <span key={i} className="h-[0.7vw] w-[0.7vw] rounded-full bg-white/15" />
-        ))}
-      </div>
-      {/* hero */}
-      <div className="h-[9vw] w-full rounded-[0.8vw] bg-white/[0.09]" />
-      {/* treatment list */}
-      <div className="mt-[1.4vw] flex flex-col gap-[0.8vw]">
-        {[0.9, 0.75, 0.6].map((w, i) => (
-          <div key={i} className="h-[1.5vw] rounded-full bg-white/[0.07]" style={{ width: `${w * 100}%` }} />
-        ))}
-      </div>
-      {/* phone number bar */}
-      <div className="mt-[1.6vw] flex justify-center">
-        <div className="h-[2.2vw] w-[16vw] rounded-full bg-white/[0.12]" />
-      </div>
-    </div>
-  );
-}
-
 /* ---------- S4b: three beliefs, lit one at a time ---------- */
 
 const PATIENT_THOUGHTS = ["“Just tired legs.”", "“It runs in the family.”", "“It’s only cosmetic.”"];
@@ -282,7 +259,12 @@ function SymptomCheckerSim({ live, onDone }: { live: boolean; onDone: () => void
   const [pressed, setPressed] = useState(false);
   const [result, setResult] = useState(false);
   const doneRef = useRef(onDone);
-  doneRef.current = onDone;
+  // Synced in an effect, not during render: writing a ref while rendering is
+  // a side effect in the render path, and React's lint rules are right to
+  // reject it. The callback is only ever read from a timer.
+  useEffect(() => {
+    doneRef.current = onDone;
+  }, [onDone]);
 
   useEffect(() => {
     const timers: number[] = [];
@@ -378,9 +360,13 @@ function SymptomCheckerSim({ live, onDone }: { live: boolean; onDone: () => void
           className="absolute inset-0 flex flex-col items-center justify-center bg-[#0b1620] px-[2.4vh] text-center transition-opacity duration-500"
           style={{ opacity: result ? 1 : 0, pointerEvents: "none" }}
         >
-          <div className="mb-[2vh] flex h-[6vh] w-[6vh] items-center justify-center rounded-full" style={{ background: LIME }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="h-[3vh] w-[3vh]" aria-hidden>
-              <path d="M20 6 9 17l-5-5" />
+          {/* Amber, and an exclamation rather than a tick: a green check reads
+              as "you passed", which is the opposite of what this screen is
+              for. Concerning, not alarming — hence amber and not red. */}
+          <div className="mb-[2vh] flex h-[6vh] w-[6vh] items-center justify-center rounded-full" style={{ background: AMBER }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" className="h-[3.2vh] w-[3.2vh]" aria-hidden>
+              <path d="M12 7v6" />
+              <circle cx="12" cy="17" r="0.6" fill="#fff" stroke="none" />
             </svg>
           </div>
           <p className="text-[2.1vh] font-extrabold leading-snug text-white">
@@ -388,6 +374,280 @@ function SymptomCheckerSim({ live, onDone }: { live: boolean; onDone: () => void
           </p>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ---------- S4a: the brochure every practice already has ---------- */
+
+/**
+ * A typical vein practice site, drawn rather than screenshotted. Specific
+ * enough that a doctor recognises their own — hero slab, three treatment
+ * cards, a phone number top right, an appointment button, a footer strip —
+ * and deliberately dated: flat greys and one dull blue, the palette of a site
+ * built in 2019 and left alone since.
+ */
+function BrochureMockup() {
+  const DULL = "#5b7fa8";
+  const card = (i: number) => (
+    <div key={i} className="flex-1 rounded-[0.4vw] border border-black/5 bg-white p-[0.7vw]">
+      <div className="mb-[0.5vw] h-[1.6vw] w-[1.6vw] rounded-full" style={{ background: `${DULL}33` }} />
+      <div className="mb-[0.35vw] h-[0.5vw] w-[70%] rounded-full bg-slate-300" />
+      <div className="h-[0.35vw] w-[92%] rounded-full bg-slate-200" />
+      <div className="mt-[0.25vw] h-[0.35vw] w-[80%] rounded-full bg-slate-200" />
+    </div>
+  );
+  return (
+    <div className="w-[min(52vw,780px)] overflow-hidden rounded-[0.9vw] border border-white/12 bg-[#f4f5f7] shadow-2xl">
+      {/* browser chrome */}
+      <div className="flex items-center gap-[0.5vw] bg-[#e4e6ea] px-[1vw] py-[0.7vw]">
+        {[0, 1, 2].map((i) => (
+          <span key={i} className="h-[0.6vw] w-[0.6vw] rounded-full bg-black/15" />
+        ))}
+        <div className="ml-[0.6vw] h-[1vw] flex-1 rounded-full bg-white/70" />
+      </div>
+      {/* nav + phone number */}
+      <div className="flex items-center justify-between px-[1.2vw] py-[0.9vw]" style={{ background: DULL }}>
+        <div className="h-[0.8vw] w-[7vw] rounded-full bg-white/70" />
+        <div className="flex items-center gap-[0.8vw]">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="h-[0.45vw] w-[2.4vw] rounded-full bg-white/40" />
+          ))}
+          <div className="h-[0.7vw] w-[5vw] rounded-full bg-white/85" />
+        </div>
+      </div>
+      {/* hero: placeholder photo + headline bars */}
+      <div className="flex gap-[1vw] px-[1.2vw] py-[1.2vw]">
+        <div className="flex h-[8vw] flex-[1.1] items-center justify-center rounded-[0.4vw] bg-slate-300">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.6" className="h-[2.4vw] w-[2.4vw]" aria-hidden>
+            <rect x="3" y="4" width="18" height="16" rx="2" />
+            <circle cx="8.5" cy="9.5" r="1.8" />
+            <path d="m21 16-5.5-5.5L7 19" />
+          </svg>
+        </div>
+        <div className="flex flex-[1.4] flex-col justify-center gap-[0.6vw]">
+          <div className="h-[1.1vw] w-[88%] rounded-full bg-slate-400" />
+          <div className="h-[0.55vw] w-[95%] rounded-full bg-slate-300" />
+          <div className="h-[0.55vw] w-[78%] rounded-full bg-slate-300" />
+          <div
+            className="mt-[0.5vw] flex h-[2vw] w-[11vw] items-center justify-center rounded-[0.3vw]"
+            style={{ background: DULL }}
+          >
+            <div className="h-[0.5vw] w-[7vw] rounded-full bg-white/85" />
+          </div>
+        </div>
+      </div>
+      {/* three treatment cards */}
+      <div className="flex gap-[1vw] px-[1.2vw] pb-[1.2vw]">{[0, 1, 2].map(card)}</div>
+      {/* footer strip */}
+      <div className="flex items-center justify-between px-[1.2vw] py-[0.9vw]" style={{ background: "#33455c" }}>
+        <div className="h-[0.4vw] w-[9vw] rounded-full bg-white/25" />
+        <div className="h-[0.4vw] w-[5vw] rounded-full bg-white/20" />
+      </div>
+    </div>
+  );
+}
+
+/* ---------- S4e: visitor becomes screening ---------- */
+
+/**
+ * Three beats: the monitor lands, the line draws across, the screening
+ * appears. Read as a sequence, which is the argument — one thing becoming
+ * another — rather than as a composition of three objects.
+ */
+function TurnSequence({ live }: { live: boolean }) {
+  const [beat, setBeat] = useState(0);
+
+  useEffect(() => {
+    const timers: number[] = [];
+    if (!live) {
+      timers.push(window.setTimeout(() => setBeat(0), 0));
+      return () => timers.forEach((t) => window.clearTimeout(t));
+    }
+    if (prefersReducedMotion()) {
+      timers.push(window.setTimeout(() => setBeat(3), 0));
+      return () => timers.forEach((t) => window.clearTimeout(t));
+    }
+    [1, 2, 3].forEach((b, i) => timers.push(window.setTimeout(() => setBeat(b), 300 + i * 600)));
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [live]);
+
+  const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+  return (
+    <div className="flex w-[min(74vw,1180px)] items-center justify-between gap-[2vw]">
+      {/* the visitor */}
+      <div
+        className="shrink-0"
+        style={{
+          opacity: beat >= 1 ? 1 : 0,
+          transform: beat >= 1 ? "translateY(0)" : "translateY(14px)",
+          transition: `opacity 600ms ${ease}, transform 600ms ${ease}`,
+        }}
+      >
+        <svg viewBox="0 0 200 150" className="h-[22vh] w-auto" fill="none" aria-hidden>
+          <rect x="8" y="8" width="184" height="112" rx="8" stroke={BLUE} strokeWidth="3.5" />
+          <path d="M8 34h184" stroke={BLUE} strokeWidth="3" />
+          <circle cx="22" cy="21" r="3.2" fill={BLUE} />
+          <circle cx="34" cy="21" r="3.2" fill={BLUE} opacity="0.5" />
+          <rect x="28" y="50" width="70" height="8" rx="4" fill="#fff" opacity="0.85" />
+          <rect x="28" y="68" width="112" height="6" rx="3" fill="#fff" opacity="0.4" />
+          <rect x="28" y="82" width="92" height="6" rx="3" fill="#fff" opacity="0.4" />
+          <path d="M84 120v14h32v-14M70 140h60" stroke={BLUE} strokeWidth="3.5" strokeLinecap="round" />
+        </svg>
+      </div>
+
+      {/* the line between them */}
+      <svg viewBox="0 0 300 40" className="h-[6vh] flex-1" fill="none" aria-hidden preserveAspectRatio="none">
+        <path
+          d="M4 20h258"
+          stroke={LIME}
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeDasharray="262"
+          strokeDashoffset={beat >= 2 ? 0 : 262}
+          style={{ transition: `stroke-dashoffset 600ms ${ease}` }}
+        />
+        <path
+          d="m254 8 24 12-24 12"
+          stroke={LIME}
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ opacity: beat >= 2 ? 1 : 0, transition: `opacity 300ms ${ease} 400ms` }}
+        />
+      </svg>
+
+      {/* the screening */}
+      <div
+        className="shrink-0"
+        style={{
+          opacity: beat >= 3 ? 1 : 0,
+          transform: beat >= 3 ? "translateY(0)" : "translateY(14px)",
+          transition: `opacity 600ms ${ease}, transform 600ms ${ease}`,
+        }}
+      >
+        {/* Tighter viewBox than the drawing's bounds: it crops the dead space
+            so the leg reads at the same weight as the monitor opposite. */}
+        <svg viewBox="46 0 128 168" className="h-[26vh] w-auto" fill="none" aria-hidden>
+          {/* leg, from thigh to foot */}
+          <path
+            d="M74 10c-6 26-4 44 2 62s10 34 8 52c-1 12-4 22-6 30h34c3-16 6-30 8-46 3-24 6-46 2-70-2-12-4-20-6-28z"
+            stroke="#fff"
+            strokeWidth="3"
+            strokeLinejoin="round"
+            opacity="0.9"
+          />
+          <path d="M112 154h30" stroke="#fff" strokeWidth="3" strokeLinecap="round" opacity="0.9" />
+          {/* the vein being scanned */}
+          <path
+            d="M86 26c6 18 2 34 6 50s8 30 6 44"
+            stroke={LIME}
+            strokeWidth="2.6"
+            strokeLinecap="round"
+            strokeDasharray="4 6"
+          />
+          {/* ultrasound probe */}
+          <rect
+            x="118"
+            y="58"
+            width="44"
+            height="19"
+            rx="7"
+            transform="rotate(-24 118 58)"
+            stroke={LIME}
+            strokeWidth="3.2"
+          />
+          <path d="M115 71l-9 5" stroke={LIME} strokeWidth="3.2" strokeLinecap="round" />
+          {/* signal */}
+          {[0, 1, 2].map((i) => (
+            <path
+              key={i}
+              d={`M101 ${76 + i * 2}a${9 + i * 6} ${9 + i * 6} 0 0 0 0 -${16 + i * 11}`}
+              stroke={LIME}
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              opacity={0.75 - i * 0.2}
+            />
+          ))}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- S5: the recipe, in three ---------- */
+
+const RECAP = [
+  ["Visibility", "Be found by patients and AI"],
+  ["Performance", "Every second costs conversions"],
+  ["Education", "Turn visitors into screenings"],
+] as const;
+
+const RECAP_STEP_MS = 900;
+const RECAP_HOLD_MS = 8000;
+
+/**
+ * The three acts, reassembled. Builds one line at a time so the deck lands as
+ * a recipe rather than a blur, then holds long enough to say "so that's the
+ * three pieces" before moving itself on.
+ */
+function Recap({ live, onDone }: { live: boolean; onDone: () => void }) {
+  const [shown, setShown] = useState(0);
+  const doneRef = useRef(onDone);
+  // Synced in an effect, not during render: writing a ref while rendering is
+  // a side effect in the render path, and React's lint rules are right to
+  // reject it. The callback is only ever read from a timer.
+  useEffect(() => {
+    doneRef.current = onDone;
+  }, [onDone]);
+
+  useEffect(() => {
+    const timers: number[] = [];
+    if (!live) {
+      timers.push(window.setTimeout(() => setShown(0), 0));
+      return () => timers.forEach((t) => window.clearTimeout(t));
+    }
+    if (prefersReducedMotion()) {
+      timers.push(window.setTimeout(() => setShown(RECAP.length), 0));
+      timers.push(window.setTimeout(() => doneRef.current(), RECAP_HOLD_MS));
+      return () => timers.forEach((t) => window.clearTimeout(t));
+    }
+    RECAP.forEach((_, i) =>
+      timers.push(window.setTimeout(() => setShown(i + 1), 400 + i * RECAP_STEP_MS))
+    );
+    timers.push(
+      window.setTimeout(
+        () => doneRef.current(),
+        400 + RECAP.length * RECAP_STEP_MS + RECAP_HOLD_MS
+      )
+    );
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [live]);
+
+  return (
+    <div className="flex flex-col gap-[5vh]">
+      {RECAP.map(([label, line], i) => (
+        <div
+          key={label}
+          className="text-left"
+          style={{
+            opacity: i < shown ? 1 : 0,
+            transform: i < shown ? "translateY(0)" : "translateY(16px)",
+            transition:
+              "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
+          }}
+        >
+          <div
+            className="text-[clamp(30px,3.4vw,74px)] font-extrabold leading-none tracking-tight"
+            style={{ color: LIME }}
+          >
+            {label}
+          </div>
+          <div className="mt-[1.2vh] text-[clamp(18px,1.8vw,38px)] font-light text-white">
+            {line}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -1098,9 +1358,24 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* S3b — 3x bars + the conversion, illustrated */}
+      {/* S3b — PROOF: the same test, side by side */}
       {section(
         6,
+        <>
+          <DotGrid className="inset-x-[20vw] top-[8vh] h-[18vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
+          <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
+            Same test. Their site. Our build.
+          </h2>
+          <CountingGauges live={active === 6} />
+          <p className={`${SUB} pitch-rise`} style={{ "--rise": "450ms" } as React.CSSProperties}>
+            Run it live on any site — including this one.
+          </p>
+        </>
+      )}
+
+      {/* S3c — 3x bars + the conversion, illustrated */}
+      {section(
+        7,
         <>
           <h2 className={`${PRIMARY} max-w-[15em] pitch-rise`} style={rise(0)}>
             A 1-second site converts 3x better than a 5-second site.
@@ -1110,7 +1385,7 @@ export default function PitchClient() {
               <div className="flex flex-col items-center gap-3 h-full justify-end">
                 <div
                   className={`pitch-bar w-[8vw] min-w-24 rounded-t-2xl bg-white/20 ${
-                    active === 6 ? "" : "pitch-bar-hidden"
+                    active === 7 ? "" : "pitch-bar-hidden"
                   }`}
                   style={{ height: "33.3%" }}
                 />
@@ -1121,7 +1396,7 @@ export default function PitchClient() {
               <div className="flex flex-col items-center gap-3 h-full justify-end">
                 <div
                   className={`pitch-bar w-[8vw] min-w-24 rounded-t-2xl ${
-                    active === 6 ? "" : "pitch-bar-hidden"
+                    active === 7 ? "" : "pitch-bar-hidden"
                   }`}
                   style={{ height: "100%", background: LIME, transitionDelay: "150ms" }}
                 />
@@ -1130,7 +1405,7 @@ export default function PitchClient() {
                 </span>
               </div>
             </div>
-            <BookingSim live={active === 6} />
+            <BookingSim live={active === 7} />
           </div>
           <p className={`${SUB} pitch-rise`} style={{ "--rise": "400ms" } as React.CSSProperties}>
             Portent, 2022 — 100M+ pageviews, lead-generation sites
@@ -1138,9 +1413,9 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* S3c — architecture */}
+      {/* S3d — architecture */}
       {section(
-        7,
+        8,
         <>
           <svg
             viewBox="0 0 1200 320"
@@ -1192,13 +1467,13 @@ export default function PitchClient() {
 
       {/* S4a — the billboard */}
       {section(
-        8,
+        9,
         <>
           <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
             Most vein websites are brochures.
           </h2>
           <div className="pitch-rise" style={rise(220)}>
-            <BillboardSilhouette />
+            <BrochureMockup />
           </div>
           <p className={`${SUB} pitch-rise`} style={rise(420)}>
             They work for patients who already decided to call.
@@ -1208,7 +1483,7 @@ export default function PitchClient() {
 
       {/* S4b — what patients actually believe */}
       {section(
-        9,
+        10,
         <>
           <DotGrid className="left-[10vw] top-[16vh] w-[18vw] h-[26vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_72%)]" />
           <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
@@ -1216,7 +1491,7 @@ export default function PitchClient() {
           </h2>
           {/* Lit one at a time — see ThoughtCycle. */}
           <div className="pitch-rise" style={rise(300)}>
-            <ThoughtCycle live={active === 9} />
+            <ThoughtCycle live={active === 10} />
           </div>
           <p className={`${SUB} pitch-rise`} style={rise(1400)}>
             They think it&rsquo;s tired legs. Or genetics. Or cosmetic.
@@ -1226,13 +1501,13 @@ export default function PitchClient() {
 
       {/* S4c — THE CENTREPIECE: the stages, walked */}
       {section(
-        10,
+        11,
         <>
           <h2 className={`${PRIMARY} pitch-rise`} style={rise(0)}>
             So we teach the stages.
           </h2>
           <div className="w-[min(84vw,1500px)] pitch-rise" style={rise(200)}>
-            <StageWalk live={active === 10} />
+            <StageWalk live={active === 11} />
           </div>
           <p
             className="pitch-rise text-[clamp(24px,2.4vw,50px)] font-semibold leading-snug text-white/85"
@@ -1249,13 +1524,13 @@ export default function PitchClient() {
 
       {/* S4d — the assessment, real UI */}
       {section(
-        11,
+        12,
         <>
           <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
             Then we ask them to count their symptoms.
           </h2>
           <div className="pitch-rise" style={rise(220)}>
-            <SymptomCheckerSim live={active === 11} onDone={() => goTo(12)} />
+            <SymptomCheckerSim live={active === 12} onDone={() => goTo(13)} />
           </div>
           <p className={`${SUB} pitch-rise`} style={rise(420)}>
             Interactive assessment — not a contact form.
@@ -1263,39 +1538,34 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* S4e — the turn */}
+      {/* S4e — the turn, shown rather than stated */}
       {section(
-        12,
+        13,
         <>
-          <DotGrid className="right-[8vw] bottom-[14vh] w-[20vw] h-[28vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
-          <h2 className={`${PRIMARY} max-w-[15em] pitch-rise`} style={rise(0)}>
-            That&rsquo;s what turns a visitor into a{" "}
-            <span style={{ color: LIME }}>screening</span>.
-          </h2>
-          <p className={`${SUB} pitch-rise`} style={rise(260)}>
-            Education first. The appointment follows.
+          <TurnSequence live={active === 13} />
+          <p className="pitch-rise text-[clamp(22px,2.3vw,48px)] font-semibold leading-snug" style={rise(1500)}>
+            That&rsquo;s what turns a{" "}
+            <span className="font-extrabold" style={{ color: BLUE }}>
+              website visitor
+            </span>{" "}
+            into a{" "}
+            <span className="font-extrabold" style={{ color: LIME }}>
+              vein screening
+            </span>
+            .
           </p>
         </>
       )}
 
-      {/* S5 — PROOF */}
+      {/* S5 — RECAP: the three acts, in three lines */}
       {section(
-        13,
-        <>
-          <DotGrid className="inset-x-[20vw] top-[8vh] h-[18vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
-          <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
-            Same test. Their site. Our build.
-          </h2>
-          <CountingGauges live={active === 13} />
-          <p className={`${SUB} pitch-rise`} style={{ "--rise": "450ms" } as React.CSSProperties}>
-            Run it live on any site — including this one.
-          </p>
-        </>
+        14,
+        <Recap live={active === 14} onDone={() => goTo(15)} />
       )}
 
       {/* S6 — HANDOFF */}
       {section(
-        14,
+        15,
         <>
           <h2 className={`${PRIMARY} pitch-rise`} style={rise(0)}>
             Want to see yours?
