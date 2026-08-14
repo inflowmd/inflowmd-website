@@ -47,6 +47,14 @@ check("OUR OWN SITE IS NEVER COUNTED", () => {
   assert.equal(isCountable("https://inflowmd.com/audit"), false);
 });
 
+check("THE COMPARISON SITE IS NEVER COUNTED", () => {
+  // The result screen fires a live audit of it every time a report opens, so
+  // if it were countable it would swamp the real booth traffic.
+  assert.ok(NON_COUNTED_DOMAINS.includes("centerforveincareandsurgery.com"));
+  assert.equal(isCountable("https://centerforveincareandsurgery.com"), false);
+  assert.equal(isCountable("https://www.centerforveincareandsurgery.com/contact"), false);
+});
+
 check("the configured test domains are excluded", () => {
   assert.ok(NON_COUNTED_DOMAINS.includes("inflowmd.com"));
   assert.ok(NON_COUNTED_DOMAINS.includes("thebluffs.com"));

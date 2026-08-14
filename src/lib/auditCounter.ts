@@ -31,6 +31,10 @@ const GIST_FILENAME = "booth-audit-counter.json";
 export const NON_COUNTED_DOMAINS: readonly string[] = [
   "inflowmd.com",
   "thebluffs.com",
+  // The booth's comparison site. Every opened report can fire a live audit of
+  // it, so it would otherwise dominate the count — it is our demonstration,
+  // not a practice that walked up to the booth.
+  "centerforveincareandsurgery.com",
   "vercel.app",
   "localhost",
 ];
