@@ -154,15 +154,29 @@ export default function RotatingHeadline() {
               } as React.CSSProperties
             }
           >
-            {slide.segments.map((segment) => (
-              <span
-                key={segment.text}
-                className={segment.accent ? "font-extrabold" : "font-medium"}
-                style={segment.accent ? { color: ACCENT } : undefined}
-              >
-                {segment.text}
-              </span>
-            ))}
+            {/* Two blocks, always: the setup, then the accented phrase on a
+                line of its own. From across a booth the green line is the
+                part that gets read first, and it should never start
+                mid-sentence at the end of someone else's line. Trailing
+                punctuation rides with the accent so a stray "?" never lands
+                alone on the next line. */}
+            <span className="block font-medium">
+              {slide.segments
+                .slice(0, slide.segments.findIndex((s) => s.accent))
+                .map((s) => s.text)
+                .join("")
+                .trimEnd()}
+            </span>
+            <span className="block font-extrabold">
+              {slide.segments.slice(slide.segments.findIndex((s) => s.accent)).map((segment) => (
+                <span
+                  key={segment.text}
+                  style={segment.accent ? { color: ACCENT } : undefined}
+                >
+                  {segment.text}
+                </span>
+              ))}
+            </span>
           </span>
         );
       })}
