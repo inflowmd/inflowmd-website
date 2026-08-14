@@ -28,17 +28,18 @@ const SECTIONS = [
   "s2a",
   "s2b",
   "s2c",
-  // Act 3 — how we build. Sits between "AI cannot find you" and "and it is
-  // slow", because a site nobody can find is a different problem from a site
-  // that gets found and still does not convert.
+  // Act 3 — speed.
   "s3a",
   "s3b",
   "s3c",
-  "s3d",
-  "s3e",
+  // Act 4 — how we build. Education and speed are both conversion arguments,
+  // so they sit adjacent, and the deck ends on the differentiator rather than
+  // passing through it on the way to a statistic.
   "s4a",
   "s4b",
   "s4c",
+  "s4d",
+  "s4e",
   "s5",
   "s6",
 ] as const;
@@ -190,6 +191,202 @@ function BillboardSilhouette() {
       {/* phone number bar */}
       <div className="mt-[1.6vw] flex justify-center">
         <div className="h-[2.2vw] w-[16vw] rounded-full bg-white/[0.12]" />
+      </div>
+    </div>
+  );
+}
+
+/* ---------- S4b: three beliefs, lit one at a time ---------- */
+
+const PATIENT_THOUGHTS = ["“Just tired legs.”", "“It runs in the family.”", "“It’s only cosmetic.”"];
+
+/**
+ * Lights each belief in turn, then leaves all three standing in white.
+ * Sequential rather than simultaneous: three phrases arriving together are a
+ * list, and a list is scanned. One at a time, each is read.
+ */
+function ThoughtCycle({ live }: { live: boolean }) {
+  /** -1 before the cycle, 0..2 while lighting, 3 once settled. */
+  const [phase, setPhase] = useState(-1);
+
+  useEffect(() => {
+    // Every state change goes through a timer, including the resets: setting
+    // state straight from an effect body cascades an extra render, and the
+    // linter is right to flag it. A 0ms timer lands on the next tick and
+    // behaves identically here.
+    const timers: number[] = [];
+    if (!live) {
+      timers.push(window.setTimeout(() => setPhase(-1), 0));
+      return () => timers.forEach((t) => window.clearTimeout(t));
+    }
+    if (prefersReducedMotion()) {
+      timers.push(window.setTimeout(() => setPhase(PATIENT_THOUGHTS.length), 0));
+      return () => timers.forEach((t) => window.clearTimeout(t));
+    }
+    PATIENT_THOUGHTS.forEach((_, i) => {
+      timers.push(window.setTimeout(() => setPhase(i), 500 + i * 1200));
+    });
+    timers.push(
+      window.setTimeout(() => setPhase(PATIENT_THOUGHTS.length), 500 + PATIENT_THOUGHTS.length * 1200)
+    );
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [live]);
+
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-x-[4vw] gap-y-[2vh]">
+      {PATIENT_THOUGHTS.map((thought, i) => {
+        const lit = phase === i;
+        const settled = phase >= PATIENT_THOUGHTS.length || phase > i;
+        return (
+          <span
+            key={thought}
+            className="text-[clamp(20px,2.1vw,42px)] font-light italic transition-all duration-500"
+            style={{
+              color: lit ? LIME : "#fff",
+              opacity: lit || settled ? 1 : 0.22,
+              textShadow: lit ? `0 0 clamp(18px,2vw,38px) ${LIME}66` : "none",
+            }}
+          >
+            {thought}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ---------- S4d: the assessment, answering itself ---------- */
+
+const SYMPTOMS = [
+  { label: "Leg pain, aching or cramping", picked: true },
+  { label: "Restless legs", picked: true },
+  { label: "Swelling of the legs or ankles", picked: true },
+  { label: "Leg fatigue or weakness", picked: true },
+  { label: "Skin discoloration or texture changes", picked: false },
+  { label: "Open wounds or venous ulcers", picked: false },
+];
+const PICKED_COUNT = SYMPTOMS.filter((s) => s.picked).length;
+const STEP_MS = 800;
+const RESULT_HOLD_MS = 2000;
+
+/**
+ * The live assessment, played back. Four of six tick themselves, Continue
+ * lights and is pressed, and the result lands — then the deck advances itself.
+ *
+ * This screen is the only one that moves on without a keypress: the point being
+ * sold is what the patient sees at the END of the interaction, and a presenter
+ * pressing through it would cut the moment off.
+ */
+function SymptomCheckerSim({ live, onDone }: { live: boolean; onDone: () => void }) {
+  const [checked, setChecked] = useState(0);
+  const [pressed, setPressed] = useState(false);
+  const [result, setResult] = useState(false);
+  const doneRef = useRef(onDone);
+  doneRef.current = onDone;
+
+  useEffect(() => {
+    const timers: number[] = [];
+    if (!live) {
+      // Deferred for the same reason as ThoughtCycle — no synchronous
+      // setState in an effect body.
+      timers.push(
+        window.setTimeout(() => {
+          setChecked(0);
+          setPressed(false);
+          setResult(false);
+        }, 0)
+      );
+      return () => timers.forEach((t) => window.clearTimeout(t));
+    }
+    const reduce = prefersReducedMotion();
+
+    if (reduce) {
+      timers.push(
+        window.setTimeout(() => {
+          setChecked(PICKED_COUNT);
+          setPressed(true);
+          setResult(true);
+        }, 0)
+      );
+      timers.push(window.setTimeout(() => doneRef.current(), RESULT_HOLD_MS));
+    } else {
+      for (let i = 1; i <= PICKED_COUNT; i++) {
+        timers.push(window.setTimeout(() => setChecked(i), i * STEP_MS));
+      }
+      const afterChecks = PICKED_COUNT * STEP_MS + 500;
+      timers.push(window.setTimeout(() => setPressed(true), afterChecks));
+      timers.push(window.setTimeout(() => setResult(true), afterChecks + 600));
+      timers.push(window.setTimeout(() => doneRef.current(), afterChecks + 600 + RESULT_HOLD_MS));
+    }
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [live]);
+
+  // Which of the picked rows have ticked so far.
+  let seen = 0;
+  const rows = SYMPTOMS.map((s) => {
+    if (!s.picked) return { ...s, on: false };
+    seen += 1;
+    return { ...s, on: seen <= checked };
+  });
+
+  return (
+    <div className="rounded-[2.6vh] border-[0.5vh] border-white/15 bg-black p-[0.5vh] shadow-[0_30px_90px_rgba(0,0,0,0.6)]">
+      <div className="relative w-[min(34vh,340px)] overflow-hidden rounded-[2.1vh] bg-[#0b1620] px-[2vh] py-[2.4vh]">
+        <p className="text-[1.9vh] font-semibold leading-tight text-white">
+          Do you experience any of these in your legs?
+        </p>
+        <p className="mt-[0.6vh] text-[1.4vh] text-white/40">Select all that apply.</p>
+
+        <div className="mt-[1.8vh] flex flex-col gap-[1vh]">
+          {rows.map((row) => (
+            <div
+              key={row.label}
+              className="flex items-center justify-between gap-2 rounded-[1.2vh] border px-[1.4vh] py-[1.2vh] transition-all duration-300"
+              style={{
+                borderColor: row.on ? "#2f9fd0" : "rgba(255,255,255,0.09)",
+                background: row.on ? "rgba(47,159,208,0.12)" : "rgba(255,255,255,0.02)",
+              }}
+            >
+              <span className="text-[1.45vh] leading-tight text-white/85">{row.label}</span>
+              <span
+                className="shrink-0 transition-opacity duration-300"
+                style={{ opacity: row.on ? 1 : 0 }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="#7fd4f5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-[1.8vh] w-[1.8vh]" aria-hidden>
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-[2vh] flex justify-end">
+          <span
+            className="rounded-full px-[2.2vh] py-[1.1vh] text-[1.5vh] font-bold text-white transition-all duration-300"
+            style={{
+              background: pressed ? LIME : "#1a7fa8",
+              transform: pressed ? "scale(0.96)" : "scale(1)",
+              boxShadow: pressed ? `0 0 0 0.5vh ${LIME}44` : "none",
+            }}
+          >
+            Continue →
+          </span>
+        </div>
+
+        {/* The moment being sold. */}
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center bg-[#0b1620] px-[2.4vh] text-center transition-opacity duration-500"
+          style={{ opacity: result ? 1 : 0, pointerEvents: "none" }}
+        >
+          <div className="mb-[2vh] flex h-[6vh] w-[6vh] items-center justify-center rounded-full" style={{ background: LIME }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="h-[3vh] w-[3vh]" aria-hidden>
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </div>
+          <p className="text-[2.1vh] font-extrabold leading-snug text-white">
+            Your symptoms suggest you need a vein screening.
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -881,111 +1078,10 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* ═══ ACT 3 — HOW WE BUILD ═══ */}
-
-      {/* S3a — the billboard */}
+      {/* ═══ ACT 3 — SPEED ═══ */}
+      {/* S3a — 53% */}
       {section(
         5,
-        <>
-          <h2 className={`${PRIMARY} max-w-[15em] pitch-rise`} style={rise(0)}>
-            Most vein websites are built for patients who already decided.
-          </h2>
-          <div className="pitch-rise" style={rise(220)}>
-            <BillboardSilhouette />
-          </div>
-          <p className={`${SUB} pitch-rise`} style={rise(420)}>
-            That&rsquo;s a small fraction of the people searching.
-          </p>
-        </>
-      )}
-
-      {/* S3b — what patients actually believe */}
-      {section(
-        6,
-        <>
-          <DotGrid className="left-[10vw] top-[16vh] w-[18vw] h-[26vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_72%)]" />
-          <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
-            Most patients don&rsquo;t know CVI is progressive.
-          </h2>
-          {/* The words carry this one; the fragments are barely there. */}
-          <div className="flex flex-wrap items-center justify-center gap-x-[4vw] gap-y-[2vh]">
-            {["“Just tired legs.”", "“It runs in the family.”", "“It&rsquo;s only cosmetic.”"].map(
-              (fragment, i) => (
-                <span
-                  key={fragment}
-                  className="pitch-rise text-[clamp(18px,1.9vw,38px)] font-light italic text-white/25"
-                  style={rise(400 + i * 320)}
-                  dangerouslySetInnerHTML={{ __html: fragment }}
-                />
-              )
-            )}
-          </div>
-          <p className={`${SUB} pitch-rise`} style={rise(1400)}>
-            They think it&rsquo;s tired legs. Or genetics. Or cosmetic.
-          </p>
-        </>
-      )}
-
-      {/* S3c — THE CENTREPIECE: the stages, walked */}
-      {section(
-        7,
-        <>
-          <h2 className={`${PRIMARY} pitch-rise`} style={rise(0)}>
-            So we teach the stages.
-          </h2>
-          <div className="w-[min(84vw,1500px)] pitch-rise" style={rise(200)}>
-            <StageWalk live={active === 7} />
-          </div>
-          <p className={`${SUB} pitch-rise`} style={rise(420)}>
-            Patients who understand progression don&rsquo;t wait.
-          </p>
-        </>
-      )}
-
-      {/* S3d — the assessment, real UI */}
-      {section(
-        8,
-        <>
-          <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
-            Then we ask them to count their symptoms.
-          </h2>
-          <div className="pitch-rise" style={rise(220)}>
-            {/* Device frame around a real capture of the live assessment. */}
-            <div className="rounded-[2.6vh] border-[0.5vh] border-white/15 bg-black p-[0.5vh] shadow-[0_30px_90px_rgba(0,0,0,0.6)]">
-              <img
-                src="/veinquiz-symptoms.png"
-                alt="A patient's vein assessment, four symptoms selected"
-                width={337}
-                height={614}
-                draggable={false}
-                className="block h-[46vh] w-auto rounded-[2.1vh]"
-              />
-            </div>
-          </div>
-          <p className={`${SUB} pitch-rise`} style={rise(420)}>
-            Interactive assessment — not a contact form.
-          </p>
-        </>
-      )}
-
-      {/* S3e — the turn */}
-      {section(
-        9,
-        <>
-          <DotGrid className="right-[8vw] bottom-[14vh] w-[20vw] h-[28vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
-          <h2 className={`${PRIMARY} max-w-[15em] pitch-rise`} style={rise(0)}>
-            That&rsquo;s what turns a browser into a{" "}
-            <span style={{ color: LIME }}>screening</span>.
-          </h2>
-          <p className={`${SUB} pitch-rise`} style={rise(260)}>
-            Education first. The appointment follows.
-          </p>
-        </>
-      )}
-
-      {/* S4a — 53% */}
-      {section(
-        10,
         <>
           <div
             className="font-extrabold leading-none tracking-tight text-[clamp(200px,30vh,320px)] pitch-rise"
@@ -1002,9 +1098,9 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* S4b — 3x bars + the conversion, illustrated */}
+      {/* S3b — 3x bars + the conversion, illustrated */}
       {section(
-        11,
+        6,
         <>
           <h2 className={`${PRIMARY} max-w-[15em] pitch-rise`} style={rise(0)}>
             A 1-second site converts 3x better than a 5-second site.
@@ -1014,7 +1110,7 @@ export default function PitchClient() {
               <div className="flex flex-col items-center gap-3 h-full justify-end">
                 <div
                   className={`pitch-bar w-[8vw] min-w-24 rounded-t-2xl bg-white/20 ${
-                    active === 11 ? "" : "pitch-bar-hidden"
+                    active === 6 ? "" : "pitch-bar-hidden"
                   }`}
                   style={{ height: "33.3%" }}
                 />
@@ -1025,7 +1121,7 @@ export default function PitchClient() {
               <div className="flex flex-col items-center gap-3 h-full justify-end">
                 <div
                   className={`pitch-bar w-[8vw] min-w-24 rounded-t-2xl ${
-                    active === 11 ? "" : "pitch-bar-hidden"
+                    active === 6 ? "" : "pitch-bar-hidden"
                   }`}
                   style={{ height: "100%", background: LIME, transitionDelay: "150ms" }}
                 />
@@ -1034,7 +1130,7 @@ export default function PitchClient() {
                 </span>
               </div>
             </div>
-            <BookingSim live={active === 11} />
+            <BookingSim live={active === 6} />
           </div>
           <p className={`${SUB} pitch-rise`} style={{ "--rise": "400ms" } as React.CSSProperties}>
             Portent, 2022 — 100M+ pageviews, lead-generation sites
@@ -1042,9 +1138,9 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* S4c — architecture */}
+      {/* S3c — architecture */}
       {section(
-        12,
+        7,
         <>
           <svg
             viewBox="0 0 1200 320"
@@ -1089,6 +1185,96 @@ export default function PitchClient() {
               </span>
             ))}
           </div>
+        </>
+      )}
+
+      {/* ═══ ACT 4 — HOW WE BUILD ═══ */}
+
+      {/* S4a — the billboard */}
+      {section(
+        8,
+        <>
+          <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
+            Most vein websites are brochures.
+          </h2>
+          <div className="pitch-rise" style={rise(220)}>
+            <BillboardSilhouette />
+          </div>
+          <p className={`${SUB} pitch-rise`} style={rise(420)}>
+            They work for patients who already decided to call.
+          </p>
+        </>
+      )}
+
+      {/* S4b — what patients actually believe */}
+      {section(
+        9,
+        <>
+          <DotGrid className="left-[10vw] top-[16vh] w-[18vw] h-[26vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_72%)]" />
+          <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
+            Most patients don&rsquo;t know CVI is progressive.
+          </h2>
+          {/* Lit one at a time — see ThoughtCycle. */}
+          <div className="pitch-rise" style={rise(300)}>
+            <ThoughtCycle live={active === 9} />
+          </div>
+          <p className={`${SUB} pitch-rise`} style={rise(1400)}>
+            They think it&rsquo;s tired legs. Or genetics. Or cosmetic.
+          </p>
+        </>
+      )}
+
+      {/* S4c — THE CENTREPIECE: the stages, walked */}
+      {section(
+        10,
+        <>
+          <h2 className={`${PRIMARY} pitch-rise`} style={rise(0)}>
+            So we teach the stages.
+          </h2>
+          <div className="w-[min(84vw,1500px)] pitch-rise" style={rise(200)}>
+            <StageWalk live={active === 10} />
+          </div>
+          <p
+            className="pitch-rise text-[clamp(24px,2.4vw,50px)] font-semibold leading-snug text-white/85"
+            style={rise(420)}
+          >
+            Patients who understand progression{" "}
+            <span className="font-extrabold" style={{ color: LIME }}>
+              don&rsquo;t wait
+            </span>
+            .
+          </p>
+        </>
+      )}
+
+      {/* S4d — the assessment, real UI */}
+      {section(
+        11,
+        <>
+          <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
+            Then we ask them to count their symptoms.
+          </h2>
+          <div className="pitch-rise" style={rise(220)}>
+            <SymptomCheckerSim live={active === 11} onDone={() => goTo(12)} />
+          </div>
+          <p className={`${SUB} pitch-rise`} style={rise(420)}>
+            Interactive assessment — not a contact form.
+          </p>
+        </>
+      )}
+
+      {/* S4e — the turn */}
+      {section(
+        12,
+        <>
+          <DotGrid className="right-[8vw] bottom-[14vh] w-[20vw] h-[28vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
+          <h2 className={`${PRIMARY} max-w-[15em] pitch-rise`} style={rise(0)}>
+            That&rsquo;s what turns a visitor into a{" "}
+            <span style={{ color: LIME }}>screening</span>.
+          </h2>
+          <p className={`${SUB} pitch-rise`} style={rise(260)}>
+            Education first. The appointment follows.
+          </p>
         </>
       )}
 

@@ -15,15 +15,60 @@ export interface CviStage {
   stage: number;
   name: string;
   desc: string;
-  /** The clinical colour ramp, blue through amber to red. */
+  /** The clinical colour ramp, blue through teal and amber to red. */
   color: string;
+  /** The practice's own progression photograph, paired as they pair them. */
+  image: string;
 }
 
+/**
+ * Five stages, matching the progression Center For Vein Care publishes. The
+ * photographs are theirs, copied from that project and paired to the same
+ * stages they pair them to.
+ *
+ * Stage 3's description is OURS, not the practice's — their own note marks the
+ * copy for stages three to five as authored and awaiting sign-off, so this
+ * stays descriptive of the stage name and claims nothing further. Stage 4's
+ * wording lost the word "swelling" when stage 3 arrived; two consecutive
+ * stages both leading on swelling read as a duplicate rather than a
+ * progression.
+ */
 export const CVI_STAGES: readonly CviStage[] = [
-  { stage: 1, name: "Spider Veins", desc: "Small, visible veins beneath the skin", color: "#7db4f7" },
-  { stage: 2, name: "Varicose Veins", desc: "Bulging, twisted veins causing discomfort", color: "#2D6CDF" },
-  { stage: 3, name: "Skin Changes", desc: "Swelling, discoloration around ankles", color: "#f59e0b" },
-  { stage: 4, name: "Venous Ulcers", desc: "Open wounds requiring immediate care", color: "#ef4444" },
+  {
+    stage: 1,
+    name: "Spider Veins",
+    desc: "Small, visible veins beneath the skin",
+    color: "#7db4f7",
+    image: "/cvi/stage-1-clear.webp",
+  },
+  {
+    stage: 2,
+    name: "Varicose Veins",
+    desc: "Bulging, twisted veins causing discomfort",
+    color: "#2D6CDF",
+    image: "/cvi/stage-2-spider.webp",
+  },
+  {
+    stage: 3,
+    name: "Swelling of Legs and Ankles",
+    desc: "Legs and ankles swell as pressure builds",
+    color: "#0ea5a4",
+    image: "/cvi/stage-3-reticular.webp",
+  },
+  {
+    stage: 4,
+    name: "Skin Changes",
+    desc: "Discoloration and hardening around the ankles",
+    color: "#f59e0b",
+    image: "/cvi/stage-4-discoloration.webp",
+  },
+  {
+    stage: 5,
+    name: "Venous Ulcers",
+    desc: "Open wounds requiring immediate care",
+    color: "#ef4444",
+    image: "/cvi/stage-5-trophic.webp",
+  },
 ];
 
 const LIME = "#84B83B";
@@ -52,14 +97,26 @@ function MockupStages() {
       {CVI_STAGES.map((item, i) => (
         <div key={item.stage} className="flex items-start flex-1">
           <div className="flex flex-col items-center text-center flex-1">
+            {/* Supporting imagery, deliberately tiny — the mockup is a
+                thumbnail of a website, not the website. Lazy because the
+                Showcase section sits well below the fold. */}
+            <img
+              src={item.image}
+              alt=""
+              aria-hidden
+              loading="lazy"
+              width={700}
+              height={1000}
+              className="mb-1 h-[26px] w-auto rounded-[2px] object-cover"
+            />
             <div
-              className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[7px] font-bold mb-1"
+              className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[6px] font-bold mb-1"
               style={{ backgroundColor: item.color }}
             >
               {item.stage}
             </div>
-            <p className="text-gray-900 text-[7px] font-semibold leading-tight mb-0.5">{item.name}</p>
-            <p className="text-gray-400 text-[5.5px] leading-tight px-0.5">{item.desc}</p>
+            <p className="text-gray-900 text-[6px] font-semibold leading-tight mb-0.5">{item.name}</p>
+            <p className="text-gray-400 text-[5px] leading-tight px-0.5">{item.desc}</p>
           </div>
           {i < CVI_STAGES.length - 1 && (
             <div className="flex items-center pt-2.5 px-0.5 text-gray-300">
@@ -85,11 +142,23 @@ function StageStages({ reached }: { reached: number }) {
         return (
           <div key={item.stage} className="flex flex-1 items-start">
             <div className="flex flex-1 flex-col items-center text-center">
+              {/* Supporting, not the focus: small enough that the progression
+                  still reads as a sequence of stages rather than a gallery. */}
+              <img
+                src={item.image}
+                alt=""
+                aria-hidden
+                width={700}
+                height={1000}
+                draggable={false}
+                className="mb-[1.4vmin] w-auto rounded-[0.6vmin] object-cover transition-opacity duration-700"
+                style={{ height: "clamp(56px,11vmin,150px)", opacity: lit ? 1 : 0.3 }}
+              />
               <div
                 className="flex items-center justify-center rounded-full font-extrabold transition-all duration-700"
                 style={{
-                  width: "clamp(34px,5.4vmin,68px)",
-                  height: "clamp(34px,5.4vmin,68px)",
+                  width: "clamp(28px,4.4vmin,56px)",
+                  height: "clamp(28px,4.4vmin,56px)",
                   fontSize: "clamp(15px,2.2vmin,28px)",
                   // Unreached stages keep the clinical colour but sit back;
                   // the lime ring is what says "you are here".
@@ -105,7 +174,7 @@ function StageStages({ reached }: { reached: number }) {
               <p
                 className="mt-[1.4vmin] font-bold leading-tight transition-opacity duration-700"
                 style={{
-                  fontSize: "clamp(13px,1.9vmin,26px)",
+                  fontSize: "clamp(12px,1.7vmin,24px)",
                   color: "#fff",
                   opacity: lit ? 1 : 0.35,
                 }}
