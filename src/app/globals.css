@@ -446,7 +446,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6vmin;
+  gap: 4vmin;
 }
 .kiosk-stage .kiosk-copy {
   align-items: center;
@@ -455,7 +455,7 @@ body {
 @media (orientation: landscape) {
   .kiosk-stage {
     flex-direction: row;
-    gap: 8vmin;
+    gap: 6vmin;
   }
   .kiosk-stage .kiosk-copy {
     align-items: flex-start;
@@ -980,7 +980,7 @@ body {
   position: absolute;
   /* Reaches well past the card: a halo tucked behind it is a halo nobody
      sees. This is the visible spread, not the card's own footprint. */
-  inset: -34%;
+  inset: -27%;
   z-index: 0;
   pointer-events: none;
   border-radius: 50%;
