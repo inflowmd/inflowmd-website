@@ -8486,15 +8486,16 @@
     },
     {
       "url": "https://centerforveincareandsurgery.com",
-      "fetchedAt": "2026-08-13T15:26:37.064Z",
+      "fetchedAt": "2026-08-14T05:14:47.047Z",
       "fromCache": false,
       "performance": {
         "available": true,
-        "lighthouseScore": 18,
-        "lcp": 10.88,
-        "cls": 0.32,
-        "tbt": 1173,
-        "speedIndex": 17.63,
+        "lighthouseScore": 74,
+        "lcp": 5.1,
+        "fcp": 2.64,
+        "cls": 0,
+        "tbt": 45,
+        "speedIndex": 4.61,
         "fieldDataAvailable": false,
         "fieldLcp": null
       },
@@ -8504,17 +8505,11 @@
         "blocked": false
       },
       "platform": {
-        "platform": "WordPress",
-        "version": "6.6.7",
+        "platform": null,
+        "version": null,
         "vendor": null,
-        "builders": [
-          "WPBakery"
-        ],
-        "evidence": [
-          "generator meta: \"WordPress 6.6.7\"",
-          "asset path: /wp-content/",
-          "builder marker: vc_row"
-        ]
+        "builders": [],
+        "evidence": []
       },
       "seo": [
         {
@@ -8534,29 +8529,30 @@
         {
           "id": "seo.title",
           "label": "Page title",
-          "status": "warn",
-          "detail": "Your page title is 81 characters, so Google will likely cut it off in search results.",
-          "evidence": "The Center For Vein Care And Surgery \u2013 Vein & Vascular Treatments in Columbus, GA"
+          "status": "pass",
+          "detail": "Your page title is 53 characters \u2014 a good length to display in full.",
+          "evidence": "Vein Treatment in Columbus, GA | Center for Vein Care"
         },
         {
           "id": "seo.meta-description",
           "label": "Search result description",
-          "status": "fail",
-          "detail": "This page has no description, so Google will invent one from whatever text it finds \u2014 often the wrong text."
+          "status": "pass",
+          "detail": "Your search description is 158 characters \u2014 the right length to display in full.",
+          "evidence": "IAC-accredited vein center in Columbus, GA. Dr. Robert Edwards treats varicose and spider veins with VenaSeal and ClosureFast \u2014 minimally invasive, in-office."
         },
         {
           "id": "seo.h1",
           "label": "Main page heading",
-          "status": "warn",
-          "detail": "This page has 4 main headings competing with each other, which muddies what it is about.",
-          "evidence": "DR. ROBERT A. EDWARDS"
+          "status": "pass",
+          "detail": "This page has one clear main heading, which tells search engines what it is about.",
+          "evidence": "One Vein at a Time"
         },
         {
           "id": "seo.heading-order",
           "label": "Heading structure",
-          "status": "warn",
-          "detail": "Your headings skip a level, which makes the page harder to follow for screen readers and search engines.",
-          "evidence": "Jumps from a level 2 heading to a level 4 heading"
+          "status": "pass",
+          "detail": "Your headings step down in order, so the page reads as a clear outline.",
+          "evidence": "29 headings, in order"
         },
         {
           "id": "seo.viewport",
@@ -8575,47 +8571,53 @@
         {
           "id": "seo.open-graph",
           "label": "Social sharing preview",
-          "status": "fail",
-          "detail": "When someone shares your page, it will appear as a bare link with no title, description or image."
+          "status": "pass",
+          "detail": "When someone shares your page in a text or on social media, it will show a proper title, description and image.",
+          "evidence": "og:title, og:description, og:image all present"
         },
         {
           "id": "seo.image-alt",
           "label": "Image descriptions",
-          "status": "fail",
-          "detail": "13 of your 17 images have no written description, so search engines and screen readers cannot tell what they show.",
-          "evidence": "4 of 17 images have alt text"
+          "status": "pass",
+          "detail": "Every image is either described or deliberately marked as decorative, which is what search engines and screen readers need.",
+          "evidence": "21 of 36 images described, 15 marked decorative"
         }
       ],
       "schema": [
         {
           "id": "schema.present",
           "label": "Machine-readable practice details",
-          "status": "fail",
-          "detail": "This page carries no machine-readable summary, so Google and AI assistants have to guess at your practice details from ordinary page text."
+          "status": "pass",
+          "detail": "This page publishes 12 machine-readable descriptions that search engines and AI assistants can read directly.",
+          "evidence": "Answer, City, EducationalOccupationalCredential, FAQPage, LocalBusiness, MedicalClinic, OpeningHoursSpecification, Organization, Physician, PostalAddress, Question, WebSite"
         },
         {
           "id": "schema.medical",
           "label": "Medical practice identification",
-          "status": "fail",
-          "detail": "Search engines cannot tell that this site belongs to a medical practice rather than any other kind of business."
+          "status": "pass",
+          "detail": "Search engines can tell this site belongs to a medical practice, which is what makes you eligible to appear for treatment searches.",
+          "evidence": "Found: MedicalClinic, Physician"
         },
         {
           "id": "schema.local-business",
           "label": "Local listing details",
-          "status": "fail",
-          "detail": "Your address, phone number and hours are not published in a form search engines can read directly."
+          "status": "pass",
+          "detail": "Your practice is described as a local business, which is how your address, phone number and hours reach local search results.",
+          "evidence": "Found: MedicalClinic, LocalBusiness, Physician"
         },
         {
           "id": "schema.faq",
           "label": "Frequently asked questions",
-          "status": "warn",
-          "detail": "No patient questions are marked up on this page, so they cannot appear as expandable answers in search results."
+          "status": "pass",
+          "detail": "Your patient questions are marked up so they can appear as expandable answers directly in search results.",
+          "evidence": "Found: FAQPage"
         },
         {
           "id": "schema.organization",
           "label": "Organization details",
-          "status": "fail",
-          "detail": "The practice itself is not described in a machine-readable way, so search engines cannot connect your name, logo and profiles."
+          "status": "pass",
+          "detail": "The practice is described as an organization, which lets search engines connect your name, logo and official profiles.",
+          "evidence": "Found: MedicalClinic, LocalBusiness, Organization"
         }
       ],
       "aiReadiness": [
@@ -8636,36 +8638,35 @@
         {
           "id": "ai.llms-txt",
           "label": "AI content guide",
-          "status": "warn",
-          "detail": "Your site has no AI content guide \u2014 an emerging standard that tells AI assistants which of your pages matter most. Few practices have one yet, so adding it is an easy edge."
+          "status": "pass",
+          "detail": "Your site publishes a guide telling AI assistants what it is about and which pages matter most.",
+          "evidence": "llms.txt found"
         },
         {
           "id": "ai.semantic-structure",
           "label": "Page structure for AI",
-          "status": "warn",
-          "detail": "Your headings skip a level, which makes it harder for AI assistants to work out how the sections relate.",
-          "evidence": "Jumps from a level 2 heading to a level 4 heading"
+          "status": "pass",
+          "detail": "Your headings form a clean outline, which is how AI assistants find the passage that answers a patient's question.",
+          "evidence": "29 headings, in order"
         },
         {
           "id": "ai.content-depth",
           "label": "Content depth",
           "status": "pass",
           "detail": "This page has enough written content for search engines and AI assistants to understand and quote it.",
-          "evidence": "710 words of page content"
+          "evidence": "1,300 words of page content"
         }
       ],
       "scores": {
-        "performance": 18,
-        "ai": 27,
+        "performance": 74,
+        "ai": 100,
         "aiVerified": 11,
         "aiTotal": 11,
-        "patientsFind": 56,
+        "patientsFind": 100,
         "patientsFindVerified": 9,
         "patientsFindTotal": 9
       },
-      "practiceName": "Center For Vein Care",
-      "stale": true,
-      "staleNote": "Kept prior performance measurement of 2026-08-11T18:29:39.068Z (perf 18, LCP 10.88s). This run's PageSpeed attempt returned no score, twice."
+      "practiceName": "Center For Vein Care"
     },
     {
       "url": "https://www.eternaaesthetic.com",
