@@ -134,7 +134,7 @@ export default function RotatingHeadline() {
   }, []);
 
   return (
-    <h1 className="mt-[2.5vmin] grid max-w-[15em] text-[clamp(26px,5.4vmin,62px)] leading-[1.08] tracking-tight text-white">
+    <h1 className="mt-[2vmin] grid max-w-[15em] text-[clamp(26px,5.4vmin,62px)] leading-[1.08] tracking-tight text-white">
       {SLIDES.map((slide, i) => {
         const showing = i === index && visible;
         return (
