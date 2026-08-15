@@ -451,9 +451,16 @@ function BrochureMockup() {
 /* ---------- S4e: visitor becomes screening ---------- */
 
 /**
- * Three beats: the monitor lands, the line draws across, the screening
- * appears. Read as a sequence, which is the argument — one thing becoming
- * another — rather than as a composition of three objects.
+ * Two beats with the line between them. Each image lands WITH its own caption
+ * line, because the sentence is split across the two halves and half a
+ * sentence arriving without its picture reads as a typo.
+ *
+ * The right-hand drawing is a DIAGNOSTIC ULTRASOUND, not a treatment. The
+ * earlier version put a dashed vein under an angled instrument with waves
+ * coming off it, which reads as ablation — a fibre lasering a vein. This is a
+ * handheld transducer with a cable, its face flat against the calf, sound
+ * arcs travelling INTO the leg. Screening is what this act is selling; showing
+ * a procedure sells something the practice has not agreed to yet.
  */
 function TurnSequence({ live }: { live: boolean }) {
   const [beat, setBeat] = useState(0);
@@ -473,17 +480,18 @@ function TurnSequence({ live }: { live: boolean }) {
   }, [live]);
 
   const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+  const arrive = (on: boolean) => ({
+    opacity: on ? 1 : 0,
+    transform: on ? "translateY(0)" : "translateY(14px)",
+    transition: `opacity 600ms ${ease}, transform 600ms ${ease}`,
+  });
+  const caption =
+    "mt-[3vh] text-center text-[clamp(18px,1.9vw,38px)] font-semibold leading-snug text-white";
+
   return (
-    <div className="flex w-[min(74vw,1180px)] items-center justify-between gap-[2vw]">
-      {/* the visitor */}
-      <div
-        className="shrink-0"
-        style={{
-          opacity: beat >= 1 ? 1 : 0,
-          transform: beat >= 1 ? "translateY(0)" : "translateY(14px)",
-          transition: `opacity 600ms ${ease}, transform 600ms ${ease}`,
-        }}
-      >
+    <div className="flex w-[min(76vw,1220px)] items-start justify-between gap-[2vw]">
+      {/* the visitor, with its half of the sentence */}
+      <div className="flex shrink-0 flex-col items-center" style={arrive(beat >= 1)}>
         <svg viewBox="0 0 200 150" className="h-[22vh] w-auto" fill="none" aria-hidden>
           <rect x="8" y="8" width="184" height="112" rx="8" stroke={BLUE} strokeWidth="3.5" />
           <path d="M8 34h184" stroke={BLUE} strokeWidth="3" />
@@ -494,10 +502,16 @@ function TurnSequence({ live }: { live: boolean }) {
           <rect x="28" y="82" width="92" height="6" rx="3" fill="#fff" opacity="0.4" />
           <path d="M84 120v14h32v-14M70 140h60" stroke={BLUE} strokeWidth="3.5" strokeLinecap="round" />
         </svg>
+        <p className={caption}>
+          That&rsquo;s what turns a{" "}
+          <span className="font-extrabold" style={{ color: BLUE }}>
+            website visitor
+          </span>
+        </p>
       </div>
 
       {/* the line between them */}
-      <svg viewBox="0 0 300 40" className="h-[6vh] flex-1" fill="none" aria-hidden preserveAspectRatio="none">
+      <svg viewBox="0 0 300 40" className="mt-[9vh] h-[6vh] flex-1" fill="none" aria-hidden preserveAspectRatio="none">
         <path
           d="M4 20h258"
           stroke={LIME}
@@ -517,59 +531,52 @@ function TurnSequence({ live }: { live: boolean }) {
         />
       </svg>
 
-      {/* the screening */}
-      <div
-        className="shrink-0"
-        style={{
-          opacity: beat >= 3 ? 1 : 0,
-          transform: beat >= 3 ? "translateY(0)" : "translateY(14px)",
-          transition: `opacity 600ms ${ease}, transform 600ms ${ease}`,
-        }}
-      >
-        {/* Tighter viewBox than the drawing's bounds: it crops the dead space
-            so the leg reads at the same weight as the monitor opposite. */}
-        <svg viewBox="46 0 128 168" className="h-[26vh] w-auto" fill="none" aria-hidden>
-          {/* leg, from thigh to foot */}
+      {/* the screening, with its half of the sentence */}
+      <div className="flex shrink-0 flex-col items-center" style={arrive(beat >= 3)}>
+        <svg viewBox="0 0 210 170" className="h-[26vh] w-auto" fill="none" aria-hidden>
+          {/* calf and foot */}
           <path
-            d="M74 10c-6 26-4 44 2 62s10 34 8 52c-1 12-4 22-6 30h34c3-16 6-30 8-46 3-24 6-46 2-70-2-12-4-20-6-28z"
+            d="M58 8c-7 26-5 46 1 64s10 34 8 52c-1 10-3 18-5 26h36c3-16 6-30 8-46 3-24 5-46 1-70-2-10-4-18-6-26z"
             stroke="#fff"
             strokeWidth="3"
             strokeLinejoin="round"
             opacity="0.9"
           />
-          <path d="M112 154h30" stroke="#fff" strokeWidth="3" strokeLinecap="round" opacity="0.9" />
-          {/* the vein being scanned */}
-          <path
-            d="M86 26c6 18 2 34 6 50s8 30 6 44"
-            stroke={LIME}
-            strokeWidth="2.6"
-            strokeLinecap="round"
-            strokeDasharray="4 6"
-          />
-          {/* ultrasound probe */}
-          <rect
-            x="118"
-            y="58"
-            width="44"
-            height="19"
-            rx="7"
-            transform="rotate(-24 118 58)"
-            stroke={LIME}
-            strokeWidth="3.2"
-          />
-          <path d="M115 71l-9 5" stroke={LIME} strokeWidth="3.2" strokeLinecap="round" />
-          {/* signal */}
+          <path d="M98 150h36" stroke="#fff" strokeWidth="3" strokeLinecap="round" opacity="0.9" />
+
+          {/* sound travelling INTO the leg — arcs open leftward from the face,
+              drawn before the probe so the probe sits cleanly on top */}
           {[0, 1, 2].map((i) => (
             <path
               key={i}
-              d={`M101 ${76 + i * 2}a${9 + i * 6} ${9 + i * 6} 0 0 0 0 -${16 + i * 11}`}
+              d={`M${116 - i * 4} ${70 - i * 5}a${16 + i * 9} ${16 + i * 9} 0 0 0 0 ${32 + i * 10}`}
               stroke={LIME}
-              strokeWidth="2.4"
+              strokeWidth="2.6"
               strokeLinecap="round"
-              opacity={0.75 - i * 0.2}
+              fill="none"
+              opacity={0.85 - i * 0.22}
             />
           ))}
+
+          {/* handheld transducer: flat face on the skin, body, cable */}
+          <g stroke={LIME} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+            {/* face plate against the leg */}
+            <path d="M120 62v36" />
+            {/* body */}
+            <path d="M120 66h34a8 8 0 0 1 8 8v12a8 8 0 0 1-8 8h-34z" />
+            {/* grip ridges */}
+            <path d="M132 74v20M142 74v20" strokeWidth="2" opacity="0.55" />
+            {/* cable */}
+            <path d="M162 80h10c14 0 16-12 28-14" />
+          </g>
         </svg>
+        <p className={caption}>
+          into a{" "}
+          <span className="font-extrabold" style={{ color: LIME }}>
+            vein screening
+          </span>
+          .
+        </p>
       </div>
     </div>
   );
@@ -577,19 +584,42 @@ function TurnSequence({ live }: { live: boolean }) {
 
 /* ---------- S5: the recipe, in three ---------- */
 
+/** Line icons in the deck's own style: 2px strokes, round caps, no fill. */
+const RECAP_ICONS = {
+  search: (
+    <>
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="m20 20-5.2-5.2" />
+    </>
+  ),
+  gauge: (
+    <>
+      <path d="M3.5 18a9 9 0 1 1 17 0" />
+      <path d="M12 18 16.5 9.5" />
+      <circle cx="12" cy="18" r="1.4" />
+    </>
+  ),
+  click: (
+    <>
+      <rect x="3" y="4" width="13" height="9" rx="2.5" />
+      <path d="m12.5 12.5 8 3.2-3.4 1.3-1.3 3.4z" />
+    </>
+  ),
+} as const;
+
 const RECAP = [
-  ["Visibility", "Be found by patients and AI"],
-  ["Performance", "Every second costs conversions"],
-  ["Education", "Turn visitors into screenings"],
+  ["Visibility", "Be found by patients and AI", "search"],
+  ["Performance", "Every second costs conversions", "gauge"],
+  ["Education", "Turn visitors into screenings", "click"],
 ] as const;
 
 const RECAP_STEP_MS = 900;
 const RECAP_HOLD_MS = 8000;
 
 /**
- * The three acts, reassembled. Builds one line at a time so the deck lands as
- * a recipe rather than a blur, then holds long enough to say "so that's the
- * three pieces" before moving itself on.
+ * The three acts, reassembled across the screen. Builds left to right so the
+ * deck lands as a recipe rather than a blur, then holds long enough to say
+ * "so that's the three pieces" before moving itself on.
  */
 function Recap({ live, onDone }: { live: boolean; onDone: () => void }) {
   const [shown, setShown] = useState(0);
@@ -625,11 +655,11 @@ function Recap({ live, onDone }: { live: boolean; onDone: () => void }) {
   }, [live]);
 
   return (
-    <div className="flex flex-col gap-[5vh]">
-      {RECAP.map(([label, line], i) => (
+    <div className="flex w-[min(84vw,1500px)] items-start justify-between gap-[4vw]">
+      {RECAP.map(([label, line, icon], i) => (
         <div
           key={label}
-          className="text-left"
+          className="flex flex-1 flex-col items-center text-center"
           style={{
             opacity: i < shown ? 1 : 0,
             transform: i < shown ? "translateY(0)" : "translateY(16px)",
@@ -637,13 +667,25 @@ function Recap({ live, onDone }: { live: boolean; onDone: () => void }) {
               "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
           }}
         >
+          <svg
+            viewBox="0 0 24 24"
+            className="mb-[2.4vh] h-[7vh] w-[7vh]"
+            fill="none"
+            stroke={LIME}
+            strokeWidth="1.7"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            {RECAP_ICONS[icon]}
+          </svg>
           <div
-            className="text-[clamp(30px,3.4vw,74px)] font-extrabold leading-none tracking-tight"
+            className="text-[clamp(26px,2.9vw,62px)] font-extrabold leading-none tracking-tight"
             style={{ color: LIME }}
           >
             {label}
           </div>
-          <div className="mt-[1.2vh] text-[clamp(18px,1.8vw,38px)] font-light text-white">
+          <div className="mt-[1.6vh] max-w-[11em] text-[clamp(16px,1.5vw,32px)] font-light leading-snug text-white">
             {line}
           </div>
         </div>
@@ -1472,12 +1514,14 @@ export default function PitchClient() {
           <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
             Most vein websites are brochures.
           </h2>
-          <div className="pitch-rise" style={rise(220)}>
-            <BrochureMockup />
-          </div>
-          <p className={`${SUB} pitch-rise`} style={rise(420)}>
+          {/* Under the headline, above the mockup: the qualifier belongs with
+              the claim it qualifies, not a screen-height below it. */}
+          <p className={`${SUB} pitch-rise`} style={rise(200)}>
             They work for patients who already decided to call.
           </p>
+          <div className="pitch-rise" style={rise(400)}>
+            <BrochureMockup />
+          </div>
         </>
       )}
 
@@ -1538,23 +1582,11 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* S4e — the turn, shown rather than stated */}
+      {/* S4e — the turn, shown rather than stated. The caption lives inside
+          TurnSequence now: each half sits under the image it describes. */}
       {section(
         13,
-        <>
-          <TurnSequence live={active === 13} />
-          <p className="pitch-rise text-[clamp(22px,2.3vw,48px)] font-semibold leading-snug" style={rise(1500)}>
-            That&rsquo;s what turns a{" "}
-            <span className="font-extrabold" style={{ color: BLUE }}>
-              website visitor
-            </span>{" "}
-            into a{" "}
-            <span className="font-extrabold" style={{ color: LIME }}>
-              vein screening
-            </span>
-            .
-          </p>
-        </>
+        <TurnSequence live={active === 13} />
       )}
 
       {/* S5 — RECAP: the three acts, in three lines */}
