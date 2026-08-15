@@ -24,6 +24,12 @@ const BLUE = "#3B6FBF";
 /** The assessment result: concerning, not alarming. */
 const AMBER = "#f59e0b";
 
+/**
+ * One id per rendered section — the progress dots map this array and goTo
+ * clamps to its length, so an id with no section behind it produces a
+ * seventeenth dot the deck can scroll to with nothing on it. That reads from
+ * the floor as a duplicate final slide, because the CTA simply stays put.
+ */
 const SECTIONS = [
   "s0",
   "s1",
@@ -46,7 +52,6 @@ const SECTIONS = [
   "s4e",
   "s5",
   "s6",
-  "s7",
 ] as const;
 
 /** Shared type scale — readable from six feet on a 1440p booth monitor. */
@@ -492,7 +497,11 @@ function TurnSequence({ live }: { live: boolean }) {
     <div className="flex w-[min(76vw,1220px)] items-start justify-between gap-[2vw]">
       {/* the visitor, with its half of the sentence */}
       <div className="flex shrink-0 flex-col items-center" style={arrive(beat >= 1)}>
-        <svg viewBox="0 0 200 150" className="h-[22vh] w-auto" fill="none" aria-hidden>
+        {/* Fixed, equal illustration heights on both sides so the two caption
+            lines share a baseline — the drawings are different shapes, the
+            sentence they carry is one sentence. */}
+        <div className="flex h-[26vh] items-center justify-center">
+        <svg viewBox="0 0 200 150" className="h-[21vh] w-auto" fill="none" aria-hidden>
           <rect x="8" y="8" width="184" height="112" rx="8" stroke={BLUE} strokeWidth="3.5" />
           <path d="M8 34h184" stroke={BLUE} strokeWidth="3" />
           <circle cx="22" cy="21" r="3.2" fill={BLUE} />
@@ -502,6 +511,7 @@ function TurnSequence({ live }: { live: boolean }) {
           <rect x="28" y="82" width="92" height="6" rx="3" fill="#fff" opacity="0.4" />
           <path d="M84 120v14h32v-14M70 140h60" stroke={BLUE} strokeWidth="3.5" strokeLinecap="round" />
         </svg>
+        </div>
         <p className={caption}>
           That&rsquo;s what turns a{" "}
           <span className="font-extrabold" style={{ color: BLUE }}>
@@ -533,7 +543,8 @@ function TurnSequence({ live }: { live: boolean }) {
 
       {/* the screening, with its half of the sentence */}
       <div className="flex shrink-0 flex-col items-center" style={arrive(beat >= 3)}>
-        <svg viewBox="0 0 210 170" className="h-[26vh] w-auto" fill="none" aria-hidden>
+        <div className="flex h-[26vh] items-center justify-center">
+        <svg viewBox="0 0 210 170" className="h-[25vh] w-auto" fill="none" aria-hidden>
           {/* calf and foot */}
           <path
             d="M58 8c-7 26-5 46 1 64s10 34 8 52c-1 10-3 18-5 26h36c3-16 6-30 8-46 3-24 5-46 1-70-2-10-4-18-6-26z"
@@ -542,7 +553,6 @@ function TurnSequence({ live }: { live: boolean }) {
             strokeLinejoin="round"
             opacity="0.9"
           />
-          <path d="M98 150h36" stroke="#fff" strokeWidth="3" strokeLinecap="round" opacity="0.9" />
 
           {/* sound travelling INTO the leg — arcs open leftward from the face,
               drawn before the probe so the probe sits cleanly on top */}
@@ -558,18 +568,21 @@ function TurnSequence({ live }: { live: boolean }) {
             />
           ))}
 
-          {/* handheld transducer: flat face on the skin, body, cable */}
-          <g stroke={LIME} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
-            {/* face plate against the leg */}
-            <path d="M120 62v36" />
-            {/* body */}
-            <path d="M120 66h34a8 8 0 0 1 8 8v12a8 8 0 0 1-8 8h-34z" />
+          {/* Handheld transducer — slimmer than a treatment handpiece, which is
+              the difference a vein doctor reads at a glance: a narrow face
+              plate on the skin, a slender grip, a cable to the machine. */}
+          <g stroke={LIME} strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+            {/* face plate against the skin */}
+            <path d="M120 68v24" />
+            {/* slim grip */}
+            <path d="M120 71h30a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5h-30z" />
             {/* grip ridges */}
-            <path d="M132 74v20M142 74v20" strokeWidth="2" opacity="0.55" />
-            {/* cable */}
-            <path d="M162 80h10c14 0 16-12 28-14" />
+            <path d="M132 76v11M140 76v11" strokeWidth="1.7" opacity="0.5" />
+            {/* cable to the machine */}
+            <path d="M155 80h8c13 0 15-11 26-13" strokeWidth="2.4" />
           </g>
         </svg>
+        </div>
         <p className={caption}>
           into a{" "}
           <span className="font-extrabold" style={{ color: LIME }}>
