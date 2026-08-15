@@ -51,6 +51,36 @@ const SECTIONS = [
   "s5",
 ] as const;
 
+/**
+ * Which act each section belongs to. The bookends — the attract screen and the
+ * closing CTA — sit outside the framework and carry no label.
+ *
+ * Indexed by section, so this has to move whenever SECTIONS does; keeping it
+ * directly beneath that array is the reminder.
+ */
+const ACTS = [
+  { number: "01", label: "Visibility" },
+  { number: "02", label: "Performance" },
+  { number: "03", label: "Vein Education" },
+] as const;
+
+/** section index → act index, or null for the bookends. */
+const ACT_OF_SECTION: ReadonlyArray<number | null> = [
+  null, // s0  attract
+  0, //    s1  how patients search
+  0, //    s2a asking AI
+  0, //    s2b invisible to AI
+  0, //    s2c what we do about it
+  1, //    s3a claim + comparison + the statistic
+  1, //    s3b 3x bars
+  1, //    s3c architecture
+  2, //    s4a brochures
+  2, //    s4b what patients believe
+  2, //    s4c the stages
+  2, //    s4d assessment becomes appointment
+  null, // s5  the CTA
+];
+
 /** Shared type scale — readable from six feet on a 1440p booth monitor. */
 const PRIMARY = "text-[clamp(40px,4.5vw,104px)] font-extrabold leading-[1.08] tracking-tight text-white";
 const SUB = "text-[clamp(20px,1.7vw,34px)] font-light text-white/60 leading-snug";
@@ -605,7 +635,7 @@ const RECAP_ICONS = {
 const RECAP = [
   ["Visibility", "Be found by patients and AI", "search"],
   ["Performance", "Every second costs conversions", "gauge"],
-  ["Education", "Turn visitors into screenings", "click"],
+  ["Vein Education", "Turn visitors into screenings", "click"],
 ] as const;
 
 const RECAP_STEP_MS = 900;
@@ -1223,6 +1253,31 @@ export default function PitchClient() {
       </div>
 
       {/* Progress dots */}
+      {/* Act marker. Fixed rather than per-section so it is genuinely still
+          while slides advance beneath it — a label re-rendered inside each
+          section would re-run its entrance animation every press. All three
+          are stacked in one grid cell and swapped by opacity, which gives the
+          crossfade for free and keeps the box from resizing between acts. */}
+      <div
+        className="pointer-events-none fixed left-[4vw] top-[6vh] z-50 grid"
+        aria-hidden
+      >
+        {ACTS.map((act, i) => (
+          <span
+            key={act.number}
+            className="[grid-area:1/1] whitespace-nowrap text-[clamp(12px,1.05vw,22px)] font-bold uppercase tracking-[0.32em]"
+            style={{
+              opacity: ACT_OF_SECTION[active] === i ? 1 : 0,
+              transition: "opacity 600ms cubic-bezier(0.22, 1, 0.36, 1)",
+            }}
+          >
+            <span className="text-white/35">{act.number}</span>
+            <span className="text-white/25"> — </span>
+            <span style={{ color: LIME }}>{act.label}</span>
+          </span>
+        ))}
+      </div>
+
       <nav
         className="fixed right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-4"
         onClick={(e) => e.stopPropagation()}
