@@ -446,17 +446,24 @@ function AppointmentCard() {
 }
 
 /**
- * One screen, one chain of events: the patient answers, the assessment flags
- * them, the appointment lands, and only then does the deck say what happened.
- * Splitting this across two slides made the presenter narrate the join; here
- * the join is the argument.
+ * One screen, four beats: the patient answers, the assessment flags them, the
+ * device steps aside, and the appointment lands in the space it vacated.
+ *
+ * The device starts CENTRED and only moves once its job is done. Parking it
+ * on the left from the first frame left a hole on the right that read as a
+ * layout mistake rather than as a space waiting to be filled — and the move
+ * itself is the transition, so the headline changes during it. One beat, not
+ * two things happening near each other.
  */
 function ScreeningTurn({ live }: { live: boolean }) {
   const [checked, setChecked] = useState(0);
   const [pressed, setPressed] = useState(false);
   const [result, setResult] = useState(false);
+  /** Beat 3: the device slides left and the headline swaps. */
+  const [moved, setMoved] = useState(false);
+  /** Beat 4: the appointment lands. */
   const [booked, setBooked] = useState(false);
-  const [headline, setHeadline] = useState(false);
+  const [snap, setSnap] = useState(false);
 
   useEffect(() => {
     const timers: number[] = [];
@@ -467,18 +474,21 @@ function ScreeningTurn({ live }: { live: boolean }) {
         setChecked(0);
         setPressed(false);
         setResult(false);
+        setMoved(false);
         setBooked(false);
-        setHeadline(false);
+        setSnap(false);
       }, 0);
       return () => timers.forEach((t) => window.clearTimeout(t));
     }
     if (prefersReducedMotion()) {
+      // The finished composition, arrived at without moving.
       set(() => {
+        setSnap(true);
         setChecked(PICKED_COUNT);
         setPressed(true);
         setResult(true);
+        setMoved(true);
         setBooked(true);
-        setHeadline(true);
       }, 0);
       return () => timers.forEach((t) => window.clearTimeout(t));
     }
@@ -487,48 +497,73 @@ function ScreeningTurn({ live }: { live: boolean }) {
     const afterChecks = PICKED_COUNT * STEP_MS + 500;
     set(() => setPressed(true), afterChecks);
     set(() => setResult(true), afterChecks + 600);
-    set(() => setBooked(true), afterChecks + 1500);
-    set(() => setHeadline(true), afterChecks + 2300);
+    // Beat 3 waits out a hold on the result — the flag is the point of the
+    // assessment and deserves a moment before the screen rearranges.
+    set(() => setMoved(true), afterChecks + 600 + 1500);
+    set(() => setBooked(true), afterChecks + 600 + 1500 + 800);
     return () => timers.forEach((t) => window.clearTimeout(t));
   }, [live]);
 
   const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
-  const arrive = (on: boolean) => ({
-    opacity: on ? 1 : 0,
-    transform: on ? "translateY(0)" : "translateY(16px)",
-    transition: `opacity 600ms ${ease}, transform 600ms ${ease}`,
-  });
+  const move = snap ? "none" : `transform 800ms ${ease}`;
+  const fade = snap ? "none" : `opacity 800ms ${ease}`;
 
   return (
-    <div className="flex flex-col items-center gap-[4vh]">
-      <div className="flex items-center justify-center gap-[5vw]">
-        <CheckerDevice checked={checked} pressed={pressed} result={result} />
+    <div className="flex w-full flex-col items-center">
+      {/* Both headlines share one grid cell so the block never changes height
+          and the crossfade has nothing to push around. */}
+      <h2 className="grid max-w-[22em] text-center">
+        <span
+          className="[grid-area:1/1] text-[clamp(28px,3vw,64px)] font-extrabold leading-[1.1] tracking-tight text-white"
+          style={{ opacity: moved ? 0 : 1, transition: fade }}
+          aria-hidden={moved}
+        >
+          So we ask them to count their symptoms.
+        </span>
+        <span
+          className="[grid-area:1/1] text-[clamp(24px,2.4vw,50px)] font-semibold leading-snug text-white"
+          style={{ opacity: moved ? 1 : 0, transition: fade }}
+          aria-hidden={!moved}
+        >
+          That&rsquo;s what turns a{" "}
+          <span className="font-extrabold" style={{ color: BLUE }}>
+            website visitor
+          </span>{" "}
+          into a{" "}
+          <span className="font-extrabold" style={{ color: LIME }}>
+            vein screening
+          </span>
+          .
+        </span>
+      </h2>
 
-        {/* the arrow only means something once there is something to point at */}
-        <svg viewBox="0 0 120 40" className="h-[5vh] w-[8vw]" fill="none" aria-hidden style={{ opacity: booked ? 1 : 0, transition: `opacity 600ms ${ease}` }}>
-          <path d="M4 20h94" stroke={LIME} strokeWidth="4" strokeLinecap="round" />
-          <path d="m92 10 20 10-20 10" stroke={LIME} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+      {/* Fixed stage: the device is centred in it and later translates out of
+          centre, so nothing below reflows when the composition changes. */}
+      <div className="relative mt-[5vh] h-[54vh] w-full">
+        <div
+          className="absolute left-1/2 top-1/2"
+          style={{
+            transform: moved
+              ? "translate(calc(-50% - 21vw), -50%) scale(0.86)"
+              : "translate(-50%, -50%) scale(1)",
+            transition: move,
+          }}
+        >
+          <CheckerDevice checked={checked} pressed={pressed} result={result} />
+        </div>
 
-        <div style={arrive(booked)}>
+        <div
+          className="absolute left-1/2 top-1/2"
+          style={{
+            transform: "translate(calc(-50% + 20vw), -50%)",
+            opacity: booked ? 1 : 0,
+            transition: snap ? "none" : `opacity 700ms ${ease}`,
+          }}
+          aria-hidden={!booked}
+        >
           <AppointmentCard />
         </div>
       </div>
-
-      <p
-        className="text-center text-[clamp(22px,2.3vw,48px)] font-semibold leading-snug"
-        style={arrive(headline)}
-      >
-        That&rsquo;s what turns a{" "}
-        <span className="font-extrabold" style={{ color: BLUE }}>
-          website visitor
-        </span>{" "}
-        into a{" "}
-        <span className="font-extrabold" style={{ color: LIME }}>
-          vein screening
-        </span>
-        .
-      </p>
     </div>
   );
 }
