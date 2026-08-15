@@ -332,6 +332,8 @@ const PICK_ORDER: ReadonlyArray<number | null> = SYMPTOMS.reduce<Array<number | 
   []
 );
 const STEP_MS = 800;
+/** Matches the CSS move below — beat 4 must not land mid-slide. */
+const MOVE_STEP_MS = 1200;
 
 /** The assessment, drawn. Presentational — the choreography lives above it. */
 function CheckerDevice({
@@ -350,7 +352,7 @@ function CheckerDevice({
 
   return (
     <div className="rounded-[2.6vh] border-[0.5vh] border-white/15 bg-black p-[0.5vh] shadow-[0_30px_90px_rgba(0,0,0,0.6)]">
-      <div className="relative w-[min(30vh,300px)] overflow-hidden rounded-[2.1vh] bg-[#0b1620] px-[2vh] py-[2.2vh]">
+      <div className="relative w-[min(40vh,410px)] overflow-hidden rounded-[2.1vh] bg-[#0b1620] px-[2.4vh] py-[2.6vh]">
         <p className="text-[1.8vh] font-semibold leading-tight text-white">
           Do you experience any of these in your legs?
         </p>
@@ -500,40 +502,44 @@ function ScreeningTurn({ live }: { live: boolean }) {
     // Beat 3 waits out a hold on the result — the flag is the point of the
     // assessment and deserves a moment before the screen rearranges.
     set(() => setMoved(true), afterChecks + 600 + 1500);
-    set(() => setBooked(true), afterChecks + 600 + 1500 + 800);
+    set(() => setBooked(true), afterChecks + 600 + 1500 + MOVE_STEP_MS);
     return () => timers.forEach((t) => window.clearTimeout(t));
   }, [live]);
 
   const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
-  const move = snap ? "none" : `transform 800ms ${ease}`;
-  const fade = snap ? "none" : `opacity 800ms ${ease}`;
+  /**
+   * Deliberately slow: this move IS the transition between the two halves of
+   * the argument, and the headline crossfades over exactly the same window so
+   * the pair reads as one motion rather than as two changes near each other.
+   */
+  const MOVE_MS = 1200;
+  const move = snap ? "none" : `transform ${MOVE_MS}ms ${ease}`;
+  const fade = snap ? "none" : `opacity ${MOVE_MS}ms ${ease}`;
 
   return (
     <div className="flex w-full flex-col items-center">
       {/* Both headlines share one grid cell so the block never changes height
           and the crossfade has nothing to push around. */}
-      <h2 className="grid max-w-[22em] text-center">
+      {/* Both headlines share one grid cell so the block never changes height
+          and the crossfade has nothing to push around. Their max-widths differ
+          because their lengths do — each is set to break across two lines, not
+          three, at booth scale. */}
+      <h2 className="grid justify-items-center text-center">
         <span
-          className="[grid-area:1/1] text-[clamp(28px,3vw,64px)] font-extrabold leading-[1.1] tracking-tight text-white"
+          className="[grid-area:1/1] max-w-[13em] text-[clamp(34px,3.9vw,84px)] font-extrabold leading-[1.08] tracking-tight text-white"
           style={{ opacity: moved ? 0 : 1, transition: fade }}
           aria-hidden={moved}
         >
           So we ask them to count their symptoms.
         </span>
         <span
-          className="[grid-area:1/1] text-[clamp(24px,2.4vw,50px)] font-semibold leading-snug text-white"
+          className="[grid-area:1/1] max-w-[17em] text-[clamp(30px,3.3vw,72px)] font-extrabold leading-[1.1] tracking-tight text-white"
           style={{ opacity: moved ? 1 : 0, transition: fade }}
           aria-hidden={!moved}
         >
           That&rsquo;s what turns a{" "}
-          <span className="font-extrabold" style={{ color: BLUE }}>
-            website visitor
-          </span>{" "}
-          into a{" "}
-          <span className="font-extrabold" style={{ color: LIME }}>
-            vein screening
-          </span>
-          .
+          <span style={{ color: LIME }}>website visitor</span> into a{" "}
+          <span style={{ color: LIME }}>vein screening</span>.
         </span>
       </h2>
 
@@ -543,9 +549,12 @@ function ScreeningTurn({ live }: { live: boolean }) {
         <div
           className="absolute left-1/2 top-1/2"
           style={{
+            // Movement only. Shrinking on the way out made the device look
+            // demoted rather than moved aside; it is the same device either
+            // side of the transition, so it stays the same size.
             transform: moved
-              ? "translate(calc(-50% - 21vw), -50%) scale(0.86)"
-              : "translate(-50%, -50%) scale(1)",
+              ? "translate(calc(-50% - 21vw), -50%)"
+              : "translate(-50%, -50%)",
             transition: move,
           }}
         >
@@ -557,7 +566,7 @@ function ScreeningTurn({ live }: { live: boolean }) {
           style={{
             transform: "translate(calc(-50% + 20vw), -50%)",
             opacity: booked ? 1 : 0,
-            transition: snap ? "none" : `opacity 700ms ${ease}`,
+            transition: snap ? "none" : `opacity 800ms ${ease}`,
           }}
           aria-hidden={!booked}
         >
