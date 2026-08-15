@@ -81,6 +81,39 @@ const ACT_OF_SECTION: ReadonlyArray<number | null> = [
   null, // s5  the CTA
 ];
 
+/**
+ * How long autoplay rests on each slide, in ms.
+ *
+ * The rule is that a slide's animation must FINISH before the deck moves —
+ * cutting a build halfway reads as a fault, not as pace. These numbers are
+ * therefore derived from the animations themselves, not chosen for rhythm:
+ *
+ *   s1  the three search bars are a ~9.6s loop (type, think, speak)
+ *   s6  the booking sim is a 4s CSS loop; one full click-to-booked cycle
+ *   s9  the beliefs light one at a time: 0.5s + 3 × 1.2s
+ *   s10 the stage walk: 0.5s + 5 × 0.7s, plus the last transition
+ *   s11 the assessment runs ~7.8s end to end, then wants a beat to be read
+ *   s0  the attract screen holds longest — it is what a passer-by sees most
+ *   s12 the CTA holds before looping back
+ *
+ * Everything else is a rise-in and gets the standard rest.
+ */
+const AUTOPLAY_STANDARD_MS = 5_500;
+const AUTOPLAY_MS: Readonly<Record<number, number>> = {
+  0: 10_000,
+  1: 10_000,
+  2: 7_000,
+  5: 6_500,
+  6: 6_500,
+  9: 6_500,
+  10: 7_000,
+  11: 10_000,
+  12: 8_000,
+};
+
+/** Two minutes of nobody touching it and the booth goes back to attracting. */
+const IDLE_BACK_TO_AUTOPLAY_MS = 120_000;
+
 /** Shared type scale — readable from six feet on a 1440p booth monitor. */
 const PRIMARY = "text-[clamp(40px,4.5vw,104px)] font-extrabold leading-[1.08] tracking-tight text-white";
 const SUB = "text-[clamp(20px,1.7vw,34px)] font-light text-white/60 leading-snug";
@@ -1113,6 +1146,39 @@ export default function PitchClient() {
     introRef.current = introRevealed;
   }, [introRevealed]);
 
+  /**
+   * The booth runs itself until someone touches it. Autoplay is the DEFAULT —
+   * the monitor is attracting for most of the day and presenting for minutes
+   * of it.
+   */
+  const [autoplay, setAutoplay] = useState(true);
+  const autoplayRef = useRef(true);
+  useEffect(() => {
+    autoplayRef.current = autoplay;
+  }, [autoplay]);
+
+  /**
+   * Someone walked up. Stop attracting, go back to the top, and hand over —
+   * landing them mid-act would mean starting the conversation halfway through
+   * an argument they have not heard the setup for.
+   */
+  const takeOver = useCallback(() => {
+    autoplayRef.current = false;
+    setAutoplay(false);
+    introRef.current = false;
+    setIntroRevealed(false);
+    goTo(0);
+  }, [goTo]);
+
+  /** Back to attracting, from the top. */
+  const resumeAutoplay = useCallback(() => {
+    introRef.current = false;
+    setIntroRevealed(false);
+    autoplayRef.current = true;
+    setAutoplay(true);
+    goTo(0);
+  }, [goTo]);
+
   const advance = useCallback(() => {
     if (stateRef.current.active === 0 && !introRef.current) {
       introRef.current = true;
@@ -1135,10 +1201,51 @@ export default function PitchClient() {
     goTo(0);
   }, [goTo]);
 
+  // The clock. Re-armed on every slide change, so each slide gets its own
+  // rest and nothing overlaps.
+  useEffect(() => {
+    if (!autoplay) return;
+    const rest = AUTOPLAY_MS[active] ?? AUTOPLAY_STANDARD_MS;
+    const t = window.setTimeout(() => {
+      goTo(active >= SECTIONS.length - 1 ? 0 : active + 1);
+    }, rest);
+    return () => window.clearTimeout(t);
+  }, [autoplay, active, goTo]);
+
+  // Manual mode times out: after two quiet minutes the booth resumes
+  // attracting, from the top.
+  useEffect(() => {
+    if (autoplay) return;
+    let idle = window.setTimeout(resumeAutoplay, IDLE_BACK_TO_AUTOPLAY_MS);
+    const poke = () => {
+      window.clearTimeout(idle);
+      idle = window.setTimeout(resumeAutoplay, IDLE_BACK_TO_AUTOPLAY_MS);
+    };
+    window.addEventListener("keydown", poke);
+    window.addEventListener("pointerdown", poke);
+    return () => {
+      window.clearTimeout(idle);
+      window.removeEventListener("keydown", poke);
+      window.removeEventListener("pointerdown", poke);
+    };
+  }, [autoplay, resumeAutoplay]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.repeat) return; // one step per physical press — held keys must not thrash
+      // The first press is the takeover and nothing else: it must not also
+      // advance, or the presenter lands on s1 having asked for the start.
+      if (autoplayRef.current) {
+        e.preventDefault();
+        takeOver();
+        return;
+      }
+      if (e.key === "a" || e.key === "A") {
+        e.preventDefault();
+        resumeAutoplay();
+        return;
+      }
       switch (e.key) {
         case "ArrowRight":
         case "ArrowDown":
@@ -1161,7 +1268,7 @@ export default function PitchClient() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [advance, back, reset]);
+  }, [advance, back, reset, takeOver, resumeAutoplay]);
 
   // Manual scrolling (trackpad, swipe) keeps the dots honest — but only when
   // the user is driving; programmatic scrolls already set their destination.
@@ -1214,7 +1321,7 @@ export default function PitchClient() {
   return (
     <div
       ref={containerRef}
-      onClick={advance}
+      onClick={() => (autoplayRef.current ? takeOver() : advance())}
       className="pitch-scroll fixed inset-0 overflow-y-auto snap-y snap-mandatory text-white cursor-default select-none"
       style={{ background: NAVY }}
     >
@@ -1253,6 +1360,15 @@ export default function PitchClient() {
       </div>
 
       {/* Progress dots */}
+      {/* Autoplay tell. Deliberately almost invisible — it exists so the
+          presenter can see at a glance whether the deck will move on its own,
+          and a visitor should never read it as a control. */}
+      <div
+        className="pointer-events-none fixed bottom-[3vh] left-[4vw] z-50 h-[7px] w-[7px] rounded-full transition-opacity duration-700"
+        style={{ background: "#ffffff", opacity: autoplay ? 0.16 : 0 }}
+        aria-hidden
+      />
+
       {/* Act marker. Fixed rather than per-section so it is genuinely still
           while slides advance beneath it — a label re-rendered inside each
           section would re-run its entrance animation every press. All three
