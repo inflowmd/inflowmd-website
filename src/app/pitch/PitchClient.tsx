@@ -1045,8 +1045,8 @@ function CountingGauges({ live }: { live: boolean }) {
       <div className="pitch-rise flex flex-col items-center" style={{ "--rise": "150ms" } as React.CSSProperties}>
         <Gauge
           score={scores.a}
-          size={300}
-          valueClass="text-7xl"
+          size={380}
+          valueClass="text-8xl"
           srLabel="Their site: performance score 42 of 100"
         />
         <p className="mt-[1.6vh] text-[clamp(14px,1.2vw,24px)] font-bold uppercase tracking-[0.18em] text-white/45">
@@ -1056,8 +1056,8 @@ function CountingGauges({ live }: { live: boolean }) {
       <div className="pitch-rise flex flex-col items-center" style={{ "--rise": "300ms" } as React.CSSProperties}>
         <Gauge
           score={scores.b}
-          size={300}
-          valueClass="text-7xl"
+          size={380}
+          valueClass="text-8xl"
           srLabel="Modern architecture: performance score 98 of 100"
         />
         <p className="mt-[1.6vh] text-[clamp(14px,1.2vw,24px)] font-bold uppercase tracking-[0.18em]" style={{ color: LIME }}>
@@ -1481,37 +1481,44 @@ export default function PitchClient() {
       )}
 
       {/* ═══ ACT 3 — SPEED ═══ */}
-      {/* S3a — the claim, the demonstration, and the evidence, on one screen */}
+      {/* S3a — the demonstration, with the claim above it and its evidence
+          below. Five competing elements fitted on one screen before: the
+          headline ran three lines wide enough to collide with the act marker,
+          and the rings — the only thing here worth seeing from the floor —
+          were the smallest they have ever been. The headline is now one line,
+          the rings are bigger, and everything else is explicitly a footnote. */}
       {section(
         5,
         <>
-          <DotGrid className="inset-x-[20vw] top-[6vh] h-[16vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
-          <h2 className={`${PRIMARY} max-w-[16em] pitch-rise`} style={rise(0)}>
-            Modern architecture makes sites dramatically faster. Faster sites convert.
+          <DotGrid className="inset-x-[24vw] top-[4vh] h-[14vh] opacity-30 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
+          <h2 className={`${PRIMARY} pitch-rise`} style={rise(0)}>
+            Faster sites convert.
           </h2>
           <CountingGauges live={active === 5} />
           <p
-            className="pitch-rise text-[clamp(16px,1.4vw,30px)] font-semibold tracking-wide text-white/50"
+            className="pitch-rise text-[clamp(18px,1.6vw,34px)] font-semibold tracking-wide text-white/70"
             style={rise(500)}
           >
             Same test. Same day. Different architecture.
           </p>
+          {/* Footnotes, and sized like footnotes. */}
           <p
-            className="pitch-rise text-[clamp(18px,1.7vw,36px)] font-semibold text-white/80"
+            className="pitch-rise text-[clamp(13px,1.05vw,22px)] font-light text-white/40"
             style={rise(650)}
           >
             The gap isn&rsquo;t tuning. It&rsquo;s what the site is built on.
           </p>
-          {/* The statistic is the proof behind the claim, so it sits under the
-              demonstration rather than on a slide of its own. */}
           <p
-            className="pitch-rise max-w-[46em] text-[clamp(14px,1.15vw,24px)] font-light leading-snug text-white/40"
-            style={rise(800)}
+            className="pitch-rise max-w-[52em] text-[clamp(12px,0.95vw,20px)] font-light leading-snug text-white/30"
+            style={rise(780)}
           >
             53% of mobile visitors abandon a page that takes longer than 3 seconds to load —
             Google / SOASTA, 2016
           </p>
-        </>
+        </>,
+        // Clearance for the act marker: the composition sits below it rather
+        // than centring into it.
+        "pt-[12vh]"
       )}
 
       {/* S3b — 3x bars + the conversion, illustrated */}
