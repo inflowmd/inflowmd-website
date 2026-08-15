@@ -31,27 +31,24 @@ const AMBER = "#f59e0b";
  * the floor as a duplicate final slide, because the CTA simply stays put.
  */
 const SECTIONS = [
+  // S0 carries two beats: the logo alone, then the three pillars.
   "s0",
   "s1",
   "s2a",
   "s2b",
   "s2c",
-  // Act 3 — speed. The side-by-side proof sits inside it now, as evidence for
-  // the argument rather than as a coda after everything else.
+  // Act 3 — speed. The claim, the side-by-side demonstration and the statistic
+  // behind it now share one screen instead of three.
   "s3a",
   "s3b",
   "s3c",
-  "s3d",
-  // Act 4 — how we build. Education and speed are both conversion arguments,
-  // so they sit adjacent, and the deck ends on the differentiator rather than
-  // passing through it on the way to a statistic.
+  // Act 4 — how we build. The assessment and what it turns into are one screen
+  // too: the join between them was the argument.
   "s4a",
   "s4b",
   "s4c",
   "s4d",
-  "s4e",
   "s5",
-  "s6",
 ] as const;
 
 /** Shared type scale — readable from six feet on a 1440p booth monitor. */
@@ -237,152 +234,6 @@ function ThoughtCycle({ live }: { live: boolean }) {
   );
 }
 
-/* ---------- S4d: the assessment, answering itself ---------- */
-
-const SYMPTOMS = [
-  { label: "Leg pain, aching or cramping", picked: true },
-  { label: "Restless legs", picked: true },
-  { label: "Swelling of the legs or ankles", picked: true },
-  { label: "Leg fatigue or weakness", picked: true },
-  { label: "Skin discoloration or texture changes", picked: false },
-  { label: "Open wounds or venous ulcers", picked: false },
-];
-const PICKED_COUNT = SYMPTOMS.filter((s) => s.picked).length;
-const STEP_MS = 800;
-const RESULT_HOLD_MS = 2000;
-
-/**
- * The live assessment, played back. Four of six tick themselves, Continue
- * lights and is pressed, and the result lands — then the deck advances itself.
- *
- * This screen is the only one that moves on without a keypress: the point being
- * sold is what the patient sees at the END of the interaction, and a presenter
- * pressing through it would cut the moment off.
- */
-function SymptomCheckerSim({ live, onDone }: { live: boolean; onDone: () => void }) {
-  const [checked, setChecked] = useState(0);
-  const [pressed, setPressed] = useState(false);
-  const [result, setResult] = useState(false);
-  const doneRef = useRef(onDone);
-  // Synced in an effect, not during render: writing a ref while rendering is
-  // a side effect in the render path, and React's lint rules are right to
-  // reject it. The callback is only ever read from a timer.
-  useEffect(() => {
-    doneRef.current = onDone;
-  }, [onDone]);
-
-  useEffect(() => {
-    const timers: number[] = [];
-    if (!live) {
-      // Deferred for the same reason as ThoughtCycle — no synchronous
-      // setState in an effect body.
-      timers.push(
-        window.setTimeout(() => {
-          setChecked(0);
-          setPressed(false);
-          setResult(false);
-        }, 0)
-      );
-      return () => timers.forEach((t) => window.clearTimeout(t));
-    }
-    const reduce = prefersReducedMotion();
-
-    if (reduce) {
-      timers.push(
-        window.setTimeout(() => {
-          setChecked(PICKED_COUNT);
-          setPressed(true);
-          setResult(true);
-        }, 0)
-      );
-      timers.push(window.setTimeout(() => doneRef.current(), RESULT_HOLD_MS));
-    } else {
-      for (let i = 1; i <= PICKED_COUNT; i++) {
-        timers.push(window.setTimeout(() => setChecked(i), i * STEP_MS));
-      }
-      const afterChecks = PICKED_COUNT * STEP_MS + 500;
-      timers.push(window.setTimeout(() => setPressed(true), afterChecks));
-      timers.push(window.setTimeout(() => setResult(true), afterChecks + 600));
-      timers.push(window.setTimeout(() => doneRef.current(), afterChecks + 600 + RESULT_HOLD_MS));
-    }
-    return () => timers.forEach((t) => window.clearTimeout(t));
-  }, [live]);
-
-  // Which of the picked rows have ticked so far.
-  let seen = 0;
-  const rows = SYMPTOMS.map((s) => {
-    if (!s.picked) return { ...s, on: false };
-    seen += 1;
-    return { ...s, on: seen <= checked };
-  });
-
-  return (
-    <div className="rounded-[2.6vh] border-[0.5vh] border-white/15 bg-black p-[0.5vh] shadow-[0_30px_90px_rgba(0,0,0,0.6)]">
-      <div className="relative w-[min(34vh,340px)] overflow-hidden rounded-[2.1vh] bg-[#0b1620] px-[2vh] py-[2.4vh]">
-        <p className="text-[1.9vh] font-semibold leading-tight text-white">
-          Do you experience any of these in your legs?
-        </p>
-        <p className="mt-[0.6vh] text-[1.4vh] text-white/40">Select all that apply.</p>
-
-        <div className="mt-[1.8vh] flex flex-col gap-[1vh]">
-          {rows.map((row) => (
-            <div
-              key={row.label}
-              className="flex items-center justify-between gap-2 rounded-[1.2vh] border px-[1.4vh] py-[1.2vh] transition-all duration-300"
-              style={{
-                borderColor: row.on ? "#2f9fd0" : "rgba(255,255,255,0.09)",
-                background: row.on ? "rgba(47,159,208,0.12)" : "rgba(255,255,255,0.02)",
-              }}
-            >
-              <span className="text-[1.45vh] leading-tight text-white/85">{row.label}</span>
-              <span
-                className="shrink-0 transition-opacity duration-300"
-                style={{ opacity: row.on ? 1 : 0 }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="#7fd4f5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-[1.8vh] w-[1.8vh]" aria-hidden>
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-[2vh] flex justify-end">
-          <span
-            className="rounded-full px-[2.2vh] py-[1.1vh] text-[1.5vh] font-bold text-white transition-all duration-300"
-            style={{
-              background: pressed ? LIME : "#1a7fa8",
-              transform: pressed ? "scale(0.96)" : "scale(1)",
-              boxShadow: pressed ? `0 0 0 0.5vh ${LIME}44` : "none",
-            }}
-          >
-            Continue →
-          </span>
-        </div>
-
-        {/* The moment being sold. */}
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center bg-[#0b1620] px-[2.4vh] text-center transition-opacity duration-500"
-          style={{ opacity: result ? 1 : 0, pointerEvents: "none" }}
-        >
-          {/* Amber, and an exclamation rather than a tick: a green check reads
-              as "you passed", which is the opposite of what this screen is
-              for. Concerning, not alarming — hence amber and not red. */}
-          <div className="mb-[2vh] flex h-[6vh] w-[6vh] items-center justify-center rounded-full" style={{ background: AMBER }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" className="h-[3.2vh] w-[3.2vh]" aria-hidden>
-              <path d="M12 7v6" />
-              <circle cx="12" cy="17" r="0.6" fill="#fff" stroke="none" />
-            </svg>
-          </div>
-          <p className="text-[2.1vh] font-extrabold leading-snug text-white">
-            Your symptoms suggest you need a vein screening.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ---------- S4a: the brochure every practice already has ---------- */
 
 /**
@@ -453,144 +304,231 @@ function BrochureMockup() {
   );
 }
 
-/* ---------- S4e: visitor becomes screening ---------- */
+/* ---------- S4d: assessment becomes appointment ---------- */
+
+const SYMPTOMS = [
+  { label: "Leg pain, aching or cramping", picked: true },
+  { label: "Restless legs", picked: true },
+  { label: "Swelling of the legs or ankles", picked: true },
+  { label: "Leg fatigue or weakness", picked: true },
+  { label: "Skin discoloration or texture changes", picked: false },
+  { label: "Open wounds or venous ulcers", picked: false },
+];
+const PICKED_COUNT = SYMPTOMS.filter((s) => s.picked).length;
 
 /**
- * Two beats with the line between them. Each image lands WITH its own caption
- * line, because the sentence is split across the two halves and half a
- * sentence arriving without its picture reads as a typo.
- *
- * The right-hand drawing is a DIAGNOSTIC ULTRASOUND, not a treatment. The
- * earlier version put a dashed vein under an angled instrument with waves
- * coming off it, which reads as ablation — a fibre lasering a vein. This is a
- * handheld transducer with a cable, its face flat against the calf, sound
- * arcs travelling INTO the leg. Screening is what this act is selling; showing
- * a procedure sells something the practice has not agreed to yet.
+ * Each row's position in the tick order (1-based), or null if it is never
+ * ticked. Computed once at module scope: doing it with a running counter
+ * inside the component meant reassigning a variable during render, which the
+ * compiler rules reject — and rightly, since it makes the row list depend on
+ * evaluation order rather than on the data.
  */
-function TurnSequence({ live }: { live: boolean }) {
-  const [beat, setBeat] = useState(0);
+const PICK_ORDER: ReadonlyArray<number | null> = SYMPTOMS.reduce<Array<number | null>>(
+  (acc, s) => {
+    const ticked = acc.filter((x) => x !== null).length;
+    acc.push(s.picked ? ticked + 1 : null);
+    return acc;
+  },
+  []
+);
+const STEP_MS = 800;
+
+/** The assessment, drawn. Presentational — the choreography lives above it. */
+function CheckerDevice({
+  checked,
+  pressed,
+  result,
+}: {
+  checked: number;
+  pressed: boolean;
+  result: boolean;
+}) {
+  const rows = SYMPTOMS.map((s, i) => {
+    const order = PICK_ORDER[i];
+    return { ...s, on: order !== null && order <= checked };
+  });
+
+  return (
+    <div className="rounded-[2.6vh] border-[0.5vh] border-white/15 bg-black p-[0.5vh] shadow-[0_30px_90px_rgba(0,0,0,0.6)]">
+      <div className="relative w-[min(30vh,300px)] overflow-hidden rounded-[2.1vh] bg-[#0b1620] px-[2vh] py-[2.2vh]">
+        <p className="text-[1.8vh] font-semibold leading-tight text-white">
+          Do you experience any of these in your legs?
+        </p>
+        <p className="mt-[0.6vh] text-[1.3vh] text-white/40">Select all that apply.</p>
+
+        <div className="mt-[1.6vh] flex flex-col gap-[0.9vh]">
+          {rows.map((row) => (
+            <div
+              key={row.label}
+              className="flex items-center justify-between gap-2 rounded-[1.1vh] border px-[1.3vh] py-[1.1vh] transition-all duration-300"
+              style={{
+                borderColor: row.on ? "#2f9fd0" : "rgba(255,255,255,0.09)",
+                background: row.on ? "rgba(47,159,208,0.12)" : "rgba(255,255,255,0.02)",
+              }}
+            >
+              <span className="text-[1.35vh] leading-tight text-white/85">{row.label}</span>
+              <span className="shrink-0 transition-opacity duration-300" style={{ opacity: row.on ? 1 : 0 }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#7fd4f5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-[1.7vh] w-[1.7vh]" aria-hidden>
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-[1.8vh] flex justify-end">
+          <span
+            className="rounded-full px-[2vh] py-[1vh] text-[1.4vh] font-bold text-white transition-all duration-300"
+            style={{
+              background: pressed ? LIME : "#1a7fa8",
+              transform: pressed ? "scale(0.96)" : "scale(1)",
+              boxShadow: pressed ? `0 0 0 0.5vh ${LIME}44` : "none",
+            }}
+          >
+            Continue →
+          </span>
+        </div>
+
+        {/* The flag. Amber and an exclamation: a tick would read as "you
+            passed", which is the opposite of the point. */}
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center bg-[#0b1620] px-[2.2vh] text-center transition-opacity duration-500"
+          style={{ opacity: result ? 1 : 0, pointerEvents: "none" }}
+        >
+          <div className="mb-[2vh] flex h-[5.6vh] w-[5.6vh] items-center justify-center rounded-full" style={{ background: AMBER }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" className="h-[3vh] w-[3vh]" aria-hidden>
+              <path d="M12 7v6" />
+              <circle cx="12" cy="17" r="0.6" fill="#fff" stroke="none" />
+            </svg>
+          </div>
+          <p className="text-[2vh] font-extrabold leading-snug text-white">
+            Your symptoms suggest you need a vein screening.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** What the assessment turns into: a booked screening. */
+function AppointmentCard() {
+  return (
+    <div className="w-[min(38vh,380px)] rounded-[2vh] border border-white/12 bg-white/[0.04] p-[3vh] shadow-[0_30px_90px_rgba(0,0,0,0.45)]">
+      <div className="flex items-center gap-[1.4vh]">
+        <span className="flex h-[4.4vh] w-[4.4vh] items-center justify-center rounded-full" style={{ background: LIME }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" className="h-[2.4vh] w-[2.4vh]" aria-hidden>
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </span>
+        <span className="text-[1.7vh] font-bold uppercase tracking-[0.16em] text-white/50">
+          Appointment booked
+        </span>
+      </div>
+
+      <div className="mt-[3vh] flex items-start gap-[2vh]">
+        {/* calendar leaf */}
+        <div className="w-[9vh] shrink-0 overflow-hidden rounded-[1.2vh] border border-white/15">
+          <div className="py-[0.7vh] text-center text-[1.3vh] font-bold uppercase tracking-[0.14em] text-white" style={{ background: LIME }}>
+            Aug
+          </div>
+          <div className="bg-white/[0.06] py-[1vh] text-center text-[3.4vh] font-extrabold leading-none text-white">
+            19
+          </div>
+        </div>
+        <div className="min-w-0">
+          <p className="text-[2.4vh] font-extrabold leading-tight text-white">Vein Screening</p>
+          <p className="mt-[0.8vh] text-[1.7vh] text-white/55">Tuesday · 2:30 PM</p>
+          <p className="mt-[0.4vh] text-[1.7vh] text-white/55">Ultrasound · 30 minutes</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * One screen, one chain of events: the patient answers, the assessment flags
+ * them, the appointment lands, and only then does the deck say what happened.
+ * Splitting this across two slides made the presenter narrate the join; here
+ * the join is the argument.
+ */
+function ScreeningTurn({ live }: { live: boolean }) {
+  const [checked, setChecked] = useState(0);
+  const [pressed, setPressed] = useState(false);
+  const [result, setResult] = useState(false);
+  const [booked, setBooked] = useState(false);
+  const [headline, setHeadline] = useState(false);
 
   useEffect(() => {
     const timers: number[] = [];
+    const set = (fn: () => void, ms: number) => timers.push(window.setTimeout(fn, ms));
+
     if (!live) {
-      timers.push(window.setTimeout(() => setBeat(0), 0));
+      set(() => {
+        setChecked(0);
+        setPressed(false);
+        setResult(false);
+        setBooked(false);
+        setHeadline(false);
+      }, 0);
       return () => timers.forEach((t) => window.clearTimeout(t));
     }
     if (prefersReducedMotion()) {
-      timers.push(window.setTimeout(() => setBeat(3), 0));
+      set(() => {
+        setChecked(PICKED_COUNT);
+        setPressed(true);
+        setResult(true);
+        setBooked(true);
+        setHeadline(true);
+      }, 0);
       return () => timers.forEach((t) => window.clearTimeout(t));
     }
-    [1, 2, 3].forEach((b, i) => timers.push(window.setTimeout(() => setBeat(b), 300 + i * 600)));
+
+    for (let i = 1; i <= PICKED_COUNT; i++) set(() => setChecked(i), i * STEP_MS);
+    const afterChecks = PICKED_COUNT * STEP_MS + 500;
+    set(() => setPressed(true), afterChecks);
+    set(() => setResult(true), afterChecks + 600);
+    set(() => setBooked(true), afterChecks + 1500);
+    set(() => setHeadline(true), afterChecks + 2300);
     return () => timers.forEach((t) => window.clearTimeout(t));
   }, [live]);
 
   const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
   const arrive = (on: boolean) => ({
     opacity: on ? 1 : 0,
-    transform: on ? "translateY(0)" : "translateY(14px)",
+    transform: on ? "translateY(0)" : "translateY(16px)",
     transition: `opacity 600ms ${ease}, transform 600ms ${ease}`,
   });
-  const caption =
-    "mt-[3vh] text-center text-[clamp(18px,1.9vw,38px)] font-semibold leading-snug text-white";
 
   return (
-    <div className="flex w-[min(76vw,1220px)] items-start justify-between gap-[2vw]">
-      {/* the visitor, with its half of the sentence */}
-      <div className="flex shrink-0 flex-col items-center" style={arrive(beat >= 1)}>
-        {/* Fixed, equal illustration heights on both sides so the two caption
-            lines share a baseline — the drawings are different shapes, the
-            sentence they carry is one sentence. */}
-        <div className="flex h-[26vh] items-center justify-center">
-        <svg viewBox="0 0 200 150" className="h-[21vh] w-auto" fill="none" aria-hidden>
-          <rect x="8" y="8" width="184" height="112" rx="8" stroke={BLUE} strokeWidth="3.5" />
-          <path d="M8 34h184" stroke={BLUE} strokeWidth="3" />
-          <circle cx="22" cy="21" r="3.2" fill={BLUE} />
-          <circle cx="34" cy="21" r="3.2" fill={BLUE} opacity="0.5" />
-          <rect x="28" y="50" width="70" height="8" rx="4" fill="#fff" opacity="0.85" />
-          <rect x="28" y="68" width="112" height="6" rx="3" fill="#fff" opacity="0.4" />
-          <rect x="28" y="82" width="92" height="6" rx="3" fill="#fff" opacity="0.4" />
-          <path d="M84 120v14h32v-14M70 140h60" stroke={BLUE} strokeWidth="3.5" strokeLinecap="round" />
+    <div className="flex flex-col items-center gap-[4vh]">
+      <div className="flex items-center justify-center gap-[5vw]">
+        <CheckerDevice checked={checked} pressed={pressed} result={result} />
+
+        {/* the arrow only means something once there is something to point at */}
+        <svg viewBox="0 0 120 40" className="h-[5vh] w-[8vw]" fill="none" aria-hidden style={{ opacity: booked ? 1 : 0, transition: `opacity 600ms ${ease}` }}>
+          <path d="M4 20h94" stroke={LIME} strokeWidth="4" strokeLinecap="round" />
+          <path d="m92 10 20 10-20 10" stroke={LIME} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
+
+        <div style={arrive(booked)}>
+          <AppointmentCard />
         </div>
-        <p className={caption}>
-          That&rsquo;s what turns a{" "}
-          <span className="font-extrabold" style={{ color: BLUE }}>
-            website visitor
-          </span>
-        </p>
       </div>
 
-      {/* the line between them */}
-      <svg viewBox="0 0 300 40" className="mt-[9vh] h-[6vh] flex-1" fill="none" aria-hidden preserveAspectRatio="none">
-        <path
-          d="M4 20h258"
-          stroke={LIME}
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeDasharray="262"
-          strokeDashoffset={beat >= 2 ? 0 : 262}
-          style={{ transition: `stroke-dashoffset 600ms ${ease}` }}
-        />
-        <path
-          d="m254 8 24 12-24 12"
-          stroke={LIME}
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ opacity: beat >= 2 ? 1 : 0, transition: `opacity 300ms ${ease} 400ms` }}
-        />
-      </svg>
-
-      {/* the screening, with its half of the sentence */}
-      <div className="flex shrink-0 flex-col items-center" style={arrive(beat >= 3)}>
-        <div className="flex h-[26vh] items-center justify-center">
-        <svg viewBox="0 0 210 170" className="h-[25vh] w-auto" fill="none" aria-hidden>
-          {/* calf and foot */}
-          <path
-            d="M58 8c-7 26-5 46 1 64s10 34 8 52c-1 10-3 18-5 26h36c3-16 6-30 8-46 3-24 5-46 1-70-2-10-4-18-6-26z"
-            stroke="#fff"
-            strokeWidth="3"
-            strokeLinejoin="round"
-            opacity="0.9"
-          />
-
-          {/* sound travelling INTO the leg — arcs open leftward from the face,
-              drawn before the probe so the probe sits cleanly on top */}
-          {[0, 1, 2].map((i) => (
-            <path
-              key={i}
-              d={`M${116 - i * 4} ${70 - i * 5}a${16 + i * 9} ${16 + i * 9} 0 0 0 0 ${32 + i * 10}`}
-              stroke={LIME}
-              strokeWidth="2.6"
-              strokeLinecap="round"
-              fill="none"
-              opacity={0.85 - i * 0.22}
-            />
-          ))}
-
-          {/* Handheld transducer — slimmer than a treatment handpiece, which is
-              the difference a vein doctor reads at a glance: a narrow face
-              plate on the skin, a slender grip, a cable to the machine. */}
-          <g stroke={LIME} strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-            {/* face plate against the skin */}
-            <path d="M120 68v24" />
-            {/* slim grip */}
-            <path d="M120 71h30a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5h-30z" />
-            {/* grip ridges */}
-            <path d="M132 76v11M140 76v11" strokeWidth="1.7" opacity="0.5" />
-            {/* cable to the machine */}
-            <path d="M155 80h8c13 0 15-11 26-13" strokeWidth="2.4" />
-          </g>
-        </svg>
-        </div>
-        <p className={caption}>
-          into a{" "}
-          <span className="font-extrabold" style={{ color: LIME }}>
-            vein screening
-          </span>
-          .
-        </p>
-      </div>
+      <p
+        className="text-center text-[clamp(22px,2.3vw,48px)] font-semibold leading-snug"
+        style={arrive(headline)}
+      >
+        That&rsquo;s what turns a{" "}
+        <span className="font-extrabold" style={{ color: BLUE }}>
+          website visitor
+        </span>{" "}
+        into a{" "}
+        <span className="font-extrabold" style={{ color: LIME }}>
+          vein screening
+        </span>
+        .
+      </p>
     </div>
   );
 }
@@ -634,7 +572,7 @@ const RECAP_HOLD_MS = 8000;
  * deck lands as a recipe rather than a blur, then holds long enough to say
  * "so that's the three pieces" before moving itself on.
  */
-function Recap({ live, onDone }: { live: boolean; onDone: () => void }) {
+function Recap({ live, onDone }: { live: boolean; onDone?: () => void }) {
   const [shown, setShown] = useState(0);
   const doneRef = useRef(onDone);
   // Synced in an effect, not during render: writing a ref while rendering is
@@ -652,18 +590,22 @@ function Recap({ live, onDone }: { live: boolean; onDone: () => void }) {
     }
     if (prefersReducedMotion()) {
       timers.push(window.setTimeout(() => setShown(RECAP.length), 0));
-      timers.push(window.setTimeout(() => doneRef.current(), RECAP_HOLD_MS));
+      if (doneRef.current) timers.push(window.setTimeout(() => doneRef.current?.(), RECAP_HOLD_MS));
       return () => timers.forEach((t) => window.clearTimeout(t));
     }
     RECAP.forEach((_, i) =>
       timers.push(window.setTimeout(() => setShown(i + 1), 400 + i * RECAP_STEP_MS))
     );
-    timers.push(
-      window.setTimeout(
-        () => doneRef.current(),
-        400 + RECAP.length * RECAP_STEP_MS + RECAP_HOLD_MS
-      )
-    );
+    // On the intro there is nothing to advance to — the presenter talks over
+    // it and presses on when ready — so the hold only exists when asked for.
+    if (doneRef.current) {
+      timers.push(
+        window.setTimeout(
+          () => doneRef.current?.(),
+          400 + RECAP.length * RECAP_STEP_MS + RECAP_HOLD_MS
+        )
+      );
+    }
     return () => timers.forEach((t) => window.clearTimeout(t));
   }, [live]);
 
@@ -1026,21 +968,27 @@ function CountingGauges({ live }: { live: boolean }) {
 
   return (
     <div className="flex items-center gap-[8vw]">
-      <div className="pitch-rise" style={{ "--rise": "150ms" } as React.CSSProperties}>
+      <div className="pitch-rise flex flex-col items-center" style={{ "--rise": "150ms" } as React.CSSProperties}>
         <Gauge
           score={scores.a}
-          size={340}
-          valueClass="text-8xl"
+          size={300}
+          valueClass="text-7xl"
           srLabel="Their site: performance score 42 of 100"
         />
+        <p className="mt-[1.6vh] text-[clamp(14px,1.2vw,24px)] font-bold uppercase tracking-[0.18em] text-white/45">
+          Their site
+        </p>
       </div>
-      <div className="pitch-rise" style={{ "--rise": "300ms" } as React.CSSProperties}>
+      <div className="pitch-rise flex flex-col items-center" style={{ "--rise": "300ms" } as React.CSSProperties}>
         <Gauge
           score={scores.b}
-          size={340}
-          valueClass="text-8xl"
-          srLabel="Our build: performance score 98 of 100"
+          size={300}
+          valueClass="text-7xl"
+          srLabel="Modern architecture: performance score 98 of 100"
         />
+        <p className="mt-[1.6vh] text-[clamp(14px,1.2vw,24px)] font-bold uppercase tracking-[0.18em]" style={{ color: LIME }}>
+          Modern architecture
+        </p>
       </div>
     </div>
   );
@@ -1078,9 +1026,40 @@ export default function PitchClient() {
     []
   );
 
-  const advance = useCallback(() => goTo(stateRef.current.active + 1), [goTo]);
-  const back = useCallback(() => goTo(stateRef.current.active - 1), [goTo]);
-  const reset = useCallback(() => goTo(0), [goTo]);
+  /**
+   * The attract screen holds two states. The first press reveals the three
+   * pillars beneath the tagline instead of advancing, so the framework can be
+   * introduced out loud before the deck moves; the press after that leaves S0
+   * as normal. Held in a ref as well as state because the key handler reads it
+   * without re-subscribing.
+   */
+  const [introRevealed, setIntroRevealed] = useState(false);
+  const introRef = useRef(false);
+  useEffect(() => {
+    introRef.current = introRevealed;
+  }, [introRevealed]);
+
+  const advance = useCallback(() => {
+    if (stateRef.current.active === 0 && !introRef.current) {
+      introRef.current = true;
+      setIntroRevealed(true);
+      return;
+    }
+    goTo(stateRef.current.active + 1);
+  }, [goTo]);
+  const back = useCallback(() => {
+    if (stateRef.current.active === 0 && introRef.current) {
+      introRef.current = false;
+      setIntroRevealed(false);
+      return;
+    }
+    goTo(stateRef.current.active - 1);
+  }, [goTo]);
+  const reset = useCallback(() => {
+    introRef.current = false;
+    setIntroRevealed(false);
+    goTo(0);
+  }, [goTo]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -1265,6 +1244,15 @@ export default function PitchClient() {
           <p className={`${SUB} pitch-rise`} style={{ "--rise": "340ms" } as React.CSSProperties}>
             AI-powered marketing for medical practices
           </p>
+          {/* The framework, on the second beat of the attract screen. Nothing
+              auto-advances here — the presenter talks over it. */}
+          <div
+            className="mt-[3vh] w-full transition-opacity duration-500"
+            style={{ opacity: introRevealed ? 1 : 0 }}
+            aria-hidden={!introRevealed}
+          >
+            <Recap live={active === 0 && introRevealed} />
+          </div>
         </>
       )}
 
@@ -1394,43 +1382,42 @@ export default function PitchClient() {
       )}
 
       {/* ═══ ACT 3 — SPEED ═══ */}
-      {/* S3a — 53% */}
+      {/* S3a — the claim, the demonstration, and the evidence, on one screen */}
       {section(
         5,
         <>
-          <div
-            className="font-extrabold leading-none tracking-tight text-[clamp(200px,30vh,320px)] pitch-rise"
-            style={{ color: LIME, "--rise": "0ms" } as React.CSSProperties}
+          <DotGrid className="inset-x-[20vw] top-[6vh] h-[16vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
+          <h2 className={`${PRIMARY} max-w-[16em] pitch-rise`} style={rise(0)}>
+            Modern architecture makes sites dramatically faster. Faster sites convert.
+          </h2>
+          <CountingGauges live={active === 5} />
+          <p
+            className="pitch-rise text-[clamp(16px,1.4vw,30px)] font-semibold tracking-wide text-white/50"
+            style={rise(500)}
           >
-            53%
-          </div>
-          <p className={`${PRIMARY} text-[clamp(32px,3vw,68px)] max-w-[16em] pitch-rise`} style={{ "--rise": "200ms" } as React.CSSProperties}>
-            of mobile visitors abandon after 3 seconds.
+            Same test. Same day. Different architecture.
           </p>
-          <p className="text-[clamp(16px,1.2vw,24px)] text-white/40 pitch-rise" style={{ "--rise": "360ms" } as React.CSSProperties}>
-            Google / SOASTA
+          <p
+            className="pitch-rise text-[clamp(18px,1.7vw,36px)] font-semibold text-white/80"
+            style={rise(650)}
+          >
+            The gap isn&rsquo;t tuning. It&rsquo;s what the site is built on.
+          </p>
+          {/* The statistic is the proof behind the claim, so it sits under the
+              demonstration rather than on a slide of its own. */}
+          <p
+            className="pitch-rise max-w-[46em] text-[clamp(14px,1.15vw,24px)] font-light leading-snug text-white/40"
+            style={rise(800)}
+          >
+            53% of mobile visitors abandon a page that takes longer than 3 seconds to load —
+            Google / SOASTA, 2016
           </p>
         </>
       )}
 
-      {/* S3b — PROOF: the same test, side by side */}
+      {/* S3b — 3x bars + the conversion, illustrated */}
       {section(
         6,
-        <>
-          <DotGrid className="inset-x-[20vw] top-[8vh] h-[18vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
-          <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
-            Same test. Their site. Our build.
-          </h2>
-          <CountingGauges live={active === 6} />
-          <p className={`${SUB} pitch-rise`} style={{ "--rise": "450ms" } as React.CSSProperties}>
-            Run it live on any site — including this one.
-          </p>
-        </>
-      )}
-
-      {/* S3c — 3x bars + the conversion, illustrated */}
-      {section(
-        7,
         <>
           <h2 className={`${PRIMARY} max-w-[15em] pitch-rise`} style={rise(0)}>
             A 1-second site converts 3x better than a 5-second site.
@@ -1440,7 +1427,7 @@ export default function PitchClient() {
               <div className="flex flex-col items-center gap-3 h-full justify-end">
                 <div
                   className={`pitch-bar w-[8vw] min-w-24 rounded-t-2xl bg-white/20 ${
-                    active === 7 ? "" : "pitch-bar-hidden"
+                    active === 6 ? "" : "pitch-bar-hidden"
                   }`}
                   style={{ height: "33.3%" }}
                 />
@@ -1451,7 +1438,7 @@ export default function PitchClient() {
               <div className="flex flex-col items-center gap-3 h-full justify-end">
                 <div
                   className={`pitch-bar w-[8vw] min-w-24 rounded-t-2xl ${
-                    active === 7 ? "" : "pitch-bar-hidden"
+                    active === 6 ? "" : "pitch-bar-hidden"
                   }`}
                   style={{ height: "100%", background: LIME, transitionDelay: "150ms" }}
                 />
@@ -1460,7 +1447,7 @@ export default function PitchClient() {
                 </span>
               </div>
             </div>
-            <BookingSim live={active === 7} />
+            <BookingSim live={active === 6} />
           </div>
           <p className={`${SUB} pitch-rise`} style={{ "--rise": "400ms" } as React.CSSProperties}>
             Portent, 2022 — 100M+ pageviews, lead-generation sites
@@ -1468,9 +1455,9 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* S3d — architecture */}
+      {/* S3c — architecture */}
       {section(
-        8,
+        7,
         <>
           <svg
             viewBox="0 0 1200 320"
@@ -1522,7 +1509,7 @@ export default function PitchClient() {
 
       {/* S4a — the billboard */}
       {section(
-        9,
+        8,
         <>
           <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
             Most vein websites are brochures.
@@ -1540,7 +1527,7 @@ export default function PitchClient() {
 
       {/* S4b — what patients actually believe */}
       {section(
-        10,
+        9,
         <>
           <DotGrid className="left-[10vw] top-[16vh] w-[18vw] h-[26vh] opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_72%)]" />
           <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
@@ -1548,7 +1535,7 @@ export default function PitchClient() {
           </h2>
           {/* Lit one at a time — see ThoughtCycle. */}
           <div className="pitch-rise" style={rise(300)}>
-            <ThoughtCycle live={active === 10} />
+            <ThoughtCycle live={active === 9} />
           </div>
           <p className={`${SUB} pitch-rise`} style={rise(1400)}>
             They think it&rsquo;s tired legs. Or genetics. Or cosmetic.
@@ -1558,13 +1545,13 @@ export default function PitchClient() {
 
       {/* S4c — THE CENTREPIECE: the stages, walked */}
       {section(
-        11,
+        10,
         <>
           <h2 className={`${PRIMARY} pitch-rise`} style={rise(0)}>
             So we teach the stages.
           </h2>
           <div className="w-[min(84vw,1500px)] pitch-rise" style={rise(200)}>
-            <StageWalk live={active === 11} />
+            <StageWalk live={active === 10} />
           </div>
           <p
             className="pitch-rise text-[clamp(24px,2.4vw,50px)] font-semibold leading-snug text-white/85"
@@ -1579,38 +1566,15 @@ export default function PitchClient() {
         </>
       )}
 
-      {/* S4d — the assessment, real UI */}
+      {/* S4d — assessment becomes appointment, on one screen */}
+      {section(
+        11,
+        <ScreeningTurn live={active === 11} />
+      )}
+
+      {/* S5 — HANDOFF */}
       {section(
         12,
-        <>
-          <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
-            Then we ask them to count their symptoms.
-          </h2>
-          <div className="pitch-rise" style={rise(220)}>
-            <SymptomCheckerSim live={active === 12} onDone={() => goTo(13)} />
-          </div>
-          <p className={`${SUB} pitch-rise`} style={rise(420)}>
-            Interactive assessment — not a contact form.
-          </p>
-        </>
-      )}
-
-      {/* S4e — the turn, shown rather than stated. The caption lives inside
-          TurnSequence now: each half sits under the image it describes. */}
-      {section(
-        13,
-        <TurnSequence live={active === 13} />
-      )}
-
-      {/* S5 — RECAP: the three acts, in three lines */}
-      {section(
-        14,
-        <Recap live={active === 14} onDone={() => goTo(15)} />
-      )}
-
-      {/* S6 — HANDOFF */}
-      {section(
-        15,
         <>
           <h2 className={`${PRIMARY} pitch-rise`} style={rise(0)}>
             Want to see yours?
