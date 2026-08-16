@@ -395,6 +395,17 @@ const PICK_ORDER: ReadonlyArray<number | null> = SYMPTOMS.reduce<Array<number | 
   []
 );
 const STEP_MS = 800;
+
+/**
+ * The scale both simulated screens are drawn against.
+ *
+ * They used to size their boxes in px-capped vh (`min(40vh,410px)`) while
+ * their type stayed in raw vh. Past the cap the box stopped growing and the
+ * text did not, so at 2560x1440 the appointment card's aspect ratio had gone
+ * from 1.66 to 0.83 — the squish. Now one clamped font-size drives both, every
+ * internal measure is in em, and the pair can only ever scale together.
+ */
+const SIM_SCALE = "clamp(7px, 1vh, 12px)";
 /** Matches the CSS move below — beat 4 must not land mid-slide. */
 const MOVE_STEP_MS = 1200;
 
@@ -414,26 +425,26 @@ function CheckerDevice({
   });
 
   return (
-    <div className="rounded-[2.6vh] border-[0.5vh] border-white/15 bg-black p-[0.5vh] shadow-[0_30px_90px_rgba(0,0,0,0.6)]">
-      <div className="relative w-[min(40vh,410px)] overflow-hidden rounded-[2.1vh] bg-[#0b1620] px-[2.4vh] py-[2.6vh]">
-        <p className="text-[1.8vh] font-semibold leading-tight text-white">
+    <div className="rounded-[2.6em] border-[0.5em] border-white/15 bg-black p-[0.5em] shadow-[0_30px_90px_rgba(0,0,0,0.6)]" style={{ fontSize: SIM_SCALE }}>
+      <div className="relative w-[40em] overflow-hidden rounded-[2.1em] bg-[#0b1620] px-[2.4em] py-[2.6em]">
+        <p className="text-[1.8em] font-semibold leading-tight text-white">
           Do you experience any of these in your legs?
         </p>
-        <p className="mt-[0.6vh] text-[1.3vh] text-white/40">Select all that apply.</p>
+        <p className="mt-[0.6em] text-[1.3em] text-white/40">Select all that apply.</p>
 
-        <div className="mt-[1.6vh] flex flex-col gap-[0.9vh]">
+        <div className="mt-[1.6em] flex flex-col gap-[0.9em]">
           {rows.map((row) => (
             <div
               key={row.label}
-              className="flex items-center justify-between gap-2 rounded-[1.1vh] border px-[1.3vh] py-[1.1vh] transition-all duration-300"
+              className="flex items-center justify-between gap-2 rounded-[1.1em] border px-[1.3em] py-[1.1em] transition-all duration-300"
               style={{
                 borderColor: row.on ? "#2f9fd0" : "rgba(255,255,255,0.09)",
                 background: row.on ? "rgba(47,159,208,0.12)" : "rgba(255,255,255,0.02)",
               }}
             >
-              <span className="text-[1.35vh] leading-tight text-white/85">{row.label}</span>
+              <span className="text-[1.35em] leading-tight text-white/85">{row.label}</span>
               <span className="shrink-0 transition-opacity duration-300" style={{ opacity: row.on ? 1 : 0 }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="#7fd4f5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-[1.7vh] w-[1.7vh]" aria-hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#7fd4f5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-[1.7em] w-[1.7em]" aria-hidden>
                   <path d="M20 6 9 17l-5-5" />
                 </svg>
               </span>
@@ -441,9 +452,9 @@ function CheckerDevice({
           ))}
         </div>
 
-        <div className="mt-[1.8vh] flex justify-end">
+        <div className="mt-[1.8em] flex justify-end">
           <span
-            className="rounded-full px-[2vh] py-[1vh] text-[1.4vh] font-bold text-white transition-all duration-300"
+            className="rounded-full px-[2em] py-[1em] text-[1.4em] font-bold text-white transition-all duration-300"
             style={{
               background: pressed ? LIME : "#1a7fa8",
               transform: pressed ? "scale(0.96)" : "scale(1)",
@@ -457,16 +468,16 @@ function CheckerDevice({
         {/* The flag. Amber and an exclamation: a tick would read as "you
             passed", which is the opposite of the point. */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center bg-[#0b1620] px-[2.2vh] text-center transition-opacity duration-500"
+          className="absolute inset-0 flex flex-col items-center justify-center bg-[#0b1620] px-[2.2em] text-center transition-opacity duration-500"
           style={{ opacity: result ? 1 : 0, pointerEvents: "none" }}
         >
-          <div className="mb-[2vh] flex h-[5.6vh] w-[5.6vh] items-center justify-center rounded-full" style={{ background: AMBER }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" className="h-[3vh] w-[3vh]" aria-hidden>
+          <div className="mb-[2em] flex h-[5.6em] w-[5.6em] items-center justify-center rounded-full" style={{ background: AMBER }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" className="h-[3em] w-[3em]" aria-hidden>
               <path d="M12 7v6" />
               <circle cx="12" cy="17" r="0.6" fill="#fff" stroke="none" />
             </svg>
           </div>
-          <p className="text-[2vh] font-extrabold leading-snug text-white">
+          <p className="text-[2em] font-extrabold leading-snug text-white">
             Your symptoms suggest you need a vein screening.
           </p>
         </div>
@@ -478,32 +489,32 @@ function CheckerDevice({
 /** What the assessment turns into: a booked screening. */
 function AppointmentCard() {
   return (
-    <div className="w-[min(38vh,380px)] rounded-[2vh] border border-white/12 bg-white/[0.04] p-[3vh] shadow-[0_30px_90px_rgba(0,0,0,0.45)]">
-      <div className="flex items-center gap-[1.4vh]">
-        <span className="flex h-[4.4vh] w-[4.4vh] items-center justify-center rounded-full" style={{ background: LIME }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" className="h-[2.4vh] w-[2.4vh]" aria-hidden>
+    <div className="w-[38em] rounded-[2em] border border-white/12 bg-white/[0.04] p-[3em] shadow-[0_30px_90px_rgba(0,0,0,0.45)]" style={{ fontSize: SIM_SCALE }}>
+      <div className="flex items-center gap-[1.4em]">
+        <span className="flex h-[4.4em] w-[4.4em] items-center justify-center rounded-full" style={{ background: LIME }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" className="h-[2.4em] w-[2.4em]" aria-hidden>
             <path d="M20 6 9 17l-5-5" />
           </svg>
         </span>
-        <span className="text-[1.7vh] font-bold uppercase tracking-[0.16em] text-white/50">
+        <span className="text-[1.7em] font-bold uppercase tracking-[0.16em] text-white/50">
           Appointment booked
         </span>
       </div>
 
-      <div className="mt-[3vh] flex items-start gap-[2vh]">
+      <div className="mt-[3em] flex items-start gap-[2em]">
         {/* calendar leaf */}
-        <div className="w-[9vh] shrink-0 overflow-hidden rounded-[1.2vh] border border-white/15">
-          <div className="py-[0.7vh] text-center text-[1.3vh] font-bold uppercase tracking-[0.14em] text-white" style={{ background: LIME }}>
+        <div className="w-[9em] shrink-0 overflow-hidden rounded-[1.2em] border border-white/15">
+          <div className="py-[0.7em] text-center text-[1.3em] font-bold uppercase tracking-[0.14em] text-white" style={{ background: LIME }}>
             Aug
           </div>
-          <div className="bg-white/[0.06] py-[1vh] text-center text-[3.4vh] font-extrabold leading-none text-white">
+          <div className="bg-white/[0.06] py-[1em] text-center text-[3.4em] font-extrabold leading-none text-white">
             19
           </div>
         </div>
         <div className="min-w-0">
-          <p className="text-[2.4vh] font-extrabold leading-tight text-white">Vein Screening</p>
-          <p className="mt-[0.8vh] text-[1.7vh] text-white/55">Tuesday · 2:30 PM</p>
-          <p className="mt-[0.4vh] text-[1.7vh] text-white/55">Ultrasound · 30 minutes</p>
+          <p className="text-[2.4em] font-extrabold leading-tight text-white">Vein Screening</p>
+          <p className="mt-[0.8em] text-[1.7em] text-white/55">Tuesday · 2:30 PM</p>
+          <p className="mt-[0.4em] text-[1.7em] text-white/55">Ultrasound · 30 minutes</p>
         </div>
       </div>
     </div>
@@ -593,7 +604,7 @@ function ScreeningTurn({ live }: { live: boolean }) {
           style={{ opacity: moved ? 0 : 1, transition: fade }}
           aria-hidden={moved}
         >
-          So we ask them to count their symptoms.
+          And we ask them for their symptoms.
         </span>
         <span
           className="[grid-area:1/1] max-w-[17em] text-[clamp(30px,3.3vw,72px)] font-extrabold leading-[1.1] tracking-tight text-white"
@@ -717,7 +728,11 @@ function Recap({ live, onDone }: { live: boolean; onDone?: () => void }) {
   }, [live]);
 
   return (
-    <div className="flex w-[min(84vw,1500px)] items-start justify-between gap-[4vw]">
+    // mx-auto is load-bearing: this row has a FIXED width once the viewport
+    // passes ~1790px, and a fixed-width block inside a full-width parent
+    // aligns left. On a 1440-wide laptop the slack is 14px and invisible; on a
+    // 2560 monitor it is 351px and the framework sits visibly off-centre.
+    <div className="mx-auto flex w-[min(84vw,1500px)] items-start justify-between gap-[4vw]">
       {RECAP.map(([label, line, icon], i) => (
         <div
           key={label}
@@ -1734,12 +1749,12 @@ export default function PitchClient() {
         8,
         <>
           <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
-            Most vein websites are brochures.
+            Your website has one job.
           </h2>
           {/* Under the headline, above the mockup: the qualifier belongs with
               the claim it qualifies, not a screen-height below it. */}
           <p className={`${SUB} pitch-rise`} style={rise(200)}>
-            They work for patients who already decided to call.
+            Turning visitors into patients. Most sites were never built for it.
           </p>
           <div className="pitch-rise" style={rise(400)}>
             <BrochureMockup />
@@ -1799,8 +1814,14 @@ export default function PitchClient() {
         12,
         <>
           <h2 className={`${PRIMARY} pitch-rise`} style={rise(0)}>
-            Want to see yours?
+            Your next patient{" "}
+            <span style={{ color: LIME }}>just asked AI</span>.
           </h2>
+          {/* Under the headline, above the button: the instruction the button
+              then carries out. */}
+          <p className={`${SUB} pitch-rise`} style={rise(160)}>
+            Find out what it said.
+          </p>
           <a
             href="/audit"
             target="_blank"
@@ -1811,7 +1832,7 @@ export default function PitchClient() {
           >
             Run your practice&rsquo;s audit
           </a>
-          <p className={`${SUB} pitch-rise`} style={{ "--rise": "360ms" } as React.CSSProperties}>
+          <p className="pitch-rise text-[clamp(15px,1.2vw,26px)] font-light text-white/40" style={{ "--rise": "360ms" } as React.CSSProperties}>
             30 seconds. Google&rsquo;s own measurement.
           </p>
         </>
