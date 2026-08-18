@@ -317,7 +317,7 @@ function BrochureMockup() {
     </div>
   );
   return (
-    <div className="w-[min(52vw,780px)] overflow-hidden rounded-[0.9vw] border border-white/12 bg-[#f4f5f7] shadow-2xl">
+    <div className="pitch-brochure w-[min(52vw,780px)] overflow-hidden rounded-[0.9vw] border border-white/12 bg-[#f4f5f7] shadow-2xl">
       {/* browser chrome */}
       <div className="flex items-center gap-[0.5vw] bg-[#e4e6ea] px-[1vw] py-[0.7vw]">
         {[0, 1, 2].map((i) => (
@@ -405,7 +405,7 @@ const STEP_MS = 800;
  * from 1.66 to 0.83 — the squish. Now one clamped font-size drives both, every
  * internal measure is in em, and the pair can only ever scale together.
  */
-const SIM_SCALE = "clamp(7px, 1vh, 12px)";
+const SIM_SCALE = "var(--pitch-sim-scale, clamp(7px, 1vh, 12px))";
 /** Matches the CSS move below — beat 4 must not land mid-slide. */
 const MOVE_STEP_MS = 1200;
 
@@ -619,15 +619,18 @@ function ScreeningTurn({ live }: { live: boolean }) {
 
       {/* Fixed stage: the device is centred in it and later translates out of
           centre, so nothing below reflows when the composition changes. */}
-      <div className="relative mt-[5vh] h-[54vh] w-full">
+      <div className="pitch-sim-stage relative mt-[5vh] h-[54vh] w-full">
         <div
-          className="absolute left-1/2 top-1/2"
+          className="pitch-sim-device absolute left-1/2 top-1/2"
           style={{
             // Movement only. Shrinking on the way out made the device look
             // demoted rather than moved aside; it is the same device either
             // side of the transition, so it stays the same size.
+            // The offsets are variables rather than literals so the tablet
+            // sheet can send the device UP instead of left — side by side is
+            // the one thing that does not fit at 834px.
             transform: moved
-              ? "translate(calc(-50% - 21vw), -50%)"
+              ? "translate(calc(-50% - var(--pitch-sim-shift-x, 21vw)), calc(-50% - var(--pitch-sim-shift-y, 0px)))"
               : "translate(-50%, -50%)",
             transition: move,
           }}
@@ -636,9 +639,10 @@ function ScreeningTurn({ live }: { live: boolean }) {
         </div>
 
         <div
-          className="absolute left-1/2 top-1/2"
+          className="pitch-sim-card absolute left-1/2 top-1/2"
           style={{
-            transform: "translate(calc(-50% + 20vw), -50%)",
+            transform:
+              "translate(calc(-50% + var(--pitch-sim-card-x, 20vw)), calc(-50% + var(--pitch-sim-card-y, 0px)))",
             opacity: booked ? 1 : 0,
             transition: snap ? "none" : `opacity 800ms ${ease}`,
           }}
@@ -732,7 +736,7 @@ function Recap({ live, onDone }: { live: boolean; onDone?: () => void }) {
     // passes ~1790px, and a fixed-width block inside a full-width parent
     // aligns left. On a 1440-wide laptop the slack is 14px and invisible; on a
     // 2560 monitor it is 351px and the framework sits visibly off-centre.
-    <div className="mx-auto flex w-[min(84vw,1500px)] items-start justify-between gap-[4vw]">
+    <div className="pitch-recap mx-auto flex w-[min(84vw,1500px)] items-start justify-between gap-[4vw]">
       {RECAP.map(([label, line, icon], i) => (
         <div
           key={label}
@@ -845,7 +849,7 @@ function SearchBars({ live }: { live: boolean }) {
   );
 
   return (
-    <div className="flex flex-col items-center gap-[2.4vh] w-[min(46vw,760px)]">
+    <div className="pitch-searchbars flex flex-col items-center gap-[2.4vh] w-[min(46vw,760px)]">
       {/* Door 1 — Google */}
       <div className="w-full">
         {label("Google")}
@@ -927,7 +931,7 @@ function SearchBars({ live }: { live: boolean }) {
 
 function SiteScan() {
   return (
-    <div className="relative w-[min(20vw,340px)] shrink-0" aria-hidden>
+    <div className="pitch-scan-card relative w-[min(20vw,340px)] shrink-0" aria-hidden>
       {/* Browser-ish card being read */}
       <div className="relative overflow-hidden rounded-2xl bg-white/[0.06] border border-white/12">
         <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-white/10">
@@ -986,7 +990,7 @@ function BrokenScan() {
     { w: 0, empty: true },
   ];
   return (
-    <div className="relative w-[min(20vw,340px)] shrink-0" aria-hidden>
+    <div className="pitch-scan-card relative w-[min(20vw,340px)] shrink-0" aria-hidden>
       <div className="relative overflow-hidden rounded-2xl bg-white/[0.06] border border-white/12">
         <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-white/10">
           <span className="w-2 h-2 rounded-full bg-white/25" />
@@ -1089,12 +1093,12 @@ function CountingGauges({ live }: { live: boolean }) {
   }, [live]);
 
   return (
-    <div className="flex items-center gap-[8vw]">
+    <div className="pitch-gauges flex items-center gap-[8vw]">
       <div className="pitch-rise flex flex-col items-center" style={{ "--rise": "150ms" } as React.CSSProperties}>
         <Gauge
           score={scores.a}
-          size={380}
-          valueClass="text-8xl"
+          size="var(--pitch-gauge-size, 380px)"
+          valueClass="text-8xl pitch-gauge-value"
           srLabel="Their site: performance score 42 of 100"
         />
         <p className="mt-[1.6vh] text-[clamp(14px,1.2vw,24px)] font-bold uppercase tracking-[0.18em] text-white/45">
@@ -1104,8 +1108,8 @@ function CountingGauges({ live }: { live: boolean }) {
       <div className="pitch-rise flex flex-col items-center" style={{ "--rise": "300ms" } as React.CSSProperties}>
         <Gauge
           score={scores.b}
-          size={380}
-          valueClass="text-8xl"
+          size="var(--pitch-gauge-size, 380px)"
+          valueClass="text-8xl pitch-gauge-value"
           srLabel="Modern architecture: performance score 98 of 100"
         />
         <p className="mt-[1.6vh] text-[clamp(14px,1.2vw,24px)] font-bold uppercase tracking-[0.18em]" style={{ color: LIME }}>
@@ -1379,7 +1383,7 @@ export default function PitchClient() {
           presenter can see at a glance whether the deck will move on its own,
           and a visitor should never read it as a control. */}
       <div
-        className="pointer-events-none fixed bottom-[3vh] left-[4vw] z-50 h-[7px] w-[7px] rounded-full transition-opacity duration-700"
+        className="pitch-autoplay-tell pointer-events-none fixed bottom-[3vh] left-[4vw] z-50 h-[7px] w-[7px] rounded-full transition-opacity duration-700"
         style={{ background: "#ffffff", opacity: autoplay ? 0.16 : 0 }}
         aria-hidden
       />
@@ -1390,7 +1394,7 @@ export default function PitchClient() {
           are stacked in one grid cell and swapped by opacity, which gives the
           crossfade for free and keeps the box from resizing between acts. */}
       <div
-        className="pointer-events-none fixed left-[4vw] top-[6vh] z-50 grid"
+        className="pitch-act-marker pointer-events-none fixed left-[4vw] top-[6vh] z-50 grid"
         aria-hidden
       >
         {ACTS.map((act, i) => (
@@ -1410,7 +1414,7 @@ export default function PitchClient() {
       </div>
 
       <nav
-        className="fixed right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-4"
+        className="pitch-rail fixed right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-4"
         onClick={(e) => e.stopPropagation()}
         aria-label="Sections"
       >
@@ -1421,7 +1425,7 @@ export default function PitchClient() {
             onClick={() => jumpTo(i)}
             aria-label={`Section ${i + 1}`}
             aria-current={active === i}
-            className={`w-4 h-4 rounded-full transition-all ${
+            className={`pitch-rail-dot w-4 h-4 rounded-full transition-all ${
               active === i ? "scale-125" : "bg-white/25 hover:bg-white/50"
             }`}
             style={active === i ? { background: LIME } : undefined}
@@ -1509,8 +1513,8 @@ export default function PitchClient() {
           <h2 className={`${PRIMARY} max-w-[14em] pitch-rise`} style={rise(0)}>
             Patients are asking AI for doctor recommendations.
           </h2>
-          <div className="flex items-center gap-[2.5vw] pitch-rise" style={{ "--rise": "220ms" } as React.CSSProperties}>
-            <div className="w-[min(34vw,600px)] flex flex-col gap-[2vh] text-left">
+          <div className="pitch-chat-row flex items-center gap-[2.5vw] pitch-rise" style={{ "--rise": "220ms" } as React.CSSProperties}>
+            <div className="pitch-chat-col w-[min(34vw,600px)] flex flex-col gap-[2vh] text-left">
               <div className="self-end max-w-[80%] rounded-3xl rounded-br-md bg-white/15 px-8 py-[1.8vh] text-[clamp(18px,1.5vw,30px)] font-medium text-white/90">
                 best vein specialist near me
               </div>
@@ -1545,7 +1549,7 @@ export default function PitchClient() {
           <h2 className={`${PRIMARY} max-w-[13em] pitch-rise`} style={rise(0)}>
             Most vein practice sites are invisible to AI.
           </h2>
-          <div className="flex items-center gap-[4vw] pitch-rise" style={rise(200)}>
+          <div className="pitch-invisible-row flex items-center gap-[4vw] pitch-rise" style={rise(200)}>
             <ul className="flex flex-col items-start gap-[3vh] text-[clamp(24px,2.1vw,44px)] font-semibold">
               {INVISIBLE_LINES.map(([head, tail], i) => (
                 <li
@@ -1591,7 +1595,7 @@ export default function PitchClient() {
           </h2>
           {/* Longer sentences than S2b, so a step down in size and room to
               wrap — these are read from the back of a booth. */}
-          <ul className="flex flex-col items-start gap-[3vh] text-[clamp(20px,1.6vw,34px)] font-semibold max-w-[40em] text-left">
+          <ul className="pitch-build-list flex flex-col items-start gap-[3vh] text-[clamp(20px,1.6vw,34px)] font-semibold max-w-[40em] text-left">
             {BUILD_LINES.map(([lead, rest], i) => (
               <li
                 key={lead}
@@ -1659,8 +1663,8 @@ export default function PitchClient() {
           <h2 className={`${PRIMARY} max-w-[15em] pitch-rise`} style={rise(0)}>
             A 1-second site converts 3x better than a 5-second site.
           </h2>
-          <div className="flex items-center gap-[6vw] pitch-rise" style={{ "--rise": "220ms" } as React.CSSProperties}>
-            <div className="flex items-end gap-[4vw] h-[32vh]">
+          <div className="pitch-bars-row flex items-center gap-[6vw] pitch-rise" style={{ "--rise": "220ms" } as React.CSSProperties}>
+            <div className="pitch-bars flex items-end gap-[4vw] h-[32vh]">
               <div className="flex flex-col items-center gap-3 h-full justify-end">
                 <div
                   className={`pitch-bar w-[8vw] min-w-24 rounded-t-2xl bg-white/20 ${
@@ -1787,7 +1791,7 @@ export default function PitchClient() {
           <h2 className={`${PRIMARY} pitch-rise`} style={rise(0)}>
             So we teach the stages.
           </h2>
-          <div className="w-[min(84vw,1500px)] pitch-rise" style={rise(200)}>
+          <div className="pitch-stage-wrap w-[min(84vw,1500px)] pitch-rise" style={rise(200)}>
             <StageWalk live={active === 10} />
           </div>
           <p
@@ -1827,7 +1831,7 @@ export default function PitchClient() {
             target="_blank"
             rel="noopener"
             onClick={(e) => e.stopPropagation()}
-            className="pitch-rise inline-flex items-center justify-center min-h-[64px] rounded-2xl px-[3.5vw] py-[2.6vh] text-[clamp(24px,2vw,42px)] font-extrabold shadow-xl transition-transform hover:scale-[1.03]"
+            className="pitch-cta pitch-rise inline-flex items-center justify-center min-h-[64px] rounded-2xl px-[3.5vw] py-[2.6vh] text-[clamp(24px,2vw,42px)] font-extrabold shadow-xl transition-transform hover:scale-[1.03]"
             style={{ background: LIME, color: NAVY, "--rise": "200ms" } as React.CSSProperties}
           >
             Run your practice&rsquo;s audit
