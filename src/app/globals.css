@@ -747,6 +747,173 @@ body {
   }
 }
 
+/* ---------------------------------------------------------------
+   Pitch deck — tablet layout (iPad 11" and narrower)
+
+   The deck is drawn for the booth monitor: its padding, its
+   compositions and its two simulated screens are all measured in
+   vw/vh against 2560x1440. An iPad 11" — 1194x834 landscape,
+   834x1194 portrait — is roughly half that, and half of a vw measure
+   is content against the glass: the rings reach both edges, the
+   assessment device hangs off the left, the progress rail lands on
+   top of whatever is nearest it.
+
+   Every rule here is inside `max-width: 1200px`, which no desktop
+   viewport reaches, and nothing outside these two blocks changed —
+   so 1920 and 2560 render exactly what they rendered before. The
+   900px block is the portrait pass, where the side-by-side
+   compositions genuinely do not fit and stack or wrap instead.
+   --------------------------------------------------------------- */
+
+@media (max-width: 1200px) {
+  .pitch-scroll {
+    /* Nothing comes within this of an edge. The deck is read at arm's
+       length on a tablet, not from six feet away across a booth. */
+    --pitch-edge: 88px;
+    --pitch-gauge-size: 300px;
+    /* The assessment and the appointment card, one notch up from what
+       1vh gives them on an 834px-tall screen. */
+    --pitch-sim-scale: clamp(7px, 1.15vh, 12px);
+  }
+
+  .pitch-scroll section {
+    padding-inline: var(--pitch-edge) !important;
+    /* Also the clearance for the act marker above and the autoplay
+       tell below, for the sections tall enough to reach them. */
+    padding-block: 96px !important;
+    gap: clamp(20px, 3.2vh, 40px) !important;
+  }
+
+  /* --- Fixed chrome, brought into the content's own column --- */
+  .pitch-act-marker {
+    left: var(--pitch-edge) !important;
+    top: 44px !important;
+  }
+  .pitch-autoplay-tell {
+    left: var(--pitch-edge) !important;
+    bottom: 44px !important;
+  }
+  /* The rail sits between the edge and the content column instead of
+     over the content, and its dots come down with the deck. */
+  .pitch-rail {
+    right: 48px !important;
+    gap: 12px !important;
+  }
+  .pitch-rail-dot {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  /* --- Blocks sized against the monitor rather than their container --- */
+  .pitch-recap,
+  .pitch-stage-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  /* Wrapped list lines under a centred heading: only the heading is
+     centred copy. Ragged-centre bullets read as a mistake. */
+  .pitch-invisible-row ul {
+    text-align: left;
+  }
+  .pitch-searchbars {
+    /* Explicit for the same reason as the chat column: its parent is
+       shrink-to-fit, so a percentage would shrink it, not stretch it. */
+    width: 620px !important;
+  }
+  .pitch-gauge-value {
+    /* Tracks the ring: the value was a quarter of 380px. */
+    font-size: 76px !important;
+  }
+  .pitch-brochure {
+    /* The mockup is drawn entirely in vw, so its container width is not
+       what makes it bigger — every bar and card inside has to scale
+       with it, which is what zoom does and a width override does not. */
+    zoom: 1.12;
+  }
+
+  /* --- Side-by-side compositions: the gaps were a fraction of 2560 --- */
+  .pitch-chat-row {
+    gap: 28px !important;
+  }
+  .pitch-chat-col {
+    /* An explicit width, not a share of the viewport: this row is
+       shrink-to-fit, so `auto` would collapse the bubbles onto the
+       length of their own text. */
+    width: 420px !important;
+  }
+  .pitch-scan-card {
+    width: 240px !important;
+  }
+  .pitch-invisible-row {
+    gap: 36px !important;
+  }
+  .pitch-bars-row {
+    gap: 48px !important;
+  }
+  .pitch-bars {
+    gap: 36px !important;
+  }
+  .pitch-cta {
+    padding-inline: 44px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .pitch-scroll {
+    --pitch-edge: 72px;
+    --pitch-gauge-size: 250px;
+    --pitch-sim-scale: clamp(6px, 0.72vh, 10px);
+    /* Portrait has no room beside anything and a screen of room below
+       it, so the device steps UP and the appointment lands under it. */
+    --pitch-sim-shift-x: 0px;
+    --pitch-sim-shift-y: 12vh;
+    --pitch-sim-card-x: 0px;
+    --pitch-sim-card-y: 20vh;
+  }
+
+  .pitch-gauges {
+    gap: 40px !important;
+  }
+  .pitch-gauge-value {
+    font-size: 62px !important;
+  }
+  .pitch-sim-stage {
+    /* Tall enough for the device with the appointment card under it,
+       and no taller — the slack would push the pair off centre. */
+    height: 60vh !important;
+  }
+  .pitch-build-list {
+    max-width: 620px !important;
+  }
+  .pitch-brochure {
+    zoom: 1.5;
+  }
+  .pitch-searchbars {
+    width: 600px !important;
+  }
+  .pitch-chat-col {
+    width: 400px !important;
+  }
+  .pitch-scan-card {
+    width: 170px !important;
+  }
+
+  /* Five stages across 690px is a five-line caption under each one.
+     Three, then two — the progression still reads left to right, and
+     the arrow that would point at the wrap is dropped. */
+  .pitch-stage-row {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 40px;
+  }
+  .pitch-stage-item {
+    flex: 0 0 33.333% !important;
+  }
+  .pitch-stage-item:nth-child(3) .pitch-stage-arrow {
+    visibility: hidden;
+  }
+}
+
 /* ============================================================
    Audit report — print / PDF.
 

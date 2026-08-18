@@ -28,7 +28,9 @@ export function Gauge({
   label?: string;
   verified?: number;
   total?: number;
-  size?: number;
+  /** Ring diameter. A string passes a CSS length straight through, which is
+   *  how /pitch hands it a viewport-dependent variable. */
+  size?: number | string;
   valueClass?: string;
   /** False renders the ring alone — the color zone carries the message. */
   showValue?: boolean;

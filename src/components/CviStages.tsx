@@ -136,11 +136,11 @@ function MockupStages() {
  */
 function StageStages({ reached }: { reached: number }) {
   return (
-    <div className="flex w-full items-start">
+    <div className="pitch-stage-row flex w-full items-start">
       {CVI_STAGES.map((item, i) => {
         const lit = i < reached;
         return (
-          <div key={item.stage} className="flex flex-1 items-start">
+          <div key={item.stage} className="pitch-stage-item flex flex-1 items-start">
             <div className="flex flex-1 flex-col items-center text-center">
               {/* Supporting, not the focus: small enough that the progression
                   still reads as a sequence of stages rather than a gallery. */}
@@ -194,7 +194,7 @@ function StageStages({ reached }: { reached: number }) {
             </div>
             {i < CVI_STAGES.length - 1 && (
               <div
-                className="flex items-center transition-colors duration-700"
+                className="pitch-stage-arrow flex items-center transition-colors duration-700"
                 style={{
                   paddingTop: "clamp(12px,2vmin,26px)",
                   color: i < reached - 1 ? LIME : "rgba(255,255,255,0.18)",
