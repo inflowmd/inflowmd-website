@@ -337,36 +337,6 @@ function CheckList({ category }: { category: ResolvedCategory }) {
 }
 
 /**
- * The other route out that sits beside the email capture.
- *
- * Deliberately quieter than the send button — an outline button against its
- * solid lime fill — so the email stays the primary action. Rendered in BOTH
- * the form and the confirmation state: someone who has just handed over their
- * address is the most engaged they will be all day, and that is the worst
- * possible moment to remove the next step.
- *
- * The "or book a call" text link used to live here. Booking has its own card
- * beside this one now, so this is the only thing left in the row.
- */
-function SecondaryActions({ className = "" }: { className?: string }) {
-  return (
-    <div
-      className={`booth-no-print mt-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 ${className}`}
-    >
-      <a
-        href="/why-nextjs"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center justify-center rounded-lg border border-white/20 px-5 text-sm sm:text-base font-semibold text-white/80 hover:text-white hover:border-white/45 transition-colors"
-        style={{ minHeight: 48 }}
-      >
-        How we fix all of this →
-      </a>
-    </div>
-  );
-}
-
-/**
  * Lead capture. Two fields, because a third is a reason to walk away.
  *
  * The practice, its URL, the scores and the findings all come from the report
@@ -450,7 +420,6 @@ function LeadForm({
         <p className="text-white/70 text-base sm:text-lg mt-2">
           Check your inbox — I&rsquo;ll follow up next week.
         </p>
-        <SecondaryActions className="sm:justify-center" />
       </div>
     );
   }
@@ -525,8 +494,6 @@ function LeadForm({
           </p>
         )}
       </form>
-
-      <SecondaryActions />
     </div>
   );
 }
@@ -604,8 +571,11 @@ function NextSteps({
   categories: ResolvedCategory[];
   verdict: Verdict | null;
 }) {
+  // mb-16: the patient-value card that follows carries the same accent
+  // border as these two, and flush against them the three read as one stack
+  // of boxes rather than an ask followed by an aside.
   return (
-    <div className="booth-no-print mt-10 grid gap-5 lg:grid-cols-2 lg:items-stretch">
+    <div className="booth-no-print mt-10 mb-16 grid gap-5 lg:grid-cols-2 lg:items-stretch">
       <LeadForm result={result} categories={categories} verdict={verdict} />
       <CallCard />
     </div>
@@ -2133,19 +2103,55 @@ export default function BoothClient({
           );
         })()}
 
-        {/* Our answer to the findings, stated once and without a pitch. Sits
-            after the evidence and before the ask: the reader has just seen
-            what is wrong, and this says what we would do instead. Deliberately
-            architecture-neutral — /why-nextjs is where the stack is named. */}
-        <div className="mt-10 mb-8 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-7">
-          <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/40 mb-3">
+        {/* PROOF, then the answer. The comparison used to sit at the very
+            bottom, after the money talk; a passing score is the evidence this
+            next section makes a claim about, so it now runs first. Only
+            against a failing score, and never against ourselves. */}
+        {perfScore !== null &&
+          perfScore < 90 &&
+          domainOf(result.url).replace(/^www\./, "") !== COMPARISON_HOST && (
+            <div className="booth-no-print mt-10">
+              <ComparisonBlock key={`${result.url}-${result.fetchedAt}`} their={result} />
+            </div>
+          )}
+
+        {/* Our answer to the findings. This one names the stack: the doctor
+            has just watched a modern build beat theirs on the same test, and
+            "modern architecture" is not a thing anyone can go and look up.
+            /why-nextjs is where it is argued in full — this is the door to it.
+
+            Carries the accent border and tinted fill the report reserves for
+            the statements that matter, so it reads as our answer rather than
+            as another finding. */}
+        <div
+          className="mt-10 mb-8 rounded-2xl border-2 p-6 sm:p-9"
+          style={{ borderColor: `${ACCENT}66`, background: `${ACCENT}14` }}
+        >
+          <div
+            className="text-[11px] font-bold tracking-[0.22em] uppercase mb-3"
+            style={{ color: ACCENT }}
+          >
             What we&rsquo;d do differently
           </div>
-          <p className="text-base sm:text-lg text-white/80 leading-relaxed max-w-3xl">
-            We don&rsquo;t optimize old platforms — we rebuild on modern architecture. Fast by
-            design, structured so AI can read it, and built to move patients from symptoms to a
-            screening.
+          <p className="text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight max-w-4xl">
+            We don&rsquo;t patch old platforms. We rebuild on Next.js.
           </p>
+          <p className="mt-5 text-base sm:text-lg text-white/80 leading-relaxed max-w-3xl">
+            Most practice sites are a theme stacked on plugins, reassembled in the patient&rsquo;s
+            browser on every visit — and the patient waits for whatever finishes last. Next.js
+            renders the page before the visit, so it arrives complete: fast enough that nobody
+            leaves, and readable enough that the AI assistants patients now ask can actually
+            quote it. The route from symptom to booked screening gets built in, not bolted on.
+          </p>
+          <a
+            href="/why-nextjs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="booth-no-print mt-7 inline-flex items-center justify-center rounded-xl px-8 font-extrabold text-base sm:text-lg text-[#081C34] transition-opacity hover:opacity-90"
+            style={{ background: ACCENT, minHeight: 60 }}
+          >
+            How we fix all of this →
+          </a>
         </div>
 
         {/* NEXT STEPS — the evidence has landed; ask before the money talk.
@@ -2183,15 +2189,6 @@ export default function BoothClient({
             </div>
           </div>
         ) : null}
-
-        {/* COMPARISON — only against a failing score, never against ourselves */}
-        {perfScore !== null &&
-          perfScore < 90 &&
-          domainOf(result.url).replace(/^www\./, "") !== COMPARISON_HOST && (
-            <div className="booth-no-print">
-              <ComparisonBlock key={`${result.url}-${result.fetchedAt}`} their={result} />
-            </div>
-          )}
 
         {/* Print footer — a printed page has to say where it came from. */}
         <div className="booth-print-only booth-print-footer">
