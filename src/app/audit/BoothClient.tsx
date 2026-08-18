@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Script from "next/script";
 import type { AuditResult, Check } from "@/types/audit";
 import { Gauge, gaugeColor } from "./Gauge";
 import {
@@ -336,28 +337,22 @@ function CheckList({ category }: { category: ResolvedCategory }) {
 }
 
 /**
- * The two routes out that sit beside the email capture.
+ * The other route out that sits beside the email capture.
  *
- * Deliberately quieter than the send button — a text link and an outline
- * button against its solid lime fill — so the email stays the primary action.
- * Rendered in BOTH the form and the confirmation state: someone who has just
- * handed over their address is the most engaged they will be all day, and
- * that is the worst possible moment to remove the next step.
+ * Deliberately quieter than the send button — an outline button against its
+ * solid lime fill — so the email stays the primary action. Rendered in BOTH
+ * the form and the confirmation state: someone who has just handed over their
+ * address is the most engaged they will be all day, and that is the worst
+ * possible moment to remove the next step.
+ *
+ * The "or book a call" text link used to live here. Booking is no longer a
+ * link away — the calendar itself is on the page, directly under this block.
  */
 function SecondaryActions({ className = "" }: { className?: string }) {
   return (
     <div
       className={`booth-no-print mt-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 ${className}`}
     >
-      <a
-        href={CALENDLY_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center text-sm sm:text-base text-white/60 hover:text-white underline decoration-white/25 underline-offset-4 hover:decoration-white/60 transition-colors"
-        style={{ minHeight: 44 }}
-      >
-        Or book a call now →
-      </a>
       <a
         href="/why-nextjs"
         target="_blank"
@@ -534,7 +529,73 @@ function LeadForm({
   );
 }
 
-/** Booking link offered beside the email capture. */
+/**
+ * The booking calendar, inline under the lead form.
+ *
+ * WHY THIS INITIALISES ITSELF. widget.js scans for .calendly-inline-widget
+ * ONCE, when it loads, and initialises whatever it finds. Here the block
+ * mounts with the result screen, which can appear long after that scan has
+ * run — a second audit in the same session, or a return from the input
+ * screen — and a mount that misses it would render an empty box. So we ask
+ * for it ourselves on mount, and again when the script reports ready for the
+ * first visit, where the order is the other way round. The iframe check is
+ * what stops those two paths from both building one.
+ */
+declare global {
+  interface Window {
+    Calendly?: {
+      initInlineWidget(options: { url: string; parentElement: HTMLElement }): void;
+    };
+  }
+}
+
+function BookingEmbed() {
+  const holder = useRef<HTMLDivElement>(null);
+
+  const mount = useCallback(() => {
+    const el = holder.current;
+    if (!el || el.querySelector("iframe")) return;
+    window.Calendly?.initInlineWidget({ url: CALENDLY_URL, parentElement: el });
+  }, []);
+
+  useEffect(() => {
+    mount();
+  }, [mount]);
+
+  return (
+    <div className="booth-no-print mt-8">
+      <Script
+        src="https://assets.calendly.com/assets/external/widget.js"
+        strategy="afterInteractive"
+        onReady={mount}
+      />
+      <h2 className="text-2xl sm:text-4xl font-extrabold leading-tight text-center">
+        Prefer to talk?
+      </h2>
+      <p className="text-white/60 text-base sm:text-lg mt-2 mb-6 text-center">
+        Book a 15-minute call &mdash; we&rsquo;ll walk through these findings together.
+      </p>
+      {/* HEIGHT. The brief asked for 700px so nothing scrolls inside the
+          iframe. Measured against the real widget, 700 clips it: the event
+          header (logo, photo, duration, description) alone is ~450px, so the
+          month grid was cut at its first week and Calendly scrolled it
+          internally — the exact thing 700 was meant to prevent. 1250 is what
+          fits the header, the full month, the timezone selector and a column
+          of slots at every width tested, so the floor is 700 as asked and the
+          height is what the content actually needs. A full day of 30-minute
+          slots still scrolls inside its own column; that column is Calendly's
+          and no embed height changes it. */}
+      <div
+        ref={holder}
+        className="calendly-inline-widget w-full overflow-hidden rounded-2xl border border-white/10"
+        data-url={CALENDLY_URL}
+        style={{ minWidth: 320, minHeight: 700, height: 1250 }}
+      />
+    </div>
+  );
+}
+
+/** The call the booking embed under the lead form opens onto. */
 const CALENDLY_URL = "https://calendly.com/inflowmd/strategy-call";
 
 /** Short date for the speed gauge's attribution line. */
@@ -2072,6 +2133,10 @@ export default function BoothClient({
 
         {/* LEAD CAPTURE — the evidence has landed; ask before the money talk. */}
         <LeadForm result={result} categories={categories} verdict={verdict} />
+
+        {/* BOOKING — the same ask, for the doctor who would rather talk than
+            wait for an email. */}
+        <BookingEmbed />
 
         {/* PATIENT VALUE — one statement, the stat behind it, the caveat.
             The sliders, the 12-step chain and the "show the math" toggle are
