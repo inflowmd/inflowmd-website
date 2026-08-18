@@ -345,8 +345,8 @@ function CheckList({ category }: { category: ResolvedCategory }) {
  * address is the most engaged they will be all day, and that is the worst
  * possible moment to remove the next step.
  *
- * The "or book a call" text link used to live here. Booking is no longer a
- * link away — the calendar itself is on the page, directly under this block.
+ * The "or book a call" text link used to live here. Booking has its own card
+ * beside this one now, so this is the only thing left in the row.
  */
 function SecondaryActions({ className = "" }: { className?: string }) {
   return (
@@ -443,7 +443,7 @@ function LeadForm({
   if (state === "sent") {
     return (
       <div
-        className="booth-no-print mt-10 rounded-2xl border-2 p-6 sm:p-10 text-center"
+        className="booth-no-print flex h-full flex-col items-center justify-center rounded-2xl border-2 p-6 sm:p-10 text-center"
         style={{ borderColor: `${ACCENT}66`, background: `${ACCENT}14` }}
       >
         <h2 className="text-2xl sm:text-3xl font-extrabold leading-tight">Sent to {sentTo}</h2>
@@ -457,7 +457,7 @@ function LeadForm({
 
   return (
     <div
-      className="booth-no-print mt-10 rounded-2xl border-2 p-6 sm:p-10"
+      className="booth-no-print flex h-full flex-col justify-center rounded-2xl border-2 p-6 sm:p-10"
       style={{ borderColor: `${ACCENT}66`, background: "rgba(0,0,0,0.25)" }}
     >
       <h2 className="text-2xl sm:text-4xl font-extrabold leading-tight text-center">
@@ -467,7 +467,9 @@ function LeadForm({
         We&rsquo;ll email you the full audit, plus what we&rsquo;d fix first.
       </p>
 
-      <form onSubmit={submit} className="max-w-2xl mx-auto grid sm:grid-cols-2 gap-3">
+      {/* One column: at half the container width a pair of side-by-side
+          64px fields is narrower than the addresses typed into them. */}
+      <form onSubmit={submit} className="w-full max-w-xl mx-auto grid gap-3">
         <label className="flex flex-col gap-1.5">
           <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-white/45">
             Email
@@ -509,14 +511,14 @@ function LeadForm({
         <button
           type="submit"
           disabled={state === "sending"}
-          className="sm:col-span-2 rounded-xl px-8 font-extrabold text-lg text-[#081C34] transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="rounded-xl px-8 font-extrabold text-lg text-[#081C34] transition-opacity hover:opacity-90 disabled:opacity-60"
           style={{ background: ACCENT, minHeight: 64 }}
         >
           {state === "sending" ? "Sending…" : "Send me this report"}
         </button>
 
         {state === "error" && (
-          <p className="sm:col-span-2 text-amber-300 text-sm text-center">
+          <p className="text-amber-300 text-sm text-center">
             {isValidEmail(email)
               ? "That didn't go through. Tap send once more."
               : "Please enter a valid email address."}
@@ -529,73 +531,88 @@ function LeadForm({
   );
 }
 
-/**
- * The booking calendar, inline under the lead form.
- *
- * WHY THIS INITIALISES ITSELF. widget.js scans for .calendly-inline-widget
- * ONCE, when it loads, and initialises whatever it finds. Here the block
- * mounts with the result screen, which can appear long after that scan has
- * run — a second audit in the same session, or a return from the input
- * screen — and a mount that misses it would render an empty box. So we ask
- * for it ourselves on mount, and again when the script reports ready for the
- * first visit, where the order is the other way round. The iframe check is
- * what stops those two paths from both building one.
- */
 declare global {
   interface Window {
-    Calendly?: {
-      initInlineWidget(options: { url: string; parentElement: HTMLElement }): void;
-    };
+    Calendly?: { initPopupWidget(options: { url: string }): void };
   }
 }
 
-function BookingEmbed() {
-  const holder = useRef<HTMLDivElement>(null);
-
-  const mount = useCallback(() => {
-    const el = holder.current;
-    if (!el || el.querySelector("iframe")) return;
-    window.Calendly?.initInlineWidget({ url: CALENDLY_URL, parentElement: el });
-  }, []);
-
-  useEffect(() => {
-    mount();
-  }, [mount]);
+/**
+ * The strategy call, offered beside the report request rather than under it.
+ *
+ * The calendar used to be embedded inline here, and at the 1250px it needed
+ * to render without its own scrollbar it owned the screen — wrong for a booth,
+ * where this page is scrolled past while someone is talking. It is a modal
+ * now: the calendar opens over the report and closes back onto it, so the
+ * findings never leave the screen.
+ *
+ * THIS IS A LINK, NOT A BUTTON. The popup is Calendly's script talking to
+ * Calendly's script; if widget.js has not landed yet, or is blocked by the
+ * venue's wifi, a button would be dead and the doctor would have no way to
+ * book. The anchor's href is the real booking page, and the click only
+ * cancels the navigation once the popup API is actually there to take over.
+ */
+function CallCard() {
+  function openPopup(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (!window.Calendly?.initPopupWidget) return; // let the href do its job
+    e.preventDefault();
+    window.Calendly.initPopupWidget({ url: CALENDLY_URL });
+  }
 
   return (
-    <div className="booth-no-print mt-8">
+    <div
+      className="booth-no-print flex h-full flex-col items-center justify-center rounded-2xl border-2 p-6 sm:p-10 text-center"
+      style={{ borderColor: `${ACCENT}66`, background: "rgba(0,0,0,0.25)" }}
+    >
       <Script
         src="https://assets.calendly.com/assets/external/widget.js"
         strategy="afterInteractive"
-        onReady={mount}
       />
-      <h2 className="text-2xl sm:text-4xl font-extrabold leading-tight text-center">
-        Prefer to talk?
-      </h2>
-      <p className="text-white/60 text-base sm:text-lg mt-2 mb-6 text-center">
+      {/* The popup's own styling. React hoists this into the head; without it
+          the overlay renders as an unstyled full-page block. */}
+      <link rel="stylesheet" href="https://assets.calendly.com/assets/external/widget.css" />
+
+      <h2 className="text-2xl sm:text-4xl font-extrabold leading-tight">Prefer to talk?</h2>
+      <p className="text-white/60 text-base sm:text-lg mt-2 mb-6">
         Book a 15-minute call &mdash; we&rsquo;ll walk through these findings together.
       </p>
-      {/* HEIGHT. The brief asked for 700px so nothing scrolls inside the
-          iframe. Measured against the real widget, 700 clips it: the event
-          header (logo, photo, duration, description) alone is ~450px, so the
-          month grid was cut at its first week and Calendly scrolled it
-          internally — the exact thing 700 was meant to prevent. 1250 is what
-          fits the header, the full month, the timezone selector and a column
-          of slots at every width tested, so the floor is 700 as asked and the
-          height is what the content actually needs. A full day of 30-minute
-          slots still scrolls inside its own column; that column is Calendly's
-          and no embed height changes it. */}
-      <div
-        ref={holder}
-        className="calendly-inline-widget w-full overflow-hidden rounded-2xl border border-white/10"
-        data-url={CALENDLY_URL}
-        style={{ minWidth: 320, minHeight: 700, height: 1250 }}
-      />
+      <a
+        href={CALENDLY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={openPopup}
+        className="w-full max-w-sm inline-flex items-center justify-center rounded-xl px-8 font-extrabold text-lg text-[#081C34] transition-opacity hover:opacity-90"
+        style={{ background: ACCENT, minHeight: 64 }}
+      >
+        Book a strategy call
+      </a>
     </div>
   );
 }
 
-/** The call the booking embed under the lead form opens onto. */
+/**
+ * The two ways out, side by side and weighted the same: take the report away,
+ * or talk it through. Stacked on a phone with the report first — that is the
+ * one that works without a calendar in front of you.
+ */
+function NextSteps({
+  result,
+  categories,
+  verdict,
+}: {
+  result: AuditResult;
+  categories: ResolvedCategory[];
+  verdict: Verdict | null;
+}) {
+  return (
+    <div className="booth-no-print mt-10 grid gap-5 lg:grid-cols-2 lg:items-stretch">
+      <LeadForm result={result} categories={categories} verdict={verdict} />
+      <CallCard />
+    </div>
+  );
+}
+
+/** The call both the popup and its fallback link open onto. */
 const CALENDLY_URL = "https://calendly.com/inflowmd/strategy-call";
 
 /** Short date for the speed gauge's attribution line. */
@@ -2131,12 +2148,9 @@ export default function BoothClient({
           </p>
         </div>
 
-        {/* LEAD CAPTURE — the evidence has landed; ask before the money talk. */}
-        <LeadForm result={result} categories={categories} verdict={verdict} />
-
-        {/* BOOKING — the same ask, for the doctor who would rather talk than
-            wait for an email. */}
-        <BookingEmbed />
+        {/* NEXT STEPS — the evidence has landed; ask before the money talk.
+            Email it, or talk it through: two cards, one weight. */}
+        <NextSteps result={result} categories={categories} verdict={verdict} />
 
         {/* PATIENT VALUE — one statement, the stat behind it, the caveat.
             The sliders, the 12-step chain and the "show the math" toggle are
