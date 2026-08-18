@@ -915,6 +915,42 @@ body {
 }
 
 /* ============================================================
+   Why we build it this way (/why-nextjs)
+
+   The page borrows the deck's ground, dot texture and mesh blobs
+   wholesale; the only thing it needs of its own is the travelling
+   dash on the two network diagrams, where the same route is drawn
+   twice and only its length differs.
+   ============================================================ */
+
+@keyframes why-route {
+  from {
+    stroke-dashoffset: 32;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* One server, a continent away: the dashes crawl. */
+.why-route-slow {
+  animation: why-route 2.2s linear infinite;
+}
+
+/* The copy next door: the same dashes, covering a fifth of the distance in
+   a third of the time. */
+.why-route-fast {
+  animation: why-route 0.75s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .why-route-slow,
+  .why-route-fast {
+    animation: none;
+  }
+}
+
+/* ============================================================
    Audit report — print / PDF.
 
    The booth screen is dark navy by design; a printed page must not be.
