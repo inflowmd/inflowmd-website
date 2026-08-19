@@ -191,8 +191,8 @@ function Hero() {
         <Trail />
       </Rise>
       <Rise delay={0.08}>
-        <h1 className="mt-8 text-[clamp(36px,6.4vw,78px)] font-extrabold leading-[1.04] tracking-tight max-w-[14em]">
-          You saw the scores. Here&rsquo;s why they&rsquo;re <Hi>structural</Hi>.
+        <h1 className="mt-8 text-[clamp(36px,6.4vw,78px)] font-extrabold leading-[1.04] tracking-tight max-w-[13em]">
+          The scores aren&rsquo;t luck. They&rsquo;re <Hi>next-generation architecture</Hi>.
         </h1>
       </Rise>
       <Rise delay={0.16}>
@@ -406,19 +406,19 @@ function SpeedRace() {
       <LazyMotion features={domAnimation} strict>
         <div key={run} className="mt-8 sm:mt-10 grid grid-cols-2 gap-3 sm:gap-6">
           <div>
-            <BrowserFrame label="The old way" tone="old">
+            <BrowserFrame label="WordPress" tone="old">
               {playing && <OldLoad />}
             </BrowserFrame>
             <div className="mt-3 sm:mt-4 flex flex-col gap-0.5 px-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
               <span className="text-xs sm:text-base font-semibold text-white/50">
-                A typical practice site
+                Rebuilt on every visit
               </span>
               <Clock ms={3800} tone="old" run={playing} />
             </div>
           </div>
 
           <div>
-            <BrowserFrame label="An InflowMD build" tone="modern">
+            <BrowserFrame label="Next.js" tone="modern">
               {playing && <ModernLoad />}
             </BrowserFrame>
             <div className="mt-3 sm:mt-4 flex flex-col gap-0.5 px-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
@@ -463,12 +463,6 @@ const PILLAR_ICONS = {
       <circle cx="12" cy="18" r="1.4" />
     </>
   ),
-  click: (
-    <>
-      <rect x="3" y="4" width="13" height="9" rx="2.5" />
-      <path d="m12.5 12.5 8 3.2-3.4 1.3-1.3 3.4z" />
-    </>
-  ),
 } as const;
 
 const PILLARS = [
@@ -486,13 +480,6 @@ const PILLARS = [
     here: "A file that already exists has nothing left to assemble.",
     measured: "Measured in your audit",
   },
-  {
-    icon: "click",
-    name: "Vein Education",
-    deck: "Turn visitors into screenings",
-    here: "Stage guides, symptom checkers and assessments are built as part of the site.",
-    measured: "Not something an audit scores",
-  },
 ] as const;
 
 function Pillars() {
@@ -500,14 +487,13 @@ function Pillars() {
     <section className="py-16 sm:py-20 border-t border-white/10">
       <Rise>
         <h2 className="text-[clamp(26px,3.4vw,44px)] font-extrabold leading-tight tracking-tight max-w-[18em]">
-          Three things, one architecture.
+          Two scores, one architecture.
         </h2>
         <p className="mt-5 text-base sm:text-xl font-light leading-snug text-white/60 max-w-[38em]">
-          The deck showed you three. Your audit measured the first two — all three come from the
-          same build.
+          Your audit measured visibility and performance. Both come out of how the site is built.
         </p>
       </Rise>
-      <div className="mt-12 grid gap-8 sm:gap-6 sm:grid-cols-3">
+      <div className="mt-12 grid gap-8 sm:gap-6 sm:grid-cols-2">
         {PILLARS.map((p, i) => (
           <Rise key={p.name} delay={0.08 * i}>
             <div className="h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-7">
@@ -539,30 +525,9 @@ function Pillars() {
   );
 }
 
-/**
- * The generous frame, placed before the first comparison so it colours all
- * four of them. A doctor has to be able to change platforms without it
- * meaning they were wrong to have chosen the old one.
- */
-function EraNote() {
-  return (
-    <Rise>
-      <div
-        className="rounded-2xl border-l-2 py-6 pl-6 pr-6 sm:pl-8"
-        style={{ borderColor: `${BLUE}99`, background: "rgba(59,111,191,0.06)" }}
-      >
-        <p className="text-base sm:text-lg leading-relaxed text-white/70 max-w-[42em]">
-          None of this is a knock on WordPress. It was built for a different era of the web —
-          before mobile-first indexing, before AI search.
-        </p>
-      </div>
-    </Rise>
-  );
-}
-
 /* ---------- 01: when the page gets made ---------- */
 
-const THEIR_STEPS = [
+const WP_STEPS = [
   "Patient asks for the page",
   "Server starts PHP",
   "Database queried for the content",
@@ -572,9 +537,9 @@ const THEIR_STEPS = [
 ] as const;
 
 /**
- * The chain, walked. Theirs loops — that is the entire point of the visual,
- * since the work is not slow so much as repeated — and ours resolves once
- * and stays resolved.
+ * The chain, walked. The WordPress side loops — that is the entire point of
+ * the visual, since the work is not slow so much as repeated — and the
+ * Next.js side resolves once and stays resolved.
  *
  * Reduced motion gets the finished state of both: every step lit, no walk.
  */
@@ -594,7 +559,7 @@ function AssemblyLanes() {
     const cleanup = () => timers.forEach((t) => window.clearTimeout(t));
 
     if (reduce) {
-      later(() => setStep(THEIR_STEPS.length));
+      later(() => setStep(WP_STEPS.length));
       return cleanup;
     }
     if (!inView) {
@@ -604,7 +569,7 @@ function AssemblyLanes() {
     let i = 0;
     later(() => setStep(0));
     const walk = window.setInterval(() => {
-      i = i >= THEIR_STEPS.length ? 0 : i + 1;
+      i = i >= WP_STEPS.length ? 0 : i + 1;
       setStep(i);
     }, 620);
     return () => {
@@ -615,11 +580,11 @@ function AssemblyLanes() {
 
   return (
     <div ref={ref} className="mt-12 grid gap-5 lg:grid-cols-2 lg:items-stretch">
-      {/* Theirs — every visit, from the top */}
+      {/* WordPress — every visit, from the top */}
       <div className="flex flex-col rounded-2xl border border-white/10 bg-black/25 p-6 sm:p-8">
         <div className="flex items-baseline justify-between gap-4">
           <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">
-            A typical practice site
+            WordPress
           </div>
           <div
             className="text-[11px] font-bold uppercase tracking-[0.18em] shrink-0"
@@ -629,7 +594,7 @@ function AssemblyLanes() {
           </div>
         </div>
         <ol className="mt-6 space-y-1">
-          {THEIR_STEPS.map((text, i) => {
+          {WP_STEPS.map((text, i) => {
             const lit = step >= i;
             const active = step === i;
             return (
@@ -666,13 +631,13 @@ function AssemblyLanes() {
       >
         <div className="flex items-baseline justify-between gap-4">
           <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">
-            Yours
+            Next.js
           </div>
           <div
             className="text-[11px] font-bold uppercase tracking-[0.18em] shrink-0"
             style={{ color: LIME }}
           >
-            Once, when we publish
+            Once, at build
           </div>
         </div>
 
@@ -739,10 +704,10 @@ function WhenSection() {
       label="When the page gets made"
       heading={
         <>
-          Their page is made <Hi>on every visit</Hi>.
+          WordPress builds the page <Hi>on every visit</Hi>.
         </>
       }
-      lede="Yours was made once, before anyone asked for it. It is already waiting."
+      lede="Next.js built it once, before anyone asked. It is already waiting."
     >
       <AssemblyLanes />
     </Section>
@@ -785,7 +750,7 @@ function NetworkField({ variant, compact = false }: { variant: "single" | "edge"
 
   /** The patient. */
   const patient = compact ? at(1.5, 1.5) : at(1.5, 2.5);
-  /** Their one datacenter, as far from the patient as the field allows. */
+  /** The WordPress datacenter, as far from the patient as the field allows. */
   const datacenter = compact ? at(5.5, 5.5) : at(13.5, 1.5);
   /** Ours: a spread, the first of which is the patient's neighbour. */
   const edges = compact
@@ -851,7 +816,7 @@ function NetworkField({ variant, compact = false }: { variant: "single" | "edge"
         <g>
           <circle cx={datacenter.x} cy={datacenter.y} r="18" fill="rgba(255,164,0,0.12)" />
           <circle cx={datacenter.x} cy={datacenter.y} r="8" fill="#ffa400" />
-          {label(datacenter.x, datacenter.y, "THEIR ONE SERVER")}
+          {label(datacenter.x, datacenter.y, "WORDPRESS")}
         </g>
       ) : (
         edges.map((e, i) => (
@@ -880,7 +845,7 @@ function WhereSection() {
       label="Where the page lives"
       heading={
         <>
-          Their site is in <Hi>one building</Hi>. Yours is in a few hundred.
+          WordPress runs on <Hi>one server</Hi>. Next.js runs on hundreds.
         </>
       }
       lede="A patient is answered by whichever copy is nearest them."
@@ -889,7 +854,7 @@ function WhereSection() {
         <div className="rounded-2xl border border-white/10 bg-black/25 p-6 sm:p-9">
           <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
             <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">
-              A typical practice site — one server, one datacenter
+              WordPress — one server, one datacenter
             </div>
             <div
               className="text-[11px] font-bold uppercase tracking-[0.18em]"
@@ -917,7 +882,7 @@ function WhereSection() {
         >
           <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
             <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">
-              Yours — a copy on every continent
+              Next.js — a copy on every continent
             </div>
             <div
               className="text-[11px] font-bold uppercase tracking-[0.18em]"
@@ -944,182 +909,77 @@ function WhereSection() {
   );
 }
 
-/* ---------- 03: why AI can read it ---------- */
+/* ---------- 03: what it is built on ---------- */
 
-/** A line of pretend markup. Colour carries the meaning, not the syntax. */
-function CodeLine({
-  children,
-  tone = "muted",
-  indent = 0,
-}: {
-  children: React.ReactNode;
-  tone?: "muted" | "live" | "ghost";
-  indent?: number;
-}) {
-  const color =
-    tone === "live" ? "rgba(255,255,255,0.92)" : tone === "ghost" ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.5)";
-  return (
-    <div
-      className="whitespace-pre font-mono text-[11px] sm:text-[13px] leading-[1.9]"
-      style={{ color, paddingLeft: indent * 14 }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function CrawlerPanes() {
-  return (
-    <div className="mt-12 grid gap-5 lg:grid-cols-2 lg:items-stretch">
-      {/* assembled in the browser */}
-      <div className="flex flex-col rounded-2xl border border-white/10 bg-black/25 p-6 sm:p-8 overflow-hidden">
-        <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">
-          What a crawler receives from a browser-assembled site
-        </div>
-        <div className="mt-6 rounded-xl border border-white/10 bg-black/40 p-5 overflow-x-auto">
-          <CodeLine tone="muted">&lt;body&gt;</CodeLine>
-          <CodeLine tone="ghost" indent={1}>
-            &lt;div id=&quot;root&quot;&gt;&lt;/div&gt;
-          </CodeLine>
-          <CodeLine tone="ghost" indent={1}>
-            &lt;script src=&quot;/app.js&quot;&gt;&lt;/script&gt;
-          </CodeLine>
-          <CodeLine tone="muted">&lt;/body&gt;</CodeLine>
-        </div>
-        <p className="mt-auto pt-6 text-sm leading-relaxed text-white/45">
-          The content arrives later, once the browser builds it. Most crawlers are gone by then.
-        </p>
-      </div>
-
-      {/* delivered complete */}
-      <div
-        className="flex flex-col rounded-2xl border-2 p-6 sm:p-8 overflow-hidden"
-        style={{ borderColor: `${LIME}66`, background: `${LIME}0f` }}
-      >
-        <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">
-          What a crawler receives from yours
-        </div>
-        <div className="mt-6 rounded-xl border border-white/10 bg-black/40 p-5 overflow-x-auto">
-          <CodeLine tone="muted">&lt;body&gt;</CodeLine>
-          <CodeLine tone="live" indent={1}>
-            &lt;h1&gt;Varicose Vein Treatment&lt;/h1&gt;
-          </CodeLine>
-          <CodeLine tone="live" indent={1}>
-            &lt;h2&gt;Who should be evaluated&lt;/h2&gt;
-          </CodeLine>
-          <CodeLine tone="live" indent={1}>
-            &lt;p&gt;CVI is progressive&hellip;&lt;/p&gt;
-          </CodeLine>
-          <CodeLine tone="live" indent={1}>
-            &lt;script type=&quot;application/ld+json&quot;&gt;
-          </CodeLine>
-          <CodeLine tone="live" indent={2}>
-            &quot;@type&quot;: &quot;MedicalBusiness&quot;,
-          </CodeLine>
-          <CodeLine tone="live" indent={2}>
-            &quot;medicalSpecialty&quot;: &quot;Phlebology&quot;
-          </CodeLine>
-          <CodeLine tone="muted">&lt;/body&gt;</CodeLine>
-        </div>
-        <p className="mt-auto pt-6 text-sm leading-relaxed text-white/55">
-          Headings, content and medical schema — already in the file.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function AiSection() {
-  return (
-    <Section
-      number="03"
-      label="Why AI can read it"
-      heading={
-        <>
-          AI crawlers don&rsquo;t run <Hi>JavaScript</Hi>.
-        </>
-      }
-      lede="They read what the server sends. Yours is complete when it arrives."
-    >
-      <CrawlerPanes />
-      <Rise>
-        <p className="mt-6 text-center text-[11px] sm:text-xs font-bold uppercase tracking-[0.22em] text-white/35">
-          The category your audit scored &ldquo;Is your website optimized for AI?&rdquo;
-        </p>
-      </Rise>
-    </Section>
-  );
-}
-
-/* ---------- 04: why there's less to break ---------- */
-
-const THEIR_SURFACE = [
-  "An admin login page, on a known URL",
-  "A database holding every page",
-  "A PHP runtime executing on request",
-  "Twenty to thirty plugins with server permissions",
-  "A theme and page builder, each updating on their own schedule",
-  "An uploads directory that accepts files",
+/**
+ * The WordPress stack, bottom to top, as it is actually assembled — and the
+ * reason the tower leans: every layer is a thing that ships on its own
+ * schedule and has to keep standing on the one beneath it.
+ */
+const WP_STACK = [
+  "Shared Hosting",
+  "MySQL Database",
+  "PHP",
+  "WordPress Core",
+  "Theme",
+  "Page Builder",
+  "SEO Plugin",
+  "Security Plugin",
+  "Cache Plugin",
+  "Backup Plugin",
+  "Forms Plugin",
+  "12 more plugins…",
 ] as const;
 
-const OUR_SURFACE = [
-  "Files on a content network",
-  "One form endpoint we own and monitor",
-] as const;
-
-function SurfaceCompare() {
+/**
+ * Twelve parts against one.
+ *
+ * The lean is cumulative rather than random: each block sits a little further
+ * off the one below it, which is what makes the top of the tower look like it
+ * is going somewhere. The whole thing sways from its base — slowly, a degree
+ * either side, so it reads as precarious rather than as an animation. Still
+ * under prefers-reduced-motion; the lean alone makes the point.
+ */
+function StackTower() {
   return (
-    <div className="mt-12 grid gap-5 lg:grid-cols-2 lg:items-stretch">
-      <div className="flex flex-col rounded-2xl border border-white/10 bg-black/25 p-6 sm:p-8">
-        <div className="flex items-baseline justify-between gap-4">
-          <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">
-            Running on a typical practice site
-          </div>
-          <div className="text-2xl font-extrabold tabular-nums" style={{ color: "#ffa400" }}>
-            {THEIR_SURFACE.length}
-          </div>
+    <div className="mt-12 grid grid-cols-2 items-end gap-4 sm:gap-10">
+      {/* the tower */}
+      <div>
+        <div className="mb-5 text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">
+          WordPress
         </div>
-        <ul className="mt-6 space-y-2.5">
-          {THEIR_SURFACE.map((item) => (
-            <li
-              key={item}
-              className="rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3 text-sm sm:text-base text-white/70"
-            >
-              {item}
-            </li>
-          ))}
-        </ul>
+        <div className="why-tower flex flex-col-reverse gap-1 sm:gap-1.5">
+          {WP_STACK.map((layer, i) => {
+            const plugin = i >= 6;
+            return (
+              <div
+                key={layer}
+                className="rounded-md border px-2 py-1.5 sm:px-3 sm:py-2 text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.08em] sm:tracking-[0.12em] whitespace-nowrap overflow-hidden text-ellipsis"
+                style={{
+                  // Each layer leans a little further than the one under it.
+                  transform: `rotate(${(i * 0.34).toFixed(2)}deg) translateX(${(i * 1.5).toFixed(1)}px)`,
+                  borderColor: plugin ? "rgba(255,164,0,0.28)" : "rgba(255,255,255,0.14)",
+                  background: plugin ? "rgba(255,164,0,0.08)" : "rgba(255,255,255,0.05)",
+                  color: plugin ? "rgba(255,196,110,0.85)" : "rgba(255,255,255,0.7)",
+                }}
+              >
+                {layer}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      <div
-        className="flex flex-col rounded-2xl border-2 p-6 sm:p-8"
-        style={{ borderColor: `${LIME}66`, background: `${LIME}0f` }}
-      >
-        <div className="flex items-baseline justify-between gap-4">
-          <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">
-            Running on yours
-          </div>
-          <div className="text-2xl font-extrabold tabular-nums" style={{ color: LIME }}>
-            {OUR_SURFACE.length}
-          </div>
+      {/* the one part */}
+      <div>
+        <div className="mb-5 text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">
+          Next.js
         </div>
-        <ul className="mt-6 space-y-2.5">
-          {OUR_SURFACE.map((item) => (
-            <li
-              key={item}
-              className="rounded-lg border px-4 py-3 text-sm sm:text-base text-white/90"
-              style={{ borderColor: `${LIME}40`, background: "rgba(0,0,0,0.2)" }}
-            >
-              {item}
-            </li>
-          ))}
-        </ul>
-        {/* The short list is the argument, so the space under it gets the
-            sentence rather than being left as a hole beside a long one. */}
-        <div className="mt-auto pt-8">
-          <p className="text-xl sm:text-2xl font-extrabold leading-snug">
-            That is the <Hi>entire list</Hi>.
-          </p>
+        <div
+          className="flex items-center justify-center rounded-xl border-2 py-10 sm:py-14 text-lg sm:text-3xl font-extrabold tracking-tight"
+          style={{ borderColor: BLUE, background: `${BLUE}26`, color: "#fff" }}
+        >
+          Next.js
         </div>
       </div>
     </div>
@@ -1129,16 +989,16 @@ function SurfaceCompare() {
 function StabilitySection() {
   return (
     <Section
-      number="04"
-      label="Why there's less to break"
+      number="03"
+      label="What it's built on"
       heading={
         <>
-          Most of what fails on a practice site <Hi>isn&rsquo;t there</Hi>.
+          Twelve things to keep standing — or <Hi>one</Hi>.
         </>
       }
-      lede="No database, no admin login, no thirty plugins. A dramatically smaller surface — not an invulnerable one."
+      lede="No database, no admin login, no plugins to keep patched."
     >
-      <SurfaceCompare />
+      <StackTower />
     </Section>
   );
 }
@@ -1147,7 +1007,7 @@ function StabilitySection() {
 
 const STACK = [
   ["Next.js", "The framework the site is built with. It renders your pages to finished HTML before anyone visits."],
-  ["React", "How the pages are composed — assessments and stage guides are built as parts, not installed as plugins."],
+  ["React", "How the pages are composed — built as parts, not installed as plugins."],
   ["Vercel", "The network your pages are published to, which keeps a copy near every patient."],
 ] as const;
 
@@ -1164,10 +1024,16 @@ function Names() {
         {STACK.map(([name, what], i) => (
           <Rise key={name} delay={0.07 * i}>
             <div className="h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-              <div className="text-lg font-extrabold" style={{ color: BLUE }}>
+              {/* The glow cycles one name at a time — the delay is the whole
+                  mechanism, so the three share a single long animation and
+                  take their turn out of it. */}
+              <div
+                className="why-stackname text-2xl sm:text-3xl font-extrabold tracking-tight text-white"
+                style={{ animationDelay: `${i * 3}s` } as React.CSSProperties}
+              >
                 {name}
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-white/60">{what}</p>
+              <p className="mt-4 text-sm leading-relaxed text-white/60">{what}</p>
             </div>
           </Rise>
         ))}
@@ -1263,12 +1129,8 @@ export default function WhyNextjsClient() {
         <Hero />
         <SpeedRace />
         <Pillars />
-        <div className="pt-12 sm:pt-16">
-          <EraNote />
-        </div>
         <WhenSection />
         <WhereSection />
-        <AiSection />
         <StabilitySection />
         <Names />
         <Close />
