@@ -24,6 +24,14 @@ import { LazyMotion, domAnimation, m, useInView, useReducedMotion } from "framer
    "modern architecture" so the argument survives whatever we build
    on next. The names live here, where a doctor who wants to go and
    look them up can.
+
+   RULE FOR THIS FILE: no paragraphs. Nothing on the page runs
+   longer than two short sentences, because it is read on a phone
+   between patients. An idea that needs a paragraph gets a visual
+   instead — which is why the race, the lattices, the two source
+   panes and the surface lists carry most of the argument, and the
+   copy only names what they show. If you find yourself writing a
+   third sentence, you are drawing the wrong thing.
    ============================================================ */
 
 const NAVY = "#081C34";
@@ -133,7 +141,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="why-section py-16 sm:py-24 lg:py-28">
+    <section className="why-section py-14 sm:py-20 lg:py-24">
       <Rise>
         <SectionMark number={number} label={label} />
         <h2 className="mt-5 text-[clamp(30px,4.4vw,54px)] font-extrabold leading-[1.08] tracking-tight max-w-[16em]">
@@ -145,17 +153,6 @@ function Section({
       </Rise>
       {children}
     </section>
-  );
-}
-
-/** Body copy under a visual. Narrow measure — this is read, not scanned. */
-function Prose({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div
-      className={`mt-10 sm:mt-12 max-w-[46em] text-base sm:text-lg leading-relaxed text-white/75 space-y-5 ${className}`}
-    >
-      {children}
-    </div>
   );
 }
 
@@ -199,12 +196,251 @@ function Hero() {
         </h1>
       </Rise>
       <Rise delay={0.16}>
-        <p className="mt-8 text-lg sm:text-2xl font-light leading-snug text-white/60 max-w-[34em]">
-          Nothing in your report was a tuning problem. Those numbers come from two decisions made
-          before a single page exists — when the page gets made, and where it lives. Everything
-          below follows from them.
+        <p className="mt-8 text-lg sm:text-2xl font-light leading-snug text-white/60 max-w-[30em]">
+          Nothing in your report was a tuning problem. Those numbers come from when the page gets
+          made, and where it lives.
         </p>
       </Rise>
+    </section>
+  );
+}
+
+/* ---------- the race ---------- */
+
+/** The deck's red — the one the audit's failing gauges use. */
+const RED = "#ff4e42";
+
+/** A browser, drawn. White inside, because a real page is. */
+function BrowserFrame({
+  label,
+  tone,
+  children,
+}: {
+  label: string;
+  tone: "old" | "modern";
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-white/12 bg-black/40 shadow-2xl">
+      <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.04] px-3 py-2.5 sm:px-4 sm:py-3">
+        <span className="hidden sm:flex gap-1.5" aria-hidden>
+          <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
+          <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
+          <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
+        </span>
+        <span
+          className="sm:ml-2 text-[9px] sm:text-xs font-bold uppercase tracking-[0.08em] sm:tracking-[0.18em] whitespace-nowrap"
+          style={{ color: tone === "old" ? RED : LIME }}
+        >
+          {label}
+        </span>
+      </div>
+      <div className="relative h-[200px] sm:h-[280px] lg:h-[300px] overflow-hidden bg-white">{children}</div>
+    </div>
+  );
+}
+
+/**
+ * The clock under each frame. Counts in real time to the finish it is given,
+ * then stops on it — a number that lands before the page does would be
+ * telling a different story than the frame above it.
+ */
+function Clock({ ms, tone, run }: { ms: number; tone: "old" | "modern"; run: boolean }) {
+  const reduce = useReducedMotion();
+  const [shown, setShown] = useState(0);
+
+  // Resets go through a timer for the reason the deck documents: setting
+  // state straight from an effect body cascades an extra render.
+  useEffect(() => {
+    if (!run) {
+      const t = window.setTimeout(() => setShown(0), 0);
+      return () => window.clearTimeout(t);
+    }
+    if (reduce) {
+      const t = window.setTimeout(() => setShown(ms), 0);
+      return () => window.clearTimeout(t);
+    }
+    let raf = 0;
+    const started = performance.now();
+    const tick = (now: number) => {
+      const v = Math.min(ms, now - started);
+      setShown(v);
+      if (v < ms) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [run, ms, reduce]);
+
+  return (
+    <span
+      className="font-mono text-lg sm:text-2xl font-bold tabular-nums"
+      style={{ color: tone === "old" ? RED : LIME }}
+    >
+      {(shown / 1000).toFixed(2)}s
+    </span>
+  );
+}
+
+/** The old way: a spinner, then content arriving in pieces, shoving itself
+ *  down the page when the image finally turns up. */
+function OldLoad() {
+  return (
+    <>
+      <m.div
+        initial={{ width: 0 }}
+        animate={{ width: "100%" }}
+        transition={{ duration: 3.8, ease: "linear" }}
+        className="absolute left-0 top-0 z-10 h-1"
+        style={{ background: RED }}
+      />
+      <m.div
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 0 }}
+        transition={{ delay: 1.4, duration: 0.3 }}
+        className="absolute inset-0 flex items-center justify-center"
+      >
+        <span
+          className="h-9 w-9 animate-spin rounded-full border-4"
+          style={{ borderColor: "rgba(0,0,0,0.10)", borderTopColor: RED }}
+        />
+      </m.div>
+      <div className="absolute inset-0 p-3 sm:p-5">
+        <m.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5, duration: 0.2 }}
+          className="mb-3 h-6 w-3/5 rounded bg-slate-300"
+        />
+        <m.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2.1, duration: 0.2 }}
+          className="mb-2 h-3 w-4/5 rounded bg-slate-200"
+        />
+        <m.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2.4, duration: 0.2 }}
+          className="mb-2 h-3 w-3/4 rounded bg-slate-200"
+        />
+        {/* The shove: the image arrives late and pushes everything under it
+            down the page. This is the moment a patient loses their place. */}
+        <m.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 76 }}
+          transition={{ delay: 2.9, duration: 0.3 }}
+          className="my-3 w-full rounded bg-slate-300"
+        />
+        <m.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 3.4, duration: 0.2 }}
+          className="mb-3 h-3 w-2/3 rounded bg-slate-200"
+        />
+        <m.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 3.7, duration: 0.2 }}
+          className="h-8 w-32 rounded"
+          style={{ background: RED }}
+        />
+      </div>
+    </>
+  );
+}
+
+/** A modern build: the whole page, at once, because it was already a file. */
+function ModernLoad() {
+  return (
+    <m.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.14, delay: 0.12 }}
+      className="absolute inset-0 p-3 sm:p-5"
+    >
+      <div className="mb-3 h-6 w-3/5 rounded" style={{ background: BLUE }} />
+      <div className="mb-2 h-3 w-4/5 rounded bg-slate-300" />
+      <div className="mb-2 h-3 w-3/4 rounded bg-slate-300" />
+      <div className="my-3 h-[76px] w-full rounded bg-slate-200" />
+      <div className="mb-3 h-3 w-2/3 rounded bg-slate-300" />
+      <div className="h-8 w-32 rounded" style={{ background: LIME }} />
+    </m.div>
+  );
+}
+
+/**
+ * The two loads, side by side, on the same clock.
+ *
+ * It runs itself when it comes into view and can be replayed, because the
+ * whole point is watching it happen — a doctor who scrolled past the first
+ * run has been shown nothing. Remounted by key so every replay starts from
+ * a genuinely blank frame rather than from wherever the last one stopped.
+ */
+function SpeedRace() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-15%" });
+  const [run, setRun] = useState(0);
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    if (!inView) return;
+    const t = window.setTimeout(() => setPlaying(true), 0);
+    return () => window.clearTimeout(t);
+  }, [inView]);
+
+  const replay = () => {
+    setPlaying(false);
+    setRun((r) => r + 1);
+    window.setTimeout(() => setPlaying(true), 60);
+  };
+
+  return (
+    <section ref={ref} className="py-14 sm:py-20 border-t border-white/10">
+      <Rise>
+        <SectionMark label="The same page, both ways" />
+        <h2 className="mt-5 text-[clamp(30px,4.4vw,54px)] font-extrabold leading-[1.08] tracking-tight max-w-[15em]">
+          Watch them load <Hi>side by side</Hi>.
+        </h2>
+      </Rise>
+
+      <LazyMotion features={domAnimation} strict>
+        <div key={run} className="mt-8 sm:mt-10 grid grid-cols-2 gap-3 sm:gap-6">
+          <div>
+            <BrowserFrame label="The old way" tone="old">
+              {playing && <OldLoad />}
+            </BrowserFrame>
+            <div className="mt-3 sm:mt-4 flex flex-col gap-0.5 px-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+              <span className="text-xs sm:text-base font-semibold text-white/50">
+                A typical practice site
+              </span>
+              <Clock ms={3800} tone="old" run={playing} />
+            </div>
+          </div>
+
+          <div>
+            <BrowserFrame label="An InflowMD build" tone="modern">
+              {playing && <ModernLoad />}
+            </BrowserFrame>
+            <div className="mt-3 sm:mt-4 flex flex-col gap-0.5 px-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+              <span className="text-xs sm:text-base font-semibold text-white/50">
+                Built before the visit
+              </span>
+              <Clock ms={400} tone="modern" run={playing} />
+            </div>
+          </div>
+        </div>
+      </LazyMotion>
+
+      <div className="mt-8 flex justify-center">
+        <button
+          type="button"
+          onClick={replay}
+          className="inline-flex items-center gap-2 rounded-xl border px-6 font-bold transition-colors hover:bg-white/[0.06]"
+          style={{ borderColor: `${LIME}66`, color: LIME, minHeight: 52 }}
+        >
+          &#8635; Run it again
+        </button>
+      </div>
     </section>
   );
 }
@@ -267,8 +503,8 @@ function Pillars() {
           Three things, one architecture.
         </h2>
         <p className="mt-5 text-base sm:text-xl font-light leading-snug text-white/60 max-w-[38em]">
-          The deck showed you three. Your audit put a number on the first two. All three are
-          downstream of the same decision about how the site is built.
+          The deck showed you three. Your audit measured the first two — all three come from the
+          same build.
         </p>
       </Rise>
       <div className="mt-12 grid gap-8 sm:gap-6 sm:grid-cols-3">
@@ -315,12 +551,9 @@ function EraNote() {
         className="rounded-2xl border-l-2 py-6 pl-6 pr-6 sm:pl-8"
         style={{ borderColor: `${BLUE}99`, background: "rgba(59,111,191,0.06)" }}
       >
-        <p className="text-base sm:text-lg leading-relaxed text-white/70 max-w-[46em]">
-          None of what follows is a knock on WordPress. It was built for a different era of the
-          web — blogs, desktop browsers, and search engines content to wait a few seconds.
-          Mobile-first indexing arrived years later; AI search, years after that. Most practice
-          sites are running a 2010 architecture against 2026 expectations, and doing it well was
-          never the point of the platform.
+        <p className="text-base sm:text-lg leading-relaxed text-white/70 max-w-[42em]">
+          None of this is a knock on WordPress. It was built for a different era of the web —
+          before mobile-first indexing, before AI search.
         </p>
       </div>
     </Rise>
@@ -422,8 +655,7 @@ function AssemblyLanes() {
           })}
         </ol>
         <p className="mt-6 border-t border-white/10 pt-5 text-sm leading-relaxed text-white/45">
-          Six steps, and the patient waits through all of them. The next patient waits through them
-          again.
+          Six steps, every visit. The next patient waits through them again.
         </p>
       </div>
 
@@ -492,8 +724,7 @@ function AssemblyLanes() {
 
         <p className="mt-auto pt-6 text-sm leading-relaxed text-white/55">
           <span className="block border-t border-white/10 pt-5">
-            Two steps, and the second is the network doing what it is good at. There is nothing left
-            to assemble.
+            Two steps. Nothing left to assemble.
           </span>
         </p>
       </div>
@@ -508,36 +739,12 @@ function WhenSection() {
       label="When the page gets made"
       heading={
         <>
-          A typical practice site doesn&rsquo;t have pages. It has{" "}
-          <Hi>instructions for making them</Hi>.
+          Their page is made <Hi>on every visit</Hi>.
         </>
       }
-      lede="Yours was made once, before anyone asked for it. That single difference is where the rest of this page comes from."
+      lede="Yours was made once, before anyone asked for it. It is already waiting."
     >
       <AssemblyLanes />
-      <Prose>
-        <p>
-          On most practice sites the page you see did not exist a moment earlier. The request wakes
-          a PHP process, the process asks a database for the content, twenty or thirty plugins each
-          take a turn filtering the result, the theme turns what survives into HTML, and only then
-          does anything start travelling to the patient. It is not that any one step is slow. It is
-          that all of them run again for the next patient, and the one after that.
-        </p>
-        <p>
-          Your site is built with <strong className="font-semibold text-white">Next.js</strong>, and
-          that same assembly happens once — when we publish. Pages are composed from{" "}
-          <strong className="font-semibold text-white">React</strong> components, rendered to
-          finished HTML at build time, and stored as files. When a patient asks for a page, there is
-          no database call, no plugin chain and no rendering. The file already exists, and it is
-          sent.
-        </p>
-        <p>
-          Everything else on this page is a consequence of that. Speed, because there is no work
-          left to do. Readability, because the content is in the file rather than in a set of
-          instructions for producing it. Stability, because most of what can break was never part of
-          answering the request.
-        </p>
-      </Prose>
     </Section>
   );
 }
@@ -676,7 +883,7 @@ function WhereSection() {
           Their site is in <Hi>one building</Hi>. Yours is in a few hundred.
         </>
       }
-      lede="Distance is a fixed cost on every request, and shared hosting charges it to whichever patient lives furthest away."
+      lede="A patient is answered by whichever copy is nearest them."
     >
       <div className="mt-12 space-y-5">
         <div className="rounded-2xl border border-white/10 bg-black/25 p-6 sm:p-9">
@@ -700,8 +907,7 @@ function WhereSection() {
             </div>
           </div>
           <p className="mt-7 border-t border-white/10 pt-5 text-sm sm:text-base leading-relaxed text-white/50 max-w-[46em]">
-            The request crosses the whole distance and the response crosses it back — before the
-            first pixel, and again for most of what the page needs after it.
+            Every request crosses the whole distance. So does every response.
           </p>
         </div>
 
@@ -729,32 +935,11 @@ function WhereSection() {
             </div>
           </div>
           <p className="mt-7 border-t border-white/10 pt-5 text-sm sm:text-base leading-relaxed text-white/60 max-w-[46em]">
-            Whichever copy is closest to the patient is the one that answers. Distance stops being a
-            variable in how fast your site feels.
+            The closest copy answers. Distance stops mattering.
           </p>
         </div>
       </div>
 
-      <Prose>
-        <p>
-          A practice site on shared hosting exists in exactly one place. If that server is in
-          Virginia and the patient is in Sacramento, every request makes the trip — and a web page
-          is not one request. It is the page, then the stylesheet, then the fonts, then the images,
-          each waiting on the one before it. The patient in the next town over never notices. The
-          one three time zones away notices every time.
-        </p>
-        <p>
-          Because your pages are finished files, they can be copied. We publish them to{" "}
-          <strong className="font-semibold text-white">Vercel</strong>&rsquo;s edge network, which
-          keeps them on servers spread across the world, and a request is answered by the closest
-          one holding a copy. Nothing is fetched from head office, because there is no head office
-          in the path.
-        </p>
-        <p>
-          This is the least abstract point on this page. Speed here is not optimisation. It is
-          geography.
-        </p>
-      </Prose>
     </Section>
   );
 }
@@ -802,8 +987,7 @@ function CrawlerPanes() {
           <CodeLine tone="muted">&lt;/body&gt;</CodeLine>
         </div>
         <p className="mt-auto pt-6 text-sm leading-relaxed text-white/45">
-          The content is real, but it arrives only once the browser runs the JavaScript. An
-          assistant that reads what the server sent finds an empty container and moves on.
+          The content arrives later, once the browser builds it. Most crawlers are gone by then.
         </p>
       </div>
 
@@ -838,8 +1022,7 @@ function CrawlerPanes() {
           <CodeLine tone="muted">&lt;/body&gt;</CodeLine>
         </div>
         <p className="mt-auto pt-6 text-sm leading-relaxed text-white/55">
-          Headings, content and medical schema are in the file itself. Nothing has to be executed
-          for an assistant to know what this practice is and what it treats.
+          Headings, content and medical schema — already in the file.
         </p>
       </div>
     </div>
@@ -853,36 +1036,17 @@ function AiSection() {
       label="Why AI can read it"
       heading={
         <>
-          Crawlers don&rsquo;t wait for JavaScript. They read{" "}
-          <Hi>what the server hands them</Hi>.
+          AI crawlers don&rsquo;t run <Hi>JavaScript</Hi>.
         </>
       }
-      lede="Your audit scored one category on exactly this. It is the category where the architecture does the most work."
+      lede="They read what the server sends. Yours is complete when it arrives."
     >
       <CrawlerPanes />
-      <Prose>
-        <p>
-          When ChatGPT, Perplexity or Google&rsquo;s AI results consider a practice, they read the
-          document the server returned. Some crawlers run JavaScript; many do not, and the ones that
-          do give it a budget. Anything that only appears after the browser has assembled the page
-          is, to a large share of them, not there.
+      <Rise>
+        <p className="mt-6 text-center text-[11px] sm:text-xs font-bold uppercase tracking-[0.22em] text-white/35">
+          The category your audit scored &ldquo;Is your website optimized for AI?&rdquo;
         </p>
-        <p>
-          Because your pages are complete before they are requested, there is no second stage.
-          Headings arrive in order, the content arrives with them, and the medical schema — the
-          block that states in machine-readable terms that this is a vein practice, what it treats
-          and where it does it — is in the same file. That is what the{" "}
-          <em className="not-italic font-semibold text-white">
-            &ldquo;Is your website optimized for AI?&rdquo;
-          </em>{" "}
-          score in your report was measuring, and why the fix for a low one is rarely a plugin.
-        </p>
-        <p>
-          It is worth being clear that this is not only a WordPress problem. Plenty of modern,
-          expensive sites are built as browser applications and have the same blind spot for the
-          opposite reason. The question is never how new the site is. It is what the server sends.
-        </p>
-      </Prose>
+      </Rise>
     </Section>
   );
 }
@@ -956,10 +1120,6 @@ function SurfaceCompare() {
           <p className="text-xl sm:text-2xl font-extrabold leading-snug">
             That is the <Hi>entire list</Hi>.
           </p>
-          <p className="mt-4 border-t border-white/10 pt-5 text-sm leading-relaxed text-white/55">
-            Not a claim that nothing can go wrong. A claim that there is dramatically less of it to
-            go wrong on.
-          </p>
         </div>
       </div>
     </div>
@@ -973,86 +1133,13 @@ function StabilitySection() {
       label="Why there's less to break"
       heading={
         <>
-          Most of what fails on a practice site <Hi>isn&rsquo;t there</Hi> on yours.
+          Most of what fails on a practice site <Hi>isn&rsquo;t there</Hi>.
         </>
       }
-      lede="Not a security lecture — a smaller machine with fewer moving parts, and fewer emails that begin with the word urgent."
+      lede="No database, no admin login, no thirty plugins. A dramatically smaller surface — not an invulnerable one."
     >
       <SurfaceCompare />
-      <Prose>
-        <p>
-          The things that take practice sites offline are rarely dramatic. A plugin updates itself
-          and a page stops rendering. Two plugins disagree after an update and the contact form
-          quietly stops sending. An abandoned plugin picks up a vulnerability and the site starts
-          serving something nobody wrote. A database gets corrupted and the last good backup is from
-          a fortnight ago.
-        </p>
-        <p>
-          None of those failure modes have anywhere to happen here. There is no database holding
-          your content, no login page to guess a password at, and nothing executing on the server
-          when a patient asks for a page — because the page was finished before they asked. The
-          working parts that remain are files on a network and one form endpoint we own.
-        </p>
-        <p>
-          Anything on the internet can be attacked, and we would rather say that plainly than sell
-          you invulnerability. What we can say precisely is that the surface is a fraction of the
-          size, that it does not grow every time a plugin author ships an update, and that in
-          practice this is the difference between maintenance being something you think about and
-          something you don&rsquo;t.
-        </p>
-      </Prose>
     </Section>
-  );
-}
-
-/* ---------- the objection ---------- */
-
-const UPDATE_POINTS = [
-  {
-    title: "You send it, in whatever form suits you",
-    body: "An email, a text, a marked-up PDF. New provider, changed hours, a paragraph you want reworded.",
-  },
-  {
-    title: "It is live the same day",
-    body: "Usually within the hour. Publishing rebuilds the affected pages and pushes them to the network.",
-  },
-  {
-    title: "There is nothing for you to log into",
-    body: "No page builder to fight, no editor to learn, no plugin conflict to debug at nine at night.",
-  },
-] as const;
-
-function UpdateAnswer() {
-  return (
-    <section className="py-16 sm:py-24 border-t border-white/10">
-      <Rise>
-        <SectionMark label="The obvious question" />
-        <h2 className="mt-5 text-[clamp(28px,4vw,50px)] font-extrabold leading-[1.08] tracking-tight max-w-[16em]">
-          &ldquo;Can I still update my content?&rdquo;
-        </h2>
-        <p className="mt-6 text-xl sm:text-3xl font-extrabold leading-snug max-w-[22em]">
-          Yes — <Hi>you send it to us and we publish it</Hi>.
-        </p>
-      </Rise>
-      <div className="mt-10 grid gap-5 sm:grid-cols-3">
-        {UPDATE_POINTS.map((p, i) => (
-          <Rise key={p.title} delay={0.08 * i}>
-            <div className="h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-              <div className="text-base sm:text-lg font-bold leading-snug text-white">{p.title}</div>
-              <p className="mt-3 text-sm sm:text-base leading-relaxed text-white/60">{p.body}</p>
-            </div>
-          </Rise>
-        ))}
-      </div>
-      <Rise>
-        <p className="mt-10 max-w-[46em] text-base sm:text-lg leading-relaxed text-white/70">
-          It is a fair thing to ask about, and worth knowing before you decide rather than
-          discovering afterwards: this is a trade. You give up editing pages yourself, and you get a
-          site with nothing on it that can be broken by editing pages yourself. Practices that have
-          spent an afternoon inside a page builder tend to consider that a good deal.
-        </p>
-      </Rise>
-    </section>
   );
 }
 
@@ -1060,7 +1147,7 @@ function UpdateAnswer() {
 
 const STACK = [
   ["Next.js", "The framework the site is built with. It renders your pages to finished HTML before anyone visits."],
-  ["React", "How those pages are composed — the assessments, the stage guides and the booking flows are built as parts, not installed as plugins."],
+  ["React", "How the pages are composed — assessments and stage guides are built as parts, not installed as plugins."],
   ["Vercel", "The network your pages are published to, which keeps a copy near every patient."],
 ] as const;
 
@@ -1070,8 +1157,7 @@ function Names() {
       <Rise>
         <SectionMark label="The names, since you'll hear them" />
         <p className="mt-5 max-w-[46em] text-base sm:text-lg leading-relaxed text-white/70">
-          Three names, and they are the whole stack. There is no plugin list underneath them, which
-          is most of the point.
+          Three names, and they are the whole stack. No plugin list underneath them.
         </p>
       </Rise>
       <div className="mt-9 grid gap-5 sm:grid-cols-3">
@@ -1088,8 +1174,7 @@ function Names() {
       </div>
       <Rise>
         <p className="mt-8 text-sm leading-relaxed text-white/35 max-w-[46em]">
-          The same architecture is behind OpenAI, Netflix, Nike and the Washington Post. It is not
-          exotic; it is simply newer than the platform most practice sites were built on.
+          The same architecture is behind OpenAI, Netflix, Nike and the Washington Post.
         </p>
       </Rise>
     </section>
@@ -1176,6 +1261,7 @@ export default function WhyNextjsClient() {
       <Ambient />
       <div className="relative z-10 mx-auto w-full max-w-5xl px-6 sm:px-10 lg:px-12 pb-20">
         <Hero />
+        <SpeedRace />
         <Pillars />
         <div className="pt-12 sm:pt-16">
           <EraNote />
@@ -1184,7 +1270,6 @@ export default function WhyNextjsClient() {
         <WhereSection />
         <AiSection />
         <StabilitySection />
-        <UpdateAnswer />
         <Names />
         <Close />
       </div>
