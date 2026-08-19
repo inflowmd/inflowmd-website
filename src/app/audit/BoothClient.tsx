@@ -972,8 +972,26 @@ function ComparisonBlock({ their }: { their: AuditResult }) {
 
       {/* the two performance gauges */}
       <div className="flex items-start justify-center gap-10 sm:gap-20">
-        <Gauge score={theirPerf} label="Their practice site" size={150} valueClass="text-4xl" />
-        <Gauge score={ourPerf} label="Modern architecture" size={150} valueClass="text-4xl" />
+        <Gauge score={theirPerf} label="Your site" size={150} valueClass="text-4xl" />
+        <div className="flex flex-col items-center">
+          <Gauge score={ourPerf} label="An InflowMD build" size={150} valueClass="text-4xl" />
+          {/* The number invites the question "measured on what?", and the
+              honest answer is a site the doctor can open right now. The
+              href comes off COMPARISON_SITE — the same constant the audit
+              above it just ran — so the two can never disagree, and the
+              domain stays off screen: this is an invitation to look, not a
+              plug for another practice. */}
+          <a
+            href={COMPARISON_SITE}
+            target="_blank"
+            rel="noopener"
+            aria-label="View it live — opens the compared site in a new tab"
+            className="mt-3 inline-flex items-center py-1 text-sm sm:text-base font-bold underline underline-offset-4 decoration-white/25 transition-colors hover:decoration-current"
+            style={{ color: ACCENT }}
+          >
+            View it live &rarr;
+          </a>
+        </div>
       </div>
 
       {/* Names what the two rings differ BY. Without it the right-hand ring is
@@ -995,8 +1013,8 @@ function ComparisonBlock({ their }: { their: AuditResult }) {
       {/* four category scores, two compact columns */}
       <div className="mt-8 grid grid-cols-2 gap-4 max-w-2xl mx-auto">
         {[
-          { title: "Their practice site", r: their },
-          { title: "Modern architecture", r: comparison },
+          { title: "Your site", r: their },
+          { title: "An InflowMD build", r: comparison },
         ].map(({ title, r }) => (
           <div key={title} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
             <div className="text-[11px] font-bold tracking-wider uppercase text-white/45 mb-3">
