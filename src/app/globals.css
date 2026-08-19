@@ -950,6 +950,53 @@ body {
   }
 }
 
+/* --- The stack tower (/why-nextjs §03) ---
+   Twelve parts stacked on each other, swaying from the base. A degree
+   either side and six seconds a cycle: the tower has to read as
+   precarious, not as an animation demanding attention. --- */
+@keyframes why-sway {
+  0%,
+  100% {
+    transform: rotate(-0.9deg);
+  }
+  50% {
+    transform: rotate(0.9deg);
+  }
+}
+.why-tower {
+  transform-origin: 50% 100%;
+  animation: why-sway 6s ease-in-out infinite;
+}
+
+/* --- The stack names (/why-nextjs) ---
+   One soft lime bloom travelling across Next.js, React and Vercel. Nine
+   seconds a lap, three seconds apart, so exactly one name is lit at a
+   time and none of them blink. --- */
+@keyframes why-glow {
+  0%,
+  22%,
+  100% {
+    text-shadow: 0 0 0 rgba(132, 184, 59, 0);
+  }
+  8% {
+    text-shadow: 0 0 26px rgba(132, 184, 59, 0.75), 0 0 6px rgba(132, 184, 59, 0.35);
+  }
+}
+.why-stackname {
+  animation: why-glow 9s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .why-tower {
+    animation: none;
+  }
+  /* The bloom stops travelling and simply stays on. */
+  .why-stackname {
+    animation: none;
+    text-shadow: 0 0 20px rgba(132, 184, 59, 0.45);
+  }
+}
+
 /* ============================================================
    Audit report — print / PDF.
 
