@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 /**
  * The booth poster's rotating sequence — the only large text on the page.
  *
- * Eight states: four questions, a two-state census beat (setup, then the
- * finding), and the two-part call to action, cycling forever.
+ * Six states: four questions, the census finding, and the call to action,
+ * cycling forever.
  *
  * THE CROSSFADE IS SEQUENTIAL, NOT SIMULTANEOUS. Fading both states at once
  * over the same 800ms put them both near half opacity in the middle of every
@@ -49,9 +49,9 @@ const FADE_IN_MS = 600;
  * trailing "?" sits outside the accent span where the phrase does not
  * include it.
  *
- * The CTA pair hold longer than the questions: a question only has to be read,
- * but "scan" has to be read, believed, and acted on — six seconds is roughly
- * how long it takes someone to get a phone out of a pocket.
+ * The closing state holds longest: a question only has to be read, but "scan"
+ * has to be read, believed, and acted on — eight seconds is roughly how long
+ * it takes someone to get a phone out of a pocket.
  */
 const SLIDES: Slide[] = [
   {
@@ -89,19 +89,11 @@ const SLIDES: Slide[] = [
   },
   {
     segments: [
-      { text: "Would you refer a patient to " },
-      { text: "your own website", accent: true },
+      { text: "Is your website " },
+      { text: "costing you patients", accent: true },
       { text: "?" },
     ],
     holdMs: 5500,
-  },
-  {
-    segments: [
-      { text: "Find out in " },
-      { text: "60 seconds", accent: true },
-      { text: "." },
-    ],
-    holdMs: 7000,
   },
   {
     segments: [{ text: "Scan to " }, { text: "audit your practice", accent: true }],
@@ -151,7 +143,22 @@ export default function RotatingHeadline() {
   }, []);
 
   return (
-    <h1 className="mt-[4.5vmin] grid max-w-[15em] text-[clamp(26px,5.4vmin,62px)] leading-[1.08] tracking-tight text-white">
+    <h1
+      /* SIZE. Read from several feet away, off a propped-up 11" iPad — the
+         old 5.4vmin was sized for a screen someone is sitting in front of.
+         8vmin is 67px on that iPad, half again bigger, and 86px at 1920.
+
+         What caps it is the wrap, not the height: in landscape the poster
+         still has 56px of vertical room to spare at this size, but one step
+         further (8.4vmin) pushes the census state to FIVE lines in portrait.
+         At 8vmin the longest state holds at three lines landscape, four
+         portrait. Nothing else on the poster had to give up room.
+
+         The max-width is in em so the line length stays constant in
+         CHARACTERS as the type grows, with a vw cap so the block can never
+         outgrow a portrait iPad. */
+      className="mt-[4.5vmin] grid max-w-[min(18em,92vw)] text-[clamp(28px,8vmin,104px)] leading-[1.08] tracking-tight text-white"
+    >
       {SLIDES.map((slide, i) => {
         const showing = i === index && visible;
         return (
