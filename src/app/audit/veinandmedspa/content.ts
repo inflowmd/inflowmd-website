@@ -67,7 +67,6 @@ export const nav = [
   { id: "verdict", label: "Verdict" },
   { id: "website", label: "Website" },
   { id: "presence", label: "Web Presence" },
-  { id: "market", label: "Market" },
   { id: "dual-build", label: "The Dual Build" },
   { id: "plan", label: "Plan" },
   { id: "investment", label: "Investment" },
@@ -121,6 +120,15 @@ export const verdict = {
    themselves make — discovery is solid, delivery is not.
    ============================================================ */
 
+/**
+ * TODO — reconcile with the live engine, in a session of its own.
+ * These are the figures the page shipped with (speed 59, LCP 12.75s). A live
+ * run on August 27, 2026 returned 53 / 10.91s against the same site. Both are
+ * real measurements of a site whose speed genuinely varies run to run; what
+ * this page needs is one dated figure with a variance note, not a silent
+ * swap. Deliberately left alone here — changing a number a prospect may have
+ * already read is not a drive-by edit.
+ */
 export const engine = {
   eyebrow: "InflowMD audit engine · measured August 27, 2026",
   headline: "Patients can find you.",
@@ -257,6 +265,52 @@ export const websiteFindings: FindingBlock[] = [
       "Without it, Google is guessing from your text. With it, you become eligible for the expanded search results your competitors are showing. Your homepage and five service pages already contain well-formed question-and-answer blocks, which means FAQ markup here is close to free — the content is written, it just is not tagged.",
   },
 ];
+
+/**
+ * The paid campaign, filed beside the dead homepage links because it is the
+ * same failure seen from the other side: the promises are good, and the site
+ * cannot keep them.
+ *
+ * ACCURACY. Everything here comes from Google's public Ads Transparency
+ * Center, checked once, on August 27, 2026. That library shows creative,
+ * advertiser verification and display URLs — and nothing else. So this block
+ * says nothing about where the ads land (advertisers write those path
+ * segments freely and we have not opened one), nothing about spend, clicks or
+ * conversions (Google does not publish them), and nothing about whether the
+ * ads are live today (the library retains recently stopped ads and we did not
+ * confirm the date filter). If any of those claims ever appear here, they did
+ * not come from this source.
+ */
+export const ads = {
+  eyebrow: "Google Ads Transparency Center · checked August 27, 2026",
+  title: "You are paying Google to make four promises the site cannot keep",
+  lead: "Four ads are on file under the verified advertiser “Sharath Reniguntala MD Inc.” They lead with insurance verification, a free screening, board certification, and Spanish-language service. The sitelinks read “Check Your Insurance Now,” “View All Vein Treatments,” and “Meet Our Vein Specialist.”",
+  praise:
+    "The campaign is good, and it is worth saying so plainly: insurance-first, symptom-led, and offering Spanish is an accurate read of a vein patient in Orange County. Nothing here is a criticism of the advertising. The failure is the destination, not the campaign.",
+  mapCaption: "What each ad promises · what this audit found",
+  map: [
+    {
+      promise: "“Check Your Insurance Now”",
+      found: "Your real insurance verification form sits on a page the current site does not link to. “Verify Insurance” opens a list of carrier logos instead.",
+    },
+    {
+      promise: "“View All Vein Treatments”",
+      found: "The treatment links on your homepage resolve to /contact/. The pages behind those names exist and nothing points at them.",
+    },
+    {
+      promise: "A free screening, booked",
+      found: "The working scheduler you already pay for is linked nowhere on the current site. The form offers a callback instead.",
+    },
+    {
+      promise: "“Meet Our Vein Specialist”",
+      found: "The bio runs under three hundred words and never names the certifying board — the single claim a vein patient shops hardest.",
+    },
+  ],
+  variants:
+    "Two smaller things worth catching. One ad spells the practice “Veins Clinic & MedSpa” — a sixth variant of your name, and the only one you are paying for. Another claims 14+ years of experience, against the about page's “over 10.”",
+  caveat:
+    "Source: Google's Ads Transparency Center, checked August 27, 2026. That library publishes creative, advertiser verification and display URLs only. It does not publish spend, clicks or conversions, and it retains ads that recently stopped running — so this is what is on file, not a statement about today's spend. We have not opened a landing page, so nothing above says where these ads arrive.",
+};
 
 export const alsoFound: TableBlock = {
   caption: "Also found, and worth naming briefly",
@@ -467,71 +521,67 @@ export const reviews = {
    03 — WHAT YOUR MARKET LOOKS LIKE
    ============================================================ */
 
+/**
+ * The market read now lives INSIDE the web presence scan — review counts and
+ * Google categories are presence data, and running them as their own section
+ * asked the reader to hold the same competitors in mind twice.
+ *
+ * The two tables merged for the same reason: four of the seven practices
+ * appeared in both, at different widths. One table now carries the local pack
+ * rank where there is one, and the wider field where there is not.
+ */
 export const marketSection = {
   title: "What your market looks like",
   sub: "These are the practices Google shows next to you, with the numbers a patient sees before they see anything else about you.",
-  serp: {
-    caption: "Google's local results for “varicose vein treatment Santa Ana,” today",
-    columns: ["#", "Practice", "Reviews", "Rating", "Google category"],
-    rows: [
-      { cells: ["1", "The Vein Place — Santa Ana", "23", "4.2", "Vascular surgeon"] },
-      { cells: ["2", "Vein Clinic & Med Spa", "47", "4.4", "Medical clinic"], highlight: true },
-      {
-        cells: ["3", "Vital Vein & Vascular — Dr. Christopher Yi, Tustin", "273", "5.0", "Vascular surgeon"],
-      },
-      { cells: ["4", "Advanced Vein Center — Orange", "94", "4.9", "Surgeon"] },
-      { cells: ["5", "Vascular & Interventional Specialists of OC", "—", "—", "—"] },
-    ],
-  } as TableBlock,
-  field: {
-    caption: "The wider Orange County field",
-    columns: ["Practice", "Google reviews", "Rating", "Notes"],
+  table: {
+    caption:
+      "Google's local results for “varicose vein treatment Santa Ana,” today, and the wider Orange County field",
+    columns: ["Local pack", "Practice", "Reviews", "Rating", "Google category", "Notes"],
     rows: [
       {
-        cells: ["Vital Vein & Vascular (Tustin)", "273", "5.0", "The volume leader in your market"],
+        cells: ["1", "The Vein Place — Santa Ana", "23", "4.2", "Vascular surgeon", "1.5 miles away; publishing weekly, names no physician anywhere"],
       },
       {
-        cells: [
-          "OC VeinCare (two locations)",
-          "249",
-          "4.7–4.9",
-          "Triple board-certified, ACR-accredited, deepest content library",
-        ],
-      },
-      {
-        cells: [
-          "Advanced Vein Center (Orange)",
-          "94",
-          "4.9",
-          "Booking directly from Google; no blog at all",
-        ],
-      },
-      {
-        cells: [
-          "Coastal Vein Care (Corona del Mar)",
-          "80",
-          "5.0",
-          "Running paid Google ads into your search results",
-        ],
-      },
-      {
-        cells: [
-          "California Vein Specialists (Newport Beach)",
-          "58",
-          "4.6",
-          "Vein plus a full aesthetics line — your closest model match",
-        ],
-      },
-      {
-        cells: ["Vein Clinic & Med Spa", "47", "4.4", "Vein plus med spa plus weight loss"],
+        cells: ["2", "Vein Clinic & Med Spa", "47", "4.4", "Medical clinic", "Vein plus med spa plus weight loss"],
         highlight: true,
       },
       {
         cells: [
-          "The Vein Place (Santa Ana)",
-          "23",
-          "4.2",
-          "1.5 miles away; publishing weekly, names no physician anywhere",
+          "3",
+          "Vital Vein & Vascular — Dr. Christopher Yi, Tustin",
+          "273",
+          "5.0",
+          "Vascular surgeon",
+          "The volume leader in your market",
+        ],
+      },
+      {
+        cells: ["4", "Advanced Vein Center — Orange", "94", "4.9", "Surgeon", "Booking directly from Google; no blog at all"],
+      },
+      {
+        cells: ["5", "Vascular & Interventional Specialists of OC", "—", "—", "—", "—"],
+      },
+      {
+        cells: [
+          "—",
+          "OC VeinCare (two locations)",
+          "249",
+          "4.7–4.9",
+          "—",
+          "Triple board-certified, ACR-accredited, deepest content library",
+        ],
+      },
+      {
+        cells: ["—", "Coastal Vein Care (Corona del Mar)", "80", "5.0", "—", "Running paid Google ads into your search results"],
+      },
+      {
+        cells: [
+          "—",
+          "California Vein Specialists (Newport Beach)",
+          "58",
+          "4.6",
+          "—",
+          "Vein plus a full aesthetics line — your closest model match",
         ],
       },
     ],
@@ -626,6 +676,14 @@ export const dualBuild = {
 export const plan = {
   title: "What we would do",
   sub: "Ordered by what returns fastest, not by what is most impressive.",
+  /**
+   * Five per phase, deliberately. Twenty-one numbered items read as a bill of
+   * work rather than a plan, and the tail of each phase was the part nobody
+   * argues about anyway. The rest is not dropped — it is the punch list, and
+   * it is named as such below.
+   */
+  punchList:
+    "The rest — the second website, the XERF gallery heading, your bio, moving the scheduler to the front, surfacing the reviews and testimonials, and the structured-data layer — is a punch list we walk through together rather than a decision to make now.",
   phases: [
     {
       name: "Phase one — stop the leaks",
@@ -636,8 +694,6 @@ export const plan = {
         "**Recategorize the Google profile** from “Medical clinic” to the vascular category your competitors use, add a full services menu, and attach a booking link to the profile.",
         "**Claim the four physician profiles** — WebMD, Vitals, Sharecare, Healthgrades — and correct the specialty on each.",
         "**Settle on one business name and one address format** and standardize every listing to match the Google profile exactly.",
-        "**Resolve the second website** so vccmedspa.com stops splitting your traffic.",
-        "**Rewrite the XERF gallery heading** to remove the compliance exposure.",
       ],
     },
     {
@@ -649,10 +705,6 @@ export const plan = {
         "**Build the med spa side as a results showcase** — your own before-and-afters, per-service pages for Botox, injectables, skin rejuvenation and facials, published pricing, direct booking.",
         "**Give medical weight loss its own door.** The content is written; it needs a home and a navigation entry.",
         "**Migrate and repair every existing page** — real headlines on the five template-default pages, genuine foam sclerotherapy content, written titles and descriptions throughout.",
-        "**Rebuild your bio properly** — named board certification, training, procedure volume, one consistent number of years, and photography of you and your staff.",
-        "**Put the scheduler in front** — the one you already pay for — as the primary action sitewide, with the contact form as the fallback rather than the default.",
-        "**Surface the proof** — live Google reviews on the site, the four testimonials currently stranded on unlinked pages brought forward.",
-        "**Add the full structured-data layer** — medical business, physician, procedures, and FAQ markup on the Q&A content you already have.",
       ],
     },
     {
@@ -677,19 +729,89 @@ export const investment = {
   title: "Investment",
   sub: "One monthly figure. The build is included, not billed separately.",
   /**
-   * The inclusions arrived attached to the tier slot, but they are finished
-   * copy and the tier number is not — so the list stands on its own and the
-   * slot holds only the recommendation and the monthly figure. Dropping the
-   * list with the slot would have silently lost copy.
+   * SHARED inclusions only.
+   *
+   * This list used to promise a dual-architecture build and reputation
+   * management at every price point, which the tier cards now contradict —
+   * the dual build is Growth and above, and reputation software is excluded
+   * throughout because he already owns his own. Anything tier-specific lives
+   * on the cards and only on the cards.
    */
-  inclusionsTitle: "What the monthly figure covers",
+  inclusionsTitle: "In every tier",
   inclusions: [
-    "Full dual-architecture Next.js build and migration",
+    "Rebuild on one architecture",
     "Hosting, maintenance, security and ongoing development",
-    "Managed citations and listings",
-    "Review generation and reputation management",
-    "SEO and AI-search optimization",
+    "Google Business Profile setup",
     "Monthly reporting",
+  ],
+  inclusionsNote:
+    "Everything beyond these four is tier-specific and named on the card that carries it.",
+
+  /**
+   * PRICING. Two numbers per card on purpose: the published rate and his, so
+   * the reduction is visible rather than asserted. $500 is the floor and does
+   * not move, which is why Essentials shows the same number twice.
+   */
+  ratesNote:
+    "Published rates are the ones on inflowmd.com/pricing. $500 is our floor and does not move; above it we are holding 15% for twelve months, with setup waived.",
+  exclusionNote:
+    "Reputation software is excluded from every tier — you already have your own, and we are not going to sell you a second one. Review strategy is still included where the card says so.",
+  tiers: [
+    {
+      name: "Essentials",
+      published: "$500",
+      rate: "$500",
+      includes: [
+        "Rebuild on one architecture",
+        "Hosting, security and ongoing development",
+        "Google Business Profile setup",
+        "Monthly reporting",
+      ],
+      /** Said plainly rather than buried: this tier leaves the listings alone. */
+      limitation:
+        "This fixes the website and does not include the listings work. The federal NPI record, the four wrong phone numbers, the unclaimed physician profiles and the second live website stay as they are.",
+    },
+    {
+      name: "Visibility",
+      published: "$900",
+      rate: "$765",
+      inherits: "Everything in Essentials, plus",
+      includes: [
+        "Phase One listing correction",
+        "Managed citations",
+        "Services menu and booking link on the Google profile",
+        "Local SEO",
+        "Review strategy",
+      ],
+    },
+    {
+      name: "Growth",
+      published: "$1,500",
+      rate: "$1,275",
+      inherits: "Everything in Visibility, plus",
+      includes: [
+        "The dual build — vein screening funnel and med spa showcase, weight-loss door, Spanish path",
+        "Keyword optimization",
+        "2 patient-education posts per month",
+        "Full structured-data layer",
+        "AI-search optimization",
+        "Monthly SEO reporting",
+      ],
+    },
+    {
+      name: "Full Engine",
+      published: "$2,500",
+      rate: "$2,125",
+      recommended: true,
+      inherits: "Everything in Growth, plus",
+      includes: [
+        "Google Ads management",
+        "Conversion tracking",
+        "Landing page optimization",
+        "Quarterly strategy review",
+      ],
+      limitation: "Management only — ad spend is paid directly to Google, never through us.",
+    },
   ],
   timingTitle: "On the timing",
   timing: [
