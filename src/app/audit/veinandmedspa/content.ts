@@ -67,10 +67,62 @@ export const nav = [
   { id: "verdict", label: "Verdict" },
   { id: "website", label: "Website" },
   { id: "presence", label: "Web Presence" },
-  { id: "dual-build", label: "The Dual Build" },
-  { id: "plan", label: "Plan" },
+  { id: "plan", label: "The Build & Plan" },
   { id: "investment", label: "Investment" },
 ];
+
+/**
+ * The one-screen summary.
+ *
+ * Everything below it is evidence for a skeptical reader; this is the part
+ * for a doctor who reads one screen and decides. It carries the verdict line,
+ * the three scores, the three findings that actually change his week, and the
+ * price — and it has to stay inside 900px at 1440, which is the only reason
+ * it is this terse.
+ */
+export const summary = {
+  eyebrow: "The short version",
+  verdictLine:
+    "You are not losing patients because anyone did bad work. You are losing them because of **when** your web presence was built.",
+  scores: [
+    { value: "91", label: "AI readiness" },
+    { value: "94", label: "Search readiness" },
+    { value: "59", label: "Speed" },
+  ],
+  scoresNote: "Patients and assistants can find you. The page is what loses them.",
+  findings: [
+    "Roughly twenty service links on your homepage all lead to the same contact form — the real pages exist and nothing points at them.",
+    "The online scheduler you already pay for is linked nowhere on the current site. The form offers a callback instead.",
+    "Four different phone numbers for your practice are live on the web, and the federal record that feeds the directories is one of the wrong ones.",
+  ],
+  recommendation: {
+    label: "Recommended",
+    tier: "Full Engine",
+    price: "$2,000",
+    per: "/ month",
+    published: "$2,500",
+    note: "Summit rate, 20% off, locked twelve months.",
+  },
+  readMore: "Read the evidence",
+};
+
+/**
+ * The strip above the findings.
+ *
+ * The six criticals used to render open, and they were most of Section 01's
+ * height. Collapsed, they risked reading as a list of headlines nobody opens
+ * — so the worst of them are stated here as plain sentences, no cards, no
+ * chrome. Same information above the fold, a fraction of the height.
+ */
+export const criticalStrip = {
+  title: "The four that cost you patients this week",
+  lines: [
+    "Your homepage does not link to your own website — around twenty service links resolve to a contact form.",
+    "You are paying for an online scheduler that no patient can reach from the current site.",
+    "Three wrong phone numbers are live on the web right now, and the federal NPI record is the one feeding them.",
+    "Your foam sclerotherapy page contains no foam sclerotherapy content, so Google keeps one page and discards the other.",
+  ],
+};
 
 /* ============================================================
    VERDICT
@@ -534,20 +586,24 @@ export const marketSection = {
   title: "What your market looks like",
   sub: "These are the practices Google shows next to you, with the numbers a patient sees before they see anything else about you.",
   table: {
-    caption:
-      "Google's local results for “varicose vein treatment Santa Ana,” today, and the wider Orange County field",
-    columns: ["Local pack", "Practice", "Reviews", "Rating", "Google category", "Notes"],
+    /**
+     * The local pack, and only the local pack. Three practices from the wider
+     * county field used to sit here carrying a dash in every column that made
+     * this table worth reading — rows padded with absence. With them gone the
+     * rank column has nothing to distinguish either, so it went too.
+     */
+    caption: "Google's local results for “varicose vein treatment Santa Ana,” today",
+    columns: ["Practice", "Reviews", "Rating", "Google category", "Notes"],
     rows: [
       {
-        cells: ["1", "The Vein Place — Santa Ana", "23", "4.2", "Vascular surgeon", "1.5 miles away; publishing weekly, names no physician anywhere"],
+        cells: ["The Vein Place — Santa Ana", "23", "4.2", "Vascular surgeon", "1.5 miles away; publishing weekly, names no physician anywhere"],
       },
       {
-        cells: ["2", "Vein Clinic & Med Spa", "47", "4.4", "Medical clinic", "Vein plus med spa plus weight loss"],
+        cells: ["Vein Clinic & Med Spa", "47", "4.4", "Medical clinic", "Vein plus med spa plus weight loss"],
         highlight: true,
       },
       {
         cells: [
-          "3",
           "Vital Vein & Vascular — Dr. Christopher Yi, Tustin",
           "273",
           "5.0",
@@ -556,33 +612,10 @@ export const marketSection = {
         ],
       },
       {
-        cells: ["4", "Advanced Vein Center — Orange", "94", "4.9", "Surgeon", "Booking directly from Google; no blog at all"],
+        cells: ["Advanced Vein Center — Orange", "94", "4.9", "Surgeon", "Booking directly from Google; no blog at all"],
       },
       {
-        cells: ["5", "Vascular & Interventional Specialists of OC", "—", "—", "—", "—"],
-      },
-      {
-        cells: [
-          "—",
-          "OC VeinCare (two locations)",
-          "249",
-          "4.7–4.9",
-          "—",
-          "Triple board-certified, ACR-accredited, deepest content library",
-        ],
-      },
-      {
-        cells: ["—", "Coastal Vein Care (Corona del Mar)", "80", "5.0", "—", "Running paid Google ads into your search results"],
-      },
-      {
-        cells: [
-          "—",
-          "California Vein Specialists (Newport Beach)",
-          "58",
-          "4.6",
-          "—",
-          "Vein plus a full aesthetics line — your closest model match",
-        ],
+        cells: ["Vascular & Interventional Specialists of OC", "—", "—", "—", "—"],
       },
     ],
   } as TableBlock,
@@ -683,39 +716,36 @@ export const plan = {
    * it is named as such below.
    */
   punchList:
-    "The rest — the second website, the XERF gallery heading, your bio, moving the scheduler to the front, surfacing the reviews and testimonials, and the structured-data layer — is a punch list we walk through together rather than a decision to make now.",
+    "Twelve more sit behind these nine — claiming the four physician profiles, settling on one business name and address format, resolving the second website, the XERF gallery heading, the weight-loss door, migrating and repairing the existing pages, your bio, moving the scheduler to the front, surfacing the reviews and testimonials, the structured-data layer, AI-search visibility and monthly reporting. That is a punch list we walk through together, not a decision to make now.",
   phases: [
     {
       name: "Phase one — stop the leaks",
       timeframe: "Weeks 1–2",
+      outcome: "The calls reach you, and Google stops filing you as a general clinic.",
       steps: [
         "**Correct the federal NPI record first.** Right address, right phone, and a vascular or phlebology taxonomy added. Everything downstream re-pulls from here, so this goes first or the rest will not hold.",
         "**Fix the three wrong phone numbers** on YellowPages, Doximity and VeinDirectory, and get the previous physician's name off your address.",
         "**Recategorize the Google profile** from “Medical clinic” to the vascular category your competitors use, add a full services menu, and attach a booking link to the profile.",
-        "**Claim the four physician profiles** — WebMD, Vitals, Sharecare, Healthgrades — and correct the specialty on each.",
-        "**Settle on one business name and one address format** and standardize every listing to match the Google profile exactly.",
       ],
     },
     {
       name: "Phase two — the dual build",
       timeframe: "Weeks 2–8",
+      outcome: "One architecture, two journeys, and something to book at the end of each.",
       steps: [
         "**Rebuild on a modern architecture** — Next.js on Vercel, from a component system, so that every page shares one source of truth for your name, address, phone, navigation and calls to action. The specific failure at the center of this audit — a homepage that does not link to its own site — cannot occur in this architecture. There is no version of it where content exists and nothing points at it.",
         "**Build the vein side as a screening funnel** — symptom-first entry, procedure education, live insurance verification, ultrasound booking.",
         "**Build the med spa side as a results showcase** — your own before-and-afters, per-service pages for Botox, injectables, skin rejuvenation and facials, published pricing, direct booking.",
-        "**Give medical weight loss its own door.** The content is written; it needs a home and a navigation entry.",
-        "**Migrate and repair every existing page** — real headlines on the five template-default pages, genuine foam sclerotherapy content, written titles and descriptions throughout.",
       ],
     },
     {
       name: "Phase three — compounding",
       timeframe: "Ongoing",
+      outcome: "The corrections hold themselves in place, and the rating starts moving.",
       steps: [
         "**Managed citations.** Your listings are corrected once and then held in place automatically, so this never drifts back.",
         "**Review generation.** A system that asks every satisfied patient at the right moment. Moving 4.4 to 4.8 and 47 reviews toward 150 is the single highest-return marketing activity available to you, and it is mostly a matter of asking consistently.",
         "**The education content nobody in your market is writing.** Vein disease explained for the patient who has symptoms and no diagnosis — the lane Advanced Vein Center and The Vein Place have both left open.",
-        "**AI search visibility.** Increasingly patients ask an assistant before they ask Google. Structured, well-marked-up content is what gets cited in those answers, and almost nobody in your market is positioned for it yet.",
-        "**Reporting** — calls, forms, bookings and rankings, monthly, in plain language.",
       ],
     },
   ],
@@ -752,8 +782,15 @@ export const investment = {
    * the reduction is visible rather than asserted. $500 is the floor and does
    * not move, which is why Essentials shows the same number twice.
    */
+  /**
+   * The Summit line. He came from the HPS Vein Practice Growth Summit, so the
+   * rate is named for it and given an end — a date supplied by Clayton, not
+   * invented here. One line, no countdown, no urgency styling: the reason to
+   * decide is on the rest of the page.
+   */
+  summitNote: "Summit pricing, held through September 12, 2026.",
   ratesNote:
-    "Published rates are the ones on inflowmd.com/pricing. $500 is our floor and does not move; above it we are holding 15% for twelve months, with setup waived.",
+    "Published rates are the ones on inflowmd.com/pricing. $500 is our floor and does not move; above it we are holding 20% for twelve months, with setup waived.",
   exclusionNote:
     "Reputation software is excluded from every tier — you already have your own, and we are not going to sell you a second one. Review strategy is still included where the card says so.",
   tiers: [
@@ -761,6 +798,7 @@ export const investment = {
       name: "Essentials",
       published: "$500",
       rate: "$500",
+      savings: "Our floor — this price does not move.",
       includes: [
         "Rebuild on one architecture",
         "Hosting, security and ongoing development",
@@ -774,7 +812,9 @@ export const investment = {
     {
       name: "Visibility",
       published: "$900",
-      rate: "$765",
+      rate: "$720",
+      badge: "20% OFF",
+      savings: "You save $180/mo — rate locked 12 months",
       inherits: "Everything in Essentials, plus",
       includes: [
         "Phase One listing correction",
@@ -787,7 +827,9 @@ export const investment = {
     {
       name: "Growth",
       published: "$1,500",
-      rate: "$1,275",
+      rate: "$1,200",
+      badge: "20% OFF",
+      savings: "You save $300/mo — rate locked 12 months",
       inherits: "Everything in Visibility, plus",
       includes: [
         "The dual build — vein screening funnel and med spa showcase, weight-loss door, Spanish path",
@@ -801,7 +843,12 @@ export const investment = {
     {
       name: "Full Engine",
       published: "$2,500",
-      rate: "$2,125",
+      rate: "$2,000",
+      badge: "20% OFF",
+      savings: "You save $500/mo — rate locked 12 months",
+      /** Savings x 12. Plain multiplication on a contracted figure — the only
+          number on this page that is extrapolated at all, and it stops here. */
+      term: "$6,000 over the term",
       recommended: true,
       inherits: "Everything in Growth, plus",
       includes: [
