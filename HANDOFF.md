@@ -1,6 +1,40 @@
 # HANDOFF — /audit booth tool
 
-## Latest: Vein Health Clinics research — Pass 2 gap closure (research only, nothing shipped)
+## Latest: /audit/vein-health-clinics — BUILT, deployed, merged
+
+**Aug 28, 2026.** Fourth page in the prospect-audit series, at
+`/audit/vein-health-clinics` — noindex, unlinked, absent from the sitemap,
+title absolute so it reads as the practice. Hand-styled, **not** an entry in
+the `[slug]` data file. Reuses the veinandmedspa components verbatim; no new
+tokens, no new CSS.
+
+**Every figure traces to `research/veinhealthclinics.md`.** Where the research
+was empty the page is silent, so three blocks the reference page carries are
+deliberately absent: no competitor comparison or local pack (captcha-blocked),
+no paid-media block (0 ads confirmed; absence is weak evidence), no review
+counts, ratings or reply behaviour (not gathered). Directory scan percentages
+and the Aug 18 cached score appear nowhere.
+
+**One presentational departure worth knowing:** the speed score renders as a
+**word** — "Mid-to-high fifties" — in a ring-shaped frame rather than as a
+number, because two passes returned 57 and 56 and neither should be shown as
+the figure. AI 86 and search 89 render as normal rings. Google is credited on
+speed only.
+
+Verified at 375 / 768 / 1440: one h1, heading order never skips, no horizontal
+scroll (a 4px overflow in the summary price row was found and fixed), noindex
+present, absent from sitemap, all nav anchors resolve. **Print verified by
+content** — 110 forty-character windows covering all eight finding bodies,
+present under print emulation. A nine-pattern exclusion scan (Bougainvillea,
+local pack, paid media, listing percentages, cached score, promised scores,
+review counts, reply-behaviour claims, vendor blame) passes against visible
+copy *and* collapsed bodies.
+
+The research file (Passes 1 and 2) landed with the same commit.
+
+---
+
+## Previous: Vein Health Clinics research — Pass 2 gap closure (research only, nothing shipped)
 
 **Aug 28, 2026 — `research/veinhealthclinics.md`, appended under "Pass 2".** Six gaps closed. Pass 1
 text was left untouched; where Pass 2 overturns it, Pass 2 says so.
