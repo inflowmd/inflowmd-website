@@ -5,6 +5,7 @@ import HashOpen from "../[slug]/HashOpen";
 import {
   ads,
   alsoFound,
+  criticalStrip,
   closing,
   dualBuild,
   engine,
@@ -19,6 +20,7 @@ import {
   practice,
   presenceSection,
   reviews,
+  summary,
   verdict,
   websiteFindings,
   websiteSection,
@@ -326,21 +328,24 @@ function DataTable({ table, light = false }: { table: TableBlock; light?: boolea
  * prints as a headline with nothing under it. Still collapsible on screen.
  */
 /**
- * Disclosure follows severity: critical findings are open, everything else
- * collapses to its one-line summary. Twenty-one open cards read as noise and
- * flattened the difference between "this is costing you calls today" and
- * "worth catching."
+ * Every finding collapses now, criticals included.
+ *
+ * The chip and the one-line summary ARE the finding; the body is proof for
+ * whoever wants it. Six open criticals were most of Section 01's height, and
+ * the strip above the list carries the same information in four sentences.
+ * Nothing is deleted — twenty-one findings checked by hand is the reason this
+ * document is not a template, and every one of them is still a click away.
  *
  * PRINT. A closed <details> prints as a headline with nothing under it, so
  * globals.css forces every one of them open under @media print. If that rule
- * ever goes, the PDF quietly loses half the report.
+ * ever goes, the PDF quietly loses the entire report — which is now literally
+ * true rather than half true.
  */
 function Finding({ f, light = false }: { f: FindingBlock; light?: boolean }) {
   const Rich = light ? RichTextLight : RichText;
   return (
     <details
       id={`finding-${f.id}`}
-      open={f.tone === "critical"}
       className={`group rounded-2xl border border-l-4 ${TONE_BAR[f.tone]} overflow-hidden ${
         light
           ? "border-slate-200 bg-white shadow-sm"
@@ -575,6 +580,81 @@ export default function VeinAndMedSpaAuditPage() {
         </div>
       </section>
 
+      {/* ============ THE SHORT VERSION ============
+          One screen at 1440. A doctor who reads only this has the verdict,
+          the scores, the three findings that change his week and the price;
+          everything below is evidence for whoever wants it. */}
+      <section className="bg-warm-bg py-10 sm:py-12 border-t border-black/5">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="rounded-3xl border border-white/10 bg-dark-card shadow-xl p-6 sm:p-8">
+            <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500">
+              {summary.eyebrow}
+            </div>
+
+            <p className="mt-3 text-xl sm:text-2xl md:text-3xl font-extrabold leading-[1.15] text-white max-w-4xl">
+              <RichText text={summary.verdictLine} />
+            </p>
+
+            <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,20rem)_1fr] lg:items-start">
+              <div>
+                <div className="flex items-center gap-3">
+                  {summary.scores.map((sc) => (
+                    <div
+                      key={sc.label}
+                      className="flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-center"
+                    >
+                      <div
+                        className={`text-2xl sm:text-3xl font-extrabold tabular-nums leading-none ${
+                          Number(sc.value) >= 90 ? "text-emerald-400" : "text-orange-400"
+                        }`}
+                      >
+                        {sc.value}
+                      </div>
+                      <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-1.5 leading-tight">
+                        {sc.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 text-gray-400 text-sm leading-snug">{summary.scoresNote}</p>
+              </div>
+
+              <ul className="space-y-2.5">
+                {summary.findings.map((line) => (
+                  <li key={line} className="flex items-start gap-3">
+                    <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
+                    <span className="text-gray-200 text-sm sm:text-base leading-snug">{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-white/10 pt-6">
+              <div className="flex items-baseline gap-3">
+                <span className="inline-flex items-center rounded-full border border-accent/50 bg-accent/20 px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-accent-light">
+                  {summary.recommendation.label}
+                </span>
+                <span className="text-white font-bold text-base sm:text-lg">
+                  {summary.recommendation.tier}
+                </span>
+                <span className="text-2xl sm:text-3xl font-extrabold tabular-nums text-white">
+                  {summary.recommendation.price}
+                </span>
+                <span className="text-sm text-gray-500">{summary.recommendation.per}</span>
+              </div>
+              <span className="text-sm text-accent-light">{summary.recommendation.note}</span>
+              <a
+                href="#verdict"
+                className="no-print ml-auto inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.05] px-5 py-3 text-sm font-bold text-gray-200 hover:bg-white/10 transition-colors"
+              >
+                {summary.readMore}
+                <span aria-hidden>↓</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ============ SECTION NAV ============ */}
       <nav
         aria-label="Report sections"
@@ -680,7 +760,23 @@ export default function VeinAndMedSpaAuditPage() {
               </p>
             </div>
 
-            <div className="mt-10 space-y-4">
+            {/* Plain sentences, no cards: this is the height the six open
+                criticals used to take, carrying the same information. */}
+            <div className="mt-10 rounded-2xl border-l-4 border-l-red-500/70 border border-slate-200 bg-white shadow-sm p-5 sm:p-7">
+              <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-red-800 mb-4">
+                {criticalStrip.title}
+              </div>
+              <ul className="space-y-3">
+                {criticalStrip.lines.map((line) => (
+                  <li key={line} className="flex items-start gap-3">
+                    <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                    <span className="text-slate-800 text-sm sm:text-base leading-snug">{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mt-6 space-y-4">
               {websiteFindings.map((f) => (
                 <div key={f.id} className="space-y-4">
                   <Finding f={f} light />
@@ -765,15 +861,18 @@ export default function VeinAndMedSpaAuditPage() {
           </div>
         </section>
 
-        {/* ============ 03 — THE DUAL BUILD ============ */}
-        <section id="dual-build" className="bg-dark py-16 sm:py-24 scroll-mt-16">
+        {/* ============ 03 — THE BUILD, AND THE PLAN ============
+            The thesis used to be its own section, immediately before this
+            one. It is the plan's rationale — running them separately meant
+            saying the same thing twice, once as an argument and once as a
+            list. It opens the plan now. */}
+        <section id="plan" className="bg-dark py-16 sm:py-24 scroll-mt-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <SectionHeading
               eyebrow="Section 03"
               title={dualBuild.title}
               subtitle={dualBuild.sub}
             />
-
             <p className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-3xl">
               {dualBuild.intro}
             </p>
@@ -851,39 +950,40 @@ export default function VeinAndMedSpaAuditPage() {
             <p className="text-gray-500 text-xs sm:text-sm leading-relaxed max-w-3xl mt-6">
               {dualBuild.footnote}
             </p>
-          </div>
-        </section>
 
-        {/* ============ 04 — WHAT WE WOULD DO ============ */}
-        <section id="plan" className="bg-warm-bg py-16 sm:py-24 scroll-mt-16 border-y border-black/5">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <SectionHeading light eyebrow="Section 04" title={plan.title} subtitle={plan.sub} />
+            <div className="mt-20 border-t border-white/10 pt-14">
+              <SectionHeading eyebrow="The plan" title={plan.title} subtitle={plan.sub} />
 
             <div className="space-y-5">
               {plan.phases.map((phase, i) => (
                 <div
                   key={phase.name}
-                  className="rounded-3xl border border-slate-200 bg-white shadow-sm p-6 sm:p-8"
+                  className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8"
                 >
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-white font-extrabold text-sm tabular-nums">
                       {i + 1}
                     </span>
-                    <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
+                    <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
                       {phase.name}
                     </h3>
-                    <span className="inline-flex items-center rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-[10px] font-bold tracking-[0.18em] uppercase text-slate-600">
+                    <span className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.05] px-3 py-1 text-[10px] font-bold tracking-[0.18em] uppercase text-gray-300">
                       {phase.timeframe}
                     </span>
                   </div>
+                  {/* One sentence of outcome per phase — the numbered items
+                      say what we do; this says what he gets for it. */}
+                  <p className="mt-4 text-accent-light text-base sm:text-lg font-semibold leading-snug">
+                    {phase.outcome}
+                  </p>
                   <ol className="mt-6 space-y-4 list-none">
                     {phase.steps.map((step, n) => (
                       <li key={step} className="flex items-start gap-3 sm:gap-4">
-                        <span className="mt-0.5 shrink-0 text-sm font-extrabold tabular-nums text-slate-400 w-5 text-right">
+                        <span className="mt-0.5 shrink-0 text-sm font-extrabold tabular-nums text-gray-500 w-5 text-right">
                           {n + 1}
                         </span>
-                        <span className="text-slate-700 text-sm sm:text-base leading-relaxed">
-                          <RichTextLight text={step} />
+                        <span className="text-gray-300 text-sm sm:text-base leading-relaxed">
+                          <RichText text={step} />
                         </span>
                       </li>
                     ))}
@@ -892,17 +992,18 @@ export default function VeinAndMedSpaAuditPage() {
               ))}
             </div>
 
-            <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-3xl mt-8">
-              {plan.punchList}
-            </p>
+              <p className="text-gray-400 text-sm sm:text-base leading-relaxed max-w-3xl mt-8">
+                {plan.punchList}
+              </p>
+            </div>
           </div>
         </section>
 
-        {/* ============ 05 — INVESTMENT ============ */}
+        {/* ============ 04 — INVESTMENT ============ */}
         <section id="investment" className="bg-dark py-16 sm:py-24 scroll-mt-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <SectionHeading
-              eyebrow="Section 05"
+              eyebrow="Section 04"
               title={investment.title}
               subtitle={investment.sub}
             />
@@ -910,7 +1011,10 @@ export default function VeinAndMedSpaAuditPage() {
             {/* The tier slot, filled. Two numbers on every card so the
                 reduction is visible rather than asserted — and the same
                 number twice on Essentials, because the floor is the floor. */}
-            <p className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-3xl">
+            <p className="text-accent-light text-base sm:text-lg font-semibold leading-relaxed">
+              {investment.summitNote}
+            </p>
+            <p className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-3xl mt-3">
               {investment.ratesNote}
             </p>
             <p className="text-gray-400 text-base sm:text-lg leading-relaxed max-w-3xl mt-4">
@@ -927,32 +1031,44 @@ export default function VeinAndMedSpaAuditPage() {
                       : "border-white/10 bg-white/[0.03]"
                   }`}
                 >
-                  {tier.recommended && (
-                    <span className="self-start mb-4 inline-flex items-center rounded-full border border-accent/50 bg-accent/20 px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-accent-light">
-                      Recommended
-                    </span>
-                  )}
+                  <div className="flex flex-wrap items-center gap-2 mb-4 min-h-[26px]">
+                    {tier.recommended && (
+                      <span className="inline-flex items-center rounded-full border border-accent/50 bg-accent/20 px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-accent-light">
+                        Recommended
+                      </span>
+                    )}
+                    {tier.badge && (
+                      <span className="inline-flex items-center rounded-full border border-accent/50 bg-accent/20 px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-accent-light">
+                        {tier.badge}
+                      </span>
+                    )}
+                  </div>
                   <h4 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
                     {tier.name}
                   </h4>
 
-                  <div className="mt-4 flex items-baseline gap-3">
-                    <span className="text-3xl sm:text-4xl font-extrabold tabular-nums text-white">
+                  {/* Published above, struck and muted; his rate below it and
+                      the biggest thing on the card. */}
+                  {tier.published !== tier.rate && (
+                    <div className="mt-4 text-sm text-gray-500">
+                      <span className="line-through decoration-gray-600">{tier.published}</span>{" "}
+                      published
+                    </div>
+                  )}
+                  <div className={`flex items-baseline gap-3 ${tier.published !== tier.rate ? "mt-1" : "mt-4"}`}>
+                    <span className="text-4xl sm:text-5xl font-extrabold tabular-nums text-white leading-none">
                       {tier.rate}
                     </span>
                     <span className="text-sm text-gray-500">/ month</span>
                   </div>
-                  <div className="mt-1.5 text-xs sm:text-sm text-gray-500">
-                    {tier.published === tier.rate ? (
-                      <>Published rate {tier.published} — our floor, held</>
-                    ) : (
-                      <>
-                        Published{" "}
-                        <span className="line-through decoration-gray-600">{tier.published}</span>{" "}
-                        · your rate for twelve months
-                      </>
-                    )}
-                  </div>
+                  {tier.savings && (
+                    <p className="mt-3 text-accent-light text-sm sm:text-base font-semibold leading-snug">
+                      {tier.savings}
+                    </p>
+                  )}
+                  {tier.term && (
+                    <p className="mt-1 text-gray-500 text-xs sm:text-sm">{tier.term}</p>
+                  )}
 
                   {tier.inherits && (
                     <div className="mt-5 text-[11px] font-bold tracking-[0.18em] uppercase text-accent-light">

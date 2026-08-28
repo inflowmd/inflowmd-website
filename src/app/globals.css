@@ -279,9 +279,16 @@ body {
   .audit-page [class*="text-amber"],
   .audit-page [class*="text-orange"] { color: #b45309 !important; }
   .audit-page [class*="text-emerald"] { color: #047857 !important; }
-  /* Findings collapse on screen by severity. On paper there is no one to
-     click them open, and a closed <details> would print as a headline with
-     nothing under it — so everything is forced open for print. */
+  /* Findings collapse on screen. On paper there is nobody to click them open,
+     and a closed <details> would print as a headline with nothing under it —
+     so every one of them is forced open for print.
+     TWO rules, and both are needed. Chrome does not hide the closed body with
+     display:none on the children; it hides the UA ::details-content pseudo
+     with content-visibility. The display rule alone measured as "visible" on
+     the child div — correct height, correct display — while the text never
+     reached the page. Verified in print emulation, which is the only way this
+     is checkable: reading the CSS would have said it worked. */
+  .audit-page details::details-content { content-visibility: visible !important; }
   .audit-page details > *:not(summary) { display: block !important; }
   .audit-page details summary { list-style: none; }
   .audit-page section, .audit-page article { break-inside: avoid; }
