@@ -1,5 +1,117 @@
 # HANDOFF — /audit booth tool
 
+## Latest: /audit/vein-health-clinics — BUILT, deployed, merged
+
+**Aug 28, 2026.** Fourth page in the prospect-audit series, at
+`/audit/vein-health-clinics` — noindex, unlinked, absent from the sitemap,
+title absolute so it reads as the practice. Hand-styled, **not** an entry in
+the `[slug]` data file. Reuses the veinandmedspa components verbatim; no new
+tokens, no new CSS.
+
+**Every figure traces to `research/veinhealthclinics.md`.** Where the research
+was empty the page is silent, so three blocks the reference page carries are
+deliberately absent: no competitor comparison or local pack (captcha-blocked),
+no paid-media block (0 ads confirmed; absence is weak evidence), no review
+counts, ratings or reply behaviour (not gathered). Directory scan percentages
+and the Aug 18 cached score appear nowhere.
+
+**One presentational departure worth knowing:** the speed score renders as a
+**word** — "Mid-to-high fifties" — in a ring-shaped frame rather than as a
+number, because two passes returned 57 and 56 and neither should be shown as
+the figure. AI 86 and search 89 render as normal rings. Google is credited on
+speed only.
+
+Verified at 375 / 768 / 1440: one h1, heading order never skips, no horizontal
+scroll (a 4px overflow in the summary price row was found and fixed), noindex
+present, absent from sitemap, all nav anchors resolve. **Print verified by
+content** — 110 forty-character windows covering all eight finding bodies,
+present under print emulation. A nine-pattern exclusion scan (Bougainvillea,
+local pack, paid media, listing percentages, cached score, promised scores,
+review counts, reply-behaviour claims, vendor blame) passes against visible
+copy *and* collapsed bodies.
+
+The research file (Passes 1 and 2) landed with the same commit.
+
+---
+
+## Previous: Vein Health Clinics research — Pass 2 gap closure (research only, nothing shipped)
+
+**Aug 28, 2026 — `research/veinhealthclinics.md`, appended under "Pass 2".** Six gaps closed. Pass 1
+text was left untouched; where Pass 2 overturns it, Pass 2 says so.
+
+**Resolved:**
+
+- **The forms.** Mechanism established: all nine LeadConnector widgets sit inside Elementor **popup**
+  templates at `display:none`, with their URL parked in **`data-lazy-src`** (WP Rocket), so lazy-load
+  never fires. Rate is now hard: **0 usable forms in 23 controlled loads** — cold/warm cache, desktop and
+  mobile, full scroll, 20s waits, exit-intent tested. Two unreproducible sightings in ~25 total loads.
+  Pass 1's "0 widget iframes in the DOM" was **my probe checking the wrong attribute**, not the site; the
+  served HTML is byte-identical between passes. Every booking CTA is enumerated with visibility, target
+  and whether the target exists — **five of seven point at a `#book` anchor that does not exist.**
+- **Organization NPI found, superseding Pass 1's `could_not_verify`.** Legal name is **VASCULAR HEALTH
+  INSTITUTE INC** — I had searched the trading name. Five org records (four VHI + Keyhole Surgery Center),
+  all authorized official Obinna Nwobi, all specific vascular taxonomy. **Federal and published addresses
+  barely overlap:** two federal locations (Winter Park, Ocoee) appear nowhere on the site, three published
+  offices (Winter Garden, Port St. Lucie, Ocala) have no federal record, and Oviedo has two different
+  addresses.
+- **A second live indexable domain: `vascularhealthcenter.com`** — same stack, same physician, sharing
+  three phone numbers including the sitewide toll-free. Pass 1 said none existed.
+- **Subdomain**: a single GoHighLevel/ClinicGrower funnel page, root 404s, no title, nothing blocking
+  indexation, linked from 32 pages. Not a duplicate of the main site.
+- **Duplicate Google profiles**: 572 Ocoee Commerce Pkwy **is** a federal location the website omits;
+  7490 Cypress Gardens Blvd matches neither NPPES nor the site.
+- **Ads closed.** Region US and "Any time" filter both confirmed, 0 ads; the "multiple advertiser
+  accounts" line appears identically on a different domain with 0 ads, so it reads as boilerplate.
+  Nothing paid-media reaches a client page.
+
+**Still open:** the two unexplained form sightings · 7490 Cypress Gardens Blvd · which address list is
+current · split authority between the two domains · shared-phone contamination (precondition confirmed,
+effect unobserved) · the "4,8/5 (466 reviews)" widget · `inLanguage: en-AU` in their JSON-LD.
+
+**Directory sweep is eleven publishers, five readable — still short of 15–20**, and labelled that way.
+Yelp (three listings confirmed to exist), ZoomInfo and Healthgrades are blocked or unlocated from this
+network. Local pack still captcha-blocked and still omitted, so **no competitor data appears anywhere in
+the file**.
+
+---
+
+## Previous: prospect research — Vein Health Clinics Pass 1 (research only, nothing shipped)
+
+**Aug 28, 2026 — `research/veinhealthclinics.md`.** Verification pass on
+veinhealthclinics.com (Dr. Obinna Nwobi, five Florida offices) for a future
+`/audit/veinhealthclinics` on the `/audit/veinandmedspa` pattern. **Nothing was
+built and nothing deployed.**
+
+Three things a build session needs to know before it starts:
+
+- **The cached prewarm entry contradicts the brief.** The brief said the site
+  was down during the Summit sweep; `data/prewarmed-audits.json` records a
+  successful 200 fetch on Aug 18 with a full score set (56 / 86 / 89). Unresolved.
+  Either way it is unused — the report carries a fresh dated run: **speed in the
+  mid-to-high fifties (56 and 57 across two passes), AI 86, search 89, LCP 13.35s**.
+- **Paid media is a dead end on current evidence.** Ads Transparency Center shows
+  **0 ads under "Any time"**, no advertiser identity, and an empty advertiser
+  filter. Absence there is weak evidence and nothing about paid media should reach
+  a client page from it.
+- **The research file's punch list is long and load-bearing.** Nine items whose
+  mechanism I could not establish — including the screening CTA pointing at a
+  `#book` anchor that does not exist, and third-party form widgets that rendered
+  on one load out of five. Those are the two most tempting to write up and the two
+  least ready. The directory sweep is **six of 15–20 publishers** and is labelled
+  as incomplete rather than dressed up.
+
+Verified and solid: NPPES individual record at source (NPI 1912028853, last
+updated 2022-07-13, Winter Haven address, primary taxonomy correct with a generic
+`208600000X` secondary); 57-URL inventory with no orphans and three low-reach
+404s; five aesthetics landing pages live outside the sitemap; no
+MedicalClinic/LocalBusiness schema anywhere (one `HealthAndBeautyBusiness` node);
+no privacy or terms page found; four of the practice's own Google profiles
+carrying four different categories, plus two duplicate practitioner profiles at
+unpublished addresses. Local pack `could_not_verify` — captcha-blocked — so **no
+competitor data appears in the file at all**, by instruction.
+
+---
+
 **Status: DONE. Deployed to production and merged to main.** Nothing is
 pending. This file exists in case a session boundary hits mid-work; as of
 the last edit it did not — everything below already happened, in order,
