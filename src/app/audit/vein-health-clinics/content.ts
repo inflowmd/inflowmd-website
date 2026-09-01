@@ -93,12 +93,16 @@ export const summary = {
     "Your website and the federal record disagree about where the practice is: two federal locations are missing from the site, three offices on the site have no federal record, and Oviedo has two different addresses.",
     "Two separate live websites carry the practice's identity, sharing your physician and your phone numbers.",
   ],
+  /**
+   * One price, no tier name and no chip. He has already scoped what he wants;
+   * a "recommended" badge implies a ladder he is choosing from, and there is
+   * no ladder on this page any more.
+   */
   recommendation: {
-    label: "Recommended",
-    tier: "Growth",
-    price: "$1,200",
+    price: "$1,000",
     per: "/ month",
-    note: "Summit rate, 20% off, locked twelve months.",
+    what: "website and Google Ads",
+    note: "Summit pricing, rate locked twelve months.",
   },
   readMore: "Read the evidence",
 };
@@ -415,90 +419,64 @@ export const plan = {
    04 — INVESTMENT
    ============================================================ */
 
+/**
+ * ONE custom package, not the published tier ladder.
+ *
+ * Dr. Nwobi has already scoped what he wants. Showing him the four-tier
+ * ladder would put plans he has already declined back in front of him and
+ * invite a settled decision to be re-opened — so there is nothing here to
+ * choose between: no published-versus-discounted pair, no strikethrough, no
+ * percentage, no savings figure. This is a package priced for what was
+ * asked for, not a discount off a listed tier.
+ *
+ * The limitation line keeps the muted treatment the old Essentials card used
+ * (text-gray-500, xs/sm, relaxed leading) — it is a scope boundary, not a
+ * warning, and it should read as quietly as it did there.
+ */
 export const investment = {
   title: "Investment",
-  sub: "One monthly figure. The build is included, not billed separately.",
-  summitNote:
-    "Summit pricing, held for practices we met at the HPS Vein Practice Growth Summit.",
-  ratesNote:
-    "Published rates are the ones on inflowmd.com/pricing. $500 is our floor and does not move; above it we are holding 20% for twelve months, with setup waived.",
-  rationale:
-    "**Why Growth, plainly:** the expensive problems in this document are not website problems. The federal record, the second domain and the duplicate profiles all sit outside what a website rebuild touches — and they are the ones sending patients to the wrong address and splitting your reputation in two. Growth is the tier where that work is included alongside the rebuild.",
-  inclusionsTitle: "In every tier",
-  inclusions: [
-    "Rebuild on one architecture",
-    "Hosting, maintenance, security and ongoing development",
-    "Google Business Profile management",
-    "Monthly reporting",
+  sub: "One package, scoped to what you asked for.",
+  packageName: "Website and Google Ads",
+  price: "$1,000",
+  per: "/ month",
+  split: [
+    { label: "Website build, hosting and development", value: "$500 / month" },
+    { label: "Google Ads management", value: "$500 / month" },
   ],
-  inclusionsNote:
-    "Everything beyond these four is tier-specific and named on the card that carries it.",
-  tiers: [
+  subline:
+    "Summit pricing, held for practices we met at the HPS Vein Practice Growth Summit. Rate locked twelve months. Setup waived.",
+  groups: [
     {
-      name: "Essentials",
-      published: "$500",
-      rate: "$500",
-      savings: "Our floor — this price does not move.",
-      includes: [
-        "Rebuild on one architecture",
+      title: "The website",
+      items: [
+        "Custom Next.js / React build, replacing the current page-builder site",
+        "Working booking forms on every page",
+        "Correct medical schema across all five locations",
+        "Single-domain consolidation",
+        "Location pages for Winter Haven, Oviedo, Winter Garden, Port St. Lucie and Ocala",
         "Hosting, security and ongoing development",
-        "Google Business Profile setup",
-        "Monthly reporting",
-      ],
-      limitation:
-        "This fixes the website. It does not touch the federal record, the directory errors, the unclaimed profiles or the second domain — the things this audit found most of.",
-    },
-    {
-      name: "Visibility",
-      published: "$900",
-      rate: "$720",
-      badge: "20% OFF",
-      savings: "You save $180/mo — rate locked 12 months",
-      inherits: "Everything in Essentials, plus",
-      includes: [
-        "Federal record correction, then the directories that read it",
-        "Managed citations across all five locations",
-        "Duplicate profile consolidation and category alignment",
-        "Local SEO",
-        "Review strategy",
       ],
     },
     {
-      name: "Growth",
-      published: "$1,500",
-      rate: "$1,200",
-      badge: "20% OFF",
-      recommended: true,
-      savings: "You save $300/mo — rate locked 12 months",
-      inherits: "Everything in Visibility, plus",
-      includes: [
-        "Custom architecture — one source of truth, single-domain consolidation",
-        "Correct medical schema across every location",
-        "Keyword optimization",
-        "2 patient-education posts per month",
-        "AI-search optimization",
-        "Monthly SEO reporting",
-      ],
-    },
-    {
-      name: "Full Engine",
-      published: "$2,500",
-      rate: "$2,000",
-      badge: "20% OFF",
-      savings: "You save $500/mo — rate locked 12 months",
-      term: "$6,000 over the term",
-      inherits: "Everything in Growth, plus",
-      includes: [
-        "Google Ads management",
+      title: "Google Ads",
+      items: [
+        "Campaign build and management",
+        "Landing page alignment",
         "Conversion tracking",
-        "Landing page optimization",
-        "Quarterly strategy review",
+        "Ongoing optimization and monthly reporting",
       ],
-      limitation: "Management only — ad spend is paid directly to Google, never through us.",
     },
   ],
-  reviewNote:
-    "Review strategy is included from Visibility upward. We have said nothing here about reputation software, because we do not know what you already own and would rather ask than assume.",
+  /** Its own block, deliberately separated so it can never read as part of
+      the monthly figure. */
+  adSpendTitle: "Ad spend",
+  adSpend: [
+    "Ad spend is paid directly to Google, never through InflowMD. We recommend a minimum of $1,000 per month.",
+    "Across five markets that is a floor rather than a plan — in practice it means starting with two or three markets and expanding as the numbers justify it.",
+  ],
+  limitation:
+    "This covers the website build and the ads. It does not include ongoing SEO, reputation management, or directory and listing management, and it does not correct the federal record, the directory inconsistencies, or the duplicate Google profiles. Those appear in the plan above because the practice needs them, not because they are quoted here — and they are worth doing whoever does them.",
+  deadline: "Summit pricing held through September 12, 2026.",
 };
 
 export const closing = {

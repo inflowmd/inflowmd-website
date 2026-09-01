@@ -1,6 +1,47 @@
 # HANDOFF — /audit booth tool
 
-## Latest: /audit/vein-health-clinics — BUILT, deployed, merged
+## Latest: /audit/vein-health-clinics Section 04 — one package, not a ladder
+
+**Aug 28, 2026 — correction, deployed and merged.** Section 04 had rendered as
+the published four-tier ladder. Dr. Nwobi has already scoped what he wants, so
+showing him plans he declined invited a settled decision to be re-opened. The
+whole section is replaced by **one card: Website and Google Ads, $1,000/month**,
+split $500 website and $500 ads in plain lines, with the two inclusion groups
+and the Summit terms.
+
+**Every discount mechanic is gone from the page** — tier cards, published-versus-
+rate pairs, strikethroughs, `20% OFF` chips, the `RECOMMENDED` chip, "You save"
+lines, "$6,000 over the term", "Everything in X, plus", and the
+inflowmd.com/pricing sentence. This is a custom package, so it carries no
+percentage, no savings figure and no comparison of any kind.
+
+Two details worth keeping if this section is edited again:
+
+- **Ad spend lives in its own block outside the price card**, deliberately, so
+  it can never be read as part of the $1,000. It names the $1,000/month
+  recommended minimum and says plainly that across five markets that is a floor
+  rather than a plan.
+- **The limitation line reuses the muted treatment the old Essentials card
+  used** (`text-gray-500 text-xs sm:text-sm leading-relaxed`) — it is a scope
+  boundary, not a warning — and it ends by giving those items away: the federal
+  record, the directory work and the duplicate profiles are "worth doing whoever
+  does them".
+
+The top summary lost the tier name and the recommended chip with it; it now
+reads **$1,000 / month — website and Google Ads**.
+
+**Verification note for the next editor:** the forbidden-string sweep runs over
+Section 04 and the summary separately from the full page, case- and
+whitespace-insensitively on `innerText`. **"Growth" must survive inside "HPS
+Vein Practice Growth Summit"** — that is required copy, and the assertion checks
+every occurrence sits inside that phrase rather than banning the word. Print is
+verified by content: 30 windows across Section 04 plus all 8 finding bodies.
+
+Nothing outside Section 04 and the summary was touched.
+
+---
+
+## Previous: /audit/vein-health-clinics — BUILT, deployed, merged
 
 **Aug 28, 2026.** Fourth page in the prospect-audit series, at
 `/audit/vein-health-clinics` — noindex, unlinked, absent from the sitemap,
