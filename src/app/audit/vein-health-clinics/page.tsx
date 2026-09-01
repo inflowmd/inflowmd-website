@@ -527,15 +527,14 @@ export default function VeinHealthClinicsAuditPage() {
             </div>
 
             <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-white/10 pt-6">
-              {/* wraps: at 375 the badge + tier + price + "/ month" ran 4px
-                  past the viewport as a single non-wrapping row. */}
+              {/* One price, no tier and no chip — there is nothing to choose
+                  between. Wraps because at 375 a single row ran past the
+                  viewport by 4px. */}
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
-                <span className="inline-flex items-center rounded-full border border-accent/50 bg-accent/20 px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-accent-light">
-                  {summary.recommendation.label}
-                </span>
-                <span className="text-white font-bold text-base sm:text-lg">{summary.recommendation.tier}</span>
                 <span className="text-2xl sm:text-3xl font-extrabold tabular-nums text-white">{summary.recommendation.price}</span>
                 <span className="text-sm text-gray-500">{summary.recommendation.per}</span>
+                <span aria-hidden className="text-gray-600">—</span>
+                <span className="text-white font-bold text-base sm:text-lg">{summary.recommendation.what}</span>
               </div>
               <span className="text-sm text-accent-light">{summary.recommendation.note}</span>
               <a href="#verdict" className="no-print ml-auto inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.05] px-5 py-3 text-sm font-bold text-gray-200 hover:bg-white/10 transition-colors">
@@ -792,82 +791,75 @@ export default function VeinHealthClinicsAuditPage() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <SectionHeading eyebrow="Section 04" title={investment.title} subtitle={investment.sub} />
 
-            <p className="text-accent-light text-base sm:text-lg font-semibold leading-relaxed">{investment.summitNote}</p>
-            <p className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-3xl mt-3">{investment.ratesNote}</p>
+            {/* ONE card. No ladder, no comparison, no published-versus-rate
+                pair — he has scoped this already. */}
+            <div className="rounded-3xl border-2 border-accent/60 bg-accent/[0.09] ring-1 ring-accent/40 p-6 sm:p-10">
+              <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                {investment.packageName}
+              </h3>
 
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4 items-stretch">
-              {investment.tiers.map((tier) => (
-                <div
-                  key={tier.name}
-                  className={`h-full flex flex-col rounded-3xl border p-6 sm:p-7 ${
-                    tier.recommended ? "border-accent/60 bg-accent/[0.09] ring-1 ring-accent/40" : "border-white/10 bg-white/[0.03]"
-                  }`}
-                >
-                  <div className="flex flex-wrap items-center gap-2 mb-4 min-h-[26px]">
-                    {tier.recommended && (
-                      <span className="inline-flex items-center rounded-full border border-accent/50 bg-accent/20 px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-accent-light">
-                        Recommended
-                      </span>
-                    )}
-                    {tier.badge && (
-                      <span className="inline-flex items-center rounded-full border border-accent/50 bg-accent/20 px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-accent-light">
-                        {tier.badge}
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">{tier.name}</h3>
+              <div className="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-2">
+                <span className="text-5xl sm:text-6xl font-extrabold tabular-nums text-white leading-none">
+                  {investment.price}
+                </span>
+                <span className="text-base text-gray-400">{investment.per}</span>
+              </div>
 
-                  {tier.published !== tier.rate && (
-                    <div className="mt-4 text-sm text-gray-500">
-                      <span className="line-through decoration-gray-600">{tier.published}</span> published
-                    </div>
-                  )}
-                  <div className={`flex items-baseline gap-3 ${tier.published !== tier.rate ? "mt-1" : "mt-4"}`}>
-                    <span className="text-4xl sm:text-5xl font-extrabold tabular-nums text-white leading-none">{tier.rate}</span>
-                    <span className="text-sm text-gray-500">/ month</span>
-                  </div>
-                  {tier.savings && (
-                    <p className="mt-3 text-accent-light text-sm sm:text-base font-semibold leading-snug">{tier.savings}</p>
-                  )}
-                  {tier.term && <p className="mt-1 text-gray-500 text-xs sm:text-sm">{tier.term}</p>}
-
-                  {tier.inherits && (
-                    <div className="mt-5 text-[11px] font-bold tracking-[0.18em] uppercase text-accent-light">{tier.inherits}</div>
-                  )}
-                  <ul className={`space-y-2.5 ${tier.inherits ? "mt-3" : "mt-5"}`}>
-                    {tier.includes.map((inc) => (
-                      <li key={inc} className="flex items-start gap-2.5">
-                        <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-light" />
-                        <span className="text-gray-300 text-sm leading-relaxed">{inc}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {tier.limitation && (
-                    <p className="mt-auto pt-6 text-gray-500 text-xs sm:text-sm leading-relaxed">{tier.limitation}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-7">
-              <p className="text-gray-200 text-base sm:text-lg leading-relaxed max-w-3xl">
-                <RichText text={investment.rationale} />
-              </p>
-            </div>
-
-            <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-              <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500 mb-5">{investment.inclusionsTitle}</div>
-              <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
-                {investment.inclusions.map((inc) => (
-                  <li key={inc} className="flex items-start gap-3">
-                    <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-light" />
-                    <span className="text-gray-200 text-sm sm:text-base leading-relaxed">{inc}</span>
+              <ul className="mt-5 space-y-1.5">
+                {investment.split.map((row) => (
+                  <li key={row.label} className="flex flex-wrap items-baseline gap-x-2 text-gray-300 text-sm sm:text-base">
+                    <span>{row.label}</span>
+                    <span aria-hidden className="text-gray-600">—</span>
+                    <span className="font-semibold text-white tabular-nums">{row.value}</span>
                   </li>
                 ))}
               </ul>
-              <p className="mt-5 text-gray-500 text-xs sm:text-sm leading-relaxed">{investment.inclusionsNote}</p>
-              <p className="mt-3 text-gray-500 text-xs sm:text-sm leading-relaxed">{investment.reviewNote}</p>
+
+              <p className="mt-6 text-accent-light text-base sm:text-lg font-semibold leading-relaxed max-w-3xl">
+                {investment.subline}
+              </p>
+
+              <div className="mt-10 grid gap-8 sm:grid-cols-2">
+                {investment.groups.map((g) => (
+                  <div key={g.title}>
+                    <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500 mb-4">
+                      {g.title}
+                    </div>
+                    <ul className="space-y-2.5">
+                      {g.items.map((item) => (
+                        <li key={item} className="flex items-start gap-3">
+                          <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-light" />
+                          <span className="text-gray-200 text-sm sm:text-base leading-relaxed">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
             </div>
+
+            {/* Ad spend — its own block, outside the price card, so it can
+                never be read as part of the monthly figure. */}
+            <div className="mt-6 rounded-3xl border border-white/10 bg-black/30 p-6 sm:p-8">
+              <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500 mb-4">
+                {investment.adSpendTitle}
+              </div>
+              {investment.adSpend.map((p, i) => (
+                <p key={i} className="text-gray-200 text-base sm:text-lg leading-relaxed max-w-3xl mt-4 first:mt-0">
+                  {p}
+                </p>
+              ))}
+            </div>
+
+            {/* Scope boundary, in the muted treatment the old Essentials card
+                used for its limitation line. */}
+            <p className="mt-6 text-gray-500 text-xs sm:text-sm leading-relaxed max-w-3xl">
+              {investment.limitation}
+            </p>
+
+            <p className="mt-6 text-accent-light text-base sm:text-lg font-semibold leading-relaxed">
+              {investment.deadline}
+            </p>
           </div>
         </section>
 
