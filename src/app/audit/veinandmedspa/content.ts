@@ -100,8 +100,7 @@ export const summary = {
     tier: "Full Engine",
     price: "$2,000",
     per: "/ month",
-    published: "$2,500",
-    note: "Summit rate, 20% off, locked twelve months.",
+    note: "Summit pricing.",
   },
   readMore: "Read the evidence",
 };
@@ -145,8 +144,8 @@ export const verdict = {
       tone: "critical",
     },
     {
-      value: "4",
-      label: "different phone numbers for your practice, live on the web right now",
+      value: "40%",
+      label: "of your business listings carry a wrong or missing name, address, or phone",
       tone: "critical",
     },
     {
@@ -161,7 +160,7 @@ export const verdict = {
     },
   ] as Stat[],
   footnote:
-    "Every figure on this page was verified by hand on August 27, 2026, against live Google Business Profile data, your website, and eighteen third-party directory listings.",
+    "Every figure on this page was verified by hand on August 27, 2026, against live Google Business Profile data, your website, a 25-publisher listings scan, and the physician directories that scan does not cover.",
 };
 
 /* ============================================================
@@ -458,13 +457,19 @@ export const gbp = {
 
 export const listings = {
   title: "Business listings — the part nobody has been minding",
-  body: "We found your practice on eighteen directories. Here is the problem: they do not agree with each other, and nothing is keeping them in sync.",
+  body: "We ran your name, address and phone number through a listings scan across 25 directories, and separately checked the physician directories that scan does not reach. The scan came back at **40% inaccurate**. Two in five of the places a patient might find you are showing something wrong.",
   stats: [
-    { value: "4", label: "different phone numbers published for your practice", tone: "critical" },
-    { value: "5", label: "different versions of your business name in circulation", tone: "critical" },
-    { value: "2", label: "live websites splitting your traffic and authority", tone: "critical" },
+    { value: "40%", label: "of your listings carry a wrong or missing name, address, or phone", tone: "critical" },
+    { value: "6", label: "different versions of your business name in circulation", tone: "critical" },
+    { value: "4", label: "different phone numbers published — plus two listings with no phone at all", tone: "critical" },
     { value: "0", label: "of your physician profiles have been claimed", tone: "warn" },
   ] as Stat[],
+  /** The three fields the scan breaks out, straight from it. */
+  fieldBreakdown: [
+    { label: "Business name wrong or missing", value: "36%" },
+    { label: "Phone number wrong or missing", value: "24%" },
+    { label: "Address wrong or missing", value: "20%" },
+  ],
   findings: [
     {
       id: "phones",
@@ -511,12 +516,47 @@ export const listings = {
     },
     {
       id: "name",
-      tone: "warn",
-      title: "Your name is five different businesses as far as the internet is concerned",
+      tone: "critical",
+      title: "Your name is six different businesses as far as the internet is concerned",
+      subhead:
+        "Business name is the single most-broken field in the scan — wrong or missing on 36% of your listings",
       body: [
-        "Vein Clinic CA & Med Spa · Vein Clinic & Med Spa · Vein Clinic CA · Vein Clinic Ca · VEIN CLINIC & MED SPA",
-        "Your website brands as “Vein Clinic CA & Med Spa.” Your Google profile says “Vein Clinic & Med Spa.” Your two most important properties do not match each other. Three listings drop Suite B entirely, which Google reads as an address conflict in a multi-tenant medical building.",
+        "Vein Clinic CA & Med Spa · Vein Clinic & Med Spa · Vein Clinic CA · Vein Clinic Ca · VEIN CLINIC & MED SPA · **Sharath Reniguntala MD Inc**",
+        "Your website brands as “Vein Clinic CA & Med Spa.” Your Google profile says “Vein Clinic & Med Spa.” Your two most important properties do not match each other. MapQuest shortens you to “Vein Clinic CA.” And on EZlocal, YP.com and Where To?, you are listed as **Sharath Reniguntala MD Inc** — your legal entity name, which has leaked out of your corporate registration and into consumer directories where no patient will ever recognize it.",
+        "And **Suite B is missing from most of your listings** — present on only four of the twenty-two found. Google reads a missing suite as an address conflict in a multi-tenant medical building.",
       ],
+      meaning:
+        "Google decides whether two listings describe the same business by comparing name, address and phone. Six names and a mostly-absent suite number means Google cannot confirm you are one practice. Every listing it cannot match to you is authority you paid for in time and do not receive.",
+    },
+    {
+      id: "facebook-phone",
+      tone: "critical",
+      title: "Your Facebook listing has no phone number on it",
+      body: [
+        "The scan found your Facebook listing carrying the right name and the full address — including Suite B, one of only four listings that gets that right — and **no phone number at all**. Opendi has the same gap.",
+      ],
+      meaning:
+        "Facebook is one of the most-used business listings on the internet and, for patients over fifty, often the first place they look after Google. A patient who finds you there right now has to go somewhere else to find out how to call you. Adding it takes minutes.",
+    },
+    {
+      id: "corrupted",
+      tone: "warn",
+      title: "Two listings are displaying corrupted data",
+      body: [
+        "Property Capsule shows your address as **“431 N Tustin Aveste B”** — the suite jammed into the street line. MyLocalServices shows your name as **“Vein Clinic CA &amp; Med Spa”**, with the raw HTML code for an ampersand printed where the ampersand should be.",
+      ],
+      meaning:
+        "Neither is anyone's decision. They are what happens when directories copy each other automatically and one of them mangles a field along the way. They are worth naming because they are the clearest possible illustration of the point: nothing is watching these, so nothing catches it.",
+    },
+    {
+      id: "missing-listings",
+      tone: "warn",
+      title: "Five directories have no listing for you at all",
+      body: [
+        "Tupalo, Navmii, 8coupons, GoLocal247 and Cylex returned nothing. These are not major destinations on their own — but they feed the aggregators that populate the ones that are.",
+      ],
+      meaning:
+        "Coverage gaps are the cheapest problem on this page to fix, because there is nothing to correct. There is only something to create.",
     },
     {
       id: "two-sites",
@@ -540,8 +580,8 @@ export const listings = {
       tag: "Diagnosis",
       title: "None of this is managed — and that is genuinely good news",
       body: [
-        "We checked for the fingerprints of a listings-management service and found none. There is no presence across the syndication network those services push to. Your directory descriptions are all different from one another rather than one identical text repeated. A search on your own phone number returns almost no business citations at all.",
-        "What that means is that everything above is **drift, not damage**. These listings were created by aggregators scraping each other over several years, not by anyone making choices. Nothing has to be undone. It has to be claimed, corrected once, and then held in place.",
+        "A 40% error rate is the signature of listings nobody is tending. A managed presence runs near zero, because every directory is fed from one record and corrections push out everywhere at once. Yours are not fed from anything. They were created by aggregators copying each other over several years — which is why your legal entity name is on three of them, why an HTML code is printed in your name on another, and why your suite number survived on only four.",
+        "What that means is that everything above is **drift, not damage**. Nobody made these choices. Nothing has to be undone or argued with. It has to be claimed, corrected once from a single record, and then held in place automatically so it cannot drift back.",
       ],
     },
   ] as FindingBlock[],
@@ -716,7 +756,7 @@ export const plan = {
    * it is named as such below.
    */
   punchList:
-    "Twelve more sit behind these nine — claiming the four physician profiles, settling on one business name and address format, resolving the second website, the XERF gallery heading, the weight-loss door, migrating and repairing the existing pages, your bio, moving the scheduler to the front, surfacing the reviews and testimonials, the structured-data layer, AI-search visibility and monthly reporting. That is a punch list we walk through together, not a decision to make now.",
+    "Twelve more sit behind these nine — pushing one business name and one address format to all 25 publishers from a single record (including Suite B, currently on only four of the twenty-two listings found, which also retires “Sharath Reniguntala MD Inc” from consumer directories and clears the corrupted Property Capsule and MyLocalServices entries), creating the five missing listings on Tupalo, Navmii, 8coupons, GoLocal247 and Cylex, claiming the four physician profiles, resolving the second website, the XERF gallery heading, the weight-loss door, migrating and repairing the existing pages, your bio, moving the scheduler to the front, surfacing the reviews and testimonials, and the structured-data layer. That is a punch list we walk through together, not a decision to make now.",
   phases: [
     {
       name: "Phase one — stop the leaks",
@@ -724,7 +764,7 @@ export const plan = {
       outcome: "The calls reach you, and Google stops filing you as a general clinic.",
       steps: [
         "**Correct the federal NPI record first.** Right address, right phone, and a vascular or phlebology taxonomy added. Everything downstream re-pulls from here, so this goes first or the rest will not hold.",
-        "**Fix the three wrong phone numbers** on YellowPages, Doximity and VeinDirectory, and get the previous physician's name off your address.",
+        "**Fix the three wrong phone numbers** on YellowPages, Doximity and VeinDirectory; add the missing phone number to Facebook and Opendi; and get the previous physician's name off your address on VeinDirectory.",
         "**Recategorize the Google profile** from “Medical clinic” to the vascular category your competitors use, add a full services menu, and attach a booking link to the profile.",
       ],
     },
@@ -790,7 +830,7 @@ export const investment = {
    */
   summitNote: "Summit pricing, held through September 12, 2026.",
   ratesNote:
-    "Published rates are the ones on inflowmd.com/pricing. $500 is our floor and does not move; above it we are holding 20% for twelve months, with setup waived.",
+    "$500 is our floor and does not move. Setup is waived on every tier.",
   exclusionNote:
     "Reputation software is excluded from every tier — you already have your own, and we are not going to sell you a second one. Review strategy is still included where the card says so.",
   tiers: [
@@ -801,6 +841,7 @@ export const investment = {
       savings: "Our floor — this price does not move.",
       includes: [
         "Rebuild on one architecture",
+        "Spanish-language path on the same site — retires vccmedspa.com",
         "Hosting, security and ongoing development",
         "Google Business Profile setup",
         "Monthly reporting",
@@ -811,10 +852,13 @@ export const investment = {
     },
     {
       name: "Visibility",
-      published: "$900",
-      rate: "$720",
-      badge: "20% OFF",
-      savings: "You save $180/mo — rate locked 12 months",
+      /** The only strikethrough on the page: $720 is the tier price, $650 is
+          the discounted rate for the local SEO + listing-management scope,
+          holding to the same Summit date already stated above. No second
+          date, no countdown. */
+      published: "$720",
+      rate: "$650",
+      savings: "Discounted for the local SEO and listing-management scope, holding to the same date.",
       inherits: "Everything in Essentials, plus",
       includes: [
         "Phase One listing correction",
@@ -826,10 +870,8 @@ export const investment = {
     },
     {
       name: "Growth",
-      published: "$1,500",
+      published: "$1,200",
       rate: "$1,200",
-      badge: "20% OFF",
-      savings: "You save $300/mo — rate locked 12 months",
       inherits: "Everything in Visibility, plus",
       includes: [
         "The dual build — vein screening funnel and med spa showcase, weight-loss door, Spanish path",
@@ -842,13 +884,10 @@ export const investment = {
     },
     {
       name: "Full Engine",
-      published: "$2,500",
+      published: "$2,000",
       rate: "$2,000",
-      badge: "20% OFF",
-      savings: "You save $500/mo — rate locked 12 months",
       /** Savings x 12. Plain multiplication on a contracted figure — the only
           number on this page that is extrapolated at all, and it stops here. */
-      term: "$6,000 over the term",
       recommended: true,
       inherits: "Everything in Growth, plus",
       includes: [

@@ -825,6 +825,20 @@ export default function VeinAndMedSpaAuditPage() {
             <div className="mt-8">
               <StatRow stats={listings.stats} />
             </div>
+            {/* The three fields the 25-publisher scan breaks out. */}
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
+              <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500 mb-4">
+                Where the errors are
+              </div>
+              <ul className="grid sm:grid-cols-3 gap-x-8 gap-y-3">
+                {listings.fieldBreakdown.map((row) => (
+                  <li key={row.label} className="flex items-baseline justify-between gap-3">
+                    <span className="text-gray-300 text-sm sm:text-base">{row.label}</span>
+                    <span className="text-white font-extrabold tabular-nums text-lg">{row.value}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
             <div className="mt-6 space-y-4">
               {listings.findings.map((f) => (
                 <Finding key={f.id} f={f} />
@@ -1037,22 +1051,17 @@ export default function VeinAndMedSpaAuditPage() {
                         Recommended
                       </span>
                     )}
-                    {tier.badge && (
-                      <span className="inline-flex items-center rounded-full border border-accent/50 bg-accent/20 px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-accent-light">
-                        {tier.badge}
-                      </span>
-                    )}
                   </div>
-                  <h4 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+                  <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
                     {tier.name}
-                  </h4>
+                  </h3>
 
                   {/* Published above, struck and muted; his rate below it and
                       the biggest thing on the card. */}
                   {tier.published !== tier.rate && (
                     <div className="mt-4 text-sm text-gray-500">
                       <span className="line-through decoration-gray-600">{tier.published}</span>{" "}
-                      published
+                      tier price
                     </div>
                   )}
                   <div className={`flex items-baseline gap-3 ${tier.published !== tier.rate ? "mt-1" : "mt-4"}`}>
@@ -1065,9 +1074,6 @@ export default function VeinAndMedSpaAuditPage() {
                     <p className="mt-3 text-accent-light text-sm sm:text-base font-semibold leading-snug">
                       {tier.savings}
                     </p>
-                  )}
-                  {tier.term && (
-                    <p className="mt-1 text-gray-500 text-xs sm:text-sm">{tier.term}</p>
                   )}
 
                   {tier.inherits && (
