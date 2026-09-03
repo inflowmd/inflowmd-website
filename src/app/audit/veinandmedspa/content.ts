@@ -831,8 +831,12 @@ export const investment = {
   summitNote: "Summit pricing, held through September 12, 2026.",
   ratesNote:
     "$500 is our floor and does not move. Setup is waived on every tier.",
+  /** Reviews are handled in-house, so neither the software nor the strategy is
+      quoted on any tier. Review generation still appears in Phase Three of the
+      plan, because the practice needs it — the plan is what to do, not what we
+      are billing for, and the two are allowed to differ. */
   exclusionNote:
-    "Reputation software is excluded from every tier — you already have your own, and we are not going to sell you a second one. Review strategy is still included where the card says so.",
+    "Reviews stay with you. You are already running them in-house and doing it well, so neither reputation software nor review strategy is quoted on any tier here — review generation appears in the plan above because it is worth doing, not because we are charging for it.",
   tiers: [
     {
       name: "Essentials",
@@ -865,7 +869,6 @@ export const investment = {
         "Managed citations",
         "Services menu and booking link on the Google profile",
         "Local SEO",
-        "Review strategy",
       ],
     },
     {
@@ -923,5 +926,5 @@ export const closing = {
 export const footer = {
   line: "Prepared by InflowMD for Dr. Sharath Reniguntala, Vein Clinic & Med Spa, Santa Ana CA. Confidential. August 27, 2026.",
   methodology:
-    "All figures independently verified against live Google Business Profile data, veinandmedspa.com, and eighteen third-party directory listings on the date of preparation. Review counts and ratings change continuously.",
+    "All figures independently verified against live Google Business Profile data, veinandmedspa.com, a 25-publisher listings scan and the physician directories it does not reach, on the date of preparation. Review counts and ratings change continuously.",
 };
