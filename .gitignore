@@ -54,3 +54,6 @@ next-env.d.ts
 /logo-*.png
 /audit-*.png
 /pitch-*.png
+
+# Prospect research — verification notes, never shipped
+research/
