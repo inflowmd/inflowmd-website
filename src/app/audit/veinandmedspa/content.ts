@@ -803,13 +803,13 @@ export const investment = {
    *
    * This list used to promise a dual-architecture build and reputation
    * management at every price point, which the tier cards now contradict —
-   * the dual build is Growth and above, and reputation software is excluded
+   * the dual build is in every tier now, and reputation software is excluded
    * throughout because he already owns his own. Anything tier-specific lives
    * on the cards and only on the cards.
    */
   inclusionsTitle: "In every tier",
   inclusions: [
-    "Rebuild on one architecture",
+    "The dual build — one site, two architectures, one physician",
     "Hosting, maintenance, security and ongoing development",
     "Google Business Profile setup",
     "Monthly reporting",
@@ -844,7 +844,7 @@ export const investment = {
       rate: "$500",
       savings: "Our floor — this price does not move.",
       includes: [
-        "Rebuild on one architecture",
+        "The dual build — vein screening funnel and med spa showcase, with the weight-loss door",
         "Spanish-language path on the same site — retires vccmedspa.com",
         "Hosting, security and ongoing development",
         "Google Business Profile setup",
@@ -877,7 +877,6 @@ export const investment = {
       rate: "$1,200",
       inherits: "Everything in Visibility, plus",
       includes: [
-        "The dual build — vein screening funnel and med spa showcase, weight-loss door, Spanish path",
         "Keyword optimization",
         "2 patient-education posts per month",
         "Full structured-data layer",
