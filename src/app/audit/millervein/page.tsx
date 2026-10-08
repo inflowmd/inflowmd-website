@@ -2,50 +2,53 @@ import type { Metadata } from "next";
 import PrintButton from "../[slug]/PrintButton";
 import HashOpen from "../[slug]/HashOpen";
 import {
-  addressProblem,
-  closing,
-  criticalStrip,
-  crowns,
-  directories,
-  domains,
-  engine,
+  clinicGrid,
+  close,
+  exhibits,
+  exhibitsSection,
   footer,
-  investment,
   meta as pageMeta,
-  nav,
   plan,
   practice,
-  presenceSection,
-  profiles,
-  summary,
-  thesis,
-  verdict,
-  websiteFindings,
-  websiteSection,
-  type FindingBlock,
-  type Stat,
-  type TableBlock,
+  site,
+  type Exhibit,
+  type ListingCard,
   type Tone,
+  type Visual,
 } from "./content";
 
 /**
- * Vein Health Clinics — confidential prospect audit.
+ * Miller Vein — confidential prospect audit, rebuilt as exhibits.
  *
- * Reuses /audit/veinandmedspa's components verbatim: dark hero, PSI score
- * rings, severity-chipped cards on a coloured left rule, evidence insets on
- * black, alternating dark and warm-bg sections, the tier cards. No new
- * tokens, no new CSS.
+ * The previous version of this page was 24,000 characters of prose. The
+ * reader runs eight clinics and will not read it. Every finding on it was
+ * inherently visual — a record naming the wrong city, two directory listings
+ * that disagree with each other, reviews stranded on an address nobody
+ * occupies, three phone numbers — and had been written as paragraphs. This
+ * version shows those things and puts the supporting prose behind disclosure.
  *
- * Three blocks the reference page has are deliberately absent here, each
- * because the research could not support it: no competitor comparison or
- * local pack (capture was captcha-blocked), no paid-media block (0 ads
- * confirmed, and absence is weak evidence), and no review counts or ratings
- * (not gathered). A missing section is the correct outcome; an approximated
- * one would not be.
+ * ONE RULE DRIVES THE LAYOUT: the page must be fully scannable with nothing
+ * expanded. Every <details> here is closed on screen and carries no finding
+ * that is not already stated in the exhibit above it. The disclosures hold
+ * dates, taxonomy codes, the ingestion chain and the could-not-verify list —
+ * the evidence, not the argument.
  *
- * The speed score is the one presentational departure: it renders as a WORD
- * ("Mid-to-high fifties") rather than a ring, because two passes returned 57
- * and 56 and no single figure should be shown as fixed.
+ * PRINT. Paper has nobody to click, so globals.css forces every <details>
+ * open for print with two rules (::details-content AND the direct-child
+ * display override — Chrome needs both). That is why nothing on this page
+ * builds its own collapse behaviour: a hand-rolled one would not print.
+ *
+ * COLOUR AND PRINT, the trap worth documenting. globals.css only forces
+ * `bg-dark`, `bg-white/*` and `bg-black/*` to white on paper. A `bg-dark-card`
+ * panel would keep its dark background while its text was forced to near
+ * black, printing unreadable — so every dark inset here is `bg-black/*`. For
+ * the same reason the bar comparison prints its numbers as text beside the
+ * bars: if the browser drops the bar fills, the data still survives.
+ *
+ * Mock directory listings are deliberately LIGHT cards on the dark inset.
+ * They are meant to read as screenshots of somebody else's website, which is
+ * what they represent, and `bg-white` (no slash) is untouched by the print
+ * rules, so they print as the white cards they already are.
  *
  * Hidden like the rest of the series: noindex, nofollow, no sitemap entry,
  * linked from nowhere.
@@ -68,40 +71,29 @@ export const metadata: Metadata = {
   },
 };
 
-const TONE_CHIP: Record<Tone, string> = {
-  critical: "bg-red-500/15 text-red-300 border-red-400/40",
-  warn: "bg-amber-500/15 text-amber-300 border-amber-400/40",
-  positive: "bg-emerald-500/15 text-emerald-300 border-emerald-400/40",
-};
-const TONE_BAR: Record<Tone, string> = {
-  critical: "border-l-red-500/70",
-  warn: "border-l-amber-500/70",
-  positive: "border-l-emerald-500/70",
-};
-const TONE_LABEL: Record<Tone, string> = {
-  critical: "Critical",
-  warn: "Attention",
-  positive: "Strength",
-};
-const TONE_CHIP_LIGHT: Record<Tone, string> = {
-  critical: "bg-red-100 text-red-800 border-red-300",
-  warn: "bg-amber-100 text-amber-900 border-amber-300",
-  positive: "bg-emerald-100 text-emerald-900 border-emerald-300",
-};
-const TONE_VALUE: Record<Tone, string> = {
+const TONE_TEXT: Record<Tone, string> = {
   critical: "text-red-400",
-  warn: "text-orange-400",
+  warn: "text-amber-400",
   positive: "text-emerald-400",
+  neutral: "text-gray-300",
+};
+
+/** On the light mock-listing cards, where the dark-mode values are unreadable. */
+const TONE_TEXT_LIGHT: Record<Tone, string> = {
+  critical: "text-red-600",
+  warn: "text-amber-700",
+  positive: "text-emerald-700",
+  neutral: "text-slate-700",
 };
 
 /**
- * The copy arrived with **bold** and *italic* carrying real emphasis, so it
- * is rendered rather than stripped. Deliberately not a markdown parser: two
- * marks, no nesting, no links — anything more would be a licence to put
- * markup in copy that should stay plain.
+ * The copy arrived with **bold** and *italic* and `code` carrying real
+ * emphasis, so it is rendered rather than stripped. Deliberately not a
+ * markdown parser: three marks, no nesting, no links — anything more would be
+ * a licence to put markup in copy that should stay plain.
  */
 function RichText({ text }: { text: string }) {
-  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).filter(Boolean);
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g).filter(Boolean);
   return (
     <>
       {parts.map((part, i) => {
@@ -110,6 +102,13 @@ function RichText({ text }: { text: string }) {
             <strong key={i} className="font-bold text-white">
               {part.slice(2, -2)}
             </strong>
+          );
+        }
+        if (part.startsWith("`") && part.endsWith("`")) {
+          return (
+            <code key={i} className="font-mono text-[0.9em] text-accent-light">
+              {part.slice(1, -1)}
+            </code>
           );
         }
         if (part.startsWith("*") && part.endsWith("*")) {
@@ -123,7 +122,7 @@ function RichText({ text }: { text: string }) {
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-accent font-semibold text-[11px] sm:text-xs tracking-[0.24em] uppercase">
+    <p className="text-accent-light font-semibold text-[11px] sm:text-xs tracking-[0.24em] uppercase">
       {children}
     </p>
   );
@@ -132,38 +131,20 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 function SectionHeading({
   eyebrow,
   title,
-  accent,
   subtitle,
-  light = false,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
-  accent?: string;
   subtitle?: string;
-  light?: boolean;
 }) {
   return (
     <div className="mb-8 sm:mb-10">
-      <Eyebrow>{eyebrow}</Eyebrow>
-      <h2
-        className={`mt-3 text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.05] ${
-          light ? "text-slate-900" : "text-white"
-        }`}
-      >
+      {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+      <h2 className="mt-3 text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-[1.08] text-white">
         {title}
-        {accent && (
-          <>
-            {" "}
-            <span className={light ? "text-accent" : "text-accent-light"}>{accent}</span>
-          </>
-        )}
       </h2>
       {subtitle && (
-        <p
-          className={`text-base sm:text-lg leading-relaxed mt-5 max-w-3xl ${
-            light ? "text-slate-600" : "text-gray-400"
-          }`}
-        >
+        <p className="text-base sm:text-lg leading-relaxed mt-4 max-w-3xl text-gray-400">
           {subtitle}
         </p>
       )}
@@ -171,287 +152,280 @@ function SectionHeading({
   );
 }
 
-/** PageSpeed-Insights-style score ring — same conventions as the vein-ity report. */
-function PsiGauge({ score, label, note }: { score: number; label: string; note: string }) {
-  const radius = 52;
-  const circumference = 2 * Math.PI * radius;
-  const dashOffset = circumference * (1 - score / 100);
-  const color = score >= 90 ? "#0cce6b" : score >= 50 ? "#ffa400" : "#ff4e42";
+/**
+ * Every collapsible on the page. Closed on screen, forced open on paper by
+ * globals.css. The summary states what is inside rather than teasing it —
+ * a reader who does not open it has lost evidence, never a finding.
+ */
+function Disclosure({
+  id,
+  label,
+  blocks,
+}: {
+  id: string;
+  label: string;
+  blocks: string[];
+}) {
   return (
-    <div className="flex flex-col items-center">
-      <div className="relative w-28 h-28 sm:w-36 sm:h-36">
-        <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
-          <circle cx="60" cy="60" r={radius} strokeWidth="7" stroke={`${color}29`} fill="none" />
-          <circle
-            cx="60"
-            cy="60"
-            r={radius}
-            strokeWidth="7"
-            stroke={color}
-            fill="none"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={dashOffset}
-            className="gauge-sweep"
-            style={
-              {
-                "--gauge-circ": `${circumference}px`,
-                filter: `drop-shadow(0 0 10px ${color}66)`,
-              } as React.CSSProperties
-            }
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-3xl sm:text-4xl font-extrabold tabular-nums" style={{ color }}>
-            {score}
-          </span>
-        </div>
-      </div>
-      <div className="text-xs sm:text-sm text-gray-300 font-semibold mt-3 text-center leading-snug">
+    <details id={id} className="group mt-5 rounded-xl border border-white/10 bg-black/20">
+      <summary className="cursor-pointer list-none px-4 sm:px-5 py-3.5 flex items-center gap-3 text-sm font-bold text-gray-300 hover:text-white transition-colors">
+        <span aria-hidden className="text-accent-light group-open:rotate-180 transition-transform">
+          ▾
+        </span>
         {label}
+      </summary>
+      <div className="px-4 sm:px-5 pb-5 pt-1 border-t border-white/5">
+        {blocks.map((b, i) => (
+          <p key={i} className="text-sm leading-relaxed text-gray-300 mt-4">
+            <RichText text={b} />
+          </p>
+        ))}
       </div>
-      <div className="text-[11px] text-gray-500 mt-1 text-center leading-snug max-w-[16rem]">
-        {note}
-      </div>
-    </div>
+    </details>
   );
 }
 
-function StatRow({ stats }: { stats: Stat[] }) {
+/* ---------------- the four exhibit visuals ---------------- */
+
+function ListingVisual({ cards }: { cards: ListingCard[] }) {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-      {stats.map((s) => (
-        <div
-          key={s.label}
-          className="h-full rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6"
-        >
-          <div
-            className={`text-3xl sm:text-4xl md:text-5xl font-extrabold leading-none tabular-nums ${TONE_VALUE[s.tone]}`}
-          >
-            {s.value}
+    <div className="space-y-3">
+      {cards.map((c) => (
+        <div key={c.source} className="rounded-xl bg-white p-4 shadow-sm">
+          <div className="text-[10px] font-bold tracking-[0.18em] uppercase text-slate-400">
+            {c.source}
           </div>
-          <div className="text-[11px] sm:text-xs text-gray-400 mt-3 leading-snug">{s.label}</div>
+          <div className="mt-2 font-bold text-slate-900 text-sm sm:text-base">{c.name}</div>
+          <dl className="mt-2.5 space-y-1.5">
+            {c.fields.map((f) => (
+              <div key={f.label} className="flex flex-wrap items-baseline gap-x-2 text-sm">
+                <dt className="text-slate-500">{f.label} —</dt>
+                <dd className={`font-bold ${TONE_TEXT_LIGHT[f.tone]}`}>{f.value}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="mt-2 text-sm text-slate-500">{c.city}</div>
         </div>
       ))}
     </div>
   );
 }
 
-/**
- * Tables scroll inside their own container — the page body never scrolls
- * sideways, at any width.
- */
-function DataTable({ table, light = false }: { table: TableBlock; light?: boolean }) {
+function AddressVisual({
+  halves,
+}: {
+  halves: { figure: string; label: string; address: string; tone: Tone }[];
+}) {
   return (
-    <div className="mt-4">
-      {table.caption && (
+    <div className="grid sm:grid-cols-2 gap-3">
+      {halves.map((h) => (
         <div
-          className={`text-[10px] font-bold tracking-[0.22em] uppercase mb-3 ${
-            light ? "text-slate-500" : "text-gray-500"
+          key={h.label}
+          className={`rounded-xl border p-4 ${
+            h.tone === "critical"
+              ? "border-red-400/40 bg-red-500/10"
+              : "border-white/15 bg-white/[0.04]"
           }`}
         >
-          {table.caption}
+          <div className={`text-3xl font-extrabold tabular-nums leading-none ${TONE_TEXT[h.tone]}`}>
+            {h.figure}
+          </div>
+          <div className="mt-2 text-xs font-bold uppercase tracking-[0.14em] text-gray-400">
+            {h.label}
+          </div>
+          <div className="mt-2 font-mono text-[11px] sm:text-xs leading-relaxed text-gray-200 break-words">
+            {h.address}
+          </div>
         </div>
-      )}
-      <div
-        className={`rounded-2xl border overflow-hidden ${
-          light ? "border-slate-200 bg-white" : "border-white/10 bg-white/[0.03]"
-        }`}
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[640px]">
-            <thead>
-              <tr className={light ? "bg-slate-100 border-b border-slate-200" : "bg-white/[0.02] border-b border-white/10"}>
-                {table.columns.map((c) => (
-                  <th
-                    key={c}
-                    scope="col"
-                    className={`text-left text-[10px] font-bold tracking-[0.2em] uppercase px-3 sm:px-5 py-3 ${
-                      light ? "text-slate-500" : "text-gray-500"
-                    }`}
-                  >
-                    {c}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {table.rows.map((r) => (
-                <tr
-                  key={r.cells.join("|")}
-                  className={`align-top last:border-b-0 ${
-                    light ? "border-b border-slate-200" : "border-b border-white/10"
-                  } ${r.highlight ? (light ? "bg-accent/[0.07]" : "bg-accent/[0.12]") : ""}`}
-                >
-                  {r.cells.map((cell, i) => (
-                    <td
-                      key={i}
-                      className={`px-3 sm:px-5 py-3.5 leading-snug ${
-                        i === 0
-                          ? light
-                            ? "font-semibold text-slate-900"
-                            : "font-semibold text-white"
-                          : light
-                            ? "text-slate-700"
-                            : "text-gray-300"
-                      }`}
-                    >
-                      {cell}
-                      {r.highlight && i === 0 && (
-                        <span className="ml-2 align-middle text-[9px] font-bold tracking-[0.18em] uppercase text-accent-light">
-                          You
-                        </span>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      ))}
+    </div>
+  );
+}
+
+function TilesVisual({
+  tiles,
+  caption,
+}: {
+  tiles: { label: string; on: boolean }[];
+  caption: string;
+}) {
+  return (
+    <div>
+      {/* Always five across, never wrapped. The exhibit's whole claim is
+          "four of five", and a row that breaks 4+1 reads as the opposite. */}
+      <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+        {tiles.map((t) => (
+          <div
+            key={t.label}
+            className={`rounded-lg border px-1 py-3 text-center ${
+              t.on
+                ? "border-emerald-400/50 bg-emerald-500/15"
+                : "border-dashed border-red-400/40 bg-transparent"
+            }`}
+          >
+            <div
+              aria-hidden
+              className={`text-base leading-none ${t.on ? "text-emerald-400" : "text-red-400/70"}`}
+            >
+              {t.on ? "●" : "○"}
+            </div>
+            <div
+              className={`mt-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.06em] leading-tight ${
+                t.on ? "text-emerald-300" : "text-gray-400"
+              }`}
+            >
+              {t.label}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-xs text-gray-400 leading-relaxed">{caption}</p>
+    </div>
+  );
+}
+
+function PhoneVisual({ rows }: { rows: { number: string; source: string; tone: Tone }[] }) {
+  return (
+    <div className="space-y-2.5">
+      {rows.map((r) => (
+        <div
+          key={r.number}
+          className={`flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border px-3.5 py-3 ${
+            r.tone === "critical" ? "border-red-400/50 bg-red-500/[0.07]" : "border-white/10 bg-white/[0.04]"
+          }`}
+        >
+          <span className="font-mono text-sm sm:text-base font-bold text-white tabular-nums">
+            {r.number}
+          </span>
+          <span aria-hidden className="text-gray-600">
+            →
+          </span>
+          <span className="text-xs sm:text-sm text-gray-400">{r.source}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ExhibitVisual({ visual }: { visual: Visual }) {
+  if (visual.kind === "listings") return <ListingVisual cards={visual.cards} />;
+  if (visual.kind === "addresses") return <AddressVisual halves={visual.halves} />;
+  if (visual.kind === "tiles") return <TilesVisual tiles={visual.tiles} caption={visual.caption} />;
+  return <PhoneVisual rows={visual.rows} />;
+}
+
+/**
+ * Two columns: the claim on the left, the evidence for it on the right.
+ * Collapses to one column below 720px, where the figure reads first and the
+ * visual follows it.
+ */
+function ExhibitCard({ e }: { e: Exhibit }) {
+  return (
+    <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6 md:p-7">
+      <div className="grid gap-6 md:grid-cols-2 md:gap-8 md:items-start">
+        <div>
+          <div
+            className={`text-4xl sm:text-5xl font-extrabold leading-none tabular-nums ${TONE_TEXT[e.figureTone]}`}
+          >
+            {e.figure}
+          </div>
+          <h3 className="mt-4 text-lg sm:text-xl font-extrabold leading-snug text-white">
+            {e.headline}
+          </h3>
+          <p className="mt-3 text-sm sm:text-base leading-relaxed text-gray-400">{e.line}</p>
+        </div>
+        <div className="rounded-xl border border-white/10 bg-black/30 p-4 sm:p-5">
+          <ExhibitVisual visual={e.visual} />
         </div>
       </div>
+      {e.disclosure && (
+        <Disclosure
+          id={`exhibit-${e.id}`}
+          label={e.disclosure.label}
+          blocks={e.disclosure.blocks}
+        />
+      )}
+    </article>
+  );
+}
+
+/* ---------------- the site section ---------------- */
+
+function ScoreTile({
+  score,
+  label,
+  note,
+  tone,
+}: {
+  score: string;
+  label: string;
+  note: string;
+  tone: Tone;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6 text-center">
+      <div className={`text-5xl sm:text-6xl font-extrabold leading-none tabular-nums ${TONE_TEXT[tone]}`}>
+        {score}
+      </div>
+      <div className="mt-3 text-sm font-bold text-white">{label}</div>
+      <div className="mt-1 text-[11px] text-gray-500">{note}</div>
     </div>
   );
 }
 
 /**
- * Findings open by default. The vein-ity report collapses them, but this
- * document is meant to be printed and handed around, and a closed <details>
- * prints as a headline with nothing under it. Still collapsible on screen.
+ * The number is printed as text beside every bar on purpose: print engines
+ * routinely drop background fills, and the comparison has to survive that.
  */
-/**
- * Every finding collapses now, criticals included.
- *
- * The chip and the one-line summary ARE the finding; the body is proof for
- * whoever wants it. Six open criticals were most of Section 01's height, and
- * the strip above the list carries the same information in four sentences.
- * Nothing is deleted — twenty-one findings checked by hand is the reason this
- * document is not a template, and every one of them is still a click away.
- *
- * PRINT. A closed <details> prints as a headline with nothing under it, so
- * globals.css forces every one of them open under @media print. If that rule
- * ever goes, the PDF quietly loses the entire report — which is now literally
- * true rather than half true.
- */
-function Finding({ f, light = false }: { f: FindingBlock; light?: boolean }) {
-  const Rich = light ? RichTextLight : RichText;
+function BarCompare({
+  title,
+  rows,
+}: {
+  title: string;
+  rows: { label: string; value: number; self: boolean }[];
+}) {
   return (
-    <details
-      id={`finding-${f.id}`}
-      className={`group rounded-2xl border border-l-4 ${TONE_BAR[f.tone]} overflow-hidden ${
-        light
-          ? "border-slate-200 bg-white shadow-sm"
-          : "border-white/10 bg-white/[0.03] backdrop-blur"
-      }`}
-    >
-      <summary className="cursor-pointer list-none px-5 sm:px-6 py-4 sm:py-5 flex items-start gap-3 sm:gap-4 min-h-[64px]">
-        <span
-          className={`shrink-0 text-[10px] font-bold tracking-[0.18em] uppercase px-2.5 py-1 rounded-full border ${
-            light ? TONE_CHIP_LIGHT[f.tone] : TONE_CHIP[f.tone]
-          }`}
-        >
-          {TONE_LABEL[f.tone]}
-        </span>
-        <div className="flex-1 min-w-0">
-          {f.tag && (
-            <div
-              className={`text-[10px] font-bold tracking-[0.22em] uppercase mb-1.5 ${
-                light ? "text-accent" : "text-accent-light"
-              }`}
-            >
-              {f.tag}
+    <div className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-5 sm:p-6">
+      <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500">{title}</div>
+      <div className="mt-5 space-y-4">
+        {rows.map((r) => (
+          <div key={r.label}>
+            <div className="flex items-baseline justify-between gap-3">
+              <span
+                className={`text-sm leading-snug ${
+                  r.self ? "font-extrabold text-accent-light" : "text-gray-300"
+                }`}
+              >
+                {r.label}
+              </span>
+              <span
+                className={`text-sm tabular-nums ${
+                  r.self ? "font-extrabold text-accent-light" : "font-bold text-gray-300"
+                }`}
+              >
+                {r.value}
+              </span>
             </div>
-          )}
-          <h4
-            className={`font-bold text-base sm:text-lg leading-snug ${
-              light ? "text-slate-900" : "text-white"
-            }`}
-          >
-            {f.title}
-          </h4>
-          {f.subhead && (
-            <p
-              className={`text-sm sm:text-base leading-snug mt-2 ${
-                light ? "text-slate-600" : "text-gray-400"
-              }`}
-            >
-              {f.subhead}
-            </p>
-          )}
-        </div>
-        <span
-          aria-hidden
-          className={`shrink-0 mt-1 group-open:rotate-180 transition-transform text-lg ${
-            light ? "text-slate-400" : "text-gray-500"
-          }`}
-        >
-          ▾
-        </span>
-      </summary>
-
-      <div
-        className={`px-5 sm:px-6 pb-5 sm:pb-6 pt-1 border-t ${
-          light ? "border-slate-100" : "border-white/5"
-        }`}
-      >
-        {f.body.map((p, i) => (
-          <p
-            key={i}
-            className={`text-sm sm:text-base leading-relaxed mt-4 ${
-              light ? "text-slate-700" : "text-gray-200"
-            }`}
-          >
-            <Rich text={p} />
-          </p>
-        ))}
-        {f.table && <DataTable table={f.table} light={light} />}
-        {f.meaning && (
-          <div
-            className={`mt-5 rounded-xl border p-4 sm:p-5 ${
-              light ? "border-slate-200 bg-slate-50" : "border-white/10 bg-black/30"
-            }`}
-          >
-            <div
-              className={`text-[10px] font-bold tracking-[0.2em] uppercase mb-2 ${
-                light ? "text-slate-500" : "text-gray-500"
-              }`}
-            >
-              What this means
+            <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-white/10">
+              <div
+                className={`h-full rounded-full ${r.self ? "bg-accent" : "bg-slate-500"}`}
+                style={{ width: `${r.value}%` }}
+              />
             </div>
-            <p
-              className={`text-sm sm:text-base leading-relaxed ${
-                light ? "text-slate-700" : "text-gray-200"
-              }`}
-            >
-              <Rich text={f.meaning} />
-            </p>
           </div>
-        )}
+        ))}
       </div>
-    </details>
+    </div>
   );
 }
-
-function SubHeading({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
-  return (
-    <h3
-      className={`text-xl sm:text-2xl font-extrabold tracking-tight mt-14 first:mt-0 mb-5 ${
-        light ? "text-slate-900" : "text-white"
-      }`}
-    >
-      {children}
-    </h3>
-  );
-}
-
 
 export default function MillerVeinAuditPage() {
   return (
     <div className="min-h-screen bg-dark text-white audit-page">
       <HashOpen />
 
-      {/* ============ HERO ============ */}
-      <section className="relative bg-dark pt-16 sm:pt-20 md:pt-24 pb-14 md:pb-16 overflow-hidden">
+      {/* ============ 01 · HERO ============ */}
+      <section className="relative bg-dark pt-16 sm:pt-20 md:pt-24 pb-12 md:pb-16 overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none no-print">
           <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] md:w-[520px] md:h-[520px] rounded-full bg-[#1a2a6c]/50 blur-[60px] md:blur-[130px]" />
           <div className="absolute bottom-1/4 right-1/4 w-[320px] h-[320px] md:w-[480px] md:h-[480px] rounded-full bg-[#2D6CDF]/20 blur-[60px] md:blur-[140px]" />
@@ -474,422 +448,187 @@ export default function MillerVeinAuditPage() {
           </div>
 
           <Eyebrow>{pageMeta.eyebrow}</Eyebrow>
-          <h1 className="mt-5 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.05] tracking-tight max-w-5xl">
-            {pageMeta.h1}
+          <h1 className="mt-5 text-3xl sm:text-5xl md:text-6xl font-extrabold text-white leading-[1.06] tracking-tight max-w-4xl">
+            {pageMeta.h1Lead} <span className="text-red-400">{pageMeta.h1Accent}</span>
+            {pageMeta.h1Tail}
           </h1>
           <p className="mt-6 text-gray-300 text-base sm:text-lg md:text-xl max-w-3xl leading-relaxed font-medium">
-            {pageMeta.lede}
+            {pageMeta.sub}
           </p>
 
-          <dl className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 max-w-4xl">
-            {pageMeta.metaRow.map((m) => (
-              <div key={m.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-                <dt className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500">{m.label}</dt>
-                <dd className="text-sm sm:text-base text-white font-semibold mt-2 leading-snug">{m.value}</dd>
+          {/* A single inline row of figures — not cards. Four facts, read in
+              one pass, separated by middots that disappear at the wrap. */}
+          <dl className="mt-10 flex flex-wrap items-baseline gap-x-5 gap-y-3 border-t border-white/10 pt-6 max-w-4xl">
+            {pageMeta.figures.map((f, i) => (
+              <div key={f.label} className="flex items-baseline gap-2">
+                {i > 0 && (
+                  <span aria-hidden className="hidden sm:inline text-gray-700 mr-3">
+                    ·
+                  </span>
+                )}
+                <dt className="sr-only">{f.label}</dt>
+                <dd className="flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-extrabold tabular-nums text-white leading-none">
+                    {f.value}
+                  </span>
+                  <span className="text-xs sm:text-sm text-gray-400 leading-snug">{f.label}</span>
+                </dd>
               </div>
             ))}
           </dl>
-          <p className="mt-6 text-gray-500 text-xs sm:text-sm leading-relaxed max-w-3xl">{pageMeta.verifiedLine}</p>
         </div>
       </section>
-
-      {/* ============ THE SHORT VERSION ============ */}
-      <section className="bg-warm-bg py-10 sm:py-12 border-t border-black/5">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="rounded-3xl border border-white/10 bg-dark-card shadow-xl p-6 sm:p-8">
-            <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500">{summary.eyebrow}</div>
-            <p className="mt-3 text-xl sm:text-2xl md:text-3xl font-extrabold leading-[1.15] text-white max-w-4xl">
-              <RichText text={summary.verdictLine} />
-            </p>
-
-            <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,20rem)_1fr] lg:items-start">
-              <div>
-                <div className="flex items-center gap-3">
-                  {summary.scores.map((sc) => (
-                    <div key={sc.label} className="flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-center">
-                      <div className={`text-2xl sm:text-3xl font-extrabold tabular-nums leading-none ${sc.label === "Speed" ? "text-orange-400" : "text-emerald-400"}`}>
-                        {sc.value}
-                      </div>
-                      <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-1.5 leading-tight">{sc.label}</div>
-                    </div>
-                  ))}
-                </div>
-                <p className="mt-3 text-gray-400 text-sm leading-snug">{summary.scoresNote}</p>
-              </div>
-              <ul className="space-y-2.5">
-                {summary.findings.map((line) => (
-                  <li key={line} className="flex items-start gap-3">
-                    <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
-                    <span className="text-gray-200 text-sm sm:text-base leading-snug">{line}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-white/10 pt-6">
-              {/* One price, no tier and no chip — there is nothing to choose
-                  between. Wraps because at 375 a single row ran past the
-                  viewport by 4px. */}
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
-                <span className="text-2xl sm:text-3xl font-extrabold tabular-nums text-white">{summary.recommendation.price}</span>
-                <span className="text-sm text-gray-500">{summary.recommendation.per}</span>
-                <span aria-hidden className="text-gray-600">—</span>
-                <span className="text-white font-bold text-base sm:text-lg">{summary.recommendation.what}</span>
-              </div>
-              <span className="text-sm text-accent-light">{summary.recommendation.note}</span>
-              <a href="#verdict" className="no-print ml-auto inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.05] px-5 py-3 text-sm font-bold text-gray-200 hover:bg-white/10 transition-colors">
-                {summary.readMore}
-                <span aria-hidden>↓</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ SECTION NAV ============ */}
-      <nav aria-label="Report sections" className="sticky top-0 z-50 bg-dark/90 backdrop-blur border-y border-white/10 no-print">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <ul className="flex gap-1 sm:gap-2 overflow-x-auto py-2.5">
-            {nav.map((n) => (
-              <li key={n.id}>
-                <a href={`#${n.id}`} className="inline-flex items-center whitespace-nowrap rounded-full px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-bold text-gray-300 hover:text-white hover:bg-white/[0.07] transition-colors">
-                  {n.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </nav>
 
       <main>
-        {/* ============ VERDICT ============ */}
-        <section id="verdict" className="bg-dark py-16 sm:py-24 scroll-mt-16">
+        {/* ============ 02 · THE CLINIC GRID ============ */}
+        <section className="bg-black/20 border-t border-white/10 py-14 sm:py-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="rounded-3xl border border-white/10 bg-black/40 p-6 sm:p-10 md:p-12">
-              <SectionHeading eyebrow="The verdict" title={verdict.title} />
-              {verdict.paragraphs.map((p, i) => (
-                <p key={i} className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-3xl mt-5">
-                  <RichText text={p} />
-                </p>
+            <SectionHeading eyebrow={clinicGrid.eyebrow} title={clinicGrid.title} />
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+              {clinicGrid.clinics.map((c) => (
+                <div
+                  key={c.city}
+                  className={`rounded-2xl p-4 sm:p-5 ${
+                    c.state === "wrong"
+                      ? "border-2 border-red-500/70 bg-red-500/10"
+                      : "border border-dashed border-white/20 bg-transparent"
+                  }`}
+                >
+                  <div
+                    className={`font-bold text-sm sm:text-base leading-snug ${
+                      c.state === "wrong" ? "text-white" : "text-gray-400"
+                    }`}
+                  >
+                    {c.city}
+                  </div>
+                  <div
+                    className={`mt-2 text-[11px] font-bold uppercase tracking-[0.14em] ${
+                      c.state === "wrong" ? "text-red-400" : "text-gray-600"
+                    }`}
+                  >
+                    {c.status}
+                  </div>
+                </div>
               ))}
-              <blockquote className="mt-8 border-l-2 border-accent/60 pl-5 sm:pl-6 max-w-3xl">
-                <p className="text-white text-lg sm:text-xl md:text-2xl font-bold leading-snug">{verdict.pullquote}</p>
-              </blockquote>
-              <p className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-3xl mt-8">
-                <RichText text={verdict.closing} />
-              </p>
-              <div className="mt-10">
-                <StatRow stats={verdict.stats} />
-              </div>
-              <p className="text-gray-500 text-xs sm:text-sm leading-relaxed max-w-3xl mt-8">{verdict.footnote}</p>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
+              {clinicGrid.legend.map((l) => (
+                <div key={l.text} className="flex items-center gap-2.5">
+                  <span
+                    aria-hidden
+                    className={`h-3 w-3 shrink-0 rounded-sm ${
+                      l.state === "wrong"
+                        ? "border-2 border-red-500/70 bg-red-500/20"
+                        : "border border-dashed border-white/30"
+                    }`}
+                  />
+                  <span className="text-xs text-gray-400">{l.text}</span>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-5 text-sm text-gray-500 leading-relaxed max-w-3xl">
+              {clinicGrid.footnote}
+            </p>
+          </div>
+        </section>
+
+        {/* ============ 03 · THE FOUR EXHIBITS ============ */}
+        <section className="bg-dark border-t border-white/10 py-14 sm:py-20">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <SectionHeading title={exhibitsSection.title} />
+            <div className="space-y-5 sm:space-y-6">
+              {exhibits.map((e) => (
+                <ExhibitCard key={e.id} e={e} />
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ============ 01 — THE WEBSITE AUDIT ============ */}
-        <section id="website" className="bg-warm-bg py-16 sm:py-24 scroll-mt-16 border-y border-black/5">
+        {/* ============ 04 · THE SITE ============ */}
+        <section className="bg-black/20 border-t border-white/10 py-14 sm:py-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <SectionHeading light eyebrow="Section 01" title={websiteSection.title} subtitle={websiteSection.sub} />
-
-            <div className="rounded-3xl border border-white/10 bg-dark-card shadow-xl p-6 sm:p-10">
-              <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500">{engine.eyebrow}</div>
-              <h3 className="mt-3 text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-[1.08] text-white">
-                {engine.headline} <span className="text-accent-light">{engine.headlineAccent}</span>
-              </h3>
-              <p className="mt-5 text-gray-400 text-base sm:text-lg leading-relaxed max-w-3xl">
-                <RichText text={engine.lede} />
-              </p>
-
-              <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6 items-start">
-                {engine.scores.map((s) => (
-                  <PsiGauge key={s.label} score={s.score} label={s.label} note={s.note} />
-                ))}
-                {/* Speed renders as a ring like the other two — a single dated
-                    run, reported as measured. The lab-versus-field distinction
-                    is carried in the metric cards and the translation below,
-                    where it can be explained rather than compressed. */}
-                <PsiGauge
-                  score={Number(engine.speed.value)}
-                  label={engine.speed.label}
-                  note={engine.speed.note}
+            <SectionHeading eyebrow={site.eyebrow} title={site.title} />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5">
+              {site.tiles.map((t) => (
+                <ScoreTile
+                  key={t.label}
+                  score={t.score}
+                  label={t.label}
+                  note={t.note}
+                  tone={t.tone}
                 />
-              </div>
-
-              <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
-                {engine.speed.metrics.map((m) => (
-                  <div key={m.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <div className="text-[11px] sm:text-xs text-gray-400 uppercase tracking-wider">{m.label}</div>
-                      <div className={`text-2xl sm:text-3xl font-extrabold tabular-nums ${TONE_VALUE[m.tone]}`}>{m.value}</div>
-                    </div>
-                    <p className="text-gray-500 text-xs sm:text-sm mt-2 leading-snug">{m.note}</p>
-                  </div>
-                ))}
-              </div>
-
-              <p className="mt-8 text-gray-200 text-base sm:text-lg leading-relaxed max-w-3xl">{engine.translation}</p>
-              <p className="mt-4 text-gray-500 text-sm leading-relaxed max-w-3xl">{engine.platformNote}</p>
-            </div>
-
-            <div className="mt-10 rounded-2xl border-l-4 border-l-red-500/70 border border-slate-200 bg-white shadow-sm p-5 sm:p-7">
-              <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-red-800 mb-4">{criticalStrip.title}</div>
-              <ul className="space-y-3">
-                {criticalStrip.lines.map((line) => (
-                  <li key={line} className="flex items-start gap-3">
-                    <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
-                    <span className="text-slate-800 text-sm sm:text-base leading-snug">{line}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="mt-6 space-y-4">
-              {websiteFindings.map((f) => (
-                <Finding key={f.id} f={f} light />
               ))}
             </div>
+            <BarCompare title={site.comparison.title} rows={site.comparison.rows} />
+            <Disclosure
+              id="site-numbers"
+              label={site.disclosure.label}
+              blocks={site.disclosure.blocks}
+            />
+          </div>
+        </section>
 
-            <div className="mt-10 rounded-3xl border-2 border-emerald-300 bg-emerald-50 p-6 sm:p-8">
-              <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-emerald-800 mb-3">{crowns.title}</div>
-              <p className="text-slate-700 text-base sm:text-lg leading-relaxed max-w-3xl mb-6">{crowns.lead}</p>
-              <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-5">
-                {crowns.items.map((c) => (
-                  <li key={c.title} className="flex items-start gap-3">
-                    <span aria-hidden className="mt-1.5 text-emerald-700 font-bold">✓</span>
-                    <span>
-                      <span className="block text-slate-900 font-bold text-sm sm:text-base leading-snug">{c.title}</span>
-                      <span className="block text-slate-700 text-sm leading-relaxed mt-1">{c.detail}</span>
+        {/* ============ 05 · THE PLAN ============ */}
+        <section className="bg-dark border-t border-white/10 py-14 sm:py-20">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <SectionHeading title={plan.title} subtitle={plan.sub} />
+            <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
+              {plan.phases.map((p) => (
+                <div
+                  key={p.num}
+                  className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6"
+                >
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-accent-light">
+                      Phase {p.num}
                     </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* ============ 02 — THE WEB PRESENCE SCAN ============ */}
-        <section id="presence" className="bg-dark py-16 sm:py-24 scroll-mt-16">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <SectionHeading eyebrow="Section 02" title={presenceSection.title} subtitle={presenceSection.sub} />
-
-            <SubHeading>{addressProblem.title}</SubHeading>
-            <p className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-3xl">
-              <RichText text={addressProblem.body} />
-            </p>
-            <DataTable table={addressProblem.table} />
-            <p className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-3xl mt-6">
-              <RichText text={addressProblem.mechanism} />
-            </p>
-            <div className="mt-5 rounded-xl bg-black/30 border border-white/10 p-4 sm:p-5 max-w-3xl">
-              <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-500 mb-2">What this means</div>
-              <p className="text-gray-200 text-sm sm:text-base leading-relaxed">{addressProblem.cost}</p>
-            </div>
-            <p className="text-gray-500 text-xs sm:text-sm leading-relaxed max-w-3xl mt-4">{addressProblem.note}</p>
-
-            <SubHeading>{domains.title}</SubHeading>
-            {domains.body.map((p, i) => (
-              <p key={i} className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-3xl mt-4 first:mt-0">
-                <RichText text={p} />
-              </p>
-            ))}
-            <h4 className="text-lg sm:text-xl font-extrabold tracking-tight text-white mt-10 mb-4">{domains.subdomainTitle}</h4>
-            {domains.subdomain.map((p, i) => (
-              <p key={i} className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-3xl mt-4 first:mt-0">
-                <RichText text={p} />
-              </p>
-            ))}
-
-            <SubHeading>{directories.title}</SubHeading>
-            <p className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-3xl">
-              <RichText text={directories.body} />
-            </p>
-            <div className="mt-8">
-              <StatRow stats={directories.stats} />
-            </div>
-            <div className="mt-6 space-y-4">
-              {directories.findings.map((f) => (
-                <Finding key={f.id} f={f} />
-              ))}
-            </div>
-
-            <SubHeading>{profiles.title}</SubHeading>
-            {profiles.body.map((p, i) => (
-              <p key={i} className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-3xl mt-4 first:mt-0">
-                <RichText text={p} />
-              </p>
-            ))}
-            <div className="mt-5 rounded-xl bg-black/30 border border-white/10 p-4 sm:p-5 max-w-3xl">
-              <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-500 mb-2">What this means</div>
-              <p className="text-gray-200 text-sm sm:text-base leading-relaxed">{profiles.meaning}</p>
-            </div>
-            <p className="text-gray-500 text-xs sm:text-sm leading-relaxed max-w-3xl mt-4">{profiles.omitted}</p>
-          </div>
-        </section>
-
-        {/* ============ 03 — THE BUILD AND THE PLAN ============ */}
-        <section id="plan" className="bg-warm-bg py-16 sm:py-24 scroll-mt-16 border-y border-black/5">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <SectionHeading light eyebrow="Section 03" title={thesis.title} subtitle={thesis.sub} />
-
-            <p className="text-slate-700 text-base sm:text-lg leading-relaxed max-w-3xl">{thesis.intro}</p>
-            <blockquote className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm p-6 sm:p-8 max-w-3xl">
-              <p className="text-slate-900 text-lg sm:text-xl md:text-2xl font-bold leading-snug">“{thesis.quote}”</p>
-              <footer className="mt-3 text-slate-500 text-sm">— veinhealthclinics.com</footer>
-            </blockquote>
-            {thesis.body.map((p, i) => (
-              <p key={i} className="text-slate-700 text-base sm:text-lg leading-relaxed max-w-3xl mt-6">
-                <RichTextLight text={p} />
-              </p>
-            ))}
-            <p className="text-slate-700 text-base sm:text-lg leading-relaxed max-w-3xl mt-6 font-semibold">{thesis.closing}</p>
-
-            <div className="mt-20 border-t border-black/10 pt-14">
-              <SectionHeading light eyebrow="The plan" title={plan.title} subtitle={plan.sub} />
-              <div className="rounded-2xl border-2 border-accent/40 bg-accent/[0.06] p-5 sm:p-7 mb-8">
-                <p className="text-slate-800 text-base sm:text-lg leading-relaxed max-w-3xl">
-                  <RichTextLight text={plan.spine} />
-                </p>
-              </div>
-
-              <div className="space-y-5">
-                {plan.phases.map((phase, i) => (
-                  <div key={phase.name} className="rounded-3xl border border-slate-200 bg-white shadow-sm p-6 sm:p-8">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-white font-extrabold text-sm tabular-nums">
-                        {i + 1}
-                      </span>
-                      <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">{phase.name}</h3>
-                      <span className="inline-flex items-center rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-[10px] font-bold tracking-[0.18em] uppercase text-slate-600">
-                        {phase.timeframe}
-                      </span>
-                    </div>
-                    <p className="mt-4 text-accent text-base sm:text-lg font-semibold leading-snug">{phase.outcome}</p>
-                    <ol className="mt-6 space-y-4 list-none">
-                      {phase.steps.map((step, n) => (
-                        <li key={step} className="flex items-start gap-3 sm:gap-4">
-                          <span className="mt-0.5 shrink-0 text-sm font-extrabold tabular-nums text-slate-400 w-5 text-right">{n + 1}</span>
-                          <span className="text-slate-700 text-sm sm:text-base leading-relaxed">
-                            <RichTextLight text={step} />
-                          </span>
-                        </li>
-                      ))}
-                    </ol>
+                    <span aria-hidden className="text-gray-700">
+                      ·
+                    </span>
+                    <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500">
+                      {p.timeframe}
+                    </span>
                   </div>
-                ))}
-              </div>
-
-              <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-3xl mt-8">{plan.punchList}</p>
-              <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-3xl mt-4">{plan.guarantee}</p>
+                  <h3 className="mt-3 text-base sm:text-lg font-extrabold text-white leading-snug">
+                    {p.name}
+                  </h3>
+                  <ul className="mt-4 space-y-2.5">
+                    {p.bullets.map((b) => (
+                      <li key={b} className="flex items-start gap-2.5">
+                        <span
+                          aria-hidden
+                          className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-accent-light"
+                        />
+                        <span className="text-sm leading-snug text-gray-300">{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ============ 04 — INVESTMENT ============ */}
-        <section id="investment" className="bg-dark py-16 sm:py-24 scroll-mt-16">
+        {/* ============ 06 · CLOSE ============ */}
+        <section className="bg-black/20 border-t border-white/10 py-14 sm:py-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <SectionHeading eyebrow="Section 04" title={investment.title} subtitle={investment.sub} />
-
-            {/* ONE card. The published rate is shown struck through beside the
-                held rate — the discount comes off a figure he can check at
-                inflowmd.com/pricing, and it should be the first thing he sees. */}
-            <div className="rounded-3xl border-2 border-accent/60 bg-accent/[0.09] ring-1 ring-accent/40 p-6 sm:p-10">
-              <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                {investment.packageName}
-              </h3>
-
-              <div className="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-2">
-                <span className="text-lg sm:text-xl font-semibold tabular-nums text-gray-500 line-through">
-                  {investment.published}
-                </span>
-                <span className="text-5xl sm:text-6xl font-extrabold tabular-nums text-white leading-none">
-                  {investment.price}
-                </span>
-                <span className="text-base text-gray-400">{investment.per}</span>
-              </div>
-
-              <p className="mt-3 text-accent-light text-base sm:text-lg font-semibold leading-snug">
-                {investment.savings}
+            <div className="rounded-3xl border border-white/10 bg-black/30 p-6 sm:p-10 md:p-12">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-[1.08] max-w-3xl">
+                {close.title}
+              </h2>
+              <p className="mt-5 text-gray-300 text-base sm:text-lg leading-relaxed max-w-2xl">
+                {close.body}
               </p>
-
-              <ul className="mt-5 space-y-1.5">
-                {investment.split.map((row) => (
-                  <li key={row.label} className="flex flex-wrap items-baseline gap-x-2 text-gray-300 text-sm sm:text-base">
-                    <span>{row.label}</span>
-                    <span aria-hidden className="text-gray-600">—</span>
-                    <span className="font-semibold text-white tabular-nums">{row.value}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <p className="mt-6 text-accent-light text-base sm:text-lg font-semibold leading-relaxed max-w-3xl">
-                {investment.subline}
-              </p>
-
-              <div className="mt-10 grid gap-8 sm:grid-cols-2">
-                {investment.groups.map((g) => (
-                  <div key={g.title}>
-                    <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500 mb-4">
-                      {g.title}
-                    </div>
-                    <ul className="space-y-2.5">
-                      {g.items.map((item) => (
-                        <li key={item} className="flex items-start gap-3">
-                          <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-light" />
-                          <span className="text-gray-200 text-sm sm:text-base leading-relaxed">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Ad spend — its own block, outside the price card, so it can
-                never be read as part of the monthly figure. */}
-            <div className="mt-6 rounded-3xl border border-white/10 bg-black/30 p-6 sm:p-8">
-              <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500 mb-4">
-                {investment.adSpendTitle}
-              </div>
-              {investment.adSpend.map((p, i) => (
-                <p key={i} className="text-gray-200 text-base sm:text-lg leading-relaxed max-w-3xl mt-4 first:mt-0">
-                  {p}
-                </p>
-              ))}
-            </div>
-
-            {/* Scope boundary, in the muted treatment the old Essentials card
-                used for its limitation line. */}
-            <p className="mt-6 text-gray-500 text-xs sm:text-sm leading-relaxed max-w-3xl">
-              {investment.limitation}
-            </p>
-
-            <p className="mt-6 text-accent-light text-base sm:text-lg font-semibold leading-relaxed">
-              {investment.deadline}
-            </p>
-          </div>
-        </section>
-
-        {/* ============ CLOSING ============ */}
-        <section className="bg-dark pb-16 sm:pb-24">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="rounded-3xl border border-white/10 bg-black/40 p-6 sm:p-10 md:p-12">
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-[1.08]">{closing.title}</h3>
-              {closing.paragraphs.map((p, i) => (
-                <p key={i} className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-3xl mt-5">
-                  <RichText text={p} />
-                </p>
-              ))}
-              <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm sm:text-base">
-                <span className="text-white font-bold">{closing.signature.name}</span>
-                <span aria-hidden className="text-gray-600">·</span>
-                <a href={`mailto:${closing.signature.email}`} className="text-accent-light underline decoration-white/20 hover:decoration-accent-light">
-                  {closing.signature.email}
-                </a>
-                <span aria-hidden className="text-gray-600">·</span>
-                <a href="https://www.inflowmd.com" className="text-accent-light underline decoration-white/20 hover:decoration-accent-light">
-                  {closing.signature.site}
-                </a>
-              </div>
+              <a
+                href={close.ctaHref}
+                className="mt-8 inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3.5 text-sm sm:text-base font-bold text-white hover:bg-accent-light transition-colors"
+              >
+                {close.ctaLabel}
+                <span aria-hidden>→</span>
+              </a>
             </div>
           </div>
         </section>
@@ -897,48 +636,25 @@ export default function MillerVeinAuditPage() {
 
       {/* ============ FOOTER ============ */}
       <footer className="border-t border-white/10 bg-black/30">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-12 text-sm text-gray-400">
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500 mb-2">Prepared by</div>
-              <div className="text-white font-bold">Clayton Peterson</div>
-              <div>Founder, InflowMD</div>
-              <div className="mt-2">
-                <a href="https://www.inflowmd.com" className="text-accent-light underline decoration-white/20 hover:decoration-accent-light">
-                  inflowmd.com
-                </a>
-              </div>
-              <p className="mt-4 leading-relaxed">{footer.line}</p>
-            </div>
-            <div>
-              <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500 mb-2">Methodology</div>
-              <p className="leading-relaxed">{footer.methodology}</p>
-            </div>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
+            <span className="text-white font-bold">{close.signature.name}</span>
+            <span aria-hidden className="text-gray-600">
+              ·
+            </span>
+            <a
+              href={`mailto:${close.signature.email}`}
+              className="text-accent-light underline decoration-white/20 hover:decoration-accent-light"
+            >
+              {close.signature.email}
+            </a>
           </div>
+          <p className="mt-4 text-xs text-gray-500 leading-relaxed">{footer.line}</p>
+          {/* The could-not-verify list is what keeps the rest of the document
+              trustworthy, so it is collapsed rather than dropped. */}
+          <Disclosure id="method" label={footer.methodLabel} blocks={footer.method} />
         </div>
       </footer>
     </div>
-  );
-}
-
-/** RichText for the light sections — bold has to darken, not brighten. */
-function RichTextLight({ text }: { text: string }) {
-  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).filter(Boolean);
-  return (
-    <>
-      {parts.map((part, i) => {
-        if (part.startsWith("**") && part.endsWith("**")) {
-          return (
-            <strong key={i} className="font-bold text-slate-900">
-              {part.slice(2, -2)}
-            </strong>
-          );
-        }
-        if (part.startsWith("*") && part.endsWith("*")) {
-          return <em key={i}>{part.slice(1, -1)}</em>;
-        }
-        return <span key={i}>{part}</span>;
-      })}
-    </>
   );
 }
