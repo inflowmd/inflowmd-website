@@ -57,3 +57,17 @@ next-env.d.ts
 
 # Prospect research — verification notes, never shipped
 research/
+
+# Conference attendee CSV — superseded by data/hps-practices.json and kept
+# locally only. NOTE: an older 3-row version of this path is already in git
+# history and is still tracked on some branches; ignoring it here stops it
+# being re-added, it does not remove what is already committed.
+data/attendees.csv
+
+# Stale duplicate of the booth client. The live one is
+# src/app/audit/BoothClient.tsx; this copy is imported by nothing and no
+# longer type-checks against the current AuditScores type.
+src/app/booth/BoothClient.tsx
+
+# Claude Code's own worktree state — never belongs to the project.
+.claude/worktrees/
