@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import type { Metadata } from "next";
 import PrintButton from "../[slug]/PrintButton";
 import HashOpen from "../[slug]/HashOpen";
@@ -7,6 +8,7 @@ import {
   exhibits,
   exhibitsSection,
   footer,
+  mechanism,
   meta as pageMeta,
   plan,
   practice,
@@ -358,24 +360,61 @@ function ExhibitCard({ e }: { e: Exhibit }) {
 
 /* ---------------- the site section ---------------- */
 
-function ScoreTile({
-  score,
-  label,
-  note,
-  tone,
-}: {
-  score: string;
-  label: string;
-  note: string;
-  tone: Tone;
-}) {
+/**
+ * His numbers on the left, a build of ours on the right, one row per metric.
+ * The right column is attributed to a named domain on every screen: an
+ * unattributed green column next to his would read as a promise about his
+ * site, which is the one thing this block must never do.
+ */
+function SideBySide({ data }: { data: typeof site.sideBySide }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6 text-center">
-      <div className={`text-5xl sm:text-6xl font-extrabold leading-none tabular-nums ${TONE_TEXT[tone]}`}>
-        {score}
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6 md:p-8">
+      <div className="grid grid-cols-[1fr_auto_1fr] gap-x-3 sm:gap-x-6 gap-y-5 items-end">
+        {/* headers */}
+        <div>
+          <div className="text-sm sm:text-base font-extrabold text-white leading-snug">
+            {data.left.title}
+          </div>
+          <div className="mt-1 text-[11px] sm:text-xs text-gray-500 leading-snug">
+            {data.left.sub}
+          </div>
+        </div>
+        <div aria-hidden />
+        <div>
+          <div className="text-sm sm:text-base font-extrabold text-emerald-400 leading-snug">
+            {data.right.title}
+          </div>
+          <div className="mt-1 text-[11px] sm:text-xs text-gray-500 leading-snug">
+            {data.right.sub}
+          </div>
+        </div>
+
+        {data.rows.map((r) => (
+          <Fragment key={r.label}>
+            <div className="col-span-3 border-t border-white/10 pt-4 -mb-1">
+              <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500">
+                {r.label}
+              </div>
+            </div>
+            <div
+              className={`text-4xl sm:text-5xl font-extrabold tabular-nums leading-none ${TONE_TEXT[r.mineTone]}`}
+            >
+              {r.mine}
+            </div>
+            <div aria-hidden className="text-gray-600 text-xl sm:text-2xl pb-1">
+              →
+            </div>
+            <div className="text-4xl sm:text-5xl font-extrabold tabular-nums leading-none text-emerald-400">
+              {r.theirs}
+            </div>
+          </Fragment>
+        ))}
       </div>
-      <div className="mt-3 text-sm font-bold text-white">{label}</div>
-      <div className="mt-1 text-[11px] text-gray-500">{note}</div>
+
+      <p className="mt-6 border-t border-white/10 pt-4 text-xs sm:text-sm text-emerald-400/90 leading-relaxed">
+        {data.right.attribution}
+      </p>
+      <p className="mt-3 text-[11px] sm:text-xs text-gray-500 leading-relaxed">{data.provenance}</p>
     </div>
   );
 }
@@ -435,10 +474,10 @@ function StackCompare({
  * The number is printed as text beside every bar on purpose: print engines
  * routinely drop background fills, and the comparison has to survive that.
  *
- * Three treatments, because the bars mean three different things: "self" is
- * Miller Vein, "ours" is a site we built — accent like his, but outlined and
- * labelled so it can never be mistaken for a score we are promising him —
- * and "other" is everyone else.
+ * Three treatments, because the bars mean three different things: "ours" is
+ * a site we built — green, thicker, and labelled with its domain so it can
+ * never be mistaken for a score we are promising him — "self" is Miller Vein
+ * in the accent colour, and "other" is everyone else, muted.
  */
 function BarCompare({
   title,
@@ -454,38 +493,43 @@ function BarCompare({
       <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500">{title}</div>
       <div className="mt-5 space-y-4">
         {rows.map((r) => {
-          const tinted = r.variant !== "other";
+          const ours = r.variant === "ours";
+          const labelClass = ours
+            ? "font-extrabold text-emerald-400"
+            : r.variant === "self"
+              ? "font-extrabold text-accent-light"
+              : "text-gray-300";
           return (
-            <div key={r.label}>
+            <div key={r.label} className={ours ? "pb-1" : undefined}>
               <div className="flex items-baseline justify-between gap-3">
-                <span
-                  className={`text-sm leading-snug ${
-                    tinted ? "font-extrabold text-accent-light" : "text-gray-300"
-                  }`}
-                >
+                <span className={`text-sm leading-snug ${labelClass}`}>
                   {r.label}
                   {r.sublabel && (
-                    <span className="ml-2 font-mono text-[11px] font-normal text-gray-400 break-all">
+                    <span className="ml-2 font-mono text-[11px] font-normal text-emerald-300/80 break-all">
                       {r.sublabel}
                     </span>
                   )}
                 </span>
                 <span
-                  className={`text-sm tabular-nums ${
-                    tinted ? "font-extrabold text-accent-light" : "font-bold text-gray-300"
+                  className={`tabular-nums ${
+                    ours
+                      ? "text-base font-extrabold text-emerald-400"
+                      : r.variant === "self"
+                        ? "text-sm font-extrabold text-accent-light"
+                        : "text-sm font-bold text-gray-300"
                   }`}
                 >
                   {r.value}
                 </span>
               </div>
-              <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-white/10">
+              <div
+                className={`mt-2 w-full overflow-hidden rounded-full bg-white/10 ${
+                  ours ? "h-4" : "h-2.5"
+                }`}
+              >
                 <div
                   className={`h-full rounded-full ${
-                    r.variant === "self"
-                      ? "bg-accent"
-                      : r.variant === "ours"
-                        ? "border border-accent-light bg-accent-light/40"
-                        : "bg-slate-500"
+                    ours ? "bg-emerald-400" : r.variant === "self" ? "bg-accent" : "bg-slate-500"
                   }`}
                   style={{ width: `${r.value}%` }}
                 />
@@ -560,8 +604,35 @@ export default function MillerVeinAuditPage() {
       </section>
 
       <main>
-        {/* ============ 02 · THE CLINIC GRID ============ */}
-        <section className="bg-black/20 border-t border-white/10 py-14 sm:py-20">
+        {/* ============ 02 · THE MECHANISM ============ */}
+        <section className="bg-black/20 border-t border-white/10 py-12 sm:py-16">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            {/* Three steps, left to right, stacking under md. The arrows are
+                decorative and disappear on the stacked layout. */}
+            <ol className="grid gap-4 sm:gap-5 md:grid-cols-3">
+              {mechanism.steps.map((s) => (
+                <li
+                  key={s.num}
+                  className="relative rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6"
+                >
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full border border-accent/50 bg-accent/10 text-sm font-extrabold text-accent-light tabular-nums">
+                    {s.num}
+                  </div>
+                  <h3 className="mt-4 text-base sm:text-lg font-extrabold text-white leading-snug">
+                    {s.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-400">{s.line}</p>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-6 text-base sm:text-lg font-bold text-accent-light leading-relaxed">
+              {mechanism.payoff}
+            </p>
+          </div>
+        </section>
+
+        {/* ============ 03 · THE CLINIC GRID ============ */}
+        <section className="bg-dark border-t border-white/10 py-14 sm:py-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <SectionHeading eyebrow={clinicGrid.eyebrow} title={clinicGrid.title} />
 
@@ -615,8 +686,8 @@ export default function MillerVeinAuditPage() {
           </div>
         </section>
 
-        {/* ============ 03 · THE FOUR EXHIBITS ============ */}
-        <section className="bg-dark border-t border-white/10 py-14 sm:py-20">
+        {/* ============ 04 · THE FOUR EXHIBITS ============ */}
+        <section className="bg-black/20 border-t border-white/10 py-14 sm:py-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <SectionHeading title={exhibitsSection.title} />
             <div className="space-y-5 sm:space-y-6">
@@ -627,21 +698,11 @@ export default function MillerVeinAuditPage() {
           </div>
         </section>
 
-        {/* ============ 04 · THE SITE ============ */}
-        <section className="bg-black/20 border-t border-white/10 py-14 sm:py-20">
+        {/* ============ 05 · THE SITE ============ */}
+        <section className="bg-dark border-t border-white/10 py-14 sm:py-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <SectionHeading eyebrow={site.eyebrow} title={site.title} />
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5">
-              {site.tiles.map((t) => (
-                <ScoreTile
-                  key={t.label}
-                  score={t.score}
-                  label={t.label}
-                  note={t.note}
-                  tone={t.tone}
-                />
-              ))}
-            </div>
+            <SideBySide data={site.sideBySide} />
 
             {/* Where we would take it — the reference build, measured, never
                 a promised score for his site. */}
@@ -667,8 +728,8 @@ export default function MillerVeinAuditPage() {
           </div>
         </section>
 
-        {/* ============ 05 · THE PLAN ============ */}
-        <section className="bg-dark border-t border-white/10 py-14 sm:py-20">
+        {/* ============ 06 · THE PLAN ============ */}
+        <section className="bg-black/20 border-t border-white/10 py-14 sm:py-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <SectionHeading title={plan.title} subtitle={plan.sub} />
             <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
@@ -708,8 +769,8 @@ export default function MillerVeinAuditPage() {
           </div>
         </section>
 
-        {/* ============ 06 · CLOSE ============ */}
-        <section className="bg-black/20 border-t border-white/10 py-14 sm:py-20">
+        {/* ============ 07 · CLOSE ============ */}
+        <section className="bg-dark border-t border-white/10 py-14 sm:py-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="rounded-3xl border border-white/10 bg-black/30 p-6 sm:p-10 md:p-12">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-[1.08] max-w-3xl">
