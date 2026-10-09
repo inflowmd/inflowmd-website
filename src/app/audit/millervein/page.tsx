@@ -333,6 +333,13 @@ function ExhibitCard({ e }: { e: Exhibit }) {
             {e.headline}
           </h3>
           <p className="mt-3 text-sm sm:text-base leading-relaxed text-gray-400">{e.line}</p>
+          {/* Muted, but above the visual rather than behind a disclosure: the
+              reader must not reach the mock listings without it. */}
+          {e.reassurance && (
+            <p className="mt-4 border-l-2 border-white/15 pl-3.5 text-sm leading-relaxed text-gray-500">
+              {e.reassurance}
+            </p>
+          )}
         </div>
         <div className="rounded-xl border border-white/10 bg-black/30 p-4 sm:p-5">
           <ExhibitVisual visual={e.visual} />
@@ -374,47 +381,120 @@ function ScoreTile({
 }
 
 /**
+ * Four bullets a side, no paragraphs. The stack comparison on /why-nextjs
+ * (SpeedRace, StackTower, AssemblyLanes) was considered and not reused: those
+ * are scroll-triggered client animations in a "use client" narrative file,
+ * none of them exported, and they carry their own CSS and inline styles that
+ * would print as dark-on-dark. Lifting one would have meant refactoring
+ * /why-nextjs for a page that needs a static four-line list.
+ */
+function StackCompare({
+  stacks,
+}: {
+  stacks: { label: string; note: string; ours: boolean; bullets: string[] }[];
+}) {
+  return (
+    <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
+      {stacks.map((s) => (
+        <div
+          key={s.label}
+          className={`rounded-2xl border p-5 sm:p-6 ${
+            s.ours ? "border-accent/50 bg-accent/[0.07]" : "border-white/10 bg-white/[0.03]"
+          }`}
+        >
+          <div
+            className={`text-[10px] font-bold tracking-[0.22em] uppercase ${
+              s.ours ? "text-accent-light" : "text-gray-500"
+            }`}
+          >
+            {s.note}
+          </div>
+          <h4 className="mt-2 text-lg sm:text-xl font-extrabold text-white leading-snug">
+            {s.label}
+          </h4>
+          <ul className="mt-4 space-y-2.5">
+            {s.bullets.map((b) => (
+              <li key={b} className="flex items-start gap-2.5">
+                <span
+                  aria-hidden
+                  className={`mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full ${
+                    s.ours ? "bg-accent-light" : "bg-gray-600"
+                  }`}
+                />
+                <span className="text-sm leading-snug text-gray-300">{b}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
  * The number is printed as text beside every bar on purpose: print engines
  * routinely drop background fills, and the comparison has to survive that.
+ *
+ * Three treatments, because the bars mean three different things: "self" is
+ * Miller Vein, "ours" is a site we built — accent like his, but outlined and
+ * labelled so it can never be mistaken for a score we are promising him —
+ * and "other" is everyone else.
  */
 function BarCompare({
   title,
   rows,
+  note,
 }: {
   title: string;
-  rows: { label: string; value: number; self: boolean }[];
+  rows: { label: string; sublabel?: string; value: number; variant: "self" | "ours" | "other" }[];
+  note: string;
 }) {
   return (
-    <div className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-5 sm:p-6">
+    <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-5 sm:p-6">
       <div className="text-[10px] font-bold tracking-[0.22em] uppercase text-gray-500">{title}</div>
       <div className="mt-5 space-y-4">
-        {rows.map((r) => (
-          <div key={r.label}>
-            <div className="flex items-baseline justify-between gap-3">
-              <span
-                className={`text-sm leading-snug ${
-                  r.self ? "font-extrabold text-accent-light" : "text-gray-300"
-                }`}
-              >
-                {r.label}
-              </span>
-              <span
-                className={`text-sm tabular-nums ${
-                  r.self ? "font-extrabold text-accent-light" : "font-bold text-gray-300"
-                }`}
-              >
-                {r.value}
-              </span>
+        {rows.map((r) => {
+          const tinted = r.variant !== "other";
+          return (
+            <div key={r.label}>
+              <div className="flex items-baseline justify-between gap-3">
+                <span
+                  className={`text-sm leading-snug ${
+                    tinted ? "font-extrabold text-accent-light" : "text-gray-300"
+                  }`}
+                >
+                  {r.label}
+                  {r.sublabel && (
+                    <span className="ml-2 font-mono text-[11px] font-normal text-gray-400 break-all">
+                      {r.sublabel}
+                    </span>
+                  )}
+                </span>
+                <span
+                  className={`text-sm tabular-nums ${
+                    tinted ? "font-extrabold text-accent-light" : "font-bold text-gray-300"
+                  }`}
+                >
+                  {r.value}
+                </span>
+              </div>
+              <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-white/10">
+                <div
+                  className={`h-full rounded-full ${
+                    r.variant === "self"
+                      ? "bg-accent"
+                      : r.variant === "ours"
+                        ? "border border-accent-light bg-accent-light/40"
+                        : "bg-slate-500"
+                  }`}
+                  style={{ width: `${r.value}%` }}
+                />
+              </div>
             </div>
-            <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-white/10">
-              <div
-                className={`h-full rounded-full ${r.self ? "bg-accent" : "bg-slate-500"}`}
-                style={{ width: `${r.value}%` }}
-              />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+      <p className="mt-5 text-xs leading-relaxed text-gray-400">{note}</p>
     </div>
   );
 }
@@ -562,7 +642,23 @@ export default function MillerVeinAuditPage() {
                 />
               ))}
             </div>
-            <BarCompare title={site.comparison.title} rows={site.comparison.rows} />
+
+            {/* Where we would take it — the reference build, measured, never
+                a promised score for his site. */}
+            <div className="mt-12 sm:mt-14 border-t border-white/10 pt-10 sm:pt-12">
+              <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
+                {site.future.title}
+              </h3>
+              <div className="mt-6">
+                <StackCompare stacks={site.future.stacks} />
+              </div>
+              <BarCompare
+                title={site.comparison.title}
+                rows={site.comparison.rows}
+                note={site.comparisonNote}
+              />
+            </div>
+
             <Disclosure
               id="site-numbers"
               label={site.disclosure.label}
