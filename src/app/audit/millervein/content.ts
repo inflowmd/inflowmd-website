@@ -84,6 +84,36 @@ export const meta = {
    02 — THE CLINIC GRID
    ============================================================ */
 
+/* ============================================================
+   02 — THE MECHANISM (why a federal record matters at all)
+   ============================================================ */
+
+/**
+ * The page used to assert that the federal record drives the directories
+ * without ever showing the reader why. Three steps, one line each, above the
+ * clinic grid — because every finding after it depends on believing this.
+ */
+export const mechanism = {
+  steps: [
+    {
+      num: "1",
+      title: "The federal record",
+      line: "Every practice and physician has one. Yours was last updated in 2019.",
+    },
+    {
+      num: "2",
+      title: "The directories copy it",
+      line: "Healthgrades, WebMD, Vitals and Sharecare import it automatically and re-import on a cycle.",
+    },
+    {
+      num: "3",
+      title: "Patients read the copies",
+      line: "Which is why correcting a listing by hand does not hold — the next import overwrites it.",
+    },
+  ],
+  payoff: "Fix the original and the copies follow. That is the whole of Phase One.",
+};
+
 export const clinicGrid = {
   eyebrow: "Federal registry · verified October 6",
   title: "Eight clinics. One record. Wrong city.",
@@ -274,25 +304,44 @@ export const exhibits: Exhibit[] = [
 export const site = {
   eyebrow: "The website · measured October 6, 2026",
   title: "Where the site is today.",
-  tiles: [
-    { score: "90", label: "AI readiness", note: "11 of 11 checks", tone: "positive" as Tone },
-    { score: "83", label: "Search readiness", note: "9 of 9 checks", tone: "warn" as Tone },
-    { score: "54", label: "Speed", note: "Google PageSpeed", tone: "critical" as Tone },
-  ],
+  /**
+   * HIS COLUMN IS THE PAGE'S CANONICAL OCTOBER 6 MEASUREMENT (90 / 83 / 54),
+   * which is what the disclosure below explains and what the eyebrow dates.
+   * All four sites were re-run through the engine on October 9: his AI and
+   * search readiness came back 90 and 83 again, unchanged. Only speed moved
+   * — 44 on the re-run against 54 on the 6th — which is ordinary PSI run-to-
+   * run variance, and the provenance line under the table says so rather
+   * than quietly swapping the number.
+   */
+  sideBySide: {
+    left: { title: "Miller Vein today", sub: "WordPress + page builder" },
+    right: {
+      title: "An InflowMD build",
+      sub: "Next.js on Vercel",
+      attribution: "centerforveincareandsurgery.com — measured the same day, same test.",
+    },
+    rows: [
+      { label: "AI readiness", mine: "90", mineTone: "positive" as Tone, theirs: "100" },
+      { label: "Search readiness", mine: "83", mineTone: "warn" as Tone, theirs: "100" },
+      { label: "Speed", mine: "54", mineTone: "critical" as Tone, theirs: "90" },
+    ],
+    provenance:
+      "All six figures come from the same engine. Miller Vein's AI and search readiness were re-measured on October 9 and came back unchanged at 90 and 83. Both sites' speed scores move a few points run to run — his across 44 to 54, ours across 89 to 92 — so treat either as a band rather than a decimal.",
+  },
 
   /**
    * THE REFERENCE BUILD. centerforveincareandsurgery.com is ours, and every
    * figure attributed to it below was measured through the live audit engine
    * on October 9, 2026, uncached, twice:
    *
-   *   AI readiness   100 / 100   (11 of 11 checks, both runs)
-   *   Search ready   100 / 100   ( 9 of  9 checks, both runs)
-   *   Speed           89 /  92   (lab LCP 3.38s then 2.93s, FCP ~1.18s, CLS 0)
+   *   AI readiness   100 / 100 / 100   (11 of 11 checks, every run)
+   *   Search ready   100 / 100 / 100   ( 9 of  9 checks, every run)
+   *   Speed           89 /  92 /  90   (lab LCP 3.38s, 2.93s, 3.38s; CLS 0)
    *   Field LCP      NOT AVAILABLE — Google holds no real-user data for it
    *
-   * Speed is quoted as the 89–92 band rather than a single figure, because
-   * two runs the same day returned two numbers and neither is "the" score.
-   * The 100s are quoted flat, because they did not move.
+   * The single figures shown on the page are the October 9 run that was
+   * taken alongside the other three sites, so "same test, same day" is
+   * literally true of every number in the comparison. The 100s never moved.
    *
    * NOTHING ON THIS PAGE PROMISES MILLER VEIN A FUTURE SCORE. We show what a
    * build of ours measures today and name the domain so he can run it
@@ -320,31 +369,33 @@ export const site = {
           "Pages pre-rendered and served from the edge",
           "One component system, one source of truth",
           "Performance is a build-time property, not a plugin",
-          "89–92 on Google's own scoring",
+          "90 on Google's own scoring",
         ],
       },
     ],
   },
 
   comparison: {
-    /** The original three bars were measured October 6; the fourth on
-        October 9. The title said "same day" when all three were — it cannot
-        say it now, so it says the thing that is still true of all four. */
-    title: "Search readiness · the same test, every bar measured",
+    /** Every bar re-measured October 9, 2026, uncached, within 75 seconds of
+        the others: ours 100, Center for Vein Restoration 94, Miller Vein 83,
+        Metro Vein Centers 83. The three that were also measured on October 6
+        returned exactly the same search-readiness figures, so this axis is
+        genuinely one test on one day. */
+    title: "Search readiness · same test, same day",
     rows: [
-      { label: "Center for Vein Restoration", value: 94, variant: "other" as const },
-      { label: "Miller Vein", value: 83, variant: "self" as const },
-      { label: "Metro Vein Centers", value: 83, variant: "other" as const },
       {
         label: "An InflowMD build",
         sublabel: "centerforveincareandsurgery.com",
         value: 100,
         variant: "ours" as const,
       },
+      { label: "Center for Vein Restoration", value: 94, variant: "other" as const },
+      { label: "Miller Vein", value: 83, variant: "self" as const },
+      { label: "Metro Vein Centers", value: 83, variant: "other" as const },
     ],
   },
   comparisonNote:
-    "Every bar is a measured figure on the same test — Miller Vein and the two competitors on October 6, our own build on October 9. Not a projection: a site you can go and run yourself.",
+    "Measured the same day, on the same test. Not a projection — a site you can go and run yourself.",
 
   disclosure: {
     label: "What the three numbers actually measure",
