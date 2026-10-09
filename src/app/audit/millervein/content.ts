@@ -56,12 +56,20 @@ export const meta = {
       put our name on his document and on the PDF he saves from it. */
   title: "Miller Vein — Practice Audit",
   eyebrow: "Practice Audit · Prepared for Dr. Jeffrey Miller",
-  /** The headline is split so "a competitor" can carry the critical token.
-      It is the finding, and it is the only red thing in the hero. */
-  h1Lead: "Your Troy physician works for",
-  h1Accent: "a competitor",
+  /** The headline is split so the accent phrase can carry the critical token.
+      It is the finding, and it is the only red thing in the hero.
+
+      WORDED WITH CARE, and the wording is load-bearing. An earlier draft read
+      "Your Troy physician works for a competitor." We cannot support that: we
+      know what the directories PUBLISH, and we have not checked — and cannot
+      claim — where Dr. Bannon actually practises beyond what millervein.com
+      says. Published as it stood, it could have sent Dr. Miller to confront
+      his own physician over a 2019 federal record. The claim on this page is
+      about what patients are shown, which is the thing we measured. */
+  h1Lead: "Patients looking up your Troy physician are shown",
+  h1Accent: "a competitor's name",
   h1Tail: ".",
-  sub: "At least, that is what the directories patients actually read have been saying. Here is what else the internet currently believes about Miller Vein.",
+  sub: "Not because anything changed at your practice — because a federal record from 2019 is still feeding the directories. Here is what else the internet currently believes about Miller Vein.",
   /** An inline row, not cards. Four figures, no gauges — a score ring in the
       hero would frame this as a website report, which is what it is not. */
   figures: [
@@ -128,6 +136,9 @@ export type Exhibit = {
   figureTone: Tone;
   headline: string;
   line: string;
+  /** Optional plain line between the claim and the visual. Used where the
+      exhibit could be misread as an accusation about a person. */
+  reassurance?: string;
   visual: Visual;
   disclosure?: { label: string; blocks: string[] };
 };
@@ -141,13 +152,17 @@ export const exhibits: Exhibit[] = [
     id: "providers",
     figure: "1 of 2",
     figureTone: "critical",
-    headline: "Your physicians are filed under other companies",
-    line: "Her federal record says she practises alone, in a different specialty, at an address that is not yours — and the directories published exactly that.",
+    headline: "Directories are publishing your physicians under other companies",
+    line: "Her federal record has not been updated since 2019. It lists addresses that are not yours and flags her as practising independently, so the directories filled in the rest themselves.",
+    /** Plain text above the visual, not a disclosure. The reader must not be
+        able to reach the mock listings without having read this first. */
+    reassurance:
+      "This is a records problem, not a staffing one. Dr. Bannon is listed as your Troy provider on your own site; the directories simply never read it.",
     visual: {
       kind: "listings",
       cards: [
         {
-          source: "Vitals.com · live today",
+          source: "What Vitals.com publishes",
           name: "Dr. Krista Bannon, MD",
           fields: [
             { label: "Specialty", value: "Surgery", tone: "critical" },
@@ -156,7 +171,7 @@ export const exhibits: Exhibit[] = [
           city: "Rochester Hills, MI",
         },
         {
-          source: "Your website",
+          source: "What your website says",
           name: "Dr. Krista Bannon, MD",
           fields: [
             { label: "Specialty", value: "Vein & vascular", tone: "positive" },
@@ -169,6 +184,7 @@ export const exhibits: Exhibit[] = [
     disclosure: {
       label: "See the full chain",
       blocks: [
+        "Nothing here is a claim about where anyone works — it is a claim about what the directories publish, and why.",
         "**Her federal record, last updated March 28, 2019.** It lists three addresses — Rochester Hills, Detroit and Southfield — and not one Miller Vein address among them. Her taxonomy code is `208600000X`, which reads as “Surgery”, not vein, vascular or phlebology. She is flagged a **sole proprietor**, so the registry describes a physician practising on her own.",
         "**What each directory did with that record.** Vitals published the practice name **“Metro Vein Centers”** — a direct competitor — with the specialty “Surgery” read literally off the taxonomy code. Sharecare filed her under **“Seton Health Corporation of Southeastern Michigan”**, a third unrelated employer. WebMD still carries her **former name**, as a general surgeon, which is a direct ingestion of the former-name field still sitting on the federal record. WebMD also holds two separate practice records for Miller Vein.",
         "**Dr. Miller's own record is the opposite case, and worth saying so.** It was updated **March 6, 2026** and carries seven practice locations, all matching the site. That is better maintained than most. Sharecare still files him under **“A1 Home Health Care”** — a real, unrelated home-health business that happens to occupy the same Novi building and suite number. That profile carries zero reviews.",
@@ -257,20 +273,79 @@ export const exhibits: Exhibit[] = [
 
 export const site = {
   eyebrow: "The website · measured October 6, 2026",
-  title: "The site itself, with nothing added.",
+  title: "Where the site is today.",
   tiles: [
     { score: "90", label: "AI readiness", note: "11 of 11 checks", tone: "positive" as Tone },
     { score: "83", label: "Search readiness", note: "9 of 9 checks", tone: "warn" as Tone },
     { score: "54", label: "Speed", note: "Google PageSpeed", tone: "critical" as Tone },
   ],
-  comparison: {
-    title: "Search readiness · same test, same day",
-    rows: [
-      { label: "Center for Vein Restoration", value: 94, self: false },
-      { label: "Miller Vein", value: 83, self: true },
-      { label: "Metro Vein Centers", value: 83, self: false },
+
+  /**
+   * THE REFERENCE BUILD. centerforveincareandsurgery.com is ours, and every
+   * figure attributed to it below was measured through the live audit engine
+   * on October 9, 2026, uncached, twice:
+   *
+   *   AI readiness   100 / 100   (11 of 11 checks, both runs)
+   *   Search ready   100 / 100   ( 9 of  9 checks, both runs)
+   *   Speed           89 /  92   (lab LCP 3.38s then 2.93s, FCP ~1.18s, CLS 0)
+   *   Field LCP      NOT AVAILABLE — Google holds no real-user data for it
+   *
+   * Speed is quoted as the 89–92 band rather than a single figure, because
+   * two runs the same day returned two numbers and neither is "the" score.
+   * The 100s are quoted flat, because they did not move.
+   *
+   * NOTHING ON THIS PAGE PROMISES MILLER VEIN A FUTURE SCORE. We show what a
+   * build of ours measures today and name the domain so he can run it
+   * himself. A projected number for his site would be a number we invented.
+   */
+  future: {
+    title: "Where we would take it.",
+    stacks: [
+      {
+        label: "WordPress + page builder",
+        note: "The current stack",
+        ours: false,
+        bullets: [
+          "Every page assembled at request time",
+          "Plugins stacked by different hands over years",
+          "Speed is whatever the theme and plugin set allow",
+          "54 on Google's own scoring",
+        ],
+      },
+      {
+        label: "Next.js on Vercel",
+        note: "What we build",
+        ours: true,
+        bullets: [
+          "Pages pre-rendered and served from the edge",
+          "One component system, one source of truth",
+          "Performance is a build-time property, not a plugin",
+          "89–92 on Google's own scoring",
+        ],
+      },
     ],
   },
+
+  comparison: {
+    /** The original three bars were measured October 6; the fourth on
+        October 9. The title said "same day" when all three were — it cannot
+        say it now, so it says the thing that is still true of all four. */
+    title: "Search readiness · the same test, every bar measured",
+    rows: [
+      { label: "Center for Vein Restoration", value: 94, variant: "other" as const },
+      { label: "Miller Vein", value: 83, variant: "self" as const },
+      { label: "Metro Vein Centers", value: 83, variant: "other" as const },
+      {
+        label: "An InflowMD build",
+        sublabel: "centerforveincareandsurgery.com",
+        value: 100,
+        variant: "ours" as const,
+      },
+    ],
+  },
+  comparisonNote:
+    "Every bar is a measured figure on the same test — Miller Vein and the two competitors on October 6, our own build on October 9. Not a projection: a site you can go and run yourself.",
+
   disclosure: {
     label: "What the three numbers actually measure",
     blocks: [
