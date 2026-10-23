@@ -120,7 +120,7 @@ export default function HomeV2Page() {
         <div className="hv2-wrap hv2-header-in">
           {/* The existing logo asset, unmodified, on a consistently dark bar. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={nav.logoSrc} alt={nav.logoAlt} className="hv2-logo" width={112} height={26} />
+          <img src={nav.logoSrc} alt={nav.logoAlt} className="hv2-logo" width={788} height={118} />
           <span className="hv2-tag">{pageMeta.reviewLabel}</span>
           <nav className="hv2-header-links" aria-label="Concept page">
             <a href={nav.audit.href}>{nav.audit.label}</a>
@@ -208,8 +208,9 @@ export default function HomeV2Page() {
                   gap, ending on the schema rail. Proportional coordinates
                   (viewBox 0 0 100 100, preserveAspectRatio="none") keep the
                   endpoints on the rail from 1024px up, because the device's
-                  left edge stays at 64-66% of this box and the rail ends at
-                  46.6-47.3%. Decorative, so hidden from assistive tech. */}
+                  left edge stays at 62.9-65.1% of the padding box the overlay is
+                  positioned against, and the rail ends at 46.9-47.4%.
+                  Decorative, so hidden from assistive tech. */}
               <svg
                 className="hv2-traces"
                 viewBox="0 0 100 100"
@@ -217,10 +218,10 @@ export default function HomeV2Page() {
                 aria-hidden="true"
                 focusable="false"
               >
-                <path d="M64.5 33 C 59 34, 54 35.5, 48.5 37" />
-                <path d="M64.5 44 C 59.5 44.5, 54 45.5, 48.5 46" />
-                <path d="M64.5 56 C 59.5 55.5, 54 54.5, 48.5 54" />
-                <path d="M64.5 67 C 59 66, 54 64.5, 48.5 63" />
+                <path d="M65 33 C 59 34, 54 35.5, 48.5 37" />
+                <path d="M65 44 C 59.5 44.5, 54 45.5, 48.5 46" />
+                <path d="M65 56 C 59.5 55.5, 54 54.5, 48.5 54" />
+                <path d="M65 67 C 59 66, 54 64.5, 48.5 63" />
               </svg>
 
               <div>

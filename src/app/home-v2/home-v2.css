@@ -114,20 +114,35 @@
    158px of the first viewport. Two rows now: logo and links share the first,
    the review badge takes the second as secondary information. Both nav
    targets keep their 44px height. */
-.hv2-header-in { display: flex; align-items: center; gap: 0.625rem 1rem; flex-wrap: wrap; padding-block: 0.625rem; }
-.hv2-logo { display: block; height: 28px; width: auto; order: 1; }
+.hv2-header-in { display: flex; align-items: center; gap: 0.625rem 0.75rem; flex-wrap: wrap; padding-block: 0.625rem; }
+/* The logo is 788x118, so at 28px tall it renders 186.98px wide. That plus
+   the 152px nav and a 16px gap came to 355px against a 350px inner width at
+   390px -- the nav wrapped, and the badge with it, giving three rows and
+   138px. The width is now fluid rather than a fixed height: a fixed 24px
+   (160.27px) fits 375 and 390 but still overflows a 360px screen by 4.3px.
+   This clamp keeps logo+gap+nav inside the row from 360px up, landing at
+   ~24px tall at 390px. The asset itself is untouched. */
+.hv2-logo { display: block; width: clamp(148px, 41vw, 172px); height: auto; order: 1; }
 .hv2-tag {
   font-size: 0.625rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--c-dim); border: 1px solid var(--c-rule); border-radius: 999px;
   padding: 0.25rem 0.5625rem; white-space: nowrap; order: 3; flex-basis: 100%;
 }
 @media (min-width: 640px) {
-  /* One tidy row once there is width for it. */
-  .hv2-header-in { padding-block: 0.875rem; }
-  .hv2-tag { order: 2; flex-basis: auto; }
-  .hv2-header-links { order: 3; }
+  /* One tidy row once there is width for it. Desktop is unchanged from the
+     accepted build: 28px logo, 1rem gaps, 1.25rem between the links.
+     EVERY SELECTOR HERE IS PREFIXED WITH .hv2 ON PURPOSE. The CSS minifier
+     hoists media blocks, and it placed this one ABOVE the base rules; at
+     equal specificity the base would then win at >=640px and these
+     overrides would silently do nothing. The extra class makes them (0,2,0)
+     against the base's (0,1,0), so they win on specificity rather than on
+     an ordering the build is free to change. */
+  .hv2 .hv2-header-in { padding-block: 0.875rem; gap: 0.625rem 1rem; }
+  .hv2 .hv2-logo { width: auto; height: 28px; }
+  .hv2 .hv2-header-links { order: 3; gap: 1.25rem; }
+  .hv2 .hv2-tag { order: 2; flex-basis: auto; }
 }
-.hv2-header-links { margin-left: auto; display: flex; gap: 1.25rem; order: 2; }
+.hv2-header-links { margin-left: auto; display: flex; gap: 0.875rem; order: 2; }
 .hv2-header-links a {
   color: #fff; text-decoration: none; font-size: 0.875rem; font-weight: 600;
   display: inline-flex; align-items: center; min-height: 2.75rem;
@@ -173,7 +188,24 @@
 }
 
 /* overlapping cluster: tablet behind at +4deg, phone in front at -6deg */
-.hv2-cluster { position: relative; display: grid; place-items: center; min-height: 20rem; }
+/* The phone is absolutely positioned, so it contributes nothing to the
+   cluster's height -- which is why it protruded above the H1 and below the
+   caption from roughly 450px up, worst once its width hits the 13.5rem cap
+   (measured 469.7px tall against a 320px cluster at 768px).
+   The reserve is derived from the phone rather than guessed per breakpoint:
+     screen width  = W - 16              (.hv2-dev padding)
+     screen height = (W-16) * 2556/1179  (real capture aspect)
+     device height = that + 16
+     rotated -6deg = height*cos6 + W*sin6  =  2.2606*W - 18.6
+   At the cap that gives 469.7px, matching the measured value exactly. */
+.hv2-cluster {
+  --hv2-cluster-w: calc(100vw - 2 * clamp(1.25rem, 4vw, 3rem));
+  --hv2-ph-w: min(calc(0.44 * var(--hv2-cluster-w)), 13.5rem);
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: calc(2.2606 * var(--hv2-ph-w) - 18.6px + 24px);
+}
 .hv2-cluster-tab {
   position: relative;
   width: min(86%, 30rem);
@@ -237,12 +269,28 @@
    keeps the endpoints on the rail at every desktop width: the device's left
    edge sits at 64-66% of the split and the rail ends at 46.6-47.3%. */
 .hv2-split-traced { position: relative; }
-.hv2-traces {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  pointer-events: none; z-index: 0; display: none;
+
+/* REGRESSION FIX. The stacking rule below is `.hv2-split-traced > *`, which
+   has the same specificity as a bare `.hv2-traces` and was declared after
+   it -- so it won, the overlay computed to position:relative, became an
+   in-flow grid item, took a cell, and pushed the phone onto a second row.
+   Two defences now: this selector is `> svg.hv2-traces` (0,2,1) so it
+   outranks the stacking rule (0,2,0), and the stacking rule explicitly
+   excludes the overlay. The grid is left with exactly two items again:
+   text in column one, phone field in column two. */
+.hv2-split-traced > svg.hv2-traces {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  display: none;
 }
-@media (min-width: 1024px) { .hv2-traces { display: block; } }
-.hv2-split-traced > * { position: relative; z-index: 1; }
+@media (min-width: 1024px) {
+  .hv2-split-traced > svg.hv2-traces { display: block; }
+}
+.hv2-split-traced > *:not(.hv2-traces) { position: relative; z-index: 1; }
 .hv2-traces path {
   fill: none; stroke: var(--c-signal); stroke-width: 1.25;
   vector-effect: non-scaling-stroke; opacity: 0.8;

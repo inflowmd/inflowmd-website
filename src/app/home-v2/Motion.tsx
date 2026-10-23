@@ -147,14 +147,23 @@ export default function Motion({ rootId }: { rootId: string }) {
       if (!film) return 0;
       const frames = Array.from(film.querySelectorAll<HTMLElement>(".hv2-frame"));
       if (!frames.length) return 0;
-      /* Whichever frame's centre is nearest the scroller's centre. Robust to
-         partial scrolls, momentum and odd frame widths. */
-      const mid = film.scrollLeft + film.clientWidth / 2;
+      /* Viewport coordinates for BOTH sides of the comparison.
+         This used to mix `frame.offsetLeft` with `film.scrollLeft`, which are
+         different spaces: offsetLeft is measured from the nearest positioned
+         ancestor, and the scene-2 stacking rule makes the film's column
+         exactly that. On a two-column desktop layout every frame centre
+         carried the column's offset while the midpoint did not, so frame 0
+         always won and the rail never advanced -- visible in desktop reduced
+         motion, where the strip scrolls but Learn stayed current and
+         Previous stayed disabled. Rects are already scroll-adjusted, so the
+         two sides now agree at every width and in every mode. */
+      const fr = film.getBoundingClientRect();
+      const mid = fr.left + fr.width / 2;
       let best = 0;
       let bestD = Infinity;
       frames.forEach((f, k) => {
-        const c = f.offsetLeft + f.offsetWidth / 2;
-        const d = Math.abs(c - mid);
+        const r = f.getBoundingClientRect();
+        const d = Math.abs(r.left + r.width / 2 - mid);
         if (d < bestD) { bestD = d; best = k; }
       });
       return best;
