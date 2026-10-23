@@ -39,8 +39,10 @@ export const hero = {
   primary: { label: "Run your free site audit", href: "/audit" },
   auditLine: "Google performance data. InflowMD readiness checks. A clearer starting point.",
   secondary: { label: "Talk about your practice", href: "/get-started" },
-  recordIntro:
-    "One practice record runs through this page — the same name, the same details — as it moves from being found, to being read, to being understood.",
+  /* Was implementation narration ("One practice record runs through this
+     page…"), which told the reader how the page was built rather than what
+     they get. Replaced with the controller's visitor-oriented line. */
+  recordIntro: "A clear identity. An easy visit. An informed next step.",
 };
 
 /** The one record, in one place, so all three states cannot drift apart. */
@@ -83,8 +85,9 @@ export const visibility = {
     "Vein and vascular care",
     "example-practice.test",
   ],
+  fragmentsLabel: "The same facts, in different places",
   sceneCaption:
-    "The same facts, agreeing with each other. This is an illustration of consistency, not a live view of your listings.",
+    "An illustration of those copies agreeing — not a live view of your listings.",
 };
 
 export const evidence = {
@@ -137,9 +140,11 @@ export const evidence = {
       ],
     },
   ],
+  /* One place where the audit's limits are stated plainly, so the rest of
+     the page does not have to keep hedging. */
   limits: [
     "Technical checks can expose issues worth investigating. They do not predict AI recommendations, rankings, traffic, revenue or clinical outcomes.",
-    "When something cannot be read or Google has no data for it, the audit reports it as unavailable or not applicable. That is not the same as a failed test, and it is not counted as one.",
+    "When something cannot be read, or Google holds no data for it, the audit reports it as unavailable rather than counting it as a failed test.",
   ],
   cta: { label: "Run your free site audit", href: "/audit" },
 };
@@ -174,8 +179,7 @@ export const performance = {
       line: "One clear action is available — call, ask a question, or request an appointment.",
     },
   ],
-  sceneCaption:
-    "A labelled illustration of the visit sequence. It is not a speed test and carries no measurement.",
+  sceneCaption: "A labelled illustration of the visit sequence, not a speed test.",
 };
 
 export const education = {
@@ -194,8 +198,7 @@ export const education = {
     "What happens at a first appointment?",
   ],
   affordanceLabel: "Request an appointment",
-  affordanceNote:
-    "Shown as an illustration of the cue a patient would see. It is not a working form on this page.",
+  affordanceNote: "An illustration of the cue a patient would see — not a working form.",
   caution:
     "Educational material describes options and prepares a conversation. It does not diagnose, and it does not promise a result.",
 };
@@ -214,11 +217,7 @@ export const straight = {
     },
     {
       q: "What can the audit not tell you?",
-      a: "It cannot tell you how you will rank, whether an AI assistant will mention you, how many patients will call, or anything clinical. It points at things worth looking into.",
-    },
-    {
-      q: "What happens to things it cannot check?",
-      a: "They are reported as unavailable or not applicable rather than counted against the practice.",
+      a: "How you will rank, whether an AI assistant will mention you, how many patients will call, or anything clinical. It points at things worth looking into.",
     },
   ],
 };

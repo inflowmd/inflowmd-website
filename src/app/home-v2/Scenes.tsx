@@ -56,8 +56,21 @@ export function Enhancer({ rootId }: { rootId: string }) {
     const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal], .hv2-stage"));
     if (!targets.length) return;
 
-    if (prefersReducedMotion() || !("IntersectionObserver" in window)) {
-      targets.forEach((t) => t.classList.add("hv2-in"));
+    const revealAll = () => targets.forEach((t) => t.classList.add("hv2-in"));
+
+    /**
+     * Below 900px the page is a plain static sequence: mark everything
+     * revealed straight away and never observe. The stylesheet also gates
+     * its hiding rules behind the same breakpoint, so the two cannot
+     * disagree — and a reader who resizes from desktop down to phone width
+     * can never be left with a section stuck hidden.
+     */
+    if (
+      prefersReducedMotion() ||
+      window.innerWidth < 900 ||
+      !("IntersectionObserver" in window)
+    ) {
+      revealAll();
       return;
     }
 
@@ -79,7 +92,10 @@ export function Enhancer({ rootId }: { rootId: string }) {
   return null;
 }
 
-const ZONES = ["identity", "open", "care", "next"] as const;
+/* One zone per stop, all four different. "Open" lights the website row —
+   the page the visitor opens — rather than re-lighting identity, which is
+   what made Find and Open look identical in the first deployment. */
+const ZONES = ["identity", "site", "care", "next"] as const;
 
 /**
  * Performance scene. The four stop cards are always in the DOM with their
@@ -99,24 +115,59 @@ export function PerformanceScene() {
     const track = trackRef.current;
     if (!track || reduced || !("IntersectionObserver" in window)) return;
 
-    const marks = Array.from(track.querySelectorAll<HTMLElement>("[data-stop-mark]"));
-    if (!marks.length) return;
+    let io: IntersectionObserver | null = null;
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            const i = Number((e.target as HTMLElement).dataset.stopMark);
-            if (!Number.isNaN(i)) setActive(i);
+    /**
+     * Percentage rootMargin was the wrong tool here. The spec resolves
+     * percentages against the root's WIDTH, implementations have differed
+     * historically, and "-50% 0px -50% 0px" collapses the band to zero
+     * height either way. This uses PIXELS derived from the viewport height,
+     * which every implementation reads the same way, and keeps a band with
+     * real height so a marker cannot slip through between samples.
+     */
+    const build = () => {
+      io?.disconnect();
+
+      /* Desktop only. Below the pinned breakpoint the scene is a plain
+         static list and nothing should drive step state. */
+      if (window.innerWidth < 900) {
+        setActive(0);
+        io = null;
+        return;
+      }
+
+      const vh = window.innerHeight;
+      const band = Math.max(96, Math.round(vh * 0.14)); // never zero-height
+      const inset = Math.max(0, Math.round((vh - band) / 2));
+
+      io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              const i = Number((e.target as HTMLElement).dataset.stopMark);
+              if (!Number.isNaN(i)) setActive(i);
+            }
           }
-        }
-      },
-      /* A thin band across the middle of the viewport: whichever marker sits
-         in it is the current stop. */
-      { rootMargin: "-50% 0px -50% 0px", threshold: 0 },
-    );
-    marks.forEach((m) => io.observe(m));
-    return () => io.disconnect();
+        },
+        { rootMargin: `-${inset}px 0px -${inset}px 0px`, threshold: 0 },
+      );
+
+      track.querySelectorAll<HTMLElement>("[data-stop-mark]").forEach((m) => io?.observe(m));
+    };
+
+    build();
+
+    let t: number | undefined;
+    const onResize = () => {
+      window.clearTimeout(t);
+      t = window.setTimeout(build, 150);
+    };
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("resize", onResize);
+      io?.disconnect();
+    };
   }, [reduced]);
 
   const litZone = reduced ? null : (ZONES[active] ?? null);
@@ -163,7 +214,7 @@ export function PerformanceScene() {
 
         <div>
           <PracticeRecord
-            lit={litZone === "open" ? "identity" : litZone}
+            lit={litZone}
             showNextStep
             nextStepLabel="Request an appointment"
           />
