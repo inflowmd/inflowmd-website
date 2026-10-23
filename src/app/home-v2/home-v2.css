@@ -1,565 +1,330 @@
 /*
- * Route-local styles for /home-v2. Loaded only by this route's page, and
- * every selector is nested under .hv2 so nothing can leak into another route
- * if the stylesheet is ever hoisted into a shared chunk.
+ * /home-v2 — visual-first rebuild. Route-local; every selector nested under
+ * .hv2 so nothing can leak if this sheet is ever hoisted into a shared chunk.
  *
- * WHY A STYLESHEET AND NOT UTILITIES: the two scroll scenes need real
- * keyframes, sticky containers, media-query-gated pinning and a
- * prefers-reduced-motion contract. Expressing that in utility classes would
- * be less legible and would not keep the motion rules in one reviewable
- * place.
+ * THE MOTION CONTRACT, in one place, because it is the thing most easily got
+ * wrong:
+ *   - Everything is VISIBLE BY DEFAULT. The animated states are opt-in behind
+ *     [data-motion="on"], which the client module sets only when JS is alive,
+ *     the viewport is >=1024px, and reduced motion is not requested. With no
+ *     JS the page is a complete, readable, image-rich document.
+ *   - Pinning exists only at >=1024px. The brief's floor is 900px; 1024 is
+ *     used so that at intermediate tablet widths the devices never overlap
+ *     the prose.
+ *   - prefers-reduced-motion removes pins, parallax and transitions entirely
+ *     and keeps every image and every caption.
  *
- * THE MOTION CONTRACT, in one place:
- *   - Reveals are opt-IN. Content is visible by default; only when the client
- *     component has mounted and set [data-enhanced="true"] does it start
- *     hidden and animate in. If JS never runs, the page is complete.
- *   - Pinning exists only at >=900px. Mobile is a plain vertical sequence.
- *   - prefers-reduced-motion: reduce turns off pinning, transforms and all
- *     transitions, and forces every revealed element visible.
- *
- * The body background is cream site-wide; .hv2 paints its own surfaces edge
- * to edge so none of it shows through.
+ * Scroll is native throughout: no hijacking, no smoothing override, no
+ * scroll-behavior change. The engine only reads rects and writes transforms,
+ * opacity and custom properties.
  */
 
 .hv2 {
-  /* Palette — brand blue, white, near-black, deep navy. No cream. */
-  --hv2-navy: #081C34;
-  --hv2-ink: #0B1220;
-  --hv2-blue: #3B6FBF;
-  --hv2-blue-deep: #2F5C9F;
-  /* On navy, the brand blue is ~3.4:1 and fails for small text. This lighter
-     tint measures ~8.2:1 on --hv2-navy and is what small accent text uses. */
-  --hv2-blue-on-dark: #8FB6EC;
-  --hv2-white: #FFFFFF;
-  --hv2-body: #475569;
-  --hv2-muted-on-dark: #9FB3CC;
-  --hv2-rule: rgba(11, 18, 32, 0.12);
-  --hv2-rule-dark: rgba(255, 255, 255, 0.14);
-  --hv2-measure: 34rem;
+  --c-black: #04070D;
+  --c-navy: #081C34;
+  --c-blue: #3B6FBF;
+  --c-signal: #6FA8FF;
+  --c-white: #FFFFFF;
+  --c-dim: #93A8C4;        /* 7.4:1 on --c-black */
+  --c-rule: rgba(255, 255, 255, 0.12);
+  --pad: clamp(1.25rem, 4vw, 3rem);
 
-  background: var(--hv2-white);
-  color: var(--hv2-ink);
+  background: var(--c-black);
+  color: var(--c-white);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip; /* belt and braces: rotated devices can never widen the page */
 }
 
-.hv2 *,
-.hv2 *::before,
-.hv2 *::after {
-  box-sizing: border-box;
-}
+.hv2 *, .hv2 *::before, .hv2 *::after { box-sizing: border-box; }
+.hv2 ::selection { background: var(--c-blue); color: #fff; }
 
-.hv2 ::selection {
-  background: var(--hv2-blue);
-  color: #fff;
-}
-
-/* Visible, high-contrast focus on both light and dark surfaces. */
-.hv2 a:focus-visible,
-.hv2 button:focus-visible {
-  outline: 3px solid var(--hv2-blue);
+.hv2 a:focus-visible, .hv2 button:focus-visible {
+  outline: 3px solid var(--c-signal);
   outline-offset: 3px;
-  border-radius: 4px;
-}
-.hv2 .hv2-dark a:focus-visible,
-.hv2 .hv2-dark button:focus-visible {
-  outline-color: var(--hv2-blue-on-dark);
+  border-radius: 6px;
 }
 
-.hv2-shell {
-  max-width: 76rem;
-  margin: 0 auto;
-  padding-inline: 1.25rem;
-}
-@media (min-width: 768px) {
-  .hv2-shell { padding-inline: 2.5rem; }
-}
+.hv2-wrap { width: min(100%, 78rem); margin-inline: auto; padding-inline: var(--pad); }
 
-.hv2-dark {
-  background: var(--hv2-navy);
-  color: var(--hv2-white);
-}
-
-.hv2-display {
-  font-family: var(--font-hv2-display), Georgia, serif;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.06;
-  text-wrap: balance;
-}
+/* ---------------- type ---------------- */
 
 .hv2-eyebrow {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--hv2-blue-deep);
+  color: var(--c-signal);
+  margin: 0;
 }
-.hv2-dark .hv2-eyebrow { color: var(--hv2-blue-on-dark); }
-
-.hv2-lede {
-  font-size: 1.0625rem;
-  line-height: 1.65;
-  color: var(--hv2-body);
-  max-width: var(--hv2-measure);
+.hv2-h1 {
+  font-size: clamp(2rem, 4.6vw, 3.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+  margin: 0.75rem 0 0;
+  text-wrap: balance;
 }
-.hv2-dark .hv2-lede { color: var(--hv2-muted-on-dark); }
-@media (min-width: 768px) {
-  .hv2-lede { font-size: 1.1875rem; }
+.hv2-h2 {
+  font-size: clamp(1.75rem, 3.4vw, 2.75rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  margin: 0.75rem 0 0;
+  text-wrap: balance;
 }
+.hv2-k { color: var(--c-signal); }
+.hv2-cap {
+  margin: 1.125rem 0 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--c-dim);
+  max-width: 34rem;
+}
+.hv2-micro { margin: 0.875rem 0 0; font-size: 0.8125rem; color: var(--c-dim); }
 
 /* ---------------- buttons ---------------- */
 
+.hv2-ctas { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
 .hv2-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  /* >=44px tall for touch. */
-  min-height: 2.875rem;
+  min-height: 2.875rem;           /* 46px touch target */
   padding: 0.75rem 1.375rem;
   border-radius: 0.625rem;
   font-size: 0.9375rem;
   font-weight: 600;
   text-decoration: none;
-  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
-.hv2-btn-primary {
-  background: var(--hv2-blue);
-  color: var(--hv2-white); /* 5.05:1 on the brand blue */
-  border: 1px solid var(--hv2-blue);
-}
-.hv2-btn-primary:hover { background: var(--hv2-blue-deep); border-color: var(--hv2-blue-deep); }
-.hv2-btn-ghost {
-  background: transparent;
-  color: var(--hv2-ink);
-  border: 1px solid var(--hv2-rule);
-}
-.hv2-btn-ghost:hover { border-color: var(--hv2-blue); color: var(--hv2-blue-deep); }
-.hv2-dark .hv2-btn-ghost {
-  color: var(--hv2-white);
-  border-color: var(--hv2-rule-dark);
-}
-.hv2-dark .hv2-btn-ghost:hover { border-color: var(--hv2-blue-on-dark); color: var(--hv2-blue-on-dark); }
+.hv2-btn-primary { background: var(--c-blue); color: #fff; border: 1px solid var(--c-blue); }
+.hv2-btn-primary:hover { background: #4A82D6; border-color: #4A82D6; }
+.hv2-btn-ghost { background: transparent; color: #fff; border: 1px solid var(--c-rule); }
+.hv2-btn-ghost:hover { border-color: var(--c-signal); color: var(--c-signal); }
 
-/* ---------------- navigation ---------------- */
+/* ---------------- header ---------------- */
 
-.hv2-nav {
-  background: var(--hv2-navy);
-  border-bottom: 1px solid var(--hv2-rule-dark);
+.hv2-header {
+  position: relative;
+  z-index: 5;
+  background: var(--c-black);     /* consistently dark; never white-on-white */
+  border-bottom: 1px solid var(--c-rule);
 }
-.hv2-nav-inner {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  padding-block: 0.875rem;
+.hv2-header-in { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding-block: 0.875rem; }
+.hv2-logo { display: block; height: 26px; width: auto; }
+.hv2-tag {
+  font-size: 0.625rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--c-dim); border: 1px solid var(--c-rule); border-radius: 999px;
+  padding: 0.3125rem 0.625rem; white-space: nowrap;
 }
-.hv2-nav-logo { display: block; height: 28px; width: auto; }
-.hv2-nav-tag {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--hv2-muted-on-dark);
-  border: 1px solid var(--hv2-rule-dark);
-  border-radius: 999px;
-  padding: 0.3125rem 0.625rem;
-  white-space: nowrap;
+.hv2-header-links { margin-left: auto; display: flex; gap: 1.25rem; }
+.hv2-header-links a {
+  color: #fff; text-decoration: none; font-size: 0.875rem; font-weight: 600;
+  display: inline-flex; align-items: center; min-height: 2.75rem;
 }
-.hv2-nav-actions { margin-left: auto; display: flex; gap: 0.625rem; flex-wrap: wrap; }
-.hv2-nav .hv2-btn { min-height: 2.5rem; padding: 0.5rem 1rem; font-size: 0.875rem; }
+.hv2-header-links a:hover { color: var(--c-signal); }
+
+/* ---------------- device frames ----------------
+   Generic: a thin uniform bezel and a rounded screen. No notch, no island,
+   no camera, no home indicator, no badge — nothing that imitates a specific
+   manufacturer's hardware. */
+
+.hv2-dev { position: relative; border-radius: 1.75rem; padding: 0.5rem; background: linear-gradient(160deg, #2A3242, #11161F 60%); box-shadow: 0 40px 90px -40px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.07); }
+.hv2-dev-tablet { border-radius: 1.25rem; padding: 0.625rem; }
+.hv2-screen { position: relative; overflow: hidden; border-radius: 1.3rem; background: #0A0F17; display: block; }
+.hv2-dev-tablet .hv2-screen { border-radius: 0.75rem; }
+.hv2-screen img { display: block; width: 100%; height: auto; }
 
 /* ---------------- hero ---------------- */
 
-.hv2-hero { padding-block: 3.5rem 4rem; }
-@media (min-width: 900px) { .hv2-hero { padding-block: 6rem 6.5rem; } }
+.hv2-hero { position: relative; overflow: hidden; padding-block: 2.5rem 3.5rem; }
+@media (min-width: 1024px) { .hv2-hero { padding-block: 4rem 6rem; } }
 
-.hv2-hero-grid { display: grid; gap: 3rem; }
-@media (min-width: 900px) {
-  .hv2-hero-grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 4.5rem; align-items: center; }
+.hv2-backdrop { position: absolute; inset: 0; z-index: 0; }
+.hv2-backdrop img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
+.hv2-backdrop::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(4,7,13,0.72) 0%, rgba(4,7,13,0.45) 45%, rgba(4,7,13,0.95) 100%);
+}
+.hv2-hero-in { position: relative; z-index: 1; display: grid; gap: 2rem; }
+
+/* Mobile order: compact headline, then the phone composition, then caption
+   and CTAs. Imagery is inside the first screen. */
+.hv2-hero-head { order: 1; }
+.hv2-hero-art  { order: 2; }
+.hv2-hero-rest { order: 3; }
+
+@media (min-width: 1024px) {
+  /* ~65% imagery / ~35% copy */
+  .hv2-hero-in { grid-template-columns: minmax(0, 35fr) minmax(0, 65fr); gap: 3rem; align-items: center; }
+  .hv2-hero-head { order: 1; grid-column: 1; }
+  .hv2-hero-rest { order: 2; grid-column: 1; }
+  .hv2-hero-art  { order: 3; grid-column: 2; grid-row: 1 / span 2; }
 }
 
-.hv2-h1 { font-size: clamp(2.5rem, 7vw, 4.25rem); margin: 0.875rem 0 0; }
-.hv2-hero-sub { margin-top: 1.5rem; }
-.hv2-cta-row { margin-top: 2.25rem; display: flex; flex-wrap: wrap; gap: 0.75rem; }
-.hv2-audit-line {
-  margin-top: 1rem;
-  font-size: 0.875rem;
-  color: var(--hv2-muted-on-dark);
-}
-.hv2-record-intro {
-  margin-top: 2.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--hv2-rule-dark);
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  color: var(--hv2-muted-on-dark);
-  max-width: 30rem;
-}
-
-/* ---------------- the practice record ---------------- */
-
-.hv2-record {
-  background: var(--hv2-white);
-  color: var(--hv2-ink);
-  border-radius: 1rem;
-  border: 1px solid rgba(11, 18, 32, 0.1);
-  box-shadow: 0 22px 60px -32px rgba(8, 28, 52, 0.6);
-  overflow: hidden;
-  /* Reserved so the card cannot shift the layout as fonts settle. */
-  min-height: 19.5rem;
-}
-.hv2-record-tag {
-  display: block;
-  background: #F1F5FB;
-  border-bottom: 1px solid rgba(11, 18, 32, 0.08);
-  padding: 0.5rem 1.25rem;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #456089;
-}
-.hv2-record-body { padding: 1.5rem 1.25rem 1.75rem; }
-@media (min-width: 480px) { .hv2-record-body { padding: 1.75rem; } }
-
-.hv2-record-name { font-size: 1.375rem; font-weight: 700; letter-spacing: -0.01em; }
-.hv2-record-specialty { margin-top: 0.25rem; font-size: 0.875rem; color: var(--hv2-blue-deep); font-weight: 600; }
-.hv2-record-fields { margin: 1.25rem 0 0; display: grid; gap: 0.75rem; }
-.hv2-field { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: 0.75rem; align-items: baseline; }
-.hv2-field dt {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #64748B;
-}
-.hv2-field dd { margin: 0; font-size: 0.9375rem; color: var(--hv2-ink); }
-
-/* ---------------- journey spine ---------------- */
-
-.hv2-spine { border-top: 1px solid var(--hv2-rule); border-bottom: 1px solid var(--hv2-rule); }
-.hv2-spine-list { list-style: none; margin: 0; padding: 0; display: grid; }
-@media (min-width: 768px) { .hv2-spine-list { grid-template-columns: repeat(3, 1fr); } }
-.hv2-spine-item { padding: 1.75rem 0; border-top: 1px solid var(--hv2-rule); }
-.hv2-spine-item:first-child { border-top: 0; }
-@media (min-width: 768px) {
-  .hv2-spine-item { border-top: 0; border-left: 1px solid var(--hv2-rule); padding: 2.25rem 2rem; }
-  .hv2-spine-item:first-child { border-left: 0; padding-left: 0; }
-}
-.hv2-spine-num { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.18em; color: var(--hv2-blue-deep); }
-.hv2-spine-name { margin-top: 0.5rem; font-size: 1.0625rem; font-weight: 700; }
-.hv2-spine-line { margin-top: 0.25rem; font-size: 0.9375rem; color: var(--hv2-body); }
-
-/* ---------------- generic section ---------------- */
-
-.hv2-section { padding-block: 4rem; }
-@media (min-width: 900px) { .hv2-section { padding-block: 6.5rem; } }
-.hv2-section-head { max-width: 46rem; }
-.hv2-h2 { font-size: clamp(1.875rem, 4.2vw, 2.875rem); margin: 0.75rem 0 0; }
-.hv2-prose { margin-top: 1.5rem; display: grid; gap: 1rem; }
-.hv2-prose p { margin: 0; font-size: 1rem; line-height: 1.7; color: var(--hv2-body); max-width: var(--hv2-measure); }
-.hv2-dark .hv2-prose p { color: var(--hv2-muted-on-dark); }
-
-.hv2-pull {
-  margin-top: 2rem;
-  padding-left: 1.25rem;
-  border-left: 3px solid var(--hv2-blue);
-  font-size: 1.0625rem;
-  line-height: 1.6;
-  font-weight: 500;
-  max-width: 32rem;
-}
-.hv2-dark .hv2-pull { border-left-color: var(--hv2-blue-on-dark); }
-
-.hv2-caption {
-  margin-top: 1rem;
-  font-size: 0.8125rem;
-  line-height: 1.55;
-  color: #64748B;
-  max-width: 30rem;
-}
-.hv2-dark .hv2-caption { color: var(--hv2-muted-on-dark); }
-
-/* ---------------- scene 1 · visibility ---------------- */
-
-.hv2-vis-grid { display: grid; gap: 3rem; margin-top: 3rem; }
-@media (min-width: 900px) {
-  .hv2-vis-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 4.5rem; align-items: center; }
-}
-
-/* The visibility scene.
- *
- * It must RESOLVE INTO THE RECORD. The first deployment rendered only a
- * cloud of pale chips on white and never showed the record it was supposed
- * to be assembling, so the scene asserted a change it never demonstrated.
- * Now the record is always present and always legible, the fragments sit
- * above it as the scattered copies, and the motion is them settling into
- * agreement — decorative, desktop-only, and never load-bearing.
- */
-.hv2-stage { position: relative; display: grid; gap: 1.25rem; }
-
-.hv2-fragments-label {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #64748B;
-  text-align: center;
-}
-
-/* overflow:hidden is the structural guarantee that no lateral travel can
-   ever widen the document again, independent of the capped offsets. */
-.hv2-fragments {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
-  max-width: 100%;
-  overflow: hidden;
-  padding: 0.25rem;
-}
-
-.hv2-chip {
-  /* "at most about 24px" of lateral travel — see --hv2-dx, capped in TSX. */
-  max-height: 24px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.375rem;
-  /* Dark blue on a pale blue tint: 9.2:1. The shipped version used a light
-     blue on white and was barely readable. */
-  border: 1px solid #C7D8F0;
-  background: #EEF3FB;
-  color: #244270;
-  font-size: 0.6875rem;
-  line-height: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 11rem;
-}
-
-/* The converging cue between the scattered copies and the resolved record.
-   Decorative; hidden from assistive tech in the markup. */
-.hv2-converge {
-  display: none;
-  justify-self: center;
-  width: 1px;
-  height: 1.75rem;
-  background: linear-gradient(to bottom, #C7D8F0, var(--hv2-blue));
-}
-@media (min-width: 900px) {
-  .hv2-converge { display: block; }
-}
-
-/* ---------------- scene 2 · performance (sticky, desktop only) ---------------- */
-
-.hv2-perf-track { position: relative; }
-.hv2-perf-sticky { display: grid; gap: 2.5rem; }
-
-@media (min-width: 900px) {
-  /* ~1 additional viewport of scroll past the pinned frame. */
-  .hv2-perf-track { min-height: 200vh; }
-  .hv2-perf-sticky {
-    position: sticky;
-    top: 0;
-    min-height: 100vh;
-    align-content: center;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-    gap: 4.5rem;
-    align-items: center;
-  }
-}
-
-.hv2-stops { list-style: none; margin: 2rem 0 0; padding: 0; display: grid; gap: 0.75rem; }
-.hv2-stop {
-  border: 1px solid var(--hv2-rule-dark);
-  border-radius: 0.75rem;
-  padding: 1rem 1.125rem;
-  transition: border-color 0.3s ease, background-color 0.3s ease;
-}
-.hv2-stop-label {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  font-weight: 700;
-  font-size: 0.9375rem;
-}
-.hv2-stop-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 999px;
-  background: var(--hv2-muted-on-dark);
-  flex: none;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-}
-.hv2-stop-line { margin: 0.4375rem 0 0 1.125rem; font-size: 0.9375rem; line-height: 1.6; color: var(--hv2-muted-on-dark); }
-/* Active stop. Colour is never the only signal: the dot grows and the
-   border brightens too. */
-.hv2-stop[data-active="true"] {
-  border-color: rgba(143, 182, 236, 0.55);
-  background: rgba(59, 111, 191, 0.12);
-}
-.hv2-stop[data-active="true"] .hv2-stop-dot { background: var(--hv2-blue-on-dark); transform: scale(1.5); }
-
-/* The record's highlighted zone per stop. */
-.hv2-record-zone { transition: box-shadow 0.35s ease, background-color 0.35s ease; border-radius: 0.5rem; }
-.hv2-record-zone[data-lit="true"] {
-  background: rgba(59, 111, 191, 0.09);
-  box-shadow: 0 0 0 2px rgba(59, 111, 191, 0.35);
-}
-
-/* ---------------- education ---------------- */
-
-.hv2-edu-grid { display: grid; gap: 3rem; margin-top: 3rem; }
-@media (min-width: 900px) { .hv2-edu-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 4.5rem; align-items: start; } }
-.hv2-q-list { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 0.625rem; }
-.hv2-q {
-  border: 1px solid rgba(11, 18, 32, 0.1);
-  border-radius: 0.625rem;
-  padding: 0.8125rem 1rem;
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  background: #F8FAFD;
-}
-.hv2-affordance {
-  margin-top: 1.25rem;
-  border-top: 1px dashed rgba(11, 18, 32, 0.18);
-  padding-top: 1.25rem;
-}
-/* A cue, not a control: rendered as static text, never a button or input. */
-.hv2-affordance-cue {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-height: 2.75rem;
-  padding: 0.6875rem 1.125rem;
-  border-radius: 0.625rem;
-  background: var(--hv2-blue);
-  color: var(--hv2-white);
-  font-size: 0.9375rem;
-  font-weight: 600;
-}
-
-/* ---------------- straight answers ---------------- */
-
-.hv2-qa { display: grid; gap: 0; margin-top: 2.5rem; border-top: 1px solid var(--hv2-rule); }
-@media (min-width: 768px) { .hv2-qa { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 3.5rem; } }
-.hv2-qa-item { padding: 1.5rem 0; border-bottom: 1px solid var(--hv2-rule); }
-.hv2-qa-q { font-size: 1rem; font-weight: 700; margin: 0; }
-.hv2-qa-a { margin: 0.5rem 0 0; font-size: 0.9375rem; line-height: 1.65; color: var(--hv2-body); }
-
-/* ---------------- evidence ---------------- */
-
-.hv2-ev-grid { display: grid; gap: 1.25rem; margin-top: 2.5rem; }
-@media (min-width: 900px) { .hv2-ev-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; } }
-.hv2-ev-card {
-  border: 1px solid var(--hv2-rule-dark);
-  border-radius: 1rem;
-  padding: 1.75rem;
-  background: rgba(255, 255, 255, 0.03);
-}
-.hv2-ev-title { font-size: 1.0625rem; font-weight: 700; margin: 0; }
-.hv2-ev-body { margin: 0.75rem 0 0; font-size: 0.9375rem; line-height: 1.65; color: var(--hv2-muted-on-dark); }
-.hv2-ev-group { margin-top: 1.25rem; }
-.hv2-ev-group-label {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--hv2-blue-on-dark);
-}
-.hv2-ev-items { list-style: none; margin: 0.5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.375rem; }
-.hv2-ev-items li {
-  font-size: 0.75rem;
-  line-height: 1.3;
-  padding: 0.3125rem 0.5625rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--hv2-rule-dark);
-  color: var(--hv2-white);
-}
-.hv2-limits { list-style: none; margin: 2rem 0 0; padding: 0; display: grid; gap: 0.875rem; max-width: 44rem; }
-.hv2-limits li {
-  font-size: 0.9375rem;
-  line-height: 1.65;
-  color: var(--hv2-muted-on-dark);
-  padding-left: 1.125rem;
+/* overlapping cluster: tablet behind at +4deg, phone in front at -6deg */
+.hv2-cluster { position: relative; display: grid; place-items: center; min-height: 20rem; }
+.hv2-cluster-tab {
   position: relative;
+  width: min(86%, 30rem);
+  transform: rotate(4deg) translateY(var(--tab-y, 0px));
+  z-index: 1;
 }
-.hv2-limits li::before {
-  content: "";
+.hv2-cluster-ph {
   position: absolute;
-  left: 0;
-  top: 0.6875rem;
-  width: 0.375rem;
-  height: 0.375rem;
-  border-radius: 999px;
-  background: var(--hv2-blue-on-dark);
+  left: 50%;
+  width: min(44%, 13.5rem);
+  transform: translateX(-62%) rotate(-6deg) translateY(var(--ph-y, 0px));
+  z-index: 2;
+}
+@media (min-width: 1024px) {
+  .hv2-cluster { min-height: 34rem; }
+  .hv2-cluster-tab { width: min(78%, 34rem); margin-left: 12%; }
+  .hv2-cluster-ph { left: 6%; width: min(34%, 15.5rem); transform: translateX(0) rotate(-6deg) translateY(var(--ph-y, 0px)); }
 }
 
-/* ---------------- closing + footer ---------------- */
+/* ---------------- scenes ---------------- */
 
-.hv2-closing { padding-block: 4.5rem; }
-@media (min-width: 900px) { .hv2-closing { padding-block: 7rem; } }
-.hv2-footer { border-top: 1px solid var(--hv2-rule-dark); padding-block: 2.5rem; }
-.hv2-footer-row { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; align-items: baseline; }
-.hv2-footer-brand { font-weight: 700; }
-.hv2-footer a { color: var(--hv2-blue-on-dark); }
-.hv2-footer-note { margin: 1rem 0 0; font-size: 0.8125rem; color: var(--hv2-muted-on-dark); }
-
-/* ================= MOTION =================
-   Everything below is additive enhancement. Without [data-enhanced="true"]
-   nothing here hides content. */
-
-/* ALL hiding is gated to >=900px. Below that the page is a complete static
-   vertical sequence from first paint: no reveal state, no transforms, and
-   nothing that a resize could leave stuck hidden. */
-@media (min-width: 900px) {
-  .hv2[data-enhanced="true"] [data-reveal] {
-    opacity: 0;
-    transform: translateY(14px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-  }
-  .hv2[data-enhanced="true"] [data-reveal].hv2-in {
-    opacity: 1;
-    transform: none;
-  }
-
-  /* Scene 1: fragments arrive laterally (<=24px) and settle. */
-  .hv2[data-enhanced="true"] .hv2-chip {
-    opacity: 0;
-    transform: translateX(var(--hv2-dx, 0));
-    transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-    transition-delay: var(--hv2-delay, 0ms);
-  }
-  .hv2[data-enhanced="true"] .hv2-stage.hv2-in .hv2-chip {
-    opacity: 1;
-    transform: none;
-  }
+.hv2-scene { position: relative; border-top: 1px solid var(--c-rule); background: var(--c-black); }
+.hv2-scene-navy { background: var(--c-navy); }
+.hv2-stage { padding-block: 3.5rem; }
+@media (min-width: 1024px) {
+  .hv2-stage { padding-block: 0; min-height: 100vh; display: grid; align-content: center; }
+  /* Pin heights. Only here, and only at >=1024px. */
+  .hv2[data-motion="on"] .hv2-pin-s2 { height: 190vh; }
+  .hv2[data-motion="on"] .hv2-pin-s3 { height: 175vh; }
+  .hv2[data-motion="on"] .hv2-pin-s4 { height: 200vh; }
+  .hv2[data-motion="on"] .hv2-stage { position: sticky; top: 0; height: 100vh; }
 }
 
+.hv2-split { display: grid; gap: 2.5rem; }
+@media (min-width: 1024px) { .hv2-split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4rem; align-items: center; } }
+
+/* ---------------- scene 2 · visibility ---------------- */
+
+.hv2-types { list-style: none; margin: 1.75rem 0 0; padding: 0; display: grid; gap: 0.5rem; }
+.hv2-type {
+  display: flex; align-items: center; gap: 0.625rem;
+  border: 1px solid var(--c-rule); border-radius: 0.625rem;
+  padding: 0.625rem 0.875rem; font-size: 0.875rem;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  color: #fff; background: rgba(111,168,255,0.06);
+  transition: border-color 0.35s ease, background-color 0.35s ease, color 0.35s ease;
+}
+.hv2-type .hv2-dot { width: 0.4375rem; height: 0.4375rem; border-radius: 999px; background: #44566F; flex: none; transition: background-color 0.35s ease, box-shadow 0.35s ease; }
+/* Lit state. Colour is never the only signal — the dot also gains a glow. */
+.hv2-type.is-lit { border-color: rgba(111,168,255,0.55); background: rgba(111,168,255,0.13); }
+.hv2-type.is-lit .hv2-dot { background: var(--c-signal); box-shadow: 0 0 0 4px rgba(111,168,255,0.18); }
+.hv2-types-note { margin: 0.875rem 0 0; font-size: 0.75rem; color: var(--c-dim); }
+
+.hv2-field { position: relative; display: grid; place-items: center; }
+.hv2-field .hv2-dev { width: min(70%, 15rem); }
+.hv2-traces { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.hv2-traces path {
+  fill: none; stroke: var(--c-signal); stroke-width: 1.25; opacity: 0.75;
+  stroke-dasharray: var(--len, 600); stroke-dashoffset: 0;
+}
+.hv2[data-motion="on"] .hv2-traces path { stroke-dashoffset: calc(var(--len, 600) * (1 - var(--draw, 1))); }
+
+/* ---------------- scene 3 · performance ---------------- */
+
+.hv2-paint { position: relative; display: grid; place-items: center; }
+.hv2-paint .hv2-dev { width: min(72%, 16rem); }
+/* The quiet loading surface. Hidden unless motion is on. */
+.hv2-load { position: absolute; inset: 0; background: #0A121D; opacity: 0; pointer-events: none; display: grid; align-content: start; gap: 0.5rem; padding: 1.25rem 1rem; }
+.hv2-load i { display: block; height: 0.5rem; border-radius: 999px; background: rgba(255,255,255,0.08); }
+.hv2[data-motion="on"] .hv2-load { opacity: var(--load, 0); }
+.hv2[data-motion="on"] .hv2-paint-img { clip-path: inset(0 0 calc(100% - var(--reveal, 1) * 100%) 0); }
+.hv2-filament { margin-top: 1.25rem; height: 2px; background: rgba(255,255,255,0.12); border-radius: 999px; overflow: hidden; }
+.hv2-filament i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--c-blue), var(--c-signal)); }
+.hv2[data-motion="on"] .hv2-filament i { width: calc(var(--fil, 1) * 100%); }
+.hv2-stages { display: flex; gap: 1.25rem; margin-top: 0.75rem; font-size: 0.75rem; color: var(--c-dim); }
+.hv2-stages span { transition: color 0.3s ease; }
+.hv2-stages span.is-cur { color: var(--c-signal); font-weight: 700; }
+.hv2-note {
+  margin: 1.25rem 0 0; font-size: 0.75rem; line-height: 1.5; color: var(--c-dim);
+  border-left: 2px solid var(--c-rule); padding-left: 0.75rem; max-width: 30rem;
+}
+
+/* ---------------- scene 4 · education ---------------- */
+
+/* DEFAULT (mobile, no JS, reduced motion): a real horizontal snap sequence.
+   All three screens exist in normal flow and are reachable by touch, by
+   keyboard on the scroller, and by the Previous/Next controls. */
+.hv2-film {
+  display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch; padding-bottom: 0.5rem; scrollbar-width: thin;
+}
+.hv2-frame { flex: 0 0 min(72%, 15rem); scroll-snap-align: center; }
+.hv2-film-ctrl { display: flex; gap: 0.625rem; margin-top: 1rem; }
+.hv2-film-ctrl button {
+  min-height: 2.75rem; min-width: 2.75rem; padding: 0.625rem 1rem;
+  border-radius: 0.5rem; border: 1px solid var(--c-rule);
+  background: transparent; color: #fff; font: inherit; font-size: 0.8125rem; font-weight: 600;
+  cursor: pointer;
+}
+.hv2-film-ctrl button:hover { border-color: var(--c-signal); color: var(--c-signal); }
+.hv2-rail { display: flex; gap: 0.75rem; margin-top: 1.25rem; list-style: none; padding: 0; }
+.hv2-rail li { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-dim); display: flex; align-items: center; gap: 0.5rem; }
+.hv2-rail li::before { content: ""; width: 1.25rem; height: 2px; background: rgba(255,255,255,0.18); }
+.hv2-rail li.is-cur { color: var(--c-signal); font-weight: 700; }
+.hv2-rail li.is-cur::before { background: var(--c-signal); }
+
+/* Stacked crossfade only when motion is on and there is room to pin. */
+@media (min-width: 1024px) {
+  .hv2[data-motion="on"] .hv2-film {
+    display: grid; overflow: visible; scroll-snap-type: none; place-items: center;
+  }
+  .hv2[data-motion="on"] .hv2-frame {
+    grid-area: 1 / 1; flex: none; width: min(60%, 16rem);
+    opacity: 0; transition: opacity 0.5s ease;
+  }
+  .hv2[data-motion="on"] .hv2-frame.is-cur { opacity: 1; }
+  .hv2[data-motion="on"] .hv2-film-ctrl { display: none; }
+}
+
+/* ---------------- coda ---------------- */
+
+.hv2-coda { background: #fff; color: #0B1220; border-top: 1px solid rgba(11,18,32,0.1); }
+.hv2-coda .hv2-eyebrow { color: #2F5C9F; }
+.hv2-coda .hv2-h2 { color: #0B1220; }
+.hv2-coda .hv2-k { color: #2F5C9F; }
+.hv2-coda .hv2-cap { color: #475569; }
+.hv2-coda .hv2-btn-ghost { color: #0B1220; border-color: rgba(11,18,32,0.18); }
+.hv2-coda .hv2-btn-ghost:hover { color: #2F5C9F; border-color: #2F5C9F; }
+.hv2-coda-limits { margin: 1.5rem 0 0; font-size: 0.8125rem; line-height: 1.6; color: #475569; max-width: 38rem; }
+.hv2-coda-art { display: grid; place-items: center; }
+.hv2-coda-art .hv2-dev { width: min(92%, 34rem); }
+.hv2-coda-art .hv2-dev-phone { width: min(62%, 14rem); }
+/* Tablet on desktop, phone on mobile — one of the two, never both. */
+.hv2-only-wide { display: none; }
+@media (min-width: 1024px) {
+  .hv2-only-wide { display: grid; }
+  .hv2-only-narrow { display: none; }
+}
+
+/* ---------------- footer ---------------- */
+
+.hv2-footer { background: var(--c-black); border-top: 1px solid var(--c-rule); padding-block: 2.5rem; }
+.hv2-footer-row { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; align-items: baseline; font-size: 0.875rem; }
+.hv2-footer a { color: var(--c-signal); }
+.hv2-footer-note { margin: 0.875rem 0 0; font-size: 0.75rem; color: var(--c-dim); }
+
+/* ================= REDUCED MOTION =================
+   No pins, no parallax, no transitions. Every image and caption stays. */
 @media (prefers-reduced-motion: reduce) {
-  .hv2 * { animation: none !important; transition: none !important; }
-  /* Reveal everything immediately, regardless of observer state. */
-  .hv2[data-enhanced="true"] [data-reveal],
-  .hv2[data-enhanced="true"] .hv2-chip,
-  .hv2 .hv2-chip {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  /* No pinning, no tall track. */
-  .hv2-perf-track { min-height: 0 !important; }
-  .hv2-perf-sticky { position: static !important; min-height: 0 !important; }
-  .hv2-stop-dot { transform: none !important; }
-}
-
-/* State C label inside the record. */
-.hv2-q-label {
-  margin-top: 1.25rem;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #64748B;
+  .hv2 *, .hv2 *::before, .hv2 *::after { transition: none !important; animation: none !important; }
+  .hv2 .hv2-pin-s2, .hv2 .hv2-pin-s3, .hv2 .hv2-pin-s4 { height: auto !important; }
+  .hv2 .hv2-stage { position: static !important; height: auto !important; min-height: 0 !important; padding-block: 3.5rem !important; }
+  .hv2 .hv2-cluster-ph, .hv2 .hv2-cluster-tab { transform: rotate(0deg) !important; }
+  .hv2 .hv2-load { opacity: 0 !important; }
+  .hv2 .hv2-paint-img { clip-path: none !important; }
+  .hv2 .hv2-filament i { width: 100% !important; }
+  .hv2 .hv2-traces path { stroke-dashoffset: 0 !important; }
+  .hv2 .hv2-type { border-color: rgba(111,168,255,0.55) !important; background: rgba(111,168,255,0.13) !important; }
+  .hv2 .hv2-type .hv2-dot { background: var(--c-signal) !important; }
+  /* Scene 4 returns to readable normal flow, all three keyframes visible. */
+  .hv2 .hv2-film { display: flex !important; overflow-x: auto !important; }
+  .hv2 .hv2-frame { opacity: 1 !important; grid-area: auto !important; flex: 0 0 min(72%, 15rem) !important; }
+  .hv2 .hv2-film-ctrl { display: flex !important; }
 }
