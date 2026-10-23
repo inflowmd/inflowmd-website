@@ -1,47 +1,49 @@
 import type { Metadata } from "next";
-import { Fraunces } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./home-v2.css";
-import PracticeRecord from "./PracticeRecord";
-import { Enhancer, PerformanceScene } from "./Scenes";
+import Motion from "./Motion";
+import Shot from "./Shot";
 import {
-  closing,
+  coda,
   education,
-  evidence,
   footer,
   hero,
   meta as pageMeta,
   nav,
   performance as perf,
-  spine,
-  straight,
+  shots,
   visibility,
 } from "./content";
 
 /**
- * InflowMD homepage V2 — an unlisted concept route for review.
+ * InflowMD /home-v2 — unlisted visual-first concept route.
  *
- * ISOLATION IS THE POINT. Everything this page needs lives in this
- * directory: its own copy, its own stylesheet (every selector under `.hv2`),
- * its own display font and its own metadata. It touches no shared component,
- * no root layout, no global stylesheet, no navigation and no config. It is
- * additive — deleting this directory removes it completely.
+ * ISOLATION. Everything is in this directory plus public/home-v2/. No shared
+ * component, root layout, global stylesheet, navigation, sitemap, config or
+ * dependency is touched. Deleting the two directories removes the page.
  *
- * NOT THE HOMEPAGE. `/` is untouched. This route is noindex/nofollow, absent
- * from the sitemap (which is a hand-maintained list, so nothing to remove)
- * and linked from nowhere.
+ * NOT THE HOMEPAGE. `/` is untouched. This route stays noindex/nofollow,
+ * absent from the sitemap, and linked from nowhere.
  *
- * TYPOGRAPHY. Fraunces is declared here, so Next scopes it to this route and
- * no other page pays for it. Outfit is already the site's `--font-sans` from
- * the root layout and is inherited rather than re-declared.
+ * THE IMAGERY IS THE ARGUMENT. All six screens are real captures — a
+ * launched practice site and the live InflowMD auditor — verified by sha256
+ * against the controller's provenance manifest. Nothing here is a mock-up, a
+ * placeholder or an invented interface, and the two Magnant preview files in
+ * the source directory are deliberately not referenced.
  *
- * THE BODY IS CREAM SITE-WIDE. `.hv2` paints white and navy surfaces edge to
- * edge so none of that shows through, without editing globals.css.
+ * WHAT THE PAGE DOES NOT SAY. No score, statistic, elapsed time, benchmark,
+ * testimonial or guarantee. Scene 3 draws how a visit unfolds and says in
+ * words that it is a drawing. Scene 2 shows real schema types without
+ * claiming any assistant has read or recommended anything.
  */
 
-const fraunces = Fraunces({
+/* Scoped to this route: Outfit is already the site's --font-sans from the
+   root layout, and re-declaring it here keeps this page self-contained
+   without touching the layout. */
+const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-hv2-display",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-hv2",
   display: "swap",
 });
 
@@ -102,40 +104,90 @@ export const metadata: Metadata = {
 
 const ROOT_ID = "hv2-root";
 
+/* Display widths, used for `sizes` so the browser picks the smaller variant
+   on phones and never downloads a 2x asset it cannot use. */
+const PHONE_SIZES = "(min-width: 1024px) 16rem, 72vw";
+const HERO_PHONE_SIZES = "(min-width: 1024px) 15.5rem, 44vw";
+const TABLET_SIZES = "(min-width: 1024px) 34rem, 86vw";
+
 export default function HomeV2Page() {
   return (
-    <div id={ROOT_ID} className={`hv2 ${fraunces.variable}`}>
-      <Enhancer rootId={ROOT_ID} />
+    <div id={ROOT_ID} className={`hv2 ${outfit.variable}`}>
+      <Motion rootId={ROOT_ID} />
 
-      {/* ---------------- navigation ---------------- */}
-      {/* hv2-dark is required, not decorative: without it the ghost CTA
-          inherits near-black ink on navy and is effectively invisible. */}
-      <header className="hv2-nav hv2-dark">
-        <div className="hv2-shell hv2-nav-inner">
-          {/* The existing logo, untouched: no redraw, no recolour. */}
+      {/* ============ header ============ */}
+      <header className="hv2-header">
+        <div className="hv2-wrap hv2-header-in">
+          {/* The existing logo asset, unmodified, on a consistently dark bar. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={nav.logoSrc} alt={nav.logoAlt} className="hv2-nav-logo" width={120} height={28} />
-          <span className="hv2-nav-tag">{pageMeta.reviewLabel}</span>
-          <div className="hv2-nav-actions">
-            <a className="hv2-btn hv2-btn-ghost" href={nav.secondary.href}>
-              {nav.secondary.label}
-            </a>
-            <a className="hv2-btn hv2-btn-primary" href={nav.primary.href}>
-              {nav.primary.label}
-            </a>
-          </div>
+          <img src={nav.logoSrc} alt={nav.logoAlt} className="hv2-logo" width={112} height={26} />
+          <span className="hv2-tag">{pageMeta.reviewLabel}</span>
+          <nav className="hv2-header-links" aria-label="Concept page">
+            <a href={nav.audit.href}>{nav.audit.label}</a>
+            <a href={nav.call.href}>{nav.call.label}</a>
+          </nav>
         </div>
       </header>
 
       <main>
-        {/* ---------------- hero ---------------- */}
-        <section className="hv2-dark hv2-hero">
-          <div className="hv2-shell hv2-hero-grid">
-            <div>
-              <p className="hv2-eyebrow">InflowMD</p>
-              <h1 className="hv2-display hv2-h1">{hero.h1}</h1>
-              <p className="hv2-lede hv2-hero-sub">{hero.supporting}</p>
-              <div className="hv2-cta-row">
+        {/* ============ 01 · HERO ============ */}
+        <section className="hv2-hero" data-hero>
+          {/* Decorative: conceptual technology plane, no interface, no data. */}
+          <div className="hv2-backdrop">
+            <Shot
+              base={shots.backdrop.base}
+              widths={shots.backdrop.widths}
+              ratio={shots.backdrop.ratio}
+              alt={shots.backdrop.alt}
+              sizes="100vw"
+              priority
+            />
+          </div>
+
+          <div className="hv2-wrap hv2-hero-in">
+            <div className="hv2-hero-head">
+              <p className="hv2-eyebrow">{hero.eyebrow}</p>
+              <h1 className="hv2-h1">
+                {hero.h1Lead} <span className="hv2-k">{hero.h1Accent}</span>
+              </h1>
+            </div>
+
+            <div className="hv2-hero-art">
+              <div className="hv2-cluster">
+                <div className="hv2-cluster-tab" data-hero-tablet>
+                  <div className="hv2-dev hv2-dev-tablet">
+                    <div className="hv2-screen">
+                      <Shot
+                        base={shots.auditorTablet.base}
+                        widths={shots.auditorTablet.widths}
+                        ratio={shots.auditorTablet.ratio}
+                        alt={shots.auditorTablet.alt}
+                        sizes={TABLET_SIZES}
+                        priority
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="hv2-cluster-ph" data-hero-phone>
+                  <div className="hv2-dev">
+                    <div className="hv2-screen">
+                      <Shot
+                        base={shots.practiceHome.base}
+                        widths={shots.practiceHome.widths}
+                        ratio={shots.practiceHome.ratio}
+                        alt={shots.practiceHome.alt}
+                        sizes={HERO_PHONE_SIZES}
+                        priority
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="hv2-hero-rest">
+              <p className="hv2-cap">{hero.caption}</p>
+              <div className="hv2-ctas">
                 <a className="hv2-btn hv2-btn-primary" href={hero.primary.href}>
                   {hero.primary.label}
                 </a>
@@ -143,225 +195,238 @@ export default function HomeV2Page() {
                   {hero.secondary.label}
                 </a>
               </div>
-              <p className="hv2-audit-line">{hero.auditLine}</p>
-              <p className="hv2-record-intro">{hero.recordIntro}</p>
-            </div>
-            {/* State A — a clear practice identity. */}
-            <div data-reveal>
-              <PracticeRecord />
+              <p className="hv2-micro">{hero.micro}</p>
             </div>
           </div>
         </section>
 
-        {/* ---------------- journey spine ---------------- */}
-        <section className="hv2-spine" aria-label="What this page covers">
-          <div className="hv2-shell">
-            <ol className="hv2-spine-list">
-              {spine.map((s) => (
-                <li key={s.num} className="hv2-spine-item">
-                  <div className="hv2-spine-num">
-                    {s.num} · {s.name}
+        {/* ============ 02 · VISIBILITY ============ */}
+        <section className="hv2-scene hv2-scene-navy hv2-pin-s2" data-scene="visibility">
+          <div className="hv2-stage">
+            <div className="hv2-wrap hv2-split">
+              <div>
+                <p className="hv2-eyebrow">{visibility.eyebrow}</p>
+                <h2 className="hv2-h2">
+                  {visibility.h2Lead} <span className="hv2-k">{visibility.h2Accent}</span>
+                </h2>
+                <p className="hv2-cap">{visibility.caption}</p>
+                <ul className="hv2-types">
+                  {visibility.types.map((t) => (
+                    <li key={t} className="hv2-type">
+                      <span className="hv2-dot" aria-hidden="true" />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+                <p className="hv2-types-note">{visibility.typesNote}</p>
+              </div>
+
+              <div className="hv2-field">
+                {/* Four paths from the device toward the type list. */}
+                <svg className="hv2-traces" viewBox="0 0 420 560" aria-hidden="true" focusable="false">
+                  <path d="M210 130 C 300 150, 362 206, 404 292" />
+                  <path d="M210 226 C 312 244, 358 304, 404 372" />
+                  <path d="M210 322 C 302 334, 354 384, 404 444" />
+                  <path d="M210 418 C 292 432, 350 462, 404 508" />
+                </svg>
+                <div className="hv2-dev">
+                  <div className="hv2-screen">
+                    <Shot
+                      base={shots.practiceHome.base}
+                      widths={shots.practiceHome.widths}
+                      ratio={shots.practiceHome.ratio}
+                      alt={shots.practiceHome.alt}
+                      sizes={PHONE_SIZES}
+                    />
                   </div>
-                  <div className="hv2-spine-name hv2-display">{s.line}</div>
-                </li>
-              ))}
-            </ol>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* ---------------- 01 · visibility (scene 1) ---------------- */}
-        <section className="hv2-section">
-          <div className="hv2-shell">
-            <div className="hv2-section-head">
-              <p className="hv2-eyebrow">
-                {visibility.num} · {visibility.eyebrow}
-              </p>
-              <h2 className="hv2-display hv2-h2">{visibility.headline}</h2>
-            </div>
-            <div className="hv2-vis-grid">
+        {/* ============ 03 · PERFORMANCE ============ */}
+        <section className="hv2-scene hv2-pin-s3" data-scene="performance">
+          <div className="hv2-stage">
+            <div className="hv2-wrap hv2-split">
               <div>
-                <div className="hv2-prose">
-                  {visibility.body.map((p) => (
-                    <p key={p}>{p}</p>
+                <p className="hv2-eyebrow">{perf.eyebrow}</p>
+                <h2 className="hv2-h2">
+                  {perf.h2Lead} <span className="hv2-k">{perf.h2Accent}</span>
+                </h2>
+                <p className="hv2-cap">{perf.caption}</p>
+                <div className="hv2-filament" aria-hidden="true">
+                  <i />
+                </div>
+                <div className="hv2-stages" aria-hidden="true">
+                  {perf.stages.map((s) => (
+                    <span key={s}>{s}</span>
                   ))}
                 </div>
-                <p className="hv2-pull">{visibility.pmPoint}</p>
-                <p className="hv2-caption">{visibility.sceneCaption}</p>
+                {/* Stated in words, not only implied by styling. */}
+                <p className="hv2-note">{perf.disclaimer}</p>
               </div>
 
-              {/* Scene 1. The fragments are decorative and desktop-only;
-                  the record beneath them is always rendered and always
-                  legible, so the scene resolves into the thing it is about
-                  rather than leaving a chip cloud standing in for it. */}
-              <div className="hv2-stage">
-                <div className="hv2-fragments-label" aria-hidden="true">
-                  {visibility.fragmentsLabel}
-                </div>
-                <div className="hv2-fragments" aria-hidden="true">
-                  {visibility.fragments.map((f, i) => {
-                    /* Numeric multiplication, capped at 24px. The first
-                       deployment interpolated the sign and the magnitude as
-                       strings ("-1" + "18" = "-118px"), which pushed a chip
-                       past the viewport and widened the document to 1303px
-                       at a 1280px viewport. */
-                    const direction = i % 2 === 0 ? -1 : 1;
-                    const magnitude = Math.min(24, 12 + (i % 4) * 4);
-                    return (
-                      <span
-                        key={f}
-                        className="hv2-chip"
-                        style={
-                          {
-                            "--hv2-dx": `${direction * magnitude}px`,
-                            "--hv2-delay": `${i * 55}ms`,
-                          } as React.CSSProperties
-                        }
-                      >
-                        {f}
-                      </span>
-                    );
-                  })}
-                </div>
-                <span className="hv2-converge" aria-hidden="true" />
-                <PracticeRecord />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ---------------- evidence · how the audit works ---------------- */}
-        <section className="hv2-dark hv2-section">
-          <div className="hv2-shell">
-            <div className="hv2-section-head">
-              <p className="hv2-eyebrow">{evidence.eyebrow}</p>
-              <h2 className="hv2-display hv2-h2">{evidence.headline}</h2>
-            </div>
-            <div className="hv2-ev-grid">
-              {evidence.columns.map((c) => (
-                <div key={c.title} className="hv2-ev-card" data-reveal>
-                  <h3 className="hv2-ev-title">{c.title}</h3>
-                  <p className="hv2-ev-body">{c.body}</p>
-                  {c.groups?.map((g) => (
-                    <div key={g.label} className="hv2-ev-group">
-                      <div className="hv2-ev-group-label">{g.label}</div>
-                      <ul className="hv2-ev-items">
-                        {g.items.map((it) => (
-                          <li key={it}>{it}</li>
-                        ))}
-                      </ul>
+              <div className="hv2-paint">
+                <div className="hv2-dev">
+                  <div className="hv2-screen">
+                    <Shot
+                      base={shots.practiceHome.base}
+                      widths={shots.practiceHome.widths}
+                      ratio={shots.practiceHome.ratio}
+                      alt={shots.practiceHome.alt}
+                      sizes={PHONE_SIZES}
+                      className="hv2-paint-img"
+                    />
+                    {/* Quiet loading surface. Transparent unless motion runs,
+                        so this is never a blank box on mobile or no-JS. */}
+                    <div className="hv2-load" aria-hidden="true">
+                      <i style={{ width: "62%" }} />
+                      <i style={{ width: "88%" }} />
+                      <i style={{ width: "44%" }} />
                     </div>
-                  ))}
+                  </div>
                 </div>
-              ))}
-            </div>
-            <ul className="hv2-limits">
-              {evidence.limits.map((l) => (
-                <li key={l}>{l}</li>
-              ))}
-            </ul>
-            <div className="hv2-cta-row">
-              <a className="hv2-btn hv2-btn-primary" href={evidence.cta.href}>
-                {evidence.cta.label}
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* ---------------- 02 · performance (scene 2) ---------------- */}
-        <section className="hv2-dark hv2-section">
-          <div className="hv2-shell">
-            <div className="hv2-section-head">
-              <p className="hv2-eyebrow">
-                {perf.num} · {perf.eyebrow}
-              </p>
-              <h2 className="hv2-display hv2-h2">{perf.headline}</h2>
-              <div className="hv2-prose">
-                {perf.body.map((p) => (
-                  <p key={p}>{p}</p>
-                ))}
               </div>
             </div>
           </div>
-          <div className="hv2-shell">
-            <PerformanceScene />
-          </div>
         </section>
 
-        {/* ---------------- 03 · education ---------------- */}
-        <section className="hv2-section">
-          <div className="hv2-shell">
-            <div className="hv2-section-head">
-              <p className="hv2-eyebrow">
-                {education.num} · {education.eyebrow}
-              </p>
-              <h2 className="hv2-display hv2-h2">{education.headline}</h2>
-            </div>
-            <div className="hv2-edu-grid">
+        {/* ============ 04 · EDUCATION → INQUIRY ============ */}
+        <section className="hv2-scene hv2-scene-navy hv2-pin-s4" data-scene="education">
+          <div className="hv2-stage">
+            <div className="hv2-wrap hv2-split">
               <div>
-                <div className="hv2-prose">
-                  {education.body.map((p) => (
-                    <p key={p}>{p}</p>
+                <p className="hv2-eyebrow">{education.eyebrow}</p>
+                <h2 className="hv2-h2">
+                  {education.h2Lead} <span className="hv2-k">{education.h2Accent}</span>
+                </h2>
+                <p className="hv2-cap">{education.caption}</p>
+                <ul className="hv2-rail">
+                  {education.steps.map((s) => (
+                    <li key={s.key}>{s.label}</li>
                   ))}
-                </div>
-                <p className="hv2-caption">{education.caution}</p>
+                </ul>
               </div>
-              {/* State C — the same record, now carrying the questions a
-                  patient arrives with and the appointment cue. */}
-              <div data-reveal>
-                <PracticeRecord
-                  questions={education.questions}
-                  questionsLabel={education.questionsLabel}
-                  showNextStep
-                  nextStepLabel={education.affordanceLabel}
-                  affordanceNote={education.affordanceNote}
-                />
+
+              <div>
+                {/* All three real screens are in the DOM at every width. On a
+                    phone this is a native horizontal snap sequence; with
+                    motion on a wide screen it becomes a stacked crossfade. */}
+                <div
+                  className="hv2-film"
+                  tabIndex={0}
+                  role="group"
+                  aria-label="Three screens from one practice site: learn, check, request"
+                >
+                  <div className="hv2-frame">
+                    <div className="hv2-dev">
+                      <div className="hv2-screen">
+                        <Shot
+                          base={shots.practiceStages.base}
+                          widths={shots.practiceStages.widths}
+                          ratio={shots.practiceStages.ratio}
+                          alt={shots.practiceStages.alt}
+                          sizes={PHONE_SIZES}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="hv2-frame">
+                    <div className="hv2-dev">
+                      <div className="hv2-screen">
+                        <Shot
+                          base={shots.practiceChecker.base}
+                          widths={shots.practiceChecker.widths}
+                          ratio={shots.practiceChecker.ratio}
+                          alt={shots.practiceChecker.alt}
+                          sizes={PHONE_SIZES}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="hv2-frame">
+                    <div className="hv2-dev">
+                      <div className="hv2-screen">
+                        <Shot
+                          base={shots.practiceRequest.base}
+                          widths={shots.practiceRequest.widths}
+                          ratio={shots.practiceRequest.ratio}
+                          alt={shots.practiceRequest.alt}
+                          sizes={PHONE_SIZES}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="hv2-film-ctrl">
+                  <button type="button" data-film-prev>
+                    {education.prev}
+                  </button>
+                  <button type="button" data-film-next>
+                    {education.next}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ---------------- straight answers ---------------- */}
-        <section className="hv2-section" style={{ paddingTop: 0 }}>
-          <div className="hv2-shell">
-            <div className="hv2-section-head">
-              <p className="hv2-eyebrow">{straight.eyebrow}</p>
-              <h2 className="hv2-display hv2-h2">{straight.headline}</h2>
+        {/* ============ 05 · WHITE CODA ============ */}
+        <section className="hv2-scene hv2-coda">
+          <div className="hv2-wrap hv2-split" style={{ paddingBlock: "4rem" }}>
+            <div>
+              <p className="hv2-eyebrow">{coda.eyebrow}</p>
+              <h2 className="hv2-h2">{coda.h2}</h2>
+              <p className="hv2-cap">{coda.caption}</p>
+              <div className="hv2-ctas">
+                <a className="hv2-btn hv2-btn-primary" href={coda.primary.href}>
+                  {coda.primary.label}
+                </a>
+                <a className="hv2-btn hv2-btn-ghost" href={coda.secondary.href}>
+                  {coda.secondary.label}
+                </a>
+              </div>
+              <p className="hv2-coda-limits">{coda.limits}</p>
             </div>
-            <div className="hv2-qa">
-              {straight.items.map((it) => (
-                <div key={it.q} className="hv2-qa-item">
-                  <h3 className="hv2-qa-q">{it.q}</h3>
-                  <p className="hv2-qa-a">{it.a}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        {/* ---------------- closing ---------------- */}
-        <section className="hv2-dark hv2-closing">
-          <div className="hv2-shell">
-            <h2 className="hv2-display hv2-h2">{closing.headline}</h2>
-            <p className="hv2-lede" style={{ marginTop: "1.25rem" }}>
-              {closing.body}
-            </p>
-            <div className="hv2-cta-row">
-              <a className="hv2-btn hv2-btn-primary" href={closing.primary.href}>
-                {closing.primary.label}
-              </a>
-              <a className="hv2-btn hv2-btn-ghost" href={closing.secondary.href}>
-                {closing.secondary.label}
-              </a>
+            <div className="hv2-coda-art">
+              <div className="hv2-only-wide">
+                <div className="hv2-dev hv2-dev-tablet">
+                  <div className="hv2-screen">
+                    <Shot
+                      base={shots.auditorTablet.base}
+                      widths={shots.auditorTablet.widths}
+                      ratio={shots.auditorTablet.ratio}
+                      alt={shots.auditorTablet.alt}
+                      sizes={TABLET_SIZES}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="hv2-only-narrow">
+                <div className="hv2-dev hv2-dev-phone">
+                  <div className="hv2-screen">
+                    <Shot
+                      base={shots.auditorPhone.base}
+                      widths={shots.auditorPhone.widths}
+                      ratio={shots.auditorPhone.ratio}
+                      alt={shots.auditorPhone.alt}
+                      sizes={PHONE_SIZES}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
       </main>
 
-      {/* ---------------- footer ---------------- */}
-      <footer className="hv2-dark hv2-footer">
-        <div className="hv2-shell">
+      {/* ============ footer ============ */}
+      <footer className="hv2-footer">
+        <div className="hv2-wrap">
           <div className="hv2-footer-row">
-            <span className="hv2-footer-brand">{footer.brand}</span>
+            <span style={{ fontWeight: 700 }}>{footer.brand}</span>
             <a href={`mailto:${footer.email}`}>{footer.email}</a>
           </div>
           <p className="hv2-footer-note">{footer.note}</p>
