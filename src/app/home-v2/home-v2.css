@@ -110,14 +110,24 @@
   background: var(--c-black);     /* consistently dark; never white-on-white */
   border-bottom: 1px solid var(--c-rule);
 }
-.hv2-header-in { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding-block: 0.875rem; }
-.hv2-logo { display: block; height: 26px; width: auto; }
+/* FIX: at 390px this wrapped to three rows (logo / badge / links) and cost
+   158px of the first viewport. Two rows now: logo and links share the first,
+   the review badge takes the second as secondary information. Both nav
+   targets keep their 44px height. */
+.hv2-header-in { display: flex; align-items: center; gap: 0.625rem 1rem; flex-wrap: wrap; padding-block: 0.625rem; }
+.hv2-logo { display: block; height: 28px; width: auto; order: 1; }
 .hv2-tag {
   font-size: 0.625rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--c-dim); border: 1px solid var(--c-rule); border-radius: 999px;
-  padding: 0.3125rem 0.625rem; white-space: nowrap;
+  padding: 0.25rem 0.5625rem; white-space: nowrap; order: 3; flex-basis: 100%;
 }
-.hv2-header-links { margin-left: auto; display: flex; gap: 1.25rem; }
+@media (min-width: 640px) {
+  /* One tidy row once there is width for it. */
+  .hv2-header-in { padding-block: 0.875rem; }
+  .hv2-tag { order: 2; flex-basis: auto; }
+  .hv2-header-links { order: 3; }
+}
+.hv2-header-links { margin-left: auto; display: flex; gap: 1.25rem; order: 2; }
 .hv2-header-links a {
   color: #fff; text-decoration: none; font-size: 0.875rem; font-weight: 600;
   display: inline-flex; align-items: center; min-height: 2.75rem;
@@ -219,9 +229,23 @@
 
 .hv2-field { position: relative; display: grid; place-items: center; }
 .hv2-field .hv2-dev { width: min(70%, 15rem); }
-.hv2-traces { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* FIX: the traces used to live inside the right-hand field and ran further
+   RIGHT, away from the type rail in the left column. They now overlay the
+   whole split so they can actually cross the gap, and their coordinates are
+   proportional (viewBox 0 0 100 100 with preserveAspectRatio="none"), which
+   keeps the endpoints on the rail at every desktop width: the device's left
+   edge sits at 64-66% of the split and the rail ends at 46.6-47.3%. */
+.hv2-split-traced { position: relative; }
+.hv2-traces {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0; display: none;
+}
+@media (min-width: 1024px) { .hv2-traces { display: block; } }
+.hv2-split-traced > * { position: relative; z-index: 1; }
 .hv2-traces path {
-  fill: none; stroke: var(--c-signal); stroke-width: 1.25; opacity: 0.75;
+  fill: none; stroke: var(--c-signal); stroke-width: 1.25;
+  vector-effect: non-scaling-stroke; opacity: 0.8;
   stroke-dasharray: var(--len, 600); stroke-dashoffset: 0;
 }
 .hv2[data-motion="on"] .hv2-traces path { stroke-dashoffset: calc(var(--len, 600) * (1 - var(--draw, 1))); }
@@ -234,7 +258,15 @@
 .hv2-load { position: absolute; inset: 0; background: #0A121D; opacity: 0; pointer-events: none; display: grid; align-content: start; gap: 0.5rem; padding: 1.25rem 1rem; }
 .hv2-load i { display: block; height: 0.5rem; border-radius: 999px; background: rgba(255,255,255,0.08); }
 .hv2[data-motion="on"] .hv2-load { opacity: var(--load, 0); }
-.hv2[data-motion="on"] .hv2-paint-img { clip-path: inset(0 0 calc(100% - var(--reveal, 1) * 100%) 0); }
+/* FIX: the clip used to sit on the <picture>, which is display:inline, so
+   the clip box was a line box rather than the image box and the screenshot
+   was clipped away entirely — blank at every reveal value, including 1.
+   The picture is now a block box AND the clip targets the <img> itself, a
+   block-level replaced element whose border box is exactly the picture. */
+.hv2-paint-img { display: block; }
+.hv2[data-motion="on"] .hv2-paint-img img {
+  clip-path: inset(0 0 calc(100% - var(--reveal, 1) * 100%) 0);
+}
 .hv2-filament { margin-top: 1.25rem; height: 2px; background: rgba(255,255,255,0.12); border-radius: 999px; overflow: hidden; }
 .hv2-filament i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--c-blue), var(--c-signal)); }
 .hv2[data-motion="on"] .hv2-filament i { width: calc(var(--fil, 1) * 100%); }
@@ -263,11 +295,14 @@
   background: transparent; color: #fff; font: inherit; font-size: 0.8125rem; font-weight: 600;
   cursor: pointer;
 }
-.hv2-film-ctrl button:hover { border-color: var(--c-signal); color: var(--c-signal); }
+.hv2-film-ctrl button:hover:not(:disabled) { border-color: var(--c-signal); color: var(--c-signal); }
+.hv2-film-ctrl button:disabled { opacity: 0.4; cursor: default; }
 .hv2-rail { display: flex; gap: 0.75rem; margin-top: 1.25rem; list-style: none; padding: 0; }
 .hv2-rail li { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-dim); display: flex; align-items: center; gap: 0.5rem; }
 .hv2-rail li::before { content: ""; width: 1.25rem; height: 2px; background: rgba(255,255,255,0.18); }
 .hv2-rail li.is-cur { color: var(--c-signal); font-weight: 700; }
+.hv2-rail li[aria-current="step"] { color: var(--c-signal); font-weight: 700; }
+.hv2-rail li[aria-current="step"]::before { background: var(--c-signal); }
 .hv2-rail li.is-cur::before { background: var(--c-signal); }
 
 /* Stacked crossfade only when motion is on and there is room to pin. */
@@ -318,7 +353,7 @@
   .hv2 .hv2-stage { position: static !important; height: auto !important; min-height: 0 !important; padding-block: 3.5rem !important; }
   .hv2 .hv2-cluster-ph, .hv2 .hv2-cluster-tab { transform: rotate(0deg) !important; }
   .hv2 .hv2-load { opacity: 0 !important; }
-  .hv2 .hv2-paint-img { clip-path: none !important; }
+  .hv2 .hv2-paint-img img { clip-path: none !important; }
   .hv2 .hv2-filament i { width: 100% !important; }
   .hv2 .hv2-traces path { stroke-dashoffset: 0 !important; }
   .hv2 .hv2-type { border-color: rgba(111,168,255,0.55) !important; background: rgba(111,168,255,0.13) !important; }

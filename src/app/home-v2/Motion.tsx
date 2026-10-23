@@ -118,6 +118,76 @@ export default function Motion({ rootId }: { rootId: string }) {
     /** Remove every inline value this module wrote, so turning motion off
         leaves the stylesheet's finished state intact rather than a frozen
         mid-animation one. */
+    /* ---- scene 4: the horizontal scroller, used below 1024px and in
+            reduced motion ----
+       The rail used to be driven only by the pinned desktop engine, so on a
+       phone no step was ever marked current no matter how the reader moved
+       through the three screens. It is now synchronised to the scroller
+       itself, which covers touch, keyboard scrolling, and the Previous/Next
+       controls alike, and it exposes the state to assistive tech with
+       aria-current rather than colour alone. */
+    const film = root.querySelector<HTMLElement>(".hv2-film");
+    const railItems = Array.from(root.querySelectorAll<HTMLElement>("[data-rail-index]"));
+    const prevBtn = root.querySelector<HTMLButtonElement>("[data-film-prev]");
+    const nextBtn = root.querySelector<HTMLButtonElement>("[data-film-next]");
+    const frameCount = film ? film.querySelectorAll(".hv2-frame").length : 0;
+
+    const markRail = (i: number) => {
+      railItems.forEach((li, k) => {
+        const on = k === i;
+        li.classList.toggle("is-cur", on);
+        if (on) li.setAttribute("aria-current", "step");
+        else li.removeAttribute("aria-current");
+      });
+      if (prevBtn) prevBtn.disabled = i <= 0;
+      if (nextBtn) nextBtn.disabled = i >= frameCount - 1;
+    };
+
+    const indexFromScroll = () => {
+      if (!film) return 0;
+      const frames = Array.from(film.querySelectorAll<HTMLElement>(".hv2-frame"));
+      if (!frames.length) return 0;
+      /* Whichever frame's centre is nearest the scroller's centre. Robust to
+         partial scrolls, momentum and odd frame widths. */
+      const mid = film.scrollLeft + film.clientWidth / 2;
+      let best = 0;
+      let bestD = Infinity;
+      frames.forEach((f, k) => {
+        const c = f.offsetLeft + f.offsetWidth / 2;
+        const d = Math.abs(c - mid);
+        if (d < bestD) { bestD = d; best = k; }
+      });
+      return best;
+    };
+
+    let filmTick = false;
+    const onFilmScroll = () => {
+      if (filmTick) return;
+      filmTick = true;
+      requestAnimationFrame(() => {
+        filmTick = false;
+        /* While the pinned desktop crossfade is driving, the film is a grid
+           and does not scroll; scroll sync must not fight it. */
+        if (active) return;
+        markRail(indexFromScroll());
+      });
+    };
+
+    const step = (dir: number) => () => {
+      if (!film) return;
+      const frameEl = film.querySelector<HTMLElement>(".hv2-frame");
+      const w = frameEl ? frameEl.getBoundingClientRect().width + 16 : film.clientWidth;
+      film.scrollBy({ left: dir * w, behavior: reduced.matches ? "auto" : "smooth" });
+    };
+    const onPrev = step(-1);
+    const onNext = step(1);
+    prevBtn?.addEventListener("click", onPrev);
+    nextBtn?.addEventListener("click", onNext);
+    film?.addEventListener("scroll", onFilmScroll, { passive: true });
+    /* Initial state: without this the rail started with nothing selected. */
+    if (!active) markRail(indexFromScroll());
+
+
     const reset = () => {
       heroPh?.style.removeProperty("--ph-y");
       heroTab?.style.removeProperty("--tab-y");
@@ -144,6 +214,8 @@ export default function Motion({ rootId }: { rootId: string }) {
       } else {
         root.removeAttribute("data-motion");
         reset();
+        /* Handing control back to the scroller: restore a current step. */
+        markRail(indexFromScroll());
       }
     };
 
@@ -154,21 +226,6 @@ export default function Motion({ rootId }: { rootId: string }) {
     wide.addEventListener("change", sync);
     reduced.addEventListener("change", sync);
 
-    /* ---- scene 4 controls, used below 1024px and in reduced motion ---- */
-    const film = root.querySelector<HTMLElement>(".hv2-film");
-    const step = (dir: number) => () => {
-      if (!film) return;
-      const frameEl = film.querySelector<HTMLElement>(".hv2-frame");
-      const w = frameEl ? frameEl.getBoundingClientRect().width + 16 : film.clientWidth;
-      film.scrollBy({ left: dir * w, behavior: reduced.matches ? "auto" : "smooth" });
-    };
-    const prevBtn = root.querySelector<HTMLButtonElement>("[data-film-prev]");
-    const nextBtn = root.querySelector<HTMLButtonElement>("[data-film-next]");
-    const onPrev = step(-1);
-    const onNext = step(1);
-    prevBtn?.addEventListener("click", onPrev);
-    nextBtn?.addEventListener("click", onNext);
-
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
@@ -177,6 +234,7 @@ export default function Motion({ rootId }: { rootId: string }) {
       reduced.removeEventListener("change", sync);
       prevBtn?.removeEventListener("click", onPrev);
       nextBtn?.removeEventListener("click", onNext);
+      film?.removeEventListener("scroll", onFilmScroll);
       root.removeAttribute("data-motion");
     };
   }, [rootId]);

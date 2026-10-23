@@ -203,7 +203,26 @@ export default function HomeV2Page() {
         {/* ============ 02 · VISIBILITY ============ */}
         <section className="hv2-scene hv2-scene-navy hv2-pin-s2" data-scene="visibility">
           <div className="hv2-stage">
-            <div className="hv2-wrap hv2-split">
+            <div className="hv2-wrap hv2-split hv2-split-traced">
+              {/* Four traces out of the device's LEFT edge, across the column
+                  gap, ending on the schema rail. Proportional coordinates
+                  (viewBox 0 0 100 100, preserveAspectRatio="none") keep the
+                  endpoints on the rail from 1024px up, because the device's
+                  left edge stays at 64-66% of this box and the rail ends at
+                  46.6-47.3%. Decorative, so hidden from assistive tech. */}
+              <svg
+                className="hv2-traces"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M64.5 33 C 59 34, 54 35.5, 48.5 37" />
+                <path d="M64.5 44 C 59.5 44.5, 54 45.5, 48.5 46" />
+                <path d="M64.5 56 C 59.5 55.5, 54 54.5, 48.5 54" />
+                <path d="M64.5 67 C 59 66, 54 64.5, 48.5 63" />
+              </svg>
+
               <div>
                 <p className="hv2-eyebrow">{visibility.eyebrow}</p>
                 <h2 className="hv2-h2">
@@ -222,13 +241,6 @@ export default function HomeV2Page() {
               </div>
 
               <div className="hv2-field">
-                {/* Four paths from the device toward the type list. */}
-                <svg className="hv2-traces" viewBox="0 0 420 560" aria-hidden="true" focusable="false">
-                  <path d="M210 130 C 300 150, 362 206, 404 292" />
-                  <path d="M210 226 C 312 244, 358 304, 404 372" />
-                  <path d="M210 322 C 302 334, 354 384, 404 444" />
-                  <path d="M210 418 C 292 432, 350 462, 404 508" />
-                </svg>
                 <div className="hv2-dev">
                   <div className="hv2-screen">
                     <Shot
@@ -303,8 +315,10 @@ export default function HomeV2Page() {
                 </h2>
                 <p className="hv2-cap">{education.caption}</p>
                 <ul className="hv2-rail">
-                  {education.steps.map((s) => (
-                    <li key={s.key}>{s.label}</li>
+                  {education.steps.map((s, i) => (
+                    <li key={s.key} data-rail-index={i}>
+                      {s.label}
+                    </li>
                   ))}
                 </ul>
               </div>
