@@ -102,9 +102,15 @@ export default function Motion({ rootId }: { rootId: string }) {
           el.querySelectorAll<HTMLElement>(".hv2-frame").forEach((f, k) =>
             f.classList.toggle("is-cur", k === i),
           );
-          el.querySelectorAll<HTMLElement>(".hv2-rail li").forEach((s, k) =>
-            s.classList.toggle("is-cur", k === i),
-          );
+          el.querySelectorAll<HTMLElement>(".hv2-rail li").forEach((s, k) => {
+            const on = k === i;
+            s.classList.toggle("is-cur", on);
+            /* Keep aria in step with the class: without this, the attribute
+               set by the scroller path could survive on a different item
+               once the pinned crossfade takes over. */
+            if (on) s.setAttribute("aria-current", "step");
+            else s.removeAttribute("aria-current");
+          });
         }
       }
     };
@@ -130,33 +136,40 @@ export default function Motion({ rootId }: { rootId: string }) {
     const railItems = Array.from(root.querySelectorAll<HTMLElement>("[data-rail-index]"));
     const prevBtn = root.querySelector<HTMLButtonElement>("[data-film-prev]");
     const nextBtn = root.querySelector<HTMLButtonElement>("[data-film-next]");
-    const frameCount = film ? film.querySelectorAll(".hv2-frame").length : 0;
 
-    const markRail = (i: number) => {
-      railItems.forEach((li, k) => {
-        const on = k === i;
-        li.classList.toggle("is-cur", on);
-        if (on) li.setAttribute("aria-current", "step");
-        else li.removeAttribute("aria-current");
-      });
-      if (prevBtn) prevBtn.disabled = i <= 0;
-      if (nextBtn) nextBtn.disabled = i >= frameCount - 1;
-    };
+    /* Scroll position is authoritative at the ends.
+       Nearest-centre alone cannot reach the first or last frame once the
+       strip is wide enough to show more than two of them: the container's
+       midpoint sits over a middle frame at every scroll offset, so on a
+       1280px reduced-motion desktop "Check" stayed current at both the
+       start and the end of the strip, Next stayed enabled after reaching
+       Request, and Previous was enabled at rest. Reading the real scroll
+       boundaries fixes the ends; nearest-centre still decides between them. */
+    const EPS = 2; // px, absorbs fractional scroll offsets and zoom rounding
 
-    const indexFromScroll = () => {
-      if (!film) return 0;
+    type RailState = { index: number; canScroll: boolean; atStart: boolean; atEnd: boolean };
+
+    const scrollState = (): RailState => {
+      const none: RailState = { index: 0, canScroll: false, atStart: true, atEnd: true };
+      if (!film) return none;
       const frames = Array.from(film.querySelectorAll<HTMLElement>(".hv2-frame"));
-      if (!frames.length) return 0;
-      /* Viewport coordinates for BOTH sides of the comparison.
-         This used to mix `frame.offsetLeft` with `film.scrollLeft`, which are
-         different spaces: offsetLeft is measured from the nearest positioned
-         ancestor, and the scene-2 stacking rule makes the film's column
-         exactly that. On a two-column desktop layout every frame centre
-         carried the column's offset while the midpoint did not, so frame 0
-         always won and the rail never advanced -- visible in desktop reduced
-         motion, where the strip scrolls but Learn stayed current and
-         Previous stayed disabled. Rects are already scroll-adjusted, so the
-         two sides now agree at every width and in every mode. */
+      if (!frames.length) return none;
+
+      /* No overflow: every frame is already visible and neither control can
+         change anything, so both are disabled rather than left live. */
+      const max = film.scrollWidth - film.clientWidth;
+      if (max <= EPS) return { ...none, index: 0 };
+
+      if (film.scrollLeft <= EPS) {
+        return { index: 0, canScroll: true, atStart: true, atEnd: false };
+      }
+      if (film.scrollLeft >= max - EPS) {
+        return { index: frames.length - 1, canScroll: true, atStart: false, atEnd: true };
+      }
+
+      /* Between the boundaries: whichever frame's centre is nearest the
+         scroller's centre. Both sides in viewport coordinates, which are
+         already scroll-adjusted, so they share one space at every width. */
       const fr = film.getBoundingClientRect();
       const mid = fr.left + fr.width / 2;
       let best = 0;
@@ -166,7 +179,23 @@ export default function Motion({ rootId }: { rootId: string }) {
         const d = Math.abs(r.left + r.width / 2 - mid);
         if (d < bestD) { bestD = d; best = k; }
       });
-      return best;
+      return { index: best, canScroll: true, atStart: false, atEnd: false };
+    };
+
+    /** Marks one step current, by class and by aria-current. */
+    const setCurrent = (i: number) => {
+      railItems.forEach((li, k) => {
+        const on = k === i;
+        li.classList.toggle("is-cur", on);
+        if (on) li.setAttribute("aria-current", "step");
+        else li.removeAttribute("aria-current");
+      });
+    };
+
+    const markRail = (st: RailState) => {
+      setCurrent(st.index);
+      if (prevBtn) prevBtn.disabled = !st.canScroll || st.atStart;
+      if (nextBtn) nextBtn.disabled = !st.canScroll || st.atEnd;
     };
 
     let filmTick = false;
@@ -178,7 +207,7 @@ export default function Motion({ rootId }: { rootId: string }) {
         /* While the pinned desktop crossfade is driving, the film is a grid
            and does not scroll; scroll sync must not fight it. */
         if (active) return;
-        markRail(indexFromScroll());
+        markRail(scrollState());
       });
     };
 
@@ -194,7 +223,7 @@ export default function Motion({ rootId }: { rootId: string }) {
     nextBtn?.addEventListener("click", onNext);
     film?.addEventListener("scroll", onFilmScroll, { passive: true });
     /* Initial state: without this the rail started with nothing selected. */
-    if (!active) markRail(indexFromScroll());
+    if (!active) markRail(scrollState());
 
 
     const reset = () => {
@@ -207,7 +236,10 @@ export default function Motion({ rootId }: { rootId: string }) {
         el.style.removeProperty("--fil");
         el.querySelectorAll<HTMLElement>(".hv2-type").forEach((t) => t.classList.remove("is-lit"));
         el.querySelectorAll<HTMLElement>(".hv2-frame").forEach((f) => f.classList.remove("is-cur"));
-        el.querySelectorAll<HTMLElement>(".hv2-rail li").forEach((s) => s.classList.remove("is-cur"));
+        el.querySelectorAll<HTMLElement>(".hv2-rail li").forEach((s) => {
+          s.classList.remove("is-cur");
+          s.removeAttribute("aria-current");
+        });
         el.querySelectorAll<HTMLElement>(".hv2-stages span").forEach((s) => s.classList.remove("is-cur"));
       }
     };
@@ -224,7 +256,7 @@ export default function Motion({ rootId }: { rootId: string }) {
         root.removeAttribute("data-motion");
         reset();
         /* Handing control back to the scroller: restore a current step. */
-        markRail(indexFromScroll());
+        markRail(scrollState());
       }
     };
 
