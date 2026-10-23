@@ -65,7 +65,9 @@ export default function HomeV2Page() {
       <Enhancer rootId={ROOT_ID} />
 
       {/* ---------------- navigation ---------------- */}
-      <header className="hv2-nav">
+      {/* hv2-dark is required, not decorative: without it the ghost CTA
+          inherits near-black ink on navy and is effectively invisible. */}
+      <header className="hv2-nav hv2-dark">
         <div className="hv2-shell hv2-nav-inner">
           {/* The existing logo, untouched: no redraw, no recolour. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -144,25 +146,41 @@ export default function HomeV2Page() {
                 <p className="hv2-caption">{visibility.sceneCaption}</p>
               </div>
 
-              {/* Scene 1. The chips are decorative — the record beneath them
-                  and the prose beside them carry every fact. */}
+              {/* Scene 1. The fragments are decorative and desktop-only;
+                  the record beneath them is always rendered and always
+                  legible, so the scene resolves into the thing it is about
+                  rather than leaving a chip cloud standing in for it. */}
               <div className="hv2-stage">
-                <div className="hv2-chips" aria-hidden="true">
-                  {visibility.fragments.map((f, i) => (
-                    <span
-                      key={f}
-                      className="hv2-chip"
-                      style={
-                        {
-                          "--hv2-dx": `${i % 2 === 0 ? -1 : 1}${18 + (i % 4) * 6}px`,
-                          "--hv2-delay": `${i * 55}ms`,
-                        } as React.CSSProperties
-                      }
-                    >
-                      {f}
-                    </span>
-                  ))}
+                <div className="hv2-fragments-label" aria-hidden="true">
+                  {visibility.fragmentsLabel}
                 </div>
+                <div className="hv2-fragments" aria-hidden="true">
+                  {visibility.fragments.map((f, i) => {
+                    /* Numeric multiplication, capped at 24px. The first
+                       deployment interpolated the sign and the magnitude as
+                       strings ("-1" + "18" = "-118px"), which pushed a chip
+                       past the viewport and widened the document to 1303px
+                       at a 1280px viewport. */
+                    const direction = i % 2 === 0 ? -1 : 1;
+                    const magnitude = Math.min(24, 12 + (i % 4) * 4);
+                    return (
+                      <span
+                        key={f}
+                        className="hv2-chip"
+                        style={
+                          {
+                            "--hv2-dx": `${direction * magnitude}px`,
+                            "--hv2-delay": `${i * 55}ms`,
+                          } as React.CSSProperties
+                        }
+                      >
+                        {f}
+                      </span>
+                    );
+                  })}
+                </div>
+                <span className="hv2-converge" aria-hidden="true" />
+                <PracticeRecord />
               </div>
             </div>
           </div>

@@ -13,7 +13,14 @@ import { record } from "./content";
  * only: nothing is added or removed from the card, so no information is ever
  * hidden behind a state the reader cannot reach.
  */
-export type RecordZone = "identity" | "contact" | "care" | "next" | null;
+/**
+ * The four regions the performance scene lights, one per stop. Each must sit
+ * on an element that actually carries `.hv2-record-zone`, or the highlight
+ * silently never paints — which is exactly what happened to "care" in the
+ * first deployment. They are also mutually exclusive and non-nested, so two
+ * stops can never look identical.
+ */
+export type RecordZone = "identity" | "site" | "care" | "next" | null;
 
 export default function PracticeRecord({
   lit = null,
@@ -37,11 +44,16 @@ export default function PracticeRecord({
     <figure className="hv2-record" style={{ margin: 0 }}>
       <figcaption className="hv2-record-tag">{record.illustrationLabel}</figcaption>
       <div className="hv2-record-body">
+        {/* identity and care are siblings, not nested: nesting made the two
+            stops light overlapping boxes. */}
         <div className="hv2-record-zone" data-lit={lit === "identity" ? "true" : undefined}>
           <div className="hv2-record-name">{record.name}</div>
-          <div className="hv2-record-specialty" data-lit={lit === "care" ? "true" : undefined}>
-            {record.specialty}
-          </div>
+        </div>
+        <div
+          className="hv2-record-specialty hv2-record-zone"
+          data-lit={lit === "care" ? "true" : undefined}
+        >
+          {record.specialty}
         </div>
 
         {questions ? (
@@ -57,7 +69,7 @@ export default function PracticeRecord({
           </>
         ) : (
         <dl className="hv2-record-fields">
-          <div className="hv2-field hv2-record-zone" data-lit={lit === "contact" ? "true" : undefined}>
+          <div className="hv2-field">
             <dt>Address</dt>
             <dd>
               {record.street}
@@ -73,7 +85,10 @@ export default function PracticeRecord({
             <dt>Hours</dt>
             <dd>{record.hours}</dd>
           </div>
-          <div className="hv2-field">
+          <div
+            className="hv2-field hv2-record-zone"
+            data-lit={lit === "site" ? "true" : undefined}
+          >
             <dt>Website</dt>
             <dd>{record.site}</dd>
           </div>

@@ -288,42 +288,69 @@
   .hv2-vis-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 4.5rem; align-items: center; }
 }
 
-/* The assembling fragments. Each chip is a small lateral piece of the record
-   that settles into agreement. Decorative: aria-hidden, prose carries the
-   point. Dimensions reserved by the fixed stage height. */
-.hv2-stage {
-  position: relative;
-  min-height: 21rem;
-  display: grid;
-  place-items: center;
+/* The visibility scene.
+ *
+ * It must RESOLVE INTO THE RECORD. The first deployment rendered only a
+ * cloud of pale chips on white and never showed the record it was supposed
+ * to be assembling, so the scene asserted a change it never demonstrated.
+ * Now the record is always present and always legible, the fragments sit
+ * above it as the scattered copies, and the motion is them settling into
+ * agreement — decorative, desktop-only, and never load-bearing.
+ */
+.hv2-stage { position: relative; display: grid; gap: 1.25rem; }
+
+.hv2-fragments-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #64748B;
+  text-align: center;
 }
-.hv2-chips {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+
+/* overflow:hidden is the structural guarantee that no lateral travel can
+   ever widen the document again, independent of the capped offsets. */
+.hv2-fragments {
   display: flex;
   flex-wrap: wrap;
-  align-content: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0 1rem;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 0.25rem;
 }
+
 .hv2-chip {
-  /* "small lateral identity fragments (at most about 24px)" */
+  /* "at most about 24px" of lateral travel — see --hv2-dx, capped in TSX. */
   max-height: 24px;
   display: inline-flex;
   align-items: center;
   padding: 0.25rem 0.5rem;
   border-radius: 0.375rem;
-  border: 1px solid rgba(143, 182, 236, 0.4);
-  background: rgba(59, 111, 191, 0.14);
-  color: var(--hv2-blue-on-dark);
+  /* Dark blue on a pale blue tint: 9.2:1. The shipped version used a light
+     blue on white and was barely readable. */
+  border: 1px solid #C7D8F0;
+  background: #EEF3FB;
+  color: #244270;
   font-size: 0.6875rem;
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 11rem;
+}
+
+/* The converging cue between the scattered copies and the resolved record.
+   Decorative; hidden from assistive tech in the markup. */
+.hv2-converge {
+  display: none;
+  justify-self: center;
+  width: 1px;
+  height: 1.75rem;
+  background: linear-gradient(to bottom, #C7D8F0, var(--hv2-blue));
+}
+@media (min-width: 900px) {
+  .hv2-converge { display: block; }
 }
 
 /* ---------------- scene 2 · performance (sticky, desktop only) ---------------- */
@@ -485,33 +512,39 @@
    Everything below is additive enhancement. Without [data-enhanced="true"]
    nothing here hides content. */
 
-.hv2[data-enhanced="true"] [data-reveal] {
-  opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-.hv2[data-enhanced="true"] [data-reveal].hv2-in {
-  opacity: 1;
-  transform: none;
-}
+/* ALL hiding is gated to >=900px. Below that the page is a complete static
+   vertical sequence from first paint: no reveal state, no transforms, and
+   nothing that a resize could leave stuck hidden. */
+@media (min-width: 900px) {
+  .hv2[data-enhanced="true"] [data-reveal] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .hv2[data-enhanced="true"] [data-reveal].hv2-in {
+    opacity: 1;
+    transform: none;
+  }
 
-/* Scene 1: chips arrive laterally, then settle. */
-.hv2[data-enhanced="true"] .hv2-chip {
-  opacity: 0;
-  transform: translateX(var(--hv2-dx, 0));
-  transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: var(--hv2-delay, 0ms);
-}
-.hv2[data-enhanced="true"] .hv2-stage.hv2-in .hv2-chip {
-  opacity: 1;
-  transform: none;
+  /* Scene 1: fragments arrive laterally (<=24px) and settle. */
+  .hv2[data-enhanced="true"] .hv2-chip {
+    opacity: 0;
+    transform: translateX(var(--hv2-dx, 0));
+    transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--hv2-delay, 0ms);
+  }
+  .hv2[data-enhanced="true"] .hv2-stage.hv2-in .hv2-chip {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hv2 * { animation: none !important; transition: none !important; }
   /* Reveal everything immediately, regardless of observer state. */
   .hv2[data-enhanced="true"] [data-reveal],
-  .hv2[data-enhanced="true"] .hv2-chip {
+  .hv2[data-enhanced="true"] .hv2-chip,
+  .hv2 .hv2-chip {
     opacity: 1 !important;
     transform: none !important;
   }
