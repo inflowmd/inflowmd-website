@@ -3,7 +3,7 @@ import Image from "next/image";
 import PrintButton from "../[slug]/PrintButton";
 import Rich from "./rich";
 import { competitors, findings, findingsHeading, measurement, meta as pageMeta, scope, working } from "./content";
-import { priorities, findingDisplay, competitorDisplay, phaseDisplay, measureLabels } from "./display";
+import { priorities, findingDisplay, competitorDisplay, phaseDisplay, measureLabels, monthlyPlans } from "./display";
 import styles from "./report.module.css";
 
 // Presentation only. Approved detailed findings remain unchanged in content.ts.
@@ -111,6 +111,30 @@ export default function VeinAndSkinStudioPage() {
               <div className={styles.priorityTop}><span className={styles.priorityNumber}>0{i + 1}</span><span className={styles.priorityIcon}><Icon kind={p.icon} /></span></div>
               <h3>{p.title}</h3><p>{p.body}</p>
             </li>)}</ol>
+          </div>
+        </section>
+        <section className={`${styles.section} ${styles.offer}`} aria-labelledby="plans">
+          <div className={styles.container}>
+            <div className={styles.sectionHeader}>
+              <div><p className={styles.sectionLabel}>Your personalized offer</p><h2 id="plans">We recommend Visibility.</h2></div>
+              <p className={styles.sectionLead}>Start with the website platform, local visibility and a consistent review process. Add Growth for ongoing content; consider paid ads later, once measurement, capacity and budget are agreed.</p>
+            </div>
+            <div className={styles.offerTerms}>
+              <div><strong>Month-to-month.</strong><span>No long-term commitment.</span></div>
+              <div><strong>$0 setup fee</strong><span>Waived for your practice on every plan.</span></div>
+            </div>
+            <div className={styles.planGrid}>
+              {monthlyPlans.map(plan => <article key={plan.name} className={`${styles.planCard} ${plan.recommended ? styles.recommendedPlan : ""}`} aria-label={`${plan.name} plan${plan.recommended ? ", recommended" : ""}`}>
+                <p className={styles.planLabel}>{plan.recommended ? "Recommended for your practice" : "Also available"}</p>
+                <h3>{plan.name}</h3>
+                <p className={styles.planPrice}><strong>${plan.price.toLocaleString("en-US")}</strong><span>/month</span></p>
+                <p className={styles.planTerms}>Month-to-month · $0 setup</p>
+                <p className={styles.planFocus}>{plan.focus}</p>
+                <ul>{plan.features.map(feature => <li key={feature}>{feature}</li>)}</ul>
+                <p className={styles.planNote}>{plan.note}</p>
+              </article>)}
+            </div>
+            <p className={styles.offerNote}>Prices shown are recurring monthly service fees. The setup fee is waived whichever plan you choose. Cancellation terms will be confirmed in your agreement. Visibility is our recommendation; no plan has been selected.</p>
           </div>
         </section>
         <section className={styles.section} aria-labelledby="opportunities">

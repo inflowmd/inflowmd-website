@@ -48,6 +48,28 @@ details[open] > summary > .chevron { transform:rotate(180deg); }
 .priorityIcon { border:1px solid currentColor; border-radius:12px; padding:10px; opacity:.85; }
 .priority h3 { font-size:23px; font-weight:750; line-height:1.13; letter-spacing:-.025em; max-width:240px; }
 .priority p { font-size:14px; line-height:1.65; margin-top:14px; opacity:.9; }
+.offer { background:#f7f9fc; }
+.offerTerms { display:flex; justify-content:space-between; gap:24px; border-radius:16px; background:#172239; color:#fff; padding:24px 28px; margin-bottom:24px; }
+.offerTerms > div { display:flex; flex-direction:column; gap:5px; }
+.offerTerms strong { font-size:25px; line-height:1.2; letter-spacing:-.02em; }
+.offerTerms span { color:#d0d9e8; font-size:14px; line-height:1.6; }
+.planGrid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
+.planCard { display:flex; flex-direction:column; padding:22px; border:1px solid var(--line); border-radius:16px; background:#fff; }
+.recommendedPlan { border:2px solid var(--blue); padding:21px; box-shadow:0 5px 18px #245dcc0c; }
+.planLabel { font-size:11px; font-weight:750; color:#53627a; line-height:1.5; min-height:33px; }
+.recommendedPlan .planLabel { color:#245dcc; }
+.planCard h3 { font-size:23px; font-weight:750; letter-spacing:-.02em; line-height:1.2; }
+.planPrice { display:flex; flex-wrap:wrap; align-items:baseline; gap:5px; margin-top:16px; }
+.planPrice strong { font-size:38px; font-weight:800; line-height:1.1; letter-spacing:-.05em; }
+.planPrice span { font-size:14px; color:#526078; }
+.planTerms { margin-top:8px; font-size:12px; color:#39465d; font-weight:650; line-height:1.6; }
+.planFocus { margin-top:20px; font-size:14px; font-weight:700; line-height:1.5; min-height:42px; }
+.planCard ul { list-style:none; padding:0; margin:14px 0 22px; font-size:13px; color:#526078; line-height:1.65; }
+.planCard li { padding-left:16px; position:relative; }
+.planCard li + li { margin-top:10px; }
+.planCard li::before { content:""; position:absolute; left:0; top:.6em; height:5px; width:5px; border-radius:50%; background:#245dcc; }
+.planNote { margin-top:auto; padding-top:16px; border-top:1px solid var(--line); font-size:12px; font-weight:650; line-height:1.6; color:#39465d; }
+.offerNote { margin-top:18px; color:#526078; font-size:12px; line-height:1.7; max-width:900px; }
 .findings { display:grid; gap:12px; }
 .finding { border:1px solid var(--line); border-radius:16px; overflow:clip; background:#fff; }
 .finding[open] { border-color:#9bb7e7; }
@@ -97,6 +119,10 @@ details[open] > summary > .chevron { transform:rotate(180deg); }
 .scopeBody { font-size:13px; line-height:1.8; color:#526078; max-width:900px; padding:18px 0; }
 .scopeBody p + p { margin-top:16px; }
 .footer { padding:24px 0; color:#5b677d; font-size:12px; line-height:1.7; }
+@media(max-width:1050px) {
+  .planGrid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .planLabel { min-height:0; margin-bottom:10px; }
+}
 @media(max-width:800px) {
   .heroGrid { grid-template-columns:1fr; gap:28px; }
   .hero h1 { max-width:none; }
@@ -136,6 +162,10 @@ details[open] > summary > .chevron { transform:rotate(180deg); }
   .labNote { font-size:11px; padding:10px 7px; }
   .section { padding:36px 0; }
   .priority { padding:22px; }
+  .offerTerms { flex-direction:column; padding:22px; gap:22px; }
+  .offerTerms strong { font-size:24px; }
+  .planGrid { grid-template-columns:1fr; }
+  .planFocus { min-height:0; }
   .findingSummary { align-items:flex-start; gap:12px; padding:20px 16px; }
   .findingNumber { font-size:22px; width:24px; padding-top:3px; }
   .findingTitle { gap:8px; }
@@ -196,4 +226,11 @@ details[open] > summary > .chevron { transform:rotate(180deg); }
   .measures { grid-template-columns:repeat(2,minmax(0,1fr)); break-inside:avoid; }
   .measure { break-inside:avoid; }
   .scope { padding:16px 0; }
+  .offerTerms { border:1px solid #bdc7d7; padding:16px; break-inside:avoid; }
+  .planGrid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .planCard { padding:14px; break-inside:avoid; }
+  .planCard h3 { font-size:20px; }
+  .planPrice strong { font-size:30px; }
+  .planFocus { min-height:0; margin-top:12px; }
+  .planCard ul { margin:10px 0; font-size:12px; }
 }
