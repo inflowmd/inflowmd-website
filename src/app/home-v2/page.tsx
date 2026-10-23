@@ -45,10 +45,53 @@ const fraunces = Fraunces({
   display: "swap",
 });
 
+const ROUTE_URL = "https://www.inflowmd.com/home-v2";
+
+/** Concept-labelled social copy. Neutral by design: this page must not carry
+    the root layout's marketing claim into a share card. */
+const SOCIAL_TITLE = "Homepage concept · For review | InflowMD";
+const SOCIAL_DESCRIPTION =
+  "An unlisted homepage concept for review, exploring visibility, website performance and patient education.";
+
 export const metadata: Metadata = {
   title: pageMeta.title,
   description: pageMeta.description,
-  /* Route-scoped override of the root layout's index/follow. */
+
+  /* Self-referential. The root layout pins its canonical to the site root,
+     and because metadata is shallowly merged this route inherited it --
+     pointing every sharer and crawler at the homepage instead of here. */
+  alternates: { canonical: ROUTE_URL },
+
+  /* openGraph and twitter are REPLACED wholesale by the last segment that
+     defines them, not deep-merged. So every field that should survive is
+     restated here: dropping `images` would silently remove the share image
+     rather than inherit it. The logo file itself is unchanged -- only its
+     alt text is relabelled, because the inherited alt described the agency
+     rather than this concept page. */
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "InflowMD",
+    url: ROUTE_URL,
+    title: SOCIAL_TITLE,
+    description: SOCIAL_DESCRIPTION,
+    images: [
+      {
+        url: "/inflowmd-final.png",
+        width: 1200,
+        height: 630,
+        alt: "InflowMD homepage concept — an unlisted page for review",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SOCIAL_TITLE,
+    description: SOCIAL_DESCRIPTION,
+    images: ["/inflowmd-final.png"],
+  },
+
+  /* Route-scoped override of the root layout's index/follow. Unchanged. */
   robots: {
     index: false,
     follow: false,
