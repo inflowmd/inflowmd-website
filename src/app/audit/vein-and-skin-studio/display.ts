@@ -28,3 +28,33 @@ export const phaseDisplay = [
 ];
 
 export const measureLabels = ["Qualified inquiries", "Booking rate", "Attendance rate", "Response & spam"];
+
+/** Published monthly rates verified against pricing/PricingClient.tsx.
+ * Clayton approved $0 setup and month-to-month on every plan for this prospect only.
+ */
+export const monthlyPlans = [
+  {
+    name: "Visibility", price: 900, recommended: true,
+    focus: "Website + reviews + local visibility",
+    features: ["Everything in Essentials", "Google Business Profile updates", "Review requests & reputation management", "Local SEO for your city & specialty"],
+    note: "Our recommended starting point.",
+  },
+  {
+    name: "Essentials", price: 500, recommended: false,
+    focus: "The website foundation",
+    features: ["Responsive practice website & managed hosting", "Website security & backups", "Google Business Profile setup / optimization", "Appointment request forms & domain support"],
+    note: "For the core website platform.",
+  },
+  {
+    name: "Growth", price: 1500, recommended: false,
+    focus: "Local visibility + ongoing content",
+    features: ["Everything in Visibility", "Service-page keyword optimization", "2 patient-focused SEO posts per month", "Citation management & monthly SEO insights"],
+    note: "An option when ongoing content is the next priority.",
+  },
+  {
+    name: "Full Engine", price: 2500, recommended: false,
+    focus: "Content + managed Google Ads",
+    features: ["Everything in Growth", "Google Ads setup & management", "Conversion tracking & landing-page optimization", "Quarterly strategy review"],
+    note: "Google Ads spend is additional.",
+  },
+] as const;
