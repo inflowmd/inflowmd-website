@@ -124,23 +124,41 @@ export default function VeinAndSkinStudioPage() {
               <div><strong>$0 setup fee</strong><span>Waived for your practice on every plan.</span></div>
             </div>
             <div className={styles.planGrid}>
-              {monthlyPlans.map(plan => <article key={plan.name} className={`${styles.planCard} ${plan.recommended ? styles.recommendedPlan : ""}`} aria-label={`${plan.name} plan${plan.recommended ? ", recommended" : ""}`}>
+              {monthlyPlans.map(plan => {
+                /* floor() on purpose: (900-800)/900 is 11.11%, and a discount is
+                   only ever rounded DOWN so the badge cannot overstate it. */
+                const percentOff = plan.originalPrice !== undefined && plan.originalPrice > plan.price
+                  ? Math.floor(((plan.originalPrice - plan.price) / plan.originalPrice) * 100)
+                  : null;
+                return <article key={plan.name} className={`${styles.planCard} ${plan.recommended ? styles.recommendedPlan : ""}`} aria-label={`${plan.name} plan${plan.recommended ? ", recommended" : ""}`}>
                 <p className={styles.planLabel}>{plan.recommended ? "Recommended for your practice" : "Also available"}</p>
                 <h3>{plan.name}</h3>
                 {/* The published rate, struck through, with a visible "Standard"
                     label beside it: the strike-through alone would carry the whole
                     meaning for anyone who cannot perceive it. */}
+                {/* Reading order is the argument, and it is deliberate: standard rate
+                    -> discount -> paid rate -> monthly saving -> annual saving -> the
+                    no-annual-commitment pairing. Every step is visible text in normal
+                    DOM order, so none of the meaning rests on the strike-through or
+                    on colour alone. */}
                 {plan.originalPrice !== undefined && (
                   <p className={styles.planStandard}>
                     <span className={styles.standardLabel}>Standard</span>
                     <del>${plan.originalPrice.toLocaleString("en-US")}/month</del>
+                    {percentOff !== null && <span className={styles.discountBadge}>{percentOff}% OFF</span>}
                   </p>
                 )}
                 <p className={styles.planPrice}><strong>${plan.price.toLocaleString("en-US")}</strong><span>/month</span></p>
-                {plan.savingsMonthly !== undefined && plan.savingsAnnual !== undefined && (
-                  <p className={styles.planSavings}>
-                    Save ${plan.savingsMonthly.toLocaleString("en-US")}/month · ${plan.savingsAnnual.toLocaleString("en-US")}/year
-                  </p>
+                {plan.savingsMonthly !== undefined && (
+                  <p className={styles.saveMonthly}>Save ${plan.savingsMonthly.toLocaleString("en-US")}/month</p>
+                )}
+                {plan.savingsAnnual !== undefined && (
+                  <>
+                    <p className={styles.saveAnnual}>Save ${plan.savingsAnnual.toLocaleString("en-US")} a year</p>
+                    {/* Paired immediately with the annual figure so a year of
+                        arithmetic can never read as an annual contract. */}
+                    <p className={styles.annualPairing}>Month-to-month. No annual commitment.</p>
+                  </>
                 )}
                 {plan.savingsNote && <p className={styles.planFinePrint}>{plan.savingsNote}</p>}
                 <p className={styles.planTerms}>Month-to-month · $0 setup</p>
@@ -148,7 +166,8 @@ export default function VeinAndSkinStudioPage() {
                 <ul>{plan.features.map(feature => <li key={feature}>{feature}</li>)}</ul>
                 {plan.included && <p className={styles.planIncluded}>{plan.included}</p>}
                 <p className={styles.planNote}>{plan.note}</p>
-              </article>)}
+              </article>;
+              })}
             </div>
             <p className={styles.offerNote}>The vein-focused website, patient education and screening experience are included in this personalized Visibility offer; implementation details will be confirmed in the agreement. Prices shown are recurring monthly service fees. The setup fee is waived whichever plan you choose. Cancellation terms will be confirmed in your agreement. Visibility is our recommendation; no plan has been selected.</p>
           </div>
