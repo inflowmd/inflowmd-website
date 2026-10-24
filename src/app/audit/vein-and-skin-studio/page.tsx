@@ -127,14 +127,30 @@ export default function VeinAndSkinStudioPage() {
               {monthlyPlans.map(plan => <article key={plan.name} className={`${styles.planCard} ${plan.recommended ? styles.recommendedPlan : ""}`} aria-label={`${plan.name} plan${plan.recommended ? ", recommended" : ""}`}>
                 <p className={styles.planLabel}>{plan.recommended ? "Recommended for your practice" : "Also available"}</p>
                 <h3>{plan.name}</h3>
+                {/* The published rate, struck through, with a visible "Standard"
+                    label beside it: the strike-through alone would carry the whole
+                    meaning for anyone who cannot perceive it. */}
+                {plan.originalPrice !== undefined && (
+                  <p className={styles.planStandard}>
+                    <span className={styles.standardLabel}>Standard</span>
+                    <del>${plan.originalPrice.toLocaleString("en-US")}/month</del>
+                  </p>
+                )}
                 <p className={styles.planPrice}><strong>${plan.price.toLocaleString("en-US")}</strong><span>/month</span></p>
+                {plan.savingsMonthly !== undefined && plan.savingsAnnual !== undefined && (
+                  <p className={styles.planSavings}>
+                    Save ${plan.savingsMonthly.toLocaleString("en-US")}/month · ${plan.savingsAnnual.toLocaleString("en-US")}/year
+                  </p>
+                )}
+                {plan.savingsNote && <p className={styles.planFinePrint}>{plan.savingsNote}</p>}
                 <p className={styles.planTerms}>Month-to-month · $0 setup</p>
                 <p className={styles.planFocus}>{plan.focus}</p>
                 <ul>{plan.features.map(feature => <li key={feature}>{feature}</li>)}</ul>
+                {plan.included && <p className={styles.planIncluded}>{plan.included}</p>}
                 <p className={styles.planNote}>{plan.note}</p>
               </article>)}
             </div>
-            <p className={styles.offerNote}>Prices shown are recurring monthly service fees. The setup fee is waived whichever plan you choose. Cancellation terms will be confirmed in your agreement. Visibility is our recommendation; no plan has been selected.</p>
+            <p className={styles.offerNote}>The vein-focused website, patient education and screening experience are included in this personalized Visibility offer; implementation details will be confirmed in the agreement. Prices shown are recurring monthly service fees. The setup fee is waived whichever plan you choose. Cancellation terms will be confirmed in your agreement. Visibility is our recommendation; no plan has been selected.</p>
           </div>
         </section>
         <section className={styles.section} aria-labelledby="opportunities">

@@ -63,6 +63,16 @@ details[open] > summary > .chevron { transform:rotate(180deg); }
 .planPrice strong { font-size:38px; font-weight:800; line-height:1.1; letter-spacing:-.05em; }
 .planPrice span { font-size:14px; color:#526078; }
 .planTerms { margin-top:8px; font-size:12px; color:#39465d; font-weight:650; line-height:1.6; }
+/* Personalized Visibility rate. The struck-through published price is paired
+   with a visible "Standard" label so the meaning never rests on the
+   strike-through alone, and the paid price keeps the largest type on the card. */
+.planStandard { display:flex; flex-wrap:wrap; align-items:baseline; gap:7px; margin-top:16px; font-size:13px; color:#526078; line-height:1.5; }
+.standardLabel { font-size:11px; font-weight:750; letter-spacing:.04em; text-transform:uppercase; color:#53627a; }
+.planStandard del { text-decoration-thickness:1.5px; text-underline-offset:2px; }
+.planStandard + .planPrice { margin-top:4px; }
+.planSavings { margin-top:8px; font-size:13px; font-weight:750; color:var(--blue); line-height:1.5; }
+.planFinePrint { margin-top:7px; font-size:11px; color:#53627a; line-height:1.55; }
+.planIncluded { margin-top:-12px; margin-bottom:22px; font-size:12px; font-weight:650; color:#39465d; line-height:1.6; }
 .planFocus { margin-top:20px; font-size:14px; font-weight:700; line-height:1.5; min-height:42px; }
 .planCard ul { list-style:none; padding:0; margin:14px 0 22px; font-size:13px; color:#526078; line-height:1.65; }
 .planCard li { padding-left:16px; position:relative; }
@@ -231,6 +241,10 @@ details[open] > summary > .chevron { transform:rotate(180deg); }
   .planCard { padding:14px; break-inside:avoid; }
   .planCard h3 { font-size:20px; }
   .planPrice strong { font-size:30px; }
+  .planStandard { margin-top:12px; font-size:11px; }
+  .planSavings { font-size:11px; }
+  .planFinePrint { font-size:10px; }
+  .planIncluded { margin-top:-6px; margin-bottom:12px; font-size:11px; }
   .planFocus { min-height:0; margin-top:12px; }
   .planCard ul { margin:10px 0; font-size:12px; }
 }
