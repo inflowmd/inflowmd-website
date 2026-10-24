@@ -31,12 +31,49 @@ export const measureLabels = ["Qualified inquiries", "Booking rate", "Attendance
 
 /** Published monthly rates verified against pricing/PricingClient.tsx.
  * Clayton approved $0 setup and month-to-month on every plan for this prospect only.
+ *
+ * VISIBILITY CARRIES A PERSONALIZED RATE. Clayton approved $800/month against the
+ * published $900 for this practice and this plan only, a saving of $100 a month.
+ * The $1,200 "annual" figure is twelve of those monthly discounts expressed as a
+ * year's arithmetic -- it is NOT an annual contract, an annual prepayment or a
+ * twelve-month term, and `savingsNote` says so on the card. Nothing here implies
+ * the rate expires, or invents eligibility or a deadline.
+ *
+ * The published rates for the other three plans are untouched, and
+ * pricing/PricingClient.tsx -- the global source -- is not edited at all.
  */
-export const monthlyPlans = [
+export type MonthlyPlan = {
+  name: string;
+  /** What this practice pays. */
+  price: number;
+  recommended: boolean;
+  focus: string;
+  features: readonly string[];
+  note: string;
+  /** Published standard rate, shown struck through beside a visible "Standard"
+      label so the strike-through is never the only thing carrying the meaning. */
+  originalPrice?: number;
+  savingsMonthly?: number;
+  savingsAnnual?: number;
+  savingsNote?: string;
+  /** Compact footer line instead of a sixth long bullet. */
+  included?: string;
+};
+
+export const monthlyPlans: readonly MonthlyPlan[] = [
   {
-    name: "Visibility", price: 900, recommended: true,
-    focus: "Website + reviews + local visibility",
-    features: ["Everything in Essentials", "Google Business Profile updates", "Review requests & reputation management", "Local SEO for your city & specialty"],
+    name: "Visibility", price: 800, recommended: true,
+    originalPrice: 900, savingsMonthly: 100, savingsAnnual: 1200,
+    savingsNote: "Annual savings shown as 12 monthly payments; no annual commitment required.",
+    focus: "Premium website + vein patient journey + local visibility",
+    features: [
+      "Premium responsive practice website & managed hosting",
+      "Performance-focused build & clear SEO structure",
+      "Patient education & intuitive vein screening",
+      "Google Business Profile updates & local visibility",
+      "Review requests & reputation management",
+    ],
+    included: "Everything in Essentials",
     note: "Our recommended starting point.",
   },
   {
@@ -57,4 +94,4 @@ export const monthlyPlans = [
     features: ["Everything in Growth", "Google Ads setup & management", "Conversion tracking & landing-page optimization", "Quarterly strategy review"],
     note: "Google Ads spend is additional.",
   },
-] as const;
+];
