@@ -196,7 +196,7 @@
 /* reduced motion / no-JS: every state readable in flow */
 .stateList { display:grid; gap:12px; margin:0; padding:0; list-style:none; }
 .stateItem { border:1px solid var(--line); border-radius:14px; padding:15px 17px; background:#ffffff08; }
-.stateItem h4 { margin:0; font-size:15px; font-weight:750; line-height:1.35; }
+.stateItem h3 { margin:0; font-size:15px; font-weight:750; line-height:1.35; }
 .stateItem p { margin:7px 0 0; font-size:13px; line-height:1.6; color:var(--muted); }
 .stateItem[data-active="true"] { border-color:var(--lime); background:#c9f04a14; }
 
