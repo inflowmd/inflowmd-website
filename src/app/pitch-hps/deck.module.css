@@ -35,6 +35,29 @@
 .btnPrimary { background:var(--lime); color:var(--ink); border-color:var(--lime); font-weight:750; }
 .counter { font-size:12px; font-weight:700; color:var(--muted); letter-spacing:.06em; white-space:nowrap; }
 
+/* Mobile presentation header, held at a stable height.
+   The bar was 108px for short scene names and 160px for long ones, because
+   Replay wrapped onto a third row by itself and the navigation moved while
+   the reader was advancing. The three buttons now sit in fixed columns and
+   the counter takes the one flexible column, wrapping inside its own cell
+   rather than pushing a button out of the row. Row height is set by the 44px
+   buttons, so the header measures the same whichever scene is showing.
+
+   SCOPED TO .barIn ON PURPOSE: the phone in scene 4 uses the same .controls
+   class, and its own Previous/Next/Replay must not be touched. */
+@media (max-width:767px) {
+  .barIn .controls {
+    width:100%; margin-left:0;
+    display:grid; grid-template-columns:minmax(0,1fr) auto auto auto;
+    gap:6px; align-items:center; min-height:44px;
+  }
+  .barIn .counter {
+    min-width:0; white-space:normal; font-size:11px; line-height:1.25;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .barIn .btn { padding:9px 10px; font-size:13px; }
+}
+
 /* ---------- scene shell ---------- */
 /* scroll-margin-top keeps a scene's heading clear of the sticky bar when
    Previous/Next scrolls to it. */
