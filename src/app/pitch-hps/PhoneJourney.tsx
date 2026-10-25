@@ -113,7 +113,7 @@ export default function PhoneJourney() {
           <button type="button" className={styles.btn} onClick={() => go(i + 1)} disabled={i === last}>
             Next state
           </button>
-          <button type="button" className={styles.btn} onClick={() => go(0)} aria-label="Replay the phone journey">
+          <button type="button" className={styles.btn} onClick={() => go(0)}>
             Replay journey
           </button>
         </div>

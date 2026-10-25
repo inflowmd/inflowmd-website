@@ -163,7 +163,7 @@ export default function Deck({ ids, labels }: { ids: string[]; labels: string[] 
       <button type="button" className={styles.btn} onClick={() => goTo(index + 1)} disabled={index === ids.length - 1}>
         Next
       </button>
-      <button type="button" className={styles.btn} onClick={() => goTo(0)} aria-label="Back to scene one">
+      <button type="button" className={styles.btn} onClick={() => goTo(0)} aria-label="Replay presentation">
         Replay
       </button>
     </div>
