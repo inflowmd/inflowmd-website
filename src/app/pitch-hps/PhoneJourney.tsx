@@ -128,6 +128,12 @@ export default function PhoneJourney() {
             <h3>
               {k + 1}. {j.head}
             </h3>
+            {/* The patient-facing example is rendered here for EVERY state,
+                not only the one on the device. Without this, states two to
+                four could be read only by operating the controls, which fails
+                the requirement that all four examples stay legible under
+                reduced motion and with no JavaScript. */}
+            <p className={styles.stateExample}>“{j.screen}”</p>
             <p>{j.body}</p>
           </li>
         ))}
