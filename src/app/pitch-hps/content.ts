@@ -139,15 +139,34 @@ export const signs = [
   { label: "Skin changes", body: "Changes in colour or texture around the lower leg." },
 ];
 
-/** Scene 4 — the illustrative journey. No live form, no booked appointment. */
+/**
+ * Scene 4 — the illustrative journey.
+ *
+ * `screen` is what a PATIENT would read on the device: the audience should
+ * experience the journey rather than be told how it was built. `body` is the
+ * implementation explanation and lives in the narrative beside the phone, not
+ * on its screen. Nothing here diagnoses, submits or books.
+ */
 export const journeySteps = [
-  { key: "symptoms", label: "Symptoms", head: "Choose what you notice",
+  { key: "symptoms", label: "Symptoms",
+    screenHead: "What have you noticed?",
+    screen: "Aching, swelling or heaviness? Choose what you’ve noticed.",
+    head: "Choose what you notice",
     body: "A short, plain-language list a patient can answer without clinical vocabulary." },
-  { key: "explain", label: "Explanation", head: "Your answers are worth discussing with a specialist",
+  { key: "explain", label: "Explanation",
+    screenHead: "What this can mean",
+    screen: "These symptoms can have several causes. An evaluation can help you understand what is happening.",
+    head: "Your answers are worth discussing with a specialist",
     body: "A non-diagnostic explanation of what those answers may relate to, and what a consultation would look at." },
-  { key: "request", label: "Request", head: "Request an evaluation",
+  { key: "request", label: "Request",
+    screenHead: "Speak with the office?",
+    screen: "Would you like to speak with the office? You choose whether to share contact details.",
+    head: "Request an evaluation",
     body: "A voluntary next step, offered after the explanation rather than before it." },
-  { key: "received", label: "Handoff", head: "Request received — the office will contact you to schedule",
+  { key: "received", label: "Handoff",
+    screenHead: "What happens next",
+    screen: "The office would review the request and contact you about an evaluation.",
+    head: "Request received — the office will contact you to schedule",
     body: "An illustrative handoff. Staff confirm; nothing is scheduled automatically." },
 ];
 
@@ -160,14 +179,28 @@ export const journeySymptoms = [
   "Night cramps",
 ];
 
-/** Scene 3 — clinical sign imagery already published on this site. */
+/**
+ * Scene 3 — leg images already published on this site, RE-CAPTIONED.
+ *
+ * The shared component's own labels do not match what these files actually
+ * show: stage-1-clear is clear skin yet was labelled "spider veins",
+ * stage-2-spider shows fine surface veins yet was labelled "varicose veins",
+ * and stage-3-reticular shows prominent veins with no visible swelling yet was
+ * labelled "swelling". Those labels were inspected against the pixels and
+ * replaced with neutral descriptions of what is visible. Nothing here
+ * diagnoses from a photograph or asserts a validated clinical progression,
+ * and the original asset and shared component are untouched.
+ */
 export const stageImages = [
-  { src: "/cvi/stage-1-clear.webp", name: "Spider veins", desc: "Small, visible veins beneath the skin." },
-  { src: "/cvi/stage-2-spider.webp", name: "Varicose veins", desc: "Bulging veins that can ache or throb." },
-  { src: "/cvi/stage-3-reticular.webp", name: "Swelling", desc: "Legs and ankles swell as pressure builds." },
-  { src: "/cvi/stage-4-discoloration.webp", name: "Skin changes", desc: "Colour and texture change in the lower leg." },
-  { src: "/cvi/stage-5-trophic.webp", name: "Skin breakdown", desc: "Skin can break down if pressure continues." },
+  { src: "/cvi/stage-1-clear.webp", name: "Clear skin example", desc: "No prominent surface veins.", alt: "Lower legs with clear skin and no prominent surface veins." },
+  { src: "/cvi/stage-2-spider.webp", name: "Fine visible veins", desc: "Fine veins visible at the surface.", alt: "Lower legs with fine veins visible at the skin surface." },
+  { src: "/cvi/stage-3-reticular.webp", name: "More prominent veins", desc: "Larger, more visible veins.", alt: "Lower legs with larger, more prominent visible veins." },
+  { src: "/cvi/stage-4-discoloration.webp", name: "Skin discoloration", desc: "Colour change in the lower leg.", alt: "Lower legs showing discoloration of the skin." },
+  { src: "/cvi/stage-5-trophic.webp", name: "Skin changes", desc: "Changes in skin texture and condition.", alt: "Lower legs showing changes in skin texture and condition." },
 ] as const;
+
+export const stageNote =
+  "Illustrative examples of what legs can look like. They are not a diagnostic sequence, not a staging system, and not a claim that one follows another.";
 
 /** Scene 6 — the sequence comparison. Both sides are real captures. */
 export const comparison = {
