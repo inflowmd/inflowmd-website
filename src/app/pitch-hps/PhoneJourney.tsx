@@ -123,9 +123,11 @@ export default function PhoneJourney() {
       <ol className={styles.stateList}>
         {journeySteps.map((j, k) => (
           <li key={j.key} className={styles.stateItem} data-active={k === i ? "true" : undefined}>
-            <h4>
+            {/* h3: these sit directly under the scene's h2, so h4 would
+                skip a level in the outline. */}
+            <h3>
               {k + 1}. {j.head}
-            </h4>
+            </h3>
             <p>{j.body}</p>
           </li>
         ))}
