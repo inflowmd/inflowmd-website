@@ -1,0 +1,206 @@
+/* /pitch-hps — scoped presentation styles. A CSS module, so nothing here can
+   reach another route. No global selector, no token redefinition.
+
+   THE MOTION CONTRACT:
+   - Scenes are MANUAL. Nothing advances on a timer, nothing auto-plays, and
+     there is no idle resume. Transitions are short and stop once the change
+     has been understood.
+   - prefers-reduced-motion removes every transition and transform. The deck
+     keeps all ten scenes reachable and every piece of content readable; it
+     loses only the movement.
+   - At narrow widths the deck is a normal vertical document, not a fullscreen
+     trap: scenes stack and scroll like a page. */
+
+.deck { --navy:#0b1b34; --navy-2:#122743; --ink:#0d1626; --lime:#c9f04a; --line:#ffffff24; --muted:#b4c4dc;
+  background:var(--navy); color:#fff; min-height:100vh; display:flex; flex-direction:column;
+  font-family:var(--font-sans), system-ui, sans-serif; }
+.deck *, .deck *::before, .deck *::after { box-sizing:border-box; }
+.wrap { width:min(1140px, calc(100% - 40px)); margin-inline:auto; }
+
+.deck a:focus-visible, .deck button:focus-visible, .deck summary:focus-visible {
+  outline:3px solid var(--lime); outline-offset:3px; border-radius:6px; }
+
+/* ---------- chrome ---------- */
+.bar { position:sticky; top:0; z-index:20; background:#081426f2; border-bottom:1px solid var(--line);
+  backdrop-filter:blur(6px); }
+.barIn { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:12px 0; }
+.brand { font-weight:800; letter-spacing:-.01em; }
+.tag { font-size:10px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
+  border:1px solid var(--line); border-radius:999px; padding:4px 9px; white-space:nowrap; }
+.controls { margin-left:auto; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.btn { min-height:44px; padding:9px 15px; border-radius:10px; border:1px solid var(--line);
+  background:transparent; color:#fff; font:inherit; font-size:14px; font-weight:650; cursor:pointer; }
+.btn:hover:not(:disabled) { border-color:var(--lime); color:var(--lime); }
+.btn:disabled { opacity:.38; cursor:default; }
+.btnPrimary { background:var(--lime); color:var(--ink); border-color:var(--lime); font-weight:750; }
+.counter { font-size:12px; font-weight:700; color:var(--muted); letter-spacing:.06em; white-space:nowrap; }
+
+/* ---------- scene shell ---------- */
+/* scroll-margin-top keeps a scene's heading clear of the sticky bar when
+   Previous/Next scrolls to it. */
+.scene { border-bottom:1px solid var(--line); padding:54px 0 60px; scroll-margin-top:84px; }
+@media (min-width:1024px) {
+  /* Desktop pacing: each scene owns a screen. Content is centred rather than
+     stretched, and `min-height` (not `height`) so a tall scene still grows
+     instead of clipping. */
+  .scene { min-height:100vh; display:grid; align-content:center; padding:72px 0; }
+}
+.kicker { font-size:11px; font-weight:800; letter-spacing:.2em; text-transform:uppercase; color:var(--lime); margin:0; }
+.h1 { font-size:clamp(2rem,5.2vw,3.5rem); line-height:1.04; letter-spacing:-.03em; font-weight:800; margin:14px 0 0; text-wrap:balance; }
+.h2 { font-size:clamp(1.6rem,3.6vw,2.6rem); line-height:1.08; letter-spacing:-.025em; font-weight:800; margin:12px 0 0; text-wrap:balance; }
+.accent { color:var(--lime); }
+.lede { margin:18px 0 0; font-size:clamp(1rem,1.5vw,1.125rem); line-height:1.62; color:var(--muted); max-width:46ch; }
+.note { margin:16px 0 0; font-size:12.5px; line-height:1.6; color:#9fb2cc; border-left:2px solid var(--line); padding-left:12px; max-width:62ch; }
+.grid2 { display:grid; gap:34px; margin-top:34px; }
+@media (min-width:900px){ .grid2 { grid-template-columns:1fr 1fr; gap:44px; align-items:center; } }
+
+/* ---------- device ---------- */
+.device { border-radius:26px; padding:7px; background:linear-gradient(160deg,#2b3850,#101826 62%);
+  box-shadow:0 30px 70px -34px #000c; max-width:300px; margin-inline:auto; }
+.screen { border-radius:20px; overflow:hidden; background:#0a121f; display:block; }
+.screen img { display:block; width:100%; height:auto; }
+.deviceCap { margin:12px auto 0; max-width:300px; font-size:12px; line-height:1.55; color:#9fb2cc; text-align:center; }
+
+/* ---------- lists ---------- */
+.cards { display:grid; gap:12px; margin:28px 0 0; padding:0; list-style:none; }
+@media (min-width:760px){ .cards2 { grid-template-columns:1fr 1fr; } }
+.card { border:1px solid var(--line); border-radius:14px; padding:16px 18px; background:#ffffff08; }
+.cardLabel { font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--lime); }
+.card h3 { font-size:16px; font-weight:750; margin:8px 0 0; line-height:1.35; }
+.card p { margin:7px 0 0; font-size:14px; line-height:1.6; color:var(--muted); }
+
+/* ---------- journey ---------- */
+.steps { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 20px; padding:0; list-style:none; }
+.step { font-size:11px; font-weight:750; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+  border:1px solid var(--line); border-radius:999px; padding:7px 12px; }
+.step[aria-current="step"] { background:var(--lime); color:var(--ink); border-color:var(--lime); }
+.stepPanel { border:1px solid var(--line); border-radius:16px; padding:20px; background:#ffffff08; }
+.stepPanel h3 { font-size:19px; font-weight:780; line-height:1.3; margin:0; }
+.stepPanel p { margin:10px 0 0; font-size:14.5px; line-height:1.62; color:var(--muted); }
+.illus { display:inline-block; margin-top:14px; font-size:11px; font-weight:800; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink); background:var(--lime); border-radius:999px; padding:5px 10px; }
+
+/* ---------- comparison ---------- */
+.compare { display:grid; gap:26px; margin-top:30px; }
+@media (min-width:900px){ .compare { grid-template-columns:1fr 1fr; gap:36px; align-items:start; } }
+.side { border:1px solid var(--line); border-radius:18px; padding:20px; background:#ffffff08; }
+.sideLabel { font-size:12px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--lime); }
+.sideSrc { margin:6px 0 0; font-size:11.5px; color:#9fb2cc; word-break:break-word; }
+.sideCap { margin:14px 0 0; font-size:13.5px; line-height:1.6; color:var(--muted); }
+.qualifier { margin:22px 0 0; font-size:15px; font-weight:700; line-height:1.55; }
+.ribbon { display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; padding:0; list-style:none; }
+.ribbon li { font-size:11px; font-weight:750; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+  border:1px solid var(--line); border-radius:999px; padding:7px 11px; }
+
+/* ---------- gauges ---------- */
+.gauges { display:grid; gap:14px; margin-top:28px; }
+@media (min-width:760px){ .gauges { grid-template-columns:1fr 1fr; } }
+.gauge { border:1px solid var(--line); border-radius:16px; padding:20px; background:#ffffff08; }
+.gaugeTop { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+.gaugeNum { font-size:46px; font-weight:800; line-height:1; letter-spacing:-.04em; }
+/* 50-89 is amber on Google's own banding. 57 is never shown red. */
+.amber { color:#ffb020; }
+.green { color:#7bdc9b; }
+.gaugeDev { font-size:13px; font-weight:750; color:#fff; }
+.gaugeCfg { margin:10px 0 0; font-size:12px; color:#9fb2cc; line-height:1.55; }
+.gaugeMetrics { margin:8px 0 0; font-size:12.5px; color:var(--muted); line-height:1.6; }
+.scoreRow { display:flex; gap:26px; flex-wrap:wrap; margin-top:10px; }
+.scoreItem { display:flex; align-items:baseline; gap:9px; }
+
+/* ---------- disclosure ---------- */
+.drawer { margin-top:22px; border:1px solid var(--line); border-radius:14px; background:#ffffff06; }
+.drawer summary { cursor:pointer; list-style:none; padding:14px 18px; min-height:44px; display:flex;
+  align-items:center; gap:10px; font-size:13.5px; font-weight:750; }
+.drawer summary::-webkit-details-marker { display:none; }
+.drawerBody { padding:0 18px 18px; }
+.drawerBody p, .drawerBody li { font-size:13px; line-height:1.68; color:var(--muted); }
+.drawerBody ul { margin:8px 0 0; padding-left:18px; }
+.drawerBody a { color:var(--lime); word-break:break-word; }
+.chev { margin-left:auto; transition:transform .2s ease; }
+.drawer[open] .chev { transform:rotate(180deg); }
+
+/* ---------- footer ---------- */
+.foot { margin-top:auto; border-top:1px solid var(--line); padding:26px 0 34px; }
+.foot p { font-size:12px; color:#9fb2cc; line-height:1.6; margin:8px 0 0; }
+.footLinks { display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+
+/* ---------- motion, opt-in ----------
+   Reveals are keyed on the [data-fade] ATTRIBUTE, never on a class. A CSS
+   module hashes `.fade` into something like `deck-module__x__fade`, so markup
+   carrying the literal string "fade" never matched it and no element ever
+   animated. Attribute selectors are not rewritten, so what the observer marks
+   and what CSS styles are guaranteed to be the same elements. */
+/* Every rule is scoped under the local .deck class: a CSS module
+   requires each selector to contain a local class or id, so a bare
+   attribute selector is rejected at build time. */
+.deck [data-fade] { opacity:1; }
+.deck[data-motion="on"] [data-fade] { opacity:0; transform:translateY(14px);
+  transition:opacity .5s ease, transform .5s ease; }
+.deck[data-motion="on"] [data-fade][data-in="true"] { opacity:1; transform:none; }
+.deck[data-motion="on"] [data-fade][data-delay="1"] { transition-delay:.08s; }
+.deck[data-motion="on"] [data-fade][data-delay="2"] { transition-delay:.16s; }
+.deck[data-motion="on"] [data-fade][data-delay="3"] { transition-delay:.24s; }
+.deck[data-motion="on"] [data-fade][data-delay="4"] { transition-delay:.32s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .deck *, .deck *::before, .deck *::after { transition:none !important; animation:none !important; }
+  .deck [data-fade] { opacity:1 !important; transform:none !important; transition-delay:0s !important; }
+  .chev { transform:none !important; }
+}
+
+
+/* ---------- scene 1 hero ---------- */
+.hero { display:grid; gap:34px; }
+@media (min-width:1024px){ .hero { grid-template-columns:1.05fr .95fr; gap:56px; align-items:center; } }
+.heroArt { display:grid; place-items:center; }
+
+/* ---------- scene 2 thought fragments ---------- */
+.thoughts { display:flex; flex-wrap:wrap; gap:14px 26px; margin:30px 0 0; padding:0; list-style:none; }
+.thought { font-size:clamp(17px,2.1vw,30px); font-weight:300; font-style:italic; line-height:1.3; color:#fff; }
+.thought em { font-style:italic; color:var(--lime); }
+
+/* ---------- scene 3 clinical signs ---------- */
+.stages { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:30px 0 0; padding:0; list-style:none; }
+@media (min-width:760px){ .stages { grid-template-columns:repeat(5,1fr); gap:14px; } }
+.stage { border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#ffffff08; }
+.stageImg { display:block; width:100%; height:auto; aspect-ratio:700 / 1000; object-fit:cover; }
+.stageCap { padding:11px 12px 13px; }
+.stageName { font-size:12.5px; font-weight:750; line-height:1.3; }
+.stageDesc { margin:5px 0 0; font-size:11.5px; line-height:1.5; color:var(--muted); }
+
+/* ---------- scene 4 illustrative phone ---------- */
+.journey { display:grid; gap:30px; margin-top:30px; }
+@media (min-width:1024px){ .journey { grid-template-columns:1fr 1fr; gap:48px; align-items:center; } }
+.phone { border-radius:30px; padding:9px; background:linear-gradient(160deg,#2b3850,#101826 62%);
+  box-shadow:0 34px 80px -34px #000d; max-width:310px; margin-inline:auto; }
+.phoneScreen { border-radius:22px; background:#0d1a2e; min-height:430px; padding:20px 18px; display:flex;
+  flex-direction:column; gap:14px; position:relative; overflow:hidden; }
+.phoneBadge { align-self:flex-start; font-size:9.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink); background:var(--lime); border-radius:999px; padding:4px 9px; }
+.phoneHead { font-size:17px; font-weight:750; line-height:1.3; margin:0; }
+.phoneBody { font-size:13px; line-height:1.6; color:var(--muted); margin:0; }
+.chips { display:flex; flex-wrap:wrap; gap:7px; margin:0; padding:0; list-style:none; }
+.chip { font-size:11.5px; border:1px solid var(--line); border-radius:999px; padding:6px 10px; color:#fff; }
+.chipOn { background:var(--lime); color:var(--ink); border-color:var(--lime); font-weight:700; }
+.fakeCta { margin-top:auto; text-align:center; font-size:13px; font-weight:750; color:var(--ink);
+  background:var(--lime); border-radius:10px; padding:11px; }
+.fakeNote { margin:0; font-size:11px; line-height:1.5; color:#9fb2cc; text-align:center; }
+.phoneState { transition:opacity .34s ease, transform .34s ease; }
+.deck[data-motion="on"] .phoneState[data-enter="true"] { opacity:0; transform:translateY(8px); }
+
+/* reduced motion / no-JS: every state readable in flow */
+.stateList { display:grid; gap:12px; margin:0; padding:0; list-style:none; }
+.stateItem { border:1px solid var(--line); border-radius:14px; padding:15px 17px; background:#ffffff08; }
+.stateItem h4 { margin:0; font-size:15px; font-weight:750; line-height:1.35; }
+.stateItem p { margin:7px 0 0; font-size:13px; line-height:1.6; color:var(--muted); }
+.stateItem[data-active="true"] { border-color:var(--lime); background:#c9f04a14; }
+
+/* ---------- gauges, circular ---------- */
+.dial { display:flex; align-items:center; gap:16px; }
+.dialSvg { flex:none; }
+.dialTrack { stroke:#ffffff22; }
+.dialValAmber { stroke:#ffb020; }
+.dialValGreen { stroke:#7bdc9b; }
+.dialNum { font-size:34px; font-weight:800; letter-spacing:-.03em; }
+.provenance { margin:14px 0 0; font-size:11.5px; line-height:1.6; color:#9fb2cc; }
+.provenance strong { color:#cfe0f4; font-weight:700; }
