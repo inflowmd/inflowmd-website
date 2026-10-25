@@ -5,7 +5,7 @@ import Shot from "./Shot";
 import PhoneJourney from "./PhoneJourney";
 import {
   auditor, comparison, concerns, footer, links, magnantHistorical,
-  meta as pageMeta, pilot, pilotNote, psi, scenes, shots, stageImages,
+  meta as pageMeta, pilot, pilotNote, psi, scenes, shots, stageImages, stageNote,
 } from "./content";
 
 /**
@@ -130,7 +130,7 @@ export default function PitchHpsPage() {
                   <img
                     className={styles.stageImg}
                     src={stageImages[1].src}
-                    alt="Illustration of varicose veins on a lower leg."
+                    alt={stageImages[1].alt}
                     width={700}
                     height={1000}
                     style={{ borderRadius: 16 }}
@@ -154,7 +154,7 @@ export default function PitchHpsPage() {
               {stageImages.map((st, i) => (
                 <li key={st.src} className={styles.stage} data-fade data-delay={String((i % 4) + 1)}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className={styles.stageImg} src={st.src} alt={`Illustration: ${st.name.toLowerCase()}.`} width={700} height={1000} loading="lazy" />
+                  <img className={styles.stageImg} src={st.src} alt={st.alt} width={700} height={1000} loading="lazy" />
                   <div className={styles.stageCap}>
                     <p className={styles.stageName}>{st.name}</p>
                     <p className={styles.stageDesc}>{st.desc}</p>
@@ -162,6 +162,7 @@ export default function PitchHpsPage() {
                 </li>
               ))}
             </ul>
+            <p className={styles.note}>{stageNote}</p>
             <p className={styles.note}>{s.understand.note}</p>
           </div>
         </section>

@@ -39,6 +39,11 @@
 /* scroll-margin-top keeps a scene's heading clear of the sticky bar when
    Previous/Next scrolls to it. */
 .scene { border-bottom:1px solid var(--line); padding:54px 0 60px; scroll-margin-top:84px; }
+/* The bar wraps on a phone -- measured at 108px tall at 390px, against an
+   84px offset. The heading still cleared it by 7px thanks to section padding,
+   but that is inside measurement noise, so the offset is raised to match the
+   wrapped bar rather than relying on the padding. */
+@media (max-width:767px) { .scene { scroll-margin-top:124px; } }
 @media (min-width:1024px) {
   /* Desktop pacing: each scene owns a screen. Content is centred rather than
      stretched, and `min-height` (not `height`) so a tall scene still grows

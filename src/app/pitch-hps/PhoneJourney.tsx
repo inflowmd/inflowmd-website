@@ -70,9 +70,11 @@ export default function PhoneJourney() {
               data-enter={entering ? "true" : undefined}
               key={step.key}
             >
-              <p className={styles.phoneHead}>{step.head}</p>
+              {/* Patient-facing copy. The implementation explanation lives in
+                  the list beside the device, never on its screen. */}
+              <p className={styles.phoneHead}>{step.screenHead}</p>
               <p className={styles.phoneBody} style={{ marginTop: 10 }}>
-                {step.body}
+                {step.screen}
               </p>
 
               {step.key === "symptoms" && (
@@ -111,8 +113,8 @@ export default function PhoneJourney() {
           <button type="button" className={styles.btn} onClick={() => go(i + 1)} disabled={i === last}>
             Next state
           </button>
-          <button type="button" className={styles.btn} onClick={() => go(0)}>
-            Replay
+          <button type="button" className={styles.btn} onClick={() => go(0)} aria-label="Replay the phone journey">
+            Replay journey
           </button>
         </div>
       </div>
