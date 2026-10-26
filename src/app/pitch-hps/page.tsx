@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import styles from "./deck.module.css";
 import Deck from "./Deck";
 import Shot from "./Shot";
-import PhoneJourney from "./PhoneJourney";
+import Rfa from "./Rfa";
+import Screener from "./Screener";
 import {
-  auditor, comparison, concerns, footer, links, magnantHistorical,
-  meta as pageMeta, pilot, pilotNote, psi, scenes, shots, stageImages, stageNote,
+  captions, concerns, footer, links, meta as pageMeta, order, pilot, pilotNote,
+  rfa, scenes, scorecard, screener, shots,
 } from "./content";
 
 /**
- * /pitch-hps — unlisted HPS patient-journey concept.
+ * /pitch-hps — unlisted HPS patient-journey concept, nine scenes.
  *
  * ISOLATION. Everything lives in src/app/pitch-hps/ and public/pitch-hps/.
  * The existing /pitch route, the homepage, /home-v2, /pricing, every audit
@@ -17,14 +18,21 @@ import {
  * global stylesheet are untouched. Styles are a CSS module, so they cannot
  * reach another route.
  *
- * EVERY NUMBER IS LABELLED WITH ITS SOURCE. PageSpeed scores carry tool,
- * target, date and device; the InflowMD rubric sits in its own panel and is
- * never blended with them; the historical pre-launch sample carries its own
- * date and its limits. Nothing claims a ranking, an AI citation, a
- * conversion or a platform being better than another platform.
+ * WHAT IS REAL HERE. Scene 4 runs the practice site's own RFA explainer, with
+ * its geometry and renderer ported rather than imitated. Scene 5 runs the
+ * practice site's own symptom screener: tapping a sign draws it on the leg the
+ * patient chose, the count is a count of selections, and Continue leads to a
+ * real next step. Nothing is stored, sent or submitted anywhere.
  *
- * NOTHING AUTOPLAYS and nothing is submitted. The journey scene is labelled
- * illustrative and creates no appointment.
+ * EVERY NUMBER CARRIES ITS TOOL, TARGET AND DATE. The PageSpeed rows are a
+ * matched pair measured minutes apart in one session; the InflowMD rubric rows
+ * are a different tool on different dates and say so on the cell. A measured
+ * low score is shown as measured. Nothing claims a ranking, an AI citation, a
+ * conversion, a clinical outcome, a booked appointment or that one platform is
+ * better than another.
+ *
+ * NOTHING AUTOPLAYS. Scene motion is driven by explicit controls, pauses off
+ * screen and does not resume by itself.
  */
 
 const canonical = "https://www.inflowmd.com/pitch-hps";
@@ -45,8 +53,6 @@ export const metadata: Metadata = {
   },
 };
 
-const PHONE_SIZES = "(min-width: 900px) 300px, 78vw";
-
 function Drawer({ summary, children }: { summary: string; children: React.ReactNode }) {
   return (
     <details className={styles.drawer}>
@@ -63,8 +69,26 @@ function Src({ href, children }: { href: string; children: React.ReactNode }) {
   return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>;
 }
 
+/** One scorecard cell. A missing measurement says so and is not styled as a score. */
+function Cell({
+  col, data,
+}: {
+  col: string;
+  data: { value: string; when: string; href?: string; tone: "amber" | "green" | "none"; flag?: string; note?: string };
+}) {
+  return (
+    <div className={styles.cell} data-col={col}>
+      <p className={styles.cellVal} data-tone={data.tone}>{data.value}</p>
+      <p className={styles.cellWhen}>{data.when}</p>
+      {data.flag && <span className={styles.cellFlag}>{data.flag}</span>}
+      {data.note && <p className={styles.cellNote}>{data.note}</p>}
+      {data.href && <p className={styles.cellNote}><Src href={data.href}>Open the report</Src></p>}
+    </div>
+  );
+}
+
 export default function PitchHpsPage() {
-  const s = Object.fromEntries(scenes.map((x) => [x.id, x]));
+  const s = Object.fromEntries(scenes.map((x) => [x.id, x])) as Record<string, (typeof scenes)[number]>;
   const ids = scenes.map((x) => x.id);
   const labels = scenes.map((x) => x.label);
 
@@ -79,40 +103,24 @@ export default function PitchHpsPage() {
       </header>
 
       <main>
-        {/* 1 — the device carries the scene, not the heading. */}
+        {/* 1 — one statement, nothing else. */}
         <section id="open" className={styles.scene} aria-labelledby="open-h">
-          <div className={`${styles.wrap} ${styles.hero}`}>
-            <div>
-              <p className={styles.kicker}>HPS · Patient journey</p>
-              <h1 id="open-h" data-scene-heading className={styles.h1}>
-                {s.open.title} <span className={styles.accent}>{s.open.titleAccent}</span>
-              </h1>
-              <p className={styles.lede}>{s.open.body}</p>
-              <p className={styles.note}>{s.open.note}</p>
-            </div>
-            <div className={styles.heroArt} data-fade>
-              <div>
-                <div className={styles.device}>
-                  <div className={styles.screen}>
-                    <Shot {...shots.magnantHome} sizes={PHONE_SIZES} priority />
-                  </div>
-                </div>
-                <p className={styles.deviceCap}>
-                  A working pre-launch build for a real vein practice. Captured October 24, 2026.
-                </p>
-              </div>
-            </div>
+          <div className={styles.wrap}>
+            <h1 id="open-h" className={styles.h1} data-fade>
+              {s.open.title} <span className={styles.accent}>{s.open.titleAccent}</span>
+            </h1>
+            <p className={styles.lede} data-fade data-delay="2">{s.open.body}</p>
           </div>
         </section>
 
-        {/* 2 — the fragments carry it, large and quiet. */}
-        <section id="recognize" className={styles.scene} aria-labelledby="recognize-h">
+        {/* 2 — the fragments, entering one after another. */}
+        <section id="symptom" className={styles.scene} aria-labelledby="symptom-h">
           <div className={styles.wrap}>
-            <p className={styles.kicker}>{s.recognize.kicker}</p>
-            <h2 id="recognize-h" data-scene-heading className={styles.h2}>
-              {s.recognize.title} <span className={styles.accent}>{s.recognize.titleAccent}</span>
+            <p className={styles.kicker}>{s.symptom.kicker}</p>
+            <h2 id="symptom-h" className={styles.h2}>
+              {s.symptom.title} <span className={styles.accent}>{s.symptom.titleAccent}</span>
             </h2>
-            <div className={styles.hero} style={{ marginTop: 30 }}>
+            <div className={styles.hero}>
               <div>
                 <ul className={styles.thoughts}>
                   {concerns.map((c, i) => (
@@ -121,284 +129,230 @@ export default function PitchHpsPage() {
                     </li>
                   ))}
                 </ul>
-                <p className={styles.lede} style={{ marginTop: 26 }}>{s.recognize.body}</p>
-                <p className={styles.note}>{s.recognize.note}</p>
+                <p className={styles.lede}>{s.symptom.body}</p>
               </div>
-              <div className={styles.heroArt} data-fade>
-                <div style={{ maxWidth: 240 }}>
+              <div className={styles.legArt} data-fade data-delay="2">
+                <div>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    className={styles.stageImg}
-                    src={stageImages[1].src}
-                    alt={stageImages[1].alt}
-                    width={700}
-                    height={1000}
-                    style={{ borderRadius: 16 }}
-                    loading="lazy"
+                    src="/cvi/stage-2-spider.webp"
+                    alt="A lower leg with fine visible surface veins."
+                    width={700} height={1000} loading="lazy"
                   />
+                  <p className={styles.legCap}>Fine visible veins.</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 3 — the clinical imagery is the scene. */}
-        <section id="understand" className={styles.scene} aria-labelledby="understand-h">
+        {/* 3 — a desktop capture, in a desktop. */}
+        <section id="practice" className={styles.scene} aria-labelledby="practice-h">
           <div className={styles.wrap}>
-            <p className={styles.kicker}>{s.understand.kicker}</p>
-            <h2 id="understand-h" data-scene-heading className={styles.h2}>
-              {s.understand.title} <span className={styles.accent}>{s.understand.titleAccent}</span>
+            <p className={styles.kicker}>{s.practice.kicker}</p>
+            <h2 id="practice-h" className={styles.h2}>
+              {s.practice.title} <span className={styles.accent}>{s.practice.titleAccent}</span>
             </h2>
-            <p className={styles.lede}>{s.understand.body}</p>
-            <ul className={styles.stages}>
-              {stageImages.map((st, i) => (
-                <li key={st.src} className={styles.stage} data-fade data-delay={String((i % 4) + 1)}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className={styles.stageImg} src={st.src} alt={st.alt} width={700} height={1000} loading="lazy" />
-                  <div className={styles.stageCap}>
-                    <p className={styles.stageName}>{st.name}</p>
-                    <p className={styles.stageDesc}>{st.desc}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <p className={styles.note}>{stageNote}</p>
-            <p className={styles.note}>{s.understand.note}</p>
+            <p className={styles.lede}>{s.practice.body}</p>
+            <div className={styles.monitor} data-fade style={{ marginTop: 32 }}>
+              <div className={styles.monitorFrame}>
+                <div className={styles.monitorScreen}>
+                  <Shot {...shots.magnantDesktop} sizes="(min-width: 1024px) 1100px, 94vw" priority />
+                </div>
+              </div>
+              <div className={styles.monitorStand} />
+              <div className={styles.monitorFoot} />
+            </div>
+            <p className={styles.deviceCap}>{captions.magnantDesktop}</p>
+            <p className={styles.srcLine}><Src href={links.magnantDemo}>Open the pre-launch build</Src></p>
           </div>
         </section>
 
-        {/* 4 — one device, four states, driven by hand. */}
-        <section id="journey" className={styles.scene} aria-labelledby="journey-h">
+        {/* 4 — the real explainer, on a landscape tablet. */}
+        <section id="treatment" className={styles.scene} aria-labelledby="treatment-h">
           <div className={styles.wrap}>
-            <p className={styles.kicker}>{s.journey.kicker}</p>
-            <h2 id="journey-h" data-scene-heading className={styles.h2}>
-              {s.journey.title} <span className={styles.accent}>{s.journey.titleAccent}</span>
+            <p className={styles.kicker}>{s.treatment.kicker}</p>
+            <h2 id="treatment-h" className={styles.h2}>
+              {s.treatment.title} <span className={styles.accent}>{s.treatment.titleAccent}</span>
             </h2>
-            <p className={styles.lede}>{s.journey.body}</p>
-            <PhoneJourney />
-            <p className={styles.note}>{s.journey.note}</p>
+            <p className={styles.lede}>{s.treatment.body}</p>
+            <Rfa />
+            <Drawer summary="Where this animation comes from">
+              <p>{rfa.provenance}</p>
+              <p>
+                Source: <Src href={links.magnantAblation}>the practice site’s endovenous-ablation page</Src>,
+                components/content/VeinFixExplainer.tsx and data/explainers.ts at commit eec6a94.
+              </p>
+            </Drawer>
+            <p className={styles.beat}>{s.treatment.beat}</p>
+            <p className={styles.lede}>{s.treatment.beatBody}</p>
+            <p className={styles.srcLine}>
+              <Src href={links.magnantAblation}>Open the explainer on the practice site</Src>
+            </p>
           </div>
         </section>
 
-        {/* 5 */}
-        <section id="demo" className={styles.scene} aria-labelledby="demo-h">
+        {/* 5 — the real screener, on a phone. */}
+        <section id="screening" className={styles.scene} aria-labelledby="screening-h">
           <div className={styles.wrap}>
-            <p className={styles.kicker}>{s.demo.kicker}</p>
-            <h2 id="demo-h" data-scene-heading className={styles.h2}>
-              {s.demo.title} <span className={styles.accent}>{s.demo.titleAccent}</span>
+            <p className={styles.kicker}>{s.screening.kicker}</p>
+            <h2 id="screening-h" className={styles.h2}>
+              {s.screening.title} <span className={styles.accent}>{s.screening.titleAccent}</span>
             </h2>
             <div className={styles.grid2}>
               <div>
-                <p className={styles.lede}>{s.demo.body}</p>
-                <p className={styles.note}>{s.demo.note}</p>
-                <p style={{ marginTop: 18 }}>
-                  <Src href={links.magnantDemo}>Open the pre-launch demo</Src>
-                  {" · "}
-                  <Src href={links.magnantScreening}>Open the online screening</Src>
+                <p className={styles.lede}>{s.screening.body}</p>
+                <p className={styles.srcLine}>
+                  <Src href={links.magnantScreening}>Open the screening on the practice site</Src>
                 </p>
+                <Drawer summary="How this screener works, and what happens to the selections">
+                  <p>
+                    This is the practice site’s own screener, ported for this review: the leg drawing,
+                    the signs and the Right / Left / Both choice are the real ones.
+                  </p>
+                  <p>{screener.countNote}</p>
+                  <p>
+                    Selections stay in this page. Nothing is stored, sent, added to the address bar,
+                    reported to analytics or submitted as an intake, and no appointment is created.
+                    Continue shows the next step and offers a link to the practice’s own screening.
+                  </p>
+                </Drawer>
               </div>
               <div data-fade>
-                <div className={styles.device}>
-                  <div className={styles.screen}>
-                    <Shot {...shots.magnantHome} sizes={PHONE_SIZES} priority />
-                  </div>
-                </div>
-                <p className={styles.deviceCap}>
-                  Pre-launch build · Vein Specialists · captured October 24, 2026
-                </p>
+                <Screener />
               </div>
             </div>
           </div>
         </section>
 
-        {/* 6 — the sequence comparison. Two real captures, fairly labelled. */}
-        <section id="difference" className={styles.scene} aria-labelledby="difference-h">
+        {/* 6 — the scorecard. */}
+        <section id="scorecard" className={styles.scene} aria-labelledby="scorecard-h">
           <div className={styles.wrap}>
-            <p className={styles.kicker}>{s.difference.kicker}</p>
-            <h2 id="difference-h" data-scene-heading className={styles.h2}>
-              {comparison.headline}
+            <p className={styles.kicker}>{s.scorecard.kicker}</p>
+            <h2 id="scorecard-h" className={styles.h2}>
+              {s.scorecard.title} <span className={styles.accent}>{s.scorecard.titleAccent}</span>
             </h2>
-            <p className={styles.lede}>{s.difference.body}</p>
-            <div className={styles.compare}>
-              {([comparison.left, comparison.right] as const).map((side) => (
-                <div key={side.label} className={styles.side} data-fade>
-                  <span className={styles.sideLabel}>{side.label}</span>
-                  <p className={styles.sideSrc}>
-                    <Src href={side.href}>{side.source}</Src>
-                  </p>
-                  <div className={styles.device} style={{ marginTop: 16 }}>
-                    <div className={styles.screen}>
-                      <Shot {...shots[side.shot]} sizes={PHONE_SIZES} />
-                    </div>
+            <p className={styles.lede}>{s.scorecard.body}</p>
+            {/* The minimum provenance sits beside the numbers, not only in the
+                drawer: what was measured, with what, when, and that each is a
+                single run. */}
+            <p className={styles.matched}>{scorecard.matched}</p>
+            <div className={styles.board}>
+              <div className={styles.boardHead}>
+                <span className={styles.boardCol}>{scorecard.head}</span>
+                <span className={styles.boardCol}>
+                  {scorecard.left.name}<span>{scorecard.left.sub}</span>
+                </span>
+                <span className={styles.boardCol}>
+                  {scorecard.right.name}<span>{scorecard.right.sub}</span>
+                </span>
+              </div>
+              {scorecard.rows.map((row) => (
+                <div key={row.metric} className={styles.boardRow} data-fade>
+                  <div className={styles.boardMetric}>
+                    {row.metric}<span>{row.tool}</span>
                   </div>
-                  <p className={styles.sideCap}>{side.caption}</p>
+                  <Cell col={scorecard.left.name} data={row.left} />
+                  <Cell col={scorecard.right.name} data={row.right} />
                 </div>
               ))}
             </div>
-            <p className={styles.qualifier}>{comparison.qualifier}</p>
-            <ol className={styles.ribbon}>
-              {comparison.ribbon.map((r) => <li key={r}>{r}</li>)}
-            </ol>
-            <p className={styles.note}>{s.difference.note}</p>
-            <Drawer summary="The five steps, and how these captures were taken">
-              <ul>{comparison.steps.map((x) => <li key={x}>{x}</li>)}</ul>
-              <p>{comparison.stepsNote}</p>
+            <p className={styles.note}>{scorecard.prelaunch}</p>
+            <p className={styles.note}>{scorecard.psiDetail.banding}</p>
+            <Drawer summary="Exact measurement evidence, configuration and limits">
+              <p><strong>Tool</strong> — {scorecard.psiDetail.tool}</p>
+              <p><strong>When</strong> — {scorecard.psiDetail.when}</p>
+              <p><strong>Configuration</strong> — {scorecard.psiDetail.config}</p>
+              <p>{scorecard.psiDetail.magnantMetrics}</p>
+              <p>{scorecard.psiDetail.cvrMetrics}</p>
+              <p>{scorecard.psiDetail.rounding}</p>
+              <p><strong>Reports</strong></p>
+              <ul>
+                <li><Src href={links.psiMagnantMobile}>Vein Specialists — mobile</Src></li>
+                <li><Src href={links.psiMagnantDesktop}>Vein Specialists — desktop</Src></li>
+                <li><Src href={links.psiCvrMobile}>Center for Vein Restoration — mobile</Src></li>
+                <li><Src href={links.psiCvrDesktop}>Center for Vein Restoration — desktop</Src></li>
+              </ul>
+              <p><strong>InflowMD rubric</strong> — {scorecard.psiDetail.auditorWhen}</p>
+              <p>{scorecard.psiDetail.auditorResolved}</p>
+              <p><strong>Limits</strong></p>
+              <ul>{scorecard.caveats.map((c) => <li key={c}>{c}</li>)}</ul>
               <p>
-                Captures: <Src href={comparison.left.href}>{comparison.left.source}</Src> at 390×900 CSS @2×, and{" "}
-                <Src href={comparison.right.href}>{comparison.right.source}</Src> at 390×844 CSS @2×, both on
-                October 24, 2026. Display widths are comparable at 390 CSS px; the heights differ, so these are
-                not identical viewports.
-              </p>
-              <p>
-                On centerforvein.com the cookie notice was hidden locally so their page is not shown behind a
-                modal — it was never accepted and no consent was stored. Step 1 was reached by using the page’s
-                own visible “Start Quiz” control. No field was filled, nothing was submitted, and no form field,
-                consent control or source label was hidden.
+                Targets: <Src href={scorecard.left.href}>{scorecard.left.sub}</Src> and{" "}
+                <Src href={scorecard.right.href}>{scorecard.right.sub}</Src>.
               </p>
             </Drawer>
           </div>
         </section>
 
-        {/* 7 — measurement */}
-        <section id="measure" className={styles.scene} aria-labelledby="measure-h">
+        {/* 7 — the order, two real captures. */}
+        <section id="order" className={styles.scene} aria-labelledby="order-h">
           <div className={styles.wrap}>
-            <p className={styles.kicker}>{s.measure.kicker}</p>
-            <h2 id="measure-h" data-scene-heading className={styles.h2}>
-              {s.measure.title} <span className={styles.accent}>{s.measure.titleAccent}</span>
-            </h2>
-            <p className={styles.lede}>{s.measure.body}</p>
-            {/* Minimum provenance sits beside the numbers, not only in the
-                drawer: what was measured, with what, when, and that it is a
-                single lab run. The long configuration and field data stay in
-                the drawer below. */}
-            <p className={styles.provenance}>
-              <strong>centerforvein.com homepage</strong> · Google PageSpeed Insights / Lighthouse ·
-              October 24, 2026 · single lab run per device
-            </p>
-            <div className={styles.gauges}>
-              {psi.gauges.map((g) => {
-                const r = 30, c = 2 * Math.PI * r;
-                return (
-                  <div key={g.device} className={styles.gauge} data-fade>
-                    <div className={styles.dial}>
-                      <svg className={styles.dialSvg} width="74" height="74" viewBox="0 0 74 74" aria-hidden="true">
-                        <circle className={styles.dialTrack} cx="37" cy="37" r={r} fill="none" strokeWidth="7" />
-                        <circle
-                          className={styles.dialValAmber} cx="37" cy="37" r={r} fill="none" strokeWidth="7"
-                          strokeLinecap="round" strokeDasharray={c}
-                          strokeDashoffset={c * (1 - g.score / 100)}
-                          transform="rotate(-90 37 37)"
-                        />
-                      </svg>
-                      <div>
-                        <div className={`${styles.dialNum} ${styles.amber}`}>{g.score}</div>
-                        <div className={styles.gaugeDev}>{g.device} performance · amber</div>
-                      </div>
+            <p className={styles.kicker}>{s.order.kicker}</p>
+            <h2 id="order-h" className={styles.h2}>{order.headline}</h2>
+            <div className={styles.compare}>
+              {([order.left, order.right] as const).map((side) => (
+                <div key={side.label} className={styles.side} data-fade>
+                  <span className={styles.sideLabel}>{side.label}</span>
+                  <p className={styles.sideSrc}><Src href={side.href}>{side.source}</Src></p>
+                  <div className={styles.phoneShot}>
+                    <div className={styles.phoneShotScreen}>
+                      <Shot {...shots[side.shot]} sizes="(min-width: 900px) 300px, 76vw" />
                     </div>
-                    <p className={styles.gaugeCfg}>{g.config}</p>
-                    <p className={styles.gaugeMetrics}>{g.metrics}</p>
-                    <p className={styles.gaugeCfg}><Src href={g.href}>Open the PageSpeed report</Src></p>
                   </div>
-                );
-              })}
+                  <p className={styles.sideCap}>{side.caption}</p>
+                  <p className={styles.sideSrc}>
+                    {side.shot === "cvrStep1" ? captions.cvrStep1 : captions.magnantScreening}
+                  </p>
+                </div>
+              ))}
             </div>
-            <p className={styles.note}>{psi.banding}</p>
-            <p className={styles.note}>{s.measure.note}</p>
-            <Drawer summary="Exact measurement evidence, field data and limits">
-              <p><strong>Target:</strong> <Src href={links.cvrHome}>{psi.target}</Src></p>
-              <p><strong>Tool:</strong> {psi.tool}</p>
-              <p><strong>When:</strong> {psi.when}</p>
-              <p>{psi.others}</p>
-              <p><strong>{psi.field.head}</strong></p>
-              <ul><li>{psi.field.mobile}</li><li>{psi.field.desktop}</li></ul>
-              <p>{psi.field.note}</p>
-              <ul>{psi.limits.map((l) => <li key={l}>{l}</li>)}</ul>
-              <p><strong>{magnantHistorical.head}</strong> — {magnantHistorical.target}, {magnantHistorical.tool},{" "}
-                {magnantHistorical.when}. {magnantHistorical.mobile}. {magnantHistorical.desktop}.{" "}
-                <Src href={magnantHistorical.href}>Report</Src>
-              </p>
-              <ul>{magnantHistorical.limits.map((l) => <li key={l}>{l}</li>)}</ul>
+            <p className={styles.note}>{order.note}</p>
+            <Drawer summary="How these two captures were taken">
+              <p>{order.method}</p>
             </Drawer>
           </div>
         </section>
 
-        {/* 8 — our rubric, in its own panel */}
-        <section id="foundations" className={styles.scene} aria-labelledby="foundations-h">
-          <div className={styles.wrap}>
-            <p className={styles.kicker}>{s.foundations.kicker}</p>
-            <h2 id="foundations-h" data-scene-heading className={styles.h2}>
-              {s.foundations.title} <span className={styles.accent}>{s.foundations.titleAccent}</span>
-            </h2>
-            <div className={styles.gauge} data-fade style={{ marginTop: 28 }}>
-              <span className={styles.cardLabel}>{auditor.head}</span>
-              <div className={styles.scoreRow} style={{ marginTop: 14 }}>
-                {auditor.scores.map((x) => {
-                  const r = 26, c = 2 * Math.PI * r;
-                  return (
-                    <span key={x.label} className={styles.dial}>
-                      <svg className={styles.dialSvg} width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
-                        <circle className={styles.dialTrack} cx="32" cy="32" r={r} fill="none" strokeWidth="6" />
-                        <circle className={styles.dialValGreen} cx="32" cy="32" r={r} fill="none" strokeWidth="6"
-                          strokeLinecap="round" strokeDasharray={c}
-                          strokeDashoffset={c * (1 - x.value / 100)} transform="rotate(-90 32 32)" />
-                      </svg>
-                      <span>
-                        <span className={`${styles.dialNum} ${styles.green}`}>{x.value}</span>
-                        <span className={styles.gaugeDev} style={{ display: "block" }}>{x.label}</span>
-                      </span>
-                    </span>
-                  );
-                })}
-              </div>
-              <p className={styles.gaugeMetrics} style={{ marginTop: 14 }}>{auditor.interpretation}</p>
-            </div>
-            <p className={styles.lede}>{s.foundations.body}</p>
-            <p className={styles.note}>{s.foundations.note}</p>
-            <Drawer summary="What this rubric does and does not measure">
-              <ul>{auditor.scope.map((x) => <li key={x}>{x}</li>)}</ul>
-              <p>{auditor.ours}</p>
-              <p>Target: <Src href={links.cvrHome}>centerforvein.com</Src></p>
-            </Drawer>
-          </div>
-        </section>
-
-        {/* 9 */}
+        {/* 8 — the pilot. */}
         <section id="pilot" className={styles.scene} aria-labelledby="pilot-h">
           <div className={styles.wrap}>
             <p className={styles.kicker}>{s.pilot.kicker}</p>
-            <h2 id="pilot-h" data-scene-heading className={styles.h2}>
+            <h2 id="pilot-h" className={styles.h2}>
               {s.pilot.title} <span className={styles.accent}>{s.pilot.titleAccent}</span>
             </h2>
             <p className={styles.lede}>{s.pilot.body}</p>
             <ul className={`${styles.cards} ${styles.cards2}`}>
-              {pilot.map((p) => (
-                <li key={p.label} className={styles.card} data-fade>
+              {pilot.map((p, i) => (
+                <li key={p.label} className={styles.card} data-fade data-delay={String((i % 4) + 1)}>
                   <span className={styles.cardLabel}>{p.label}</span>
                   <p>{p.body}</p>
                 </li>
               ))}
             </ul>
             <p className={styles.note}>{pilotNote}</p>
-            <p className={styles.note}>{s.pilot.note}</p>
           </div>
         </section>
 
-        {/* 10 */}
-        <section id="partnership" className={styles.scene} aria-labelledby="partnership-h">
+        {/* 9 — the close. */}
+        <section id="build" className={styles.scene} aria-labelledby="build-h">
           <div className={styles.wrap}>
-            <p className={styles.kicker}>{s.partnership.kicker}</p>
-            <h2 id="partnership-h" data-scene-heading className={styles.h2}>
-              {s.partnership.title} <span className={styles.accent}>{s.partnership.titleAccent}</span>
+            <p className={styles.kicker}>{s.build.kicker}</p>
+            <h2 id="build-h" className={styles.h2}>
+              {s.build.title} <span className={styles.accent}>{s.build.titleAccent}</span>
             </h2>
-            <p className={styles.lede}>{s.partnership.body}</p>
-            <p style={{ marginTop: 18 }}>
-              <Src href={links.magnantDemo}>Open the pre-launch demo</Src>
+            <p className={styles.lede}>{s.build.body}</p>
+            <p className={styles.srcLine}>
+              <Src href={links.magnantDemo}>Open the pre-launch build</Src>
+              {" · "}
+              <a href="#treatment">Back to the treatment animation</a>
+              {" · "}
+              <a href="#screening">Back to the screening demo</a>
             </p>
             <Drawer summary="Pilot outline">
               <ul>{pilot.map((p) => <li key={p.label}><strong>{p.label}</strong> — {p.body}</li>)}</ul>
               <p>{pilotNote}</p>
             </Drawer>
-            <p className={styles.note}>{s.partnership.note}</p>
           </div>
         </section>
       </main>

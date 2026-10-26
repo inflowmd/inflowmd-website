@@ -1,129 +1,108 @@
 /**
- * /pitch-hps — HPS patient-journey concept. Copy and evidence only.
+ * /pitch-hps — copy and evidence for the nine-scene HPS patient-journey concept.
  *
- * WHAT THIS PAGE IS ALLOWED TO SAY. Every number here is a recorded
- * measurement with a named tool, target, date and device, and every one of
- * them is labelled as such on screen. Nothing claims a ranking, an AI
- * citation, a conversion, a revenue effect or a platform being better than
- * another platform. Where a comparison cannot be made fairly, the page says
- * so rather than reaching for a number.
+ * EVERY NUMBER CARRIES ITS TOOL, TARGET AND DATE. Google PageSpeed lab scores
+ * and the InflowMD automated rubric are separate rows and are never blended.
+ * Where a comparable measurement does not exist it is left unmeasured and said
+ * so; a measured low score is shown as measured.
  *
- * THINGS DELIBERATELY ABSENT, because earlier material asserted them without
- * support: "42 vs 98"; "Same test. Same day. Different architecture";
- * guaranteed AI recommendations; "invisible to AI"; any Next.js-beats-
- * WordPress generalisation; conversion multipliers; security allegations;
- * "patients who understand progression don't wait"; invented appointment
- * dates or "Appointment booked"; pricing or any commercial commitment.
- *
- * THE COMPARISON IS OF SEQUENCE, NOT QUALITY. CVR has substantial education
- * and screening. What differs is the order in which a patient meets them,
- * and the page says that in as many words.
+ * Nothing here claims a ranking, an AI citation, a conversion, a clinical
+ * outcome, a booked appointment or that one platform is better than another.
  */
 
 export const meta = {
-  title: "HPS Patient Journey Concept",
+  title: "HPS patient journey — a concept review | InflowMD",
   description:
-    "An unlisted patient-journey concept prepared for an HPS review conversation. Not linked from site navigation and not indexed.",
-  reviewLabel: "Concept · For review",
+    "An unlisted concept review for HPS: a practice site that teaches treatment and screens patients, with every measurement labelled by tool and date.",
+  reviewLabel: "Concept review",
 };
-
-/** Real captures. Aspect ratios differ and are declared per asset. */
-export const shots = {
-  cvrStep1: {
-    base: "cvr-step1", widths: [360, 720], ratio: "780 / 1800",
-    alt: "Center for Vein Restoration self-assessment, step 1 of 5, asking first name, last name, email address, zip code, phone and follow-up consent before any symptom question.",
-  },
-  cvrHome: {
-    base: "cvr-home", widths: [360, 720], ratio: "780 / 1688",
-    alt: "Center for Vein Restoration homepage on a phone.",
-  },
-  magnantHome: {
-    base: "magnant-home", widths: [360, 720], ratio: "780 / 1688",
-    alt: "Vein Specialists pre-launch homepage on a phone.",
-  },
-  magnantScreening: {
-    base: "magnant-screening", widths: [360, 720], ratio: "780 / 1688",
-    alt: "Vein Specialists pre-launch online vein screening entry screen on a phone.",
-  },
-} as const;
 
 export const links = {
   magnantDemo: "https://vein-specialists.vercel.app/",
   magnantScreening: "https://vein-specialists.vercel.app/eveinscreening/",
+  magnantAblation:
+    "https://vein-specialists.vercel.app/vein-treatment-options/endovenous-ablation/",
   cvrQuiz: "https://www.centerforvein.com/self-assessment",
   cvrHome: "https://www.centerforvein.com/",
-  psiMobile:
-    "https://pagespeed.web.dev/analysis/https-www-centerforvein-com/jfcukfbou9?form_factor=mobile",
-  psiDesktop:
-    "https://pagespeed.web.dev/analysis/https-www-centerforvein-com/jfcukfbou9?form_factor=desktop",
-  magnantHistoricalReport:
-    "https://pagespeed.web.dev/analysis/https-vein-specialists-vercel-app/hwb5odyct3",
+  /* The October 26, 2026 matched pair: one analysis per homepage, read on both
+     device tabs. These are the only PageSpeed reports this page cites. */
+  psiMagnantMobile:
+    "https://pagespeed.web.dev/analysis/https-vein-specialists-vercel-app/5kjdxt3sg4?form_factor=mobile",
+  psiMagnantDesktop:
+    "https://pagespeed.web.dev/analysis/https-vein-specialists-vercel-app/5kjdxt3sg4?form_factor=desktop",
+  psiCvrMobile:
+    "https://pagespeed.web.dev/analysis/https-www-centerforvein-com/51ta0k6owf?form_factor=mobile",
+  psiCvrDesktop:
+    "https://pagespeed.web.dev/analysis/https-www-centerforvein-com/51ta0k6owf?form_factor=desktop",
 };
 
+/** The nine scenes. One short statement each; `label` names it in the counter. */
 export type Scene = {
-  id: string;
-  n: number;
-  label: string;
-  kicker?: string;
-  title: string;
-  titleAccent?: string;
-  body?: string;
-  note?: string;
+  id: string; label: string; kicker?: string;
+  title: string; titleAccent: string; body: string;
+  /** scene 4 only: the second, shorter beat under the animation */
+  beat?: string; beatBody?: string;
 };
-
-export const scenes: Scene[] = [
-  { id: "open", n: 1, label: "Open",
-    title: "From a symptom to a", titleAccent: "clear next step.",
-    body: "A patient-journey proof of concept for HPS.",
-    note: "Use the controls to move through ten scenes. Nothing advances on its own." },
-  { id: "recognize", n: 2, label: "Recognize",
-    kicker: "Recognize",
-    title: "A symptom may not yet", titleAccent: "have a name.",
-    body: "Aching by evening. Swelling that eases overnight. A vein that has changed. People arrive with a description, not a diagnosis.",
-    note: "Illustrative patient concerns. Not a diagnosis and not a claim about how many patients think this way." },
-  { id: "understand", n: 3, label: "Understand",
-    kicker: "Understand",
-    title: "Make vein disease", titleAccent: "easier to understand.",
-    body: "Plain explanations of possible signs and what they may indicate, so a patient can tell whether their experience is worth discussing.",
-    note: "Possible signs, not an inevitable sequence. Clinical copy subject to physician review." },
-  { id: "journey", n: 4, label: "Journey",
-    kicker: "One continuous journey",
-    title: "Education, screening and a next step —", titleAccent: "on one screen.",
-    body: "The same phone carries a patient from symptoms they recognise, to an explanation in plain language, to a voluntary request for an evaluation.",
-    note: "Illustrative sequence — not a live form. Nothing is submitted and no appointment is created." },
-  { id: "demo", n: 5, label: "Pre-launch demo",
-    kicker: "Vein Specialists",
-    title: "The same journey,", titleAccent: "built for a real practice.",
-    body: "A working pre-launch build with online vein screening and an evaluation request. Open it and move through it yourself.",
-    note: "Pre-launch build. It demonstrates the current education, screening and request experience — not delivery, scheduling or any outcome." },
-  { id: "difference", n: 6, label: "Sequence",
-    kicker: "The difference is the order",
-    title: "Help patients understand", titleAccent: "before asking them to reach out.",
-    body: "Both sites offer education and screening. What differs is where the questions begin.",
-    note: "Captures of two live pages, taken October 24, 2026. A difference in sequence and hierarchy — not evidence of higher conversion." },
-  { id: "measure", n: 7, label: "Measure",
-    kicker: "Measure the page, not a promise",
-    title: "One homepage,", titleAccent: "measured and labelled.",
-    body: "A single Google PageSpeed run per device on the Center for Vein Restoration homepage.",
-    note: "Single lab run · lab LCP is not a patient average. Field data is reported separately below." },
-  { id: "foundations", n: 8, label: "Foundations",
-    kicker: "Search and AI foundations",
-    title: "Strong foundations.", titleAccent: "A different patient experience.",
-    body: "Our own automated rubric scores the Center for Vein Restoration homepage highly. The opportunity is not their foundations — it is the patient journey and mobile loading.",
-    note: "An automated rubric of technical and content checks. It does not measure actual AI citations, rankings or clinical quality." },
-  { id: "pilot", n: 9, label: "Pilot",
-    kicker: "A measurable pilot",
-    title: "Baseline. Agreed journey.", titleAccent: "Then measure.",
-    body: "Proposed measures for an HPS pilot, agreed before anything is built.",
-    note: "Proposed pilot measures, not measured outcomes and not commitments. Targets set after baseline." },
-  { id: "partnership", n: 10, label: "Partnership",
+export const scenes: readonly Scene[] = [
+  {
+    id: "open", label: "Open",
+    title: "Websites that", titleAccent: "teach.",
+    body: "A patient-journey concept for HPS.",
+  },
+  {
+    id: "symptom", label: "Symptom",
+    kicker: "Where it starts",
+    title: "A symptom.", titleAccent: "A question.",
+    body: "Someone notices something in their own legs and goes looking for an answer.",
+  },
+  {
+    id: "practice", label: "Practice",
+    kicker: "The practice",
+    title: "A practice, presented", titleAccent: "properly.",
+    body: "A real pre-launch build, running today.",
+  },
+  {
+    id: "treatment", label: "Treatment",
+    kicker: "Teaching",
+    title: "How we teach", titleAccent: "treatment.",
+    body: "RFA, explained in motion.",
+    beat: "Bring understanding into the exam room.",
+    beatBody:
+      "The same page opens on a tablet while a clinician and a patient are talking it through.",
+  },
+  {
+    id: "screening", label: "Screening",
+    kicker: "Screening",
+    title: "Screening that", titleAccent: "responds.",
+    body: "Tap what you see. The legs answer back.",
+  },
+  {
+    id: "scorecard", label: "Scorecard",
+    kicker: "Measurement",
+    title: "Side by", titleAccent: "side.",
+    body: "Homepage against homepage, each cell labelled with its tool and date.",
+  },
+  {
+    id: "order", label: "Order",
+    kicker: "Sequence",
+    title: "Two ways to", titleAccent: "screen.",
+    body: "Both educate and screen. The order is the difference.",
+  },
+  {
+    id: "pilot", label: "Pilot",
+    kicker: "Proving it",
+    title: "Pilot it.", titleAccent: "Measure it.",
+    body: "Baseline, then an agreed journey, then measurement.",
+  },
+  {
+    id: "build", label: "Build",
     kicker: "Next",
-    title: "Worth a conversation about", titleAccent: "a measured pilot.",
-    body: "Replay the journey, open the pre-launch demo, or read the pilot outline.",
-    note: "A concept for discussion. No scope, timeline or commercial terms are implied here." },
+    title: "Let's build it", titleAccent: "together.",
+    body: "Walk the demo, or outline a pilot.",
+  },
 ];
 
-/** Scene 2 — recognisable concerns, phrased as descriptions, never diagnoses. */
+/** Scene 2 — the fragments a patient arrives with. */
 export const concerns = [
   "My legs ache by the end of the day.",
   "One ankle swells and the other does not.",
@@ -131,177 +110,242 @@ export const concerns = [
   "Standing all day leaves my legs heavy.",
 ];
 
-/** Scene 3 — possible signs. Order is presentational, not a promised course. */
-export const signs = [
-  { label: "Visible veins", body: "Veins that have become prominent or changed shape." },
-  { label: "Aching and heaviness", body: "Discomfort that builds through the day and eases when the legs are raised." },
-  { label: "Swelling", body: "Swelling around the ankle, often one side more than the other." },
-  { label: "Skin changes", body: "Changes in colour or texture around the lower leg." },
+/**
+ * Real captures, pre-optimized. Each `ratio` is the capture's own pixel ratio
+ * and each was taken at the viewport it is shown in: the desktop capture at
+ * 1440 CSS px, the phone captures at 390 CSS px. No capture is stretched into
+ * a device it was not taken on.
+ */
+export const shots = {
+  magnantDesktop: {
+    base: "magnant-desktop", widths: [720, 1440], ratio: "2880 / 1800",
+    alt: "Vein Specialists pre-launch homepage on a desktop screen: a heading reading “Expert Vein Care for Leg Pain, Swelling and Varicose Veins” above the practice navigation.",
+  },
+  magnantScreening: {
+    base: "magnant-screening", widths: [360, 720], ratio: "780 / 1688",
+    alt: "Vein Specialists pre-launch online vein screening entry screen on a phone, opening with questions about what the patient can see on their legs.",
+  },
+  cvrStep1: {
+    base: "cvr-step1", widths: [360, 720], ratio: "780 / 1800",
+    alt: "Center for Vein Restoration self-assessment, step 1 of 5, asking first name, last name, email address, zip code, phone and follow-up consent before any symptom question.",
+  },
+} as const;
+
+export const captions = {
+  magnantDesktop: "Pre-launch build · Vein Specialists · captured October 26, 2026 at 1440 CSS px",
+  magnantScreening: "Pre-launch build · Vein Specialists · captured October 24, 2026 at 390 CSS px",
+  cvrStep1: "centerforvein.com self-assessment · captured October 24, 2026 at 390 CSS px",
+};
+
+/* ───────────────────────── scene 4 — the real RFA explainer ─────────────────────────
+   Ported from the practice site's own endovenous-ablation explainer:
+   src/components/content/VeinFixExplainer.tsx and src/data/explainers.ts at
+   vein-specialists eec6a944f368ad392e72d9b213efa32bfa23e90f. The geometry,
+   renderer and step copy are the real ones.
+
+   The source clinical copy is PENDING PHYSICIAN REVIEW. It is not presented
+   here as clinician-approved, and the source step-3 sentence about returning
+   to normal activity is deliberately omitted: this concept makes no recovery,
+   candidacy or outcome claim. Nothing else in the mechanism is altered. */
+export const rfa = {
+  micro: "How we fix it",
+  heading: "From faulty vein to healthy flow.",
+  steps: [
+    {
+      title: "The problem: valves that leak.",
+      body: "Healthy veins have one-way valves that keep blood moving up toward the heart. When they fail, blood falls backward and pools, and the vein stretches, twists and bulges.",
+    },
+    {
+      title: "The fix: we close the faulty vein.",
+      body: "Guided by ultrasound, a thin catheter seals the leaking vein from the inside. It’s done in our office, under local anesthesia.",
+    },
+    {
+      title: "The result: blood takes the healthy route.",
+      body: "Healthy veins carry the blood back to the heart, and the pressure is relieved.",
+    },
+  ],
+  status: ["Reflux: blood pooling", "Sealing the faulty vein", "Healthy flow restored"],
+  heart: "Toward the heart ↑",
+  labels: [
+    { step: 0, title: "Valves leak", small: "Blood falls backward ↓", x: 7, y: 44, side: "l" },
+    { step: 0, title: "Healthy vein", small: "Valves closed, flow ↑", x: 8, y: 30, side: "r" },
+    { step: 1, title: "Catheter seals", small: "the faulty vein", x: 7, y: 62, side: "l" },
+    { step: 2, title: "Rerouted", small: "Healthy flow home ↑", x: 8, y: 56, side: "r" },
+  ],
+  provenance:
+    "The animation and its geometry are the practice site’s own endovenous-ablation explainer, ported from vein-specialists at commit eec6a94 with the mechanism unchanged. The step copy is adapted from that explainer — faithfully shortened, with its closing sentence about returning to normal activity omitted. It is pending physician review and is not presented as approved.",
+} as const;
+
+/* ───────────────────────── scene 5 — the real screener ─────────────────────────
+   Signs, side choices, leg geometry and overlays ported from
+   src/components/site/SymptomScreener.tsx and src/data/evein.ts at the same
+   commit. Selections live in component state only: nothing is stored, sent,
+   put in the URL or reported to analytics, and no intake is submitted. */
+export type SignItem = { id: string; t: string; sides: boolean };
+export type SignGroup = { title: string; items: readonly SignItem[] };
+export const signGroups: readonly SignGroup[] = [
+  {
+    title: "Veins and swelling",
+    items: [
+      { id: "s_sp", t: "Spider veins", sides: true },
+      { id: "s_var", t: "Bulging varicose veins", sides: true },
+      { id: "s_swl", t: "Ankle or leg swelling", sides: true },
+    ],
+  },
+  {
+    title: "Skin changes",
+    items: [
+      { id: "s_disc", t: "Brown discoloration, or red, itchy skin on the lower leg", sides: true },
+      { id: "s_hard", t: "Hard, tight, or shiny skin near the ankle", sides: true },
+      { id: "s_heal", t: "A leg sore that has healed", sides: true },
+      { id: "s_open", t: "An open leg sore", sides: true },
+    ],
+  },
+  {
+    title: "Elsewhere",
+    items: [{ id: "s_pelv", t: "Pelvic or lower back pain", sides: false }],
+  },
 ];
+
+export const screener = {
+  eyebrow: "Start here",
+  heading: "Where do your legs stand?",
+  lede: "Tap anything you see on your legs.",
+  legs: { right: "Right leg", left: "Left leg" },
+  sideLabels: { R: "Right", L: "Left", B: "Both" },
+  sideWords: { R: "right", L: "left", B: "both legs" },
+  empty: "Nothing picked yet",
+  emptyBody: "Your legs update as you tap.",
+  picked: (n: number) => `You picked ${n} ${n === 1 ? "sign" : "signs"}`,
+  pickedBody: "Screening helps guide the next step.",
+  pelvicNote: "+ Pelvic or lower back pain",
+  cta: "Continue",
+  privacy: "Nothing you tap is saved or sent.",
+  nextHead: "Your next step: a vein screening",
+  nextBody:
+    "The practice’s own online screening adds a few symptom and history questions, then gives the patient their next step.",
+  nextCarried: "What you picked here:",
+  nextNone: "No visible signs picked.",
+  nextLink: "Open the practice screening",
+  back: "Back to the signs",
+  countNote:
+    "The count is how many signs are selected. It is not a diagnosis, a stage, a severity or a score.",
+} as const;
+
+/* ───────────────────────── scene 6 — the scorecard ───────────────────────── */
 
 /**
- * Scene 4 — the illustrative journey.
+ * A MATCHED PAIR. Both homepages were analysed in the same session on
+ * October 26, 2026 at 00:38 UTC through Google's own PageSpeed Insights, with
+ * the same Lighthouse 13.5.0 and the same device configurations: emulated
+ * Moto G Power on Slow 4G for mobile, emulated desktop with custom throttling
+ * for desktop. One initial-load run per homepage per device. Neither run was
+ * repeated to obtain a better number.
  *
- * `screen` is what a PATIENT would read on the device: the audience should
- * experience the journey rather than be told how it was built. `body` is the
- * implementation explanation and lives in the narrative beside the phone, not
- * on its screen. Nothing here diagnoses, submits or books.
+ * The InflowMD rubric rows are NOT same-day and say so on their own cells.
+ * A measured low score is shown as measured: the pre-launch preview's SEO 69
+ * is reported with the reason Lighthouse gives for it.
  */
-export const journeySteps = [
-  { key: "symptoms", label: "Symptoms",
-    screenHead: "What have you noticed?",
-    screen: "Aching, swelling or heaviness? Choose what you’ve noticed.",
-    head: "Choose what you notice",
-    body: "A short, plain-language list a patient can answer without clinical vocabulary." },
-  { key: "explain", label: "Explanation",
-    screenHead: "What this can mean",
-    screen: "These symptoms can have several causes. An evaluation can help you understand what is happening.",
-    head: "Your answers are worth discussing with a specialist",
-    body: "A non-diagnostic explanation of what those answers may relate to, and what a consultation would look at." },
-  { key: "request", label: "Request",
-    screenHead: "Speak with the office?",
-    screen: "Would you like to speak with the office? You choose whether to share contact details.",
-    head: "Request an evaluation",
-    body: "A voluntary next step, offered after the explanation rather than before it." },
-  { key: "received", label: "Handoff",
-    screenHead: "What happens next",
-    screen: "The office would review the request and contact you about an evaluation.",
-    head: "Request received — the office will contact you to schedule",
-    body: "An illustrative handoff. Staff confirm; nothing is scheduled automatically." },
-];
+export const scorecard = {
+  head: "Homepage against homepage",
+  matched:
+    "Both homepages, same session, same tool, same device profiles · Google PageSpeed Insights · Lighthouse 13.5.0 · October 26, 2026, 00:38 UTC · one initial-load run per device",
+  left: { name: "Vein Specialists", sub: "vein-specialists.vercel.app · pre-launch build", href: links.magnantDemo },
+  right: { name: "Center for Vein Restoration", sub: "centerforvein.com · live", href: links.cvrHome },
+  rows: [
+    {
+      metric: "Mobile performance",
+      tool: "Google PageSpeed lab run · Moto G Power, Slow 4G",
+      left: { value: "86", when: "Oct 26, 2026", href: links.psiMagnantMobile, tone: "amber" as const },
+      right: { value: "59", when: "Oct 26, 2026", href: links.psiCvrMobile, tone: "amber" as const },
+    },
+    {
+      metric: "Desktop performance",
+      tool: "Google PageSpeed lab run · emulated desktop",
+      left: { value: "100", when: "Oct 26, 2026", href: links.psiMagnantDesktop, tone: "green" as const },
+      right: { value: "80", when: "Oct 26, 2026", href: links.psiCvrDesktop, tone: "amber" as const },
+    },
+    {
+      metric: "Google SEO (Lighthouse)",
+      tool: "Google PageSpeed lab run · same score on both devices",
+      left: { value: "69", when: "Oct 26, 2026", href: links.psiMagnantMobile, tone: "amber" as const,
+        note: "Measured as shown. Lighthouse reports the page as blocked from indexing: a pre-launch preview is deliberately set noindex, and that is what this check penalises." },
+      right: { value: "92", when: "Oct 26, 2026", href: links.psiCvrMobile, tone: "green" as const },
+    },
+    {
+      metric: "AI readiness (InflowMD rubric)",
+      tool: "InflowMD automated rubric · not a Google score · not same-day",
+      left: { value: "94", when: "Oct 26, 2026", tone: "green" as const, flag: "different date" as const },
+      right: { value: "97", when: "Oct 24, 2026", tone: "green" as const, flag: "different date" as const },
+    },
+    {
+      metric: "Findability (InflowMD rubric)",
+      tool: "InflowMD automated rubric · not a Google score · not same-day",
+      left: { value: "100", when: "Oct 26, 2026", tone: "green" as const, flag: "different date" as const },
+      right: { value: "94", when: "Oct 24, 2026", tone: "green" as const, flag: "different date" as const },
+    },
+    {
+      metric: "Field data (Chrome UX Report)",
+      tool: "Real-user data, latest 28 days, this URL",
+      left: { value: "No data", when: "Oct 26, 2026", tone: "none" as const,
+        note: "CrUX field data is unavailable for this preview. That is not a measurement of how much traffic it has." },
+      right: { value: "Mobile failed · desktop passed", when: "Oct 26, 2026", tone: "none" as const,
+        note: "Mobile LCP 2.8s · INP 110ms · CLS 0. Desktop LCP 1.2s · INP 57ms · CLS 0.01." },
+    },
+  ],
+  prelaunch:
+    "The left column is a pre-launch preview: deliberately not indexed, still being built, and with no field data available.",
+  caveats: [
+    "One initial-load lab run per homepage per device. A single run is not a site average, a controlled experiment, a before-and-after, or evidence that one platform causes a faster site.",
+    "The two performance and SEO columns are matched: same session, same tool version, same emulated device and throttling, minutes apart. The two InflowMD rubric columns are not — they were run on different dates, and are labelled on each cell.",
+    "The preview and the live site are in different deployment and indexing states. That difference is the reason for the SEO row, and it is not a quality judgement about either site.",
+    "Lab LCP is not what an average patient experiences. Field data is real-user data, is shown separately, and is never combined with a lab score here.",
+    "No CrUX data does not establish that a site has no traffic.",
+    "The InflowMD rubric is an automated check of crawlable structure, machine-readable practice details and whether patient questions are answered on the page. It does not measure AI citations, recommendation frequency, search rankings or clinical quality, and it is not a mobile test.",
+    "Homepage against homepage only. No interior page is compared to another site's homepage.",
+    "Nothing here is claimed to be equal or better beyond the dated values shown, and no row implies a conversion, a ranking or a clinical outcome.",
+  ],
+  psiDetail: {
+    tool: "Google PageSpeed Insights · Lighthouse 13.5.0 · Headless Chromium 153.0.8010.36, read through Google's own hosted interface",
+    when: "Vein Specialists reported Oct 25, 2026, 8:38:32 PM EDT; Center for Vein Restoration reported 8:38:43 PM EDT — October 26, 2026, 00:38 UTC",
+    config: "Mobile: emulated Moto G Power, Slow 4G. Desktop: emulated desktop, custom throttling. Single page session, initial page load.",
+    magnantMetrics: "Vein Specialists — mobile FCP 1.8s · LCP 3.7s · TBT 10ms · CLS 0 · SI 4.3s. Desktop FCP 0.4s · LCP 0.6s · TBT 0ms · CLS 0 · SI 0.6s. Accessibility 100, best practices 100 on both.",
+    cvrMetrics: "Center for Vein Restoration — mobile FCP 2.0s · LCP 10.9s · TBT 300ms · CLS 0 · SI 8.7s. Desktop FCP 0.5s · LCP 2.0s · TBT 220ms · CLS 0 · SI 1.8s. Accessibility 97 mobile / 100 desktop, best practices 96.",
+    rounding: "Metrics are quoted as Google's interface rounds them.",
+    auditorWhen:
+      "InflowMD rubric: the Vein Specialists homepage was checked on October 26, 2026 at 00:31 UTC and centerforvein.com on October 24, 2026, so these two are not a same-day pairing. Neither run has a shareable report URL.",
+    auditorResolved:
+      "The AI-readiness score of 94 comes from 11 checks that all resolved, which is not the same as 11 checks that all passed: the AI-crawler check did not pass. Findability resolved 9 checks.",
+    banding: "Google's banding: 0–49 red, 50–89 amber, 90–100 green.",
+  },
+} as const;
 
-/** Scene 4 — symptoms a patient picks from. Descriptions, never diagnoses. */
-export const journeySymptoms = [
-  "Aching by evening",
-  "Swelling at the ankle",
-  "Visible veins",
-  "Heaviness when standing",
-  "Night cramps",
-];
-
-/**
- * Scene 3 — leg images already published on this site, RE-CAPTIONED.
- *
- * The shared component's own labels do not match what these files actually
- * show: stage-1-clear is clear skin yet was labelled "spider veins",
- * stage-2-spider shows fine surface veins yet was labelled "varicose veins",
- * and stage-3-reticular shows prominent veins with no visible swelling yet was
- * labelled "swelling". Those labels were inspected against the pixels and
- * replaced with neutral descriptions of what is visible. Nothing here
- * diagnoses from a photograph or asserts a validated clinical progression,
- * and the original asset and shared component are untouched.
- */
-export const stageImages = [
-  { src: "/cvi/stage-1-clear.webp", name: "Clear skin example", desc: "No prominent surface veins.", alt: "Lower legs with clear skin and no prominent surface veins." },
-  { src: "/cvi/stage-2-spider.webp", name: "Fine visible veins", desc: "Fine veins visible at the surface.", alt: "Lower legs with fine veins visible at the skin surface." },
-  { src: "/cvi/stage-3-reticular.webp", name: "More prominent veins", desc: "Larger, more visible veins.", alt: "Lower legs with larger, more prominent visible veins." },
-  { src: "/cvi/stage-4-discoloration.webp", name: "Skin discoloration", desc: "Colour change in the lower leg.", alt: "Lower legs showing discoloration of the skin." },
-  { src: "/cvi/stage-5-trophic.webp", name: "Skin changes", desc: "Changes in skin texture and condition.", alt: "Lower legs showing changes in skin texture and condition." },
-] as const;
-
-export const stageNote =
-  "Illustrative examples of what legs can look like. They are not a diagnostic sequence, not a staging system, and not a claim that one follows another.";
-
-/** Scene 6 — the sequence comparison. Both sides are real captures. */
-export const comparison = {
-  headline: "Help patients understand before asking them to reach out.",
-  qualifier: "Both offer education and screening. This concept changes the order.",
+/* ───────────────────────── scene 7 — the order ───────────────────────── */
+export const order = {
+  headline: "Both educate and screen. The order is the difference.",
   left: {
-    label: "Contact before symptoms",
+    label: "Contact first",
     source: "centerforvein.com/self-assessment",
-    href: "https://www.centerforvein.com/self-assessment",
-    caption: "Step 1 of 5 asks first name, last name, email, zip code, phone and follow-up consent. Symptoms are step 2.",
+    href: links.cvrQuiz,
     shot: "cvrStep1" as const,
+    caption:
+      "Step 1 of 5 asks for first name, last name, email address, zip code, phone and follow-up consent. The symptom questions come after.",
   },
   right: {
-    label: "Education and symptoms before contact",
+    label: "Signs first",
     source: "vein-specialists.vercel.app/eveinscreening/",
-    href: "https://vein-specialists.vercel.app/eveinscreening/",
-    caption: "A free online screening that opens with what the patient is experiencing, with contact details offered afterwards.",
+    href: links.magnantScreening,
     shot: "magnantScreening" as const,
+    caption:
+      "The screening opens on what the patient can see on their own legs. Contact details come later, if the patient chooses to continue.",
   },
-  ribbon: ["Symptom", "Explanation", "Request", "Staff confirmation"],
-  steps: [
-    "Step 1 — first name, last name, email address, zip code, phone, follow-up consent",
-    "Step 2 — symptoms",
-    "Step 3 — duration",
-    "Step 4 — severity and impact",
-    "Step 5 — family history",
-  ],
-  stepsNote:
-    "Five-step order read from the live page on October 24, 2026. Step 1 field labels were read directly from the page.",
-};
+  note:
+    "Two different sequences, both of which educate and screen. Neither capture is evidence about how many patients either one converts.",
+  method:
+    "On centerforvein.com the cookie notice was hidden locally so the page is not shown behind a modal — it was never accepted and no consent was stored. Step 1 was reached using the page’s own visible “Start Quiz” control. No field was filled, nothing was submitted, and no form field, consent control or source label was hidden. Both captures were taken at 390 CSS px at 2×; the page heights differ, so these are not identical viewports.",
+} as const;
 
-/** Scene 7 — PSI. 57 and 89 are both amber on Google's own banding. */
-export const psi = {
-  target: "centerforvein.com homepage",
-  tool: "Google PageSpeed Insights · Lighthouse 13.5.0 · Headless Chromium 153.0.8010.36",
-  when: "October 24, 2026, about 23:02 UTC",
-  gauges: [
-    { device: "Mobile", score: 57, band: "amber" as const,
-      config: "Emulated Moto G Power, Slow 4G",
-      metrics: "Lab LCP 10.9s · FCP 2.0s · TBT 360ms · CLS 0 · Speed Index 8.4s",
-      href: links.psiMobile },
-    { device: "Desktop", score: 89, band: "amber" as const,
-      config: "Desktop configuration",
-      metrics: "Lab LCP 1.2s · FCP 0.5s · TBT 170ms · CLS 0 · Speed Index 2.2s",
-      href: links.psiDesktop },
-  ],
-  banding: "Google's banding: 0–49 red, 50–89 amber, 90–100 green. 57 and 89 are both amber.",
-  others: "Same runs: accessibility 97 mobile / 100 desktop, best practices 96, SEO 92.",
-  field: {
-    head: "Separate evidence — Chrome UX Report, 28 days, this URL",
-    mobile: "Mobile: Core Web Vitals failed. LCP 2.8s · INP 113ms · CLS 0",
-    desktop: "Desktop: passed. LCP 1.2s · INP 59ms · CLS 0.01",
-    note: "Field data is real-user data and is not the same thing as the lab run above. The two are never combined here.",
-  },
-  limits: [
-    "One run per device, initial load, single page. Not a whole-site average, a controlled experiment or a before-and-after.",
-    "Lab LCP is not what an average patient experiences.",
-  ],
-};
-
-/**
- * Scene 7 — our comparator. A HOMEPAGE-to-HOMEPAGE pairing is the only kind
- * allowed, and this one is historical rather than same-day, so it is shown
- * with its date and its limits attached rather than as a matched test.
- */
-export const magnantHistorical = {
-  head: "Our pre-launch homepage, measured earlier",
-  target: "vein-specialists.vercel.app homepage",
-  tool: "Google PageSpeed Insights · Lighthouse 13.5.0",
-  when: "October 15, 2026, 21:30 EDT",
-  mobile: "Mobile 87 · LCP 3.6s · FCP 1.7s · TBT 21ms · CLS 0",
-  desktop: "Desktop 100 · LCP 0.68s · FCP 0.47s · TBT 60ms · CLS 0",
-  href: links.magnantHistoricalReport,
-  limits: [
-    "A different date, deployment and configuration from the Center for Vein Restoration run above. This is an observational pairing, not a controlled same-day test.",
-    "Emulated hardware and throttling were not recorded for this run, so it cannot be assumed to match the other run's configuration.",
-    "A pre-launch preview with development tracking disabled and no field data.",
-    "Homepage against homepage only. Interior-page scores are never compared to another site's homepage.",
-    "These are lab samples. They do not establish a field Core Web Vitals pass, and they are not evidence that one platform causes a faster site.",
-  ],
-};
-
-/** Scene 8 — our own rubric. Separate panel, separate labels, no blending. */
-export const auditor = {
-  head: "InflowMD automated checks · CVR homepage · Oct 24, 2026",
-  scores: [
-    { label: "AI readiness", value: 97 },
-    { label: "Findability", value: 94 },
-  ],
-  interpretation: "Strong foundations. The opportunity is the patient journey and mobile loading.",
-  scope: [
-    "An automated rubric of technical and content checks: crawlable structure, machine-readable practice details, and whether patient questions are answered on the page.",
-    "It does not measure actual AI citations, recommendation frequency, search rankings or clinical quality.",
-    "Device is not applicable to these rubric checks. They are not a mobile test.",
-    "No unique shareable report URL exists for this run.",
-    "Kept separate from the Google PageSpeed scores above; the two are never blended into one number.",
-  ],
-  ours: "An equivalent score for our own example would need its own recorded run, with its own target, date and tool — and a pre-launch preview carries noindex limitations that would have to be stated. None is claimed here.",
-};
-
-/** Scene 9 — proposed measures. */
+/* ───────────────────────── scene 8 — the pilot ───────────────────────── */
 export const pilot = [
   { label: "Education engagement", body: "Whether patients reach and read the explanations." },
   { label: "Screening starts and completions", body: "How many begin the screening, and how many finish it." },
@@ -315,5 +359,6 @@ export const pilotNote =
 
 export const footer = {
   brand: "InflowMD",
-  note: "Unlisted concept page prepared for an HPS review conversation. Not linked from site navigation and not indexed.",
+  note:
+    "Unlisted concept page prepared for an HPS review conversation. Not linked from site navigation and not indexed. The practice site shown is a pre-launch preview used with permission; its clinical copy is pending physician review.",
 };
