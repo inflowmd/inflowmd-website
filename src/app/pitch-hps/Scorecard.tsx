@@ -27,6 +27,30 @@ function subscribe(cb: () => void) {
 const snap = () => window.matchMedia(QUERY).matches;
 const serverSnap = () => false;
 
+/** 0-49 red, 50-89 amber, 90-100 green. */
+function bandColor(v: number) {
+  return v >= 90 ? "#0c8f4e" : v >= 50 ? "#a86300" : "#c0392b";
+}
+
+function Gauge({ value, band, swapping, srLabel }: {
+  value: number; band: "psi" | "inflowmd" | "none"; swapping: boolean; srLabel: string;
+}) {
+  const R = 52, C = 2 * Math.PI * R;
+  const color = bandColor(value);
+  return (
+    <div className={styles.gauge} data-band={band} data-swapping={swapping ? "true" : "false"}>
+      <svg viewBox="0 0 128 128" role="img" aria-label={srLabel} className={styles.gaugeSvg}>
+        <circle cx="64" cy="64" r={R} fill="none" strokeWidth="11" stroke={color} strokeOpacity=".18" />
+        <circle
+          cx="64" cy="64" r={R} fill="none" strokeWidth="11" stroke={color} strokeLinecap="round"
+          strokeDasharray={C} strokeDashoffset={C * (1 - value / 100)} transform="rotate(-90 64 64)"
+        />
+        <text x="64" y="64" className={styles.gaugeNum} fill={color}>{value}</text>
+      </svg>
+    </div>
+  );
+}
+
 export default function Scorecard() {
   const reduced = useSyncExternalStore(subscribe, snap, serverSnap);
   const [key, setKey] = useState(metrics[0].key);
@@ -55,29 +79,35 @@ export default function Scorecard() {
 
   const side = (which: "l" | "r") => {
     const value = which === "l" ? m.left : m.right;
+    const num = which === "l" ? m.leftN : m.rightN;
     const href = which === "l" ? m.hrefL : m.hrefR;
     const meta = which === "l" ? scorecard.left : scorecard.right;
     const shot = which === "l" ? shots.magnantHome : shots.cvrHome;
+    const tool = m.band === "inflowmd" ? "InflowMD auditor" : m.band === "psi" ? "Google PageSpeed" : "Chrome UX Report";
     return (
       <div className={styles.sideCol}>
         <div className={styles.phoneShot}>
           <div className={styles.phoneShotScreen}>
-            <Shot {...shot} sizes="(max-width: 860px) 24vw, 140px" />
+            <Shot {...shot} sizes="(max-width: 860px) 30vw, 170px" />
           </div>
         </div>
-        <p
-          className={`${styles.valNum} ${m.small ? styles.valSmall : ""}`}
-          data-swapping={swapping ? "true" : "false"}
-        >
-          {value}
-        </p>
-        <p className={styles.siteName}>{meta.name}</p>
-        <p className={styles.siteSub}>{meta.sub}</p>
-        {href && (
-          <p className={styles.siteSub}>
-            <a href={href} target="_blank" rel="noopener noreferrer">Open the report</a>
+        <div className={styles.sideMeta}>
+          {num === null ? (
+            <p className={styles.valText} data-swapping={swapping ? "true" : "false"}>{value}</p>
+          ) : (
+            <Gauge value={num} band={m.band} swapping={swapping}
+              srLabel={`${meta.name}: ${m.tab} ${num} out of 100, ${tool}.`} />
+          )}
+          <p className={styles.siteName}>
+            {meta.name}
+            {which === "l" && <span className={styles.prelaunch}>pre-launch</span>}
           </p>
-        )}
+          {href && (
+            <p className={styles.siteSub}>
+              <a href={href} target="_blank" rel="noopener noreferrer">Open the report</a>
+            </p>
+          )}
+        </div>
       </div>
     );
   };
@@ -107,10 +137,7 @@ export default function Scorecard() {
       </div>
 
       <div className={styles.boardFoot} aria-live="polite">
-        <p className={styles.toolLine} data-swapping={swapping ? "true" : "false"}>{m.tool}</p>
-        {m.qual && (
-          <p className={styles.qualifier} data-swapping={swapping ? "true" : "false"}>{m.qual}</p>
-        )}
+        <p className={styles.toolLine} data-swapping={swapping ? "true" : "false"}>{m.label}</p>
       </div>
     </div>
   );

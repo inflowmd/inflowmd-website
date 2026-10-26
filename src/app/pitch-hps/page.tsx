@@ -5,10 +5,10 @@ import Shot from "./Shot";
 import Rfa from "./Rfa";
 import HeroStage from "./HeroStage";
 import Scorecard from "./Scorecard";
-import Screener from "./Screener";
+import ScreeningDemo from "./ScreeningDemo";
 import {
   captions, concerns, footer, links, meta as pageMeta, order, pilot, pilotNote,
-  rfa, scenes, scorecard, screener, shots,
+  rfa, scenes, shots,
 } from "./content";
 
 /**
@@ -191,36 +191,18 @@ export default function PitchHpsPage() {
           </div>
         </section>
 
-        {/* 5 — the real screener, on a phone. */}
-        <section id="screening" className={styles.scene} aria-labelledby="screening-h">
+        {/* 5 — the practice's own screening, running natively at full size. */}
+        <section id="screening" className={`${styles.scene} ${styles.sceneScreening}`} aria-labelledby="screening-h">
           <div className={styles.wrap}>
-            <div className={`${styles.grid2} ${styles.screeningGrid}`}>
-              <div>
-                <p className={styles.kicker}>{s.screening.kicker}</p>
-                <h2 id="screening-h" className={styles.h2}>
-                  {s.screening.title} <span className={styles.accent}>{s.screening.titleAccent}</span>
-                </h2>
-                <p className={styles.lede}>{s.screening.body}</p>
-                <p className={styles.srcLine}>
-                  <Src href={links.magnantScreening}>Open the screening on the practice site</Src>
-                </p>
-                <Drawer summary="How this screener works, and what happens to the selections">
-                  <p>
-                    This is the practice site’s own screener, ported for this review: the leg drawing,
-                    the signs and the Right / Left / Both choice are the real ones.
-                  </p>
-                  <p>{screener.countNote}</p>
-                  <p>
-                    Selections stay in this page. Nothing is stored, sent, added to the address bar,
-                    reported to analytics or submitted as an intake, and no appointment is created.
-                    Continue shows the next step and offers a link to the practice’s own screening.
-                  </p>
-                </Drawer>
-              </div>
-              <div data-fade>
-                <Screener />
-              </div>
-            </div>
+            <p className={styles.kicker}>{s.screening.kicker}</p>
+            <h2 id="screening-h" className={styles.h2}>
+              {s.screening.title} <span className={styles.accent}>{s.screening.titleAccent}</span>
+            </h2>
+            <p className={styles.lede}>{s.screening.body}</p>
+            <ScreeningDemo />
+            <p className={styles.srcLine}>
+              <Src href={links.magnantScreening}>Open the screening on the practice site</Src>
+            </p>
           </div>
         </section>
 
@@ -231,35 +213,10 @@ export default function PitchHpsPage() {
             <h2 id="scorecard-h" className={styles.h2}>
               {s.scorecard.title} <span className={styles.accent}>{s.scorecard.titleAccent}</span>
             </h2>
-            {/* The minimum provenance sits beside the numbers, not only in the
-                drawer: what was measured, with what, when, and that each is a
-                single run. */}
-            <p className={styles.matched}>{scorecard.matched}</p>
+            {/* Each metric carries a concise tool / category / date label.
+                The full evidence — report links, run configuration, dates and
+                limits — lives in the handback, not on the slide. */}
             <Scorecard />
-            <p className={styles.note}>{scorecard.prelaunch}</p>
-            <Drawer summary="Exact measurement evidence, configuration and limits">
-              <p><strong>Tool</strong> — {scorecard.psiDetail.tool}</p>
-              <p><strong>When</strong> — {scorecard.psiDetail.when}</p>
-              <p><strong>Configuration</strong> — {scorecard.psiDetail.config}</p>
-              <p>{scorecard.psiDetail.magnantMetrics}</p>
-              <p>{scorecard.psiDetail.cvrMetrics}</p>
-              <p>{scorecard.psiDetail.rounding}</p>
-              <p><strong>Reports</strong></p>
-              <ul>
-                <li><Src href={links.psiMagnantMobile}>Vein Specialists — mobile</Src></li>
-                <li><Src href={links.psiMagnantDesktop}>Vein Specialists — desktop</Src></li>
-                <li><Src href={links.psiCvrMobile}>Center for Vein Restoration — mobile</Src></li>
-                <li><Src href={links.psiCvrDesktop}>Center for Vein Restoration — desktop</Src></li>
-              </ul>
-              <p><strong>InflowMD rubric</strong> — {scorecard.psiDetail.auditorWhen}</p>
-              <p>{scorecard.psiDetail.auditorResolved}</p>
-              <p><strong>Limits</strong></p>
-              <ul>{scorecard.caveats.map((c) => <li key={c}>{c}</li>)}</ul>
-              <p>
-                Targets: <Src href={scorecard.left.href}>{scorecard.left.sub}</Src> and{" "}
-                <Src href={scorecard.right.href}>{scorecard.right.sub}</Src>.
-              </p>
-            </Drawer>
           </div>
         </section>
 
