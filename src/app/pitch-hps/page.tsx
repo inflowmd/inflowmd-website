@@ -137,36 +137,45 @@ export default function PitchHpsPage() {
         </section>
 
         {/* 3 — a desktop capture, in a desktop. */}
-        <section id="practice" className={styles.scene} aria-labelledby="practice-h">
+        <section id="practice" className={`${styles.scene} ${styles.scenePractice}`} aria-labelledby="practice-h">
           <div className={styles.wrap}>
             <p className={styles.kicker}>{s.practice.kicker}</p>
             <h2 id="practice-h" className={styles.h2}>
               {s.practice.title} <span className={styles.accent}>{s.practice.titleAccent}</span>
             </h2>
             <p className={styles.lede}>{s.practice.body}</p>
-            <div className={styles.monitor} data-fade style={{ marginTop: 32 }}>
-              <div className={styles.monitorFrame}>
-                <div className={styles.monitorScreen}>
-                  <Shot {...shots.magnantDesktop} sizes="(min-width: 1024px) 1100px, 94vw" priority />
+            {/* Its own device sizing: the opening's height-derived clamp was
+                shrinking this monitor and leaving it adrift of its caption. */}
+            <div className={styles.practiceUnit} data-fade>
+              <div className={styles.practiceMonitor}>
+                <div className={styles.monitorFrame}>
+                  <div className={styles.monitorScreen}>
+                    <Shot {...shots.magnantDesktop} sizes="(min-width: 1024px) 900px, 92vw" />
+                  </div>
                 </div>
+                <div className={styles.monitorStand} />
+                <div className={styles.monitorFoot} />
               </div>
-              <div className={styles.monitorStand} />
-              <div className={styles.monitorFoot} />
+              <p className={styles.deviceCap}>{captions.magnantDesktop}</p>
             </div>
-            <p className={styles.deviceCap}>{captions.magnantDesktop}</p>
             <p className={styles.srcLine}><Src href={links.magnantDemo}>Open the pre-launch build</Src></p>
           </div>
         </section>
 
         {/* 4 — the real explainer, on a landscape tablet. */}
         <section id="treatment" className={`${styles.scene} ${styles.sceneStage}`} aria-labelledby="treatment-h">
-          <div className={`${styles.wrap} ${styles.stageHead}`}>
-            <p className={styles.kicker}>{s.treatment.kicker}</p>
-            <h2 id="treatment-h" className={styles.h2}>
-              Show how it works<span className={styles.accentDot}>.</span>
-            </h2>
-          </div>
-          <Rfa />
+          {/* The heading rides inside the sticky stage, so the stage and its
+              controls are one screen at scene entry. */}
+          <Rfa
+            head={
+              <div className={styles.stageHead}>
+                <p className={styles.kicker}>{s.treatment.kicker}</p>
+                <h2 id="treatment-h" className={styles.h2}>
+                  Show how it works<span className={styles.accentDot}>.</span>
+                </h2>
+              </div>
+            }
+          />
           <div className={`${styles.wrap} ${styles.stageFoot}`}>
             <Drawer summary="How it works, and where it comes from">
               {rfa.steps.map((x) => (
@@ -185,12 +194,12 @@ export default function PitchHpsPage() {
         {/* 5 — the real screener, on a phone. */}
         <section id="screening" className={styles.scene} aria-labelledby="screening-h">
           <div className={styles.wrap}>
-            <p className={styles.kicker}>{s.screening.kicker}</p>
-            <h2 id="screening-h" className={styles.h2}>
-              {s.screening.title} <span className={styles.accent}>{s.screening.titleAccent}</span>
-            </h2>
-            <div className={styles.grid2}>
+            <div className={`${styles.grid2} ${styles.screeningGrid}`}>
               <div>
+                <p className={styles.kicker}>{s.screening.kicker}</p>
+                <h2 id="screening-h" className={styles.h2}>
+                  {s.screening.title} <span className={styles.accent}>{s.screening.titleAccent}</span>
+                </h2>
                 <p className={styles.lede}>{s.screening.body}</p>
                 <p className={styles.srcLine}>
                   <Src href={links.magnantScreening}>Open the screening on the practice site</Src>
@@ -264,9 +273,9 @@ export default function PitchHpsPage() {
                 <div key={side.label} className={styles.side} data-fade>
                   <span className={styles.sideLabel}>{side.label}</span>
                   <p className={styles.sideSrc}><Src href={side.href}>{side.source}</Src></p>
-                  <div className={styles.phoneShot}>
-                    <div className={styles.phoneShotScreen}>
-                      <Shot {...shots[side.shot]} sizes="(min-width: 900px) 300px, 76vw" />
+                  <div className={styles.orderShot}>
+                    <div className={styles.orderShotScreen}>
+                      <Shot {...shots[side.shot]} sizes="(min-width: 900px) 260px, 62vw" />
                     </div>
                   </div>
                   <p className={styles.sideCap}>{side.caption}</p>
@@ -304,18 +313,16 @@ export default function PitchHpsPage() {
         </section>
 
         {/* 9 — the close. */}
-        <section id="build" className={styles.scene} aria-labelledby="build-h">
+        <section id="build" className={`${styles.scene} ${styles.sceneClose}`} aria-labelledby="build-h">
           <div className={styles.wrap}>
             <p className={styles.kicker}>{s.build.kicker}</p>
             <h2 id="build-h" className={styles.h2}>
               {s.build.title} <span className={styles.accent}>{s.build.titleAccent}</span>
             </h2>
             <p className={styles.lede}>{s.build.body}</p>
-            <p className={styles.srcLine}>
+            <p className={styles.actionRow}>
               <Src href={links.magnantDemo}>Open the pre-launch build</Src>
-              {" · "}
               <a href="#treatment">Back to the treatment animation</a>
-              {" · "}
               <a href="#screening">Back to the screening demo</a>
             </p>
             <Drawer summary="Pilot outline">
