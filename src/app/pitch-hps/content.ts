@@ -129,6 +129,10 @@ export const shots = {
     base: "magnant-home", widths: [360, 720], ratio: "780 / 1688",
     alt: "The Vein Specialists pre-launch homepage as it renders on a phone.",
   },
+  magnantQuestions: {
+    base: "magnant-questions", widths: [360, 720], ratio: "780 / 1688",
+    alt: "The Vein Specialists online screening on a phone, at step 1 of 4: a Signs / Symptoms / History / Result rail above \u201cWhat you can see\u201d and a list of signs to check.",
+  },
   magnantScreening: {
     base: "magnant-screening", widths: [360, 720], ratio: "780 / 1688",
     alt: "Vein Specialists pre-launch online vein screening entry screen on a phone, opening with questions about what the patient can see on their legs.",
@@ -143,6 +147,7 @@ export const captions = {
   magnantDesktop: "Pre-launch build · Vein Specialists · desktop captured October 26, 2026 at 1440 CSS px; phone captured October 24, 2026 at 390 CSS px",
   magnantHome: "Pre-launch build · Vein Specialists · captured October 24, 2026 at 390 CSS px",
   magnantScreening: "Pre-launch build · Vein Specialists · captured October 24, 2026 at 390 CSS px",
+  magnantQuestions: "Pre-launch build · Vein Specialists · captured October 26, 2026 at 390 CSS px",
   cvrStep1: "centerforvein.com self-assessment · captured October 24, 2026 at 390 CSS px",
 };
 
@@ -266,30 +271,32 @@ export const screener = {
  */
 export type Metric = {
   key: string; tab: string;
-  left: string; right: string; small?: boolean;
-  tool: string; qual?: string;
+  left: string; right: string;
+  /** numeric where the metric has a score to band; null where it has none */
+  leftN: number | null; rightN: number | null;
+  /** which banding applies — each metric's own scale, never another's */
+  band: "psi" | "inflowmd" | "none";
+  /** the concise on-slide label: tool, category, date */
+  label: string;
   hrefL?: string; hrefR?: string;
 };
 export const metrics: readonly Metric[] = [
-  { key: "mobile", tab: "Mobile", left: "86", right: "59",
-    tool: "Google PageSpeed Insights · Lighthouse 13.5.0 · emulated Moto G Power, Slow 4G · October 26, 2026, 00:38 UTC · one lab run each",
+  { key: "mobile", tab: "Mobile", left: "86", right: "59", leftN: 86, rightN: 59, band: "psi",
+    label: "Google PageSpeed · mobile · Oct 26",
     hrefL: links.psiMagnantMobile, hrefR: links.psiCvrMobile },
-  { key: "desktop", tab: "Desktop", left: "100", right: "80",
-    tool: "Google PageSpeed Insights · Lighthouse 13.5.0 · emulated desktop, custom throttling · October 26, 2026, 00:38 UTC · one lab run each",
+  { key: "desktop", tab: "Desktop", left: "100", right: "80", leftN: 100, rightN: 80, band: "psi",
+    label: "Google PageSpeed · desktop · Oct 26",
     hrefL: links.psiMagnantDesktop, hrefR: links.psiCvrDesktop },
-  { key: "seo", tab: "Google SEO", left: "69", right: "92",
-    tool: "Google PageSpeed Insights · Lighthouse SEO · same score on both devices · October 26, 2026, 00:38 UTC",
-    qual: "69 is the measured score. Lighthouse reports the page as blocked from indexing: this pre-launch preview is deliberately set noindex, and that is what the check penalises. It is not a live-indexed SEO comparison.",
+  { key: "seo", tab: "Google SEO", left: "69", right: "92", leftN: 69, rightN: 92, band: "psi",
+    label: "Google PageSpeed · SEO · Oct 26",
     hrefL: links.psiMagnantMobile, hrefR: links.psiCvrMobile },
-  { key: "ai", tab: "AI rubric", left: "94", right: "97",
-    tool: "InflowMD rubric — not Google · Vein Specialists October 26, 2026 · Center for Vein Restoration October 24, 2026",
-    qual: "Different dates, so this is not a same-day pairing. The rubric checks crawlable structure, machine-readable practice details and whether patient questions are answered on the page. It does not measure AI citations, recommendation frequency or search rankings. Its 11 checks all resolved, which is not the same as all passing: the AI-crawler check did not pass." },
-  { key: "findability", tab: "Findability", left: "100", right: "94",
-    tool: "InflowMD rubric — not Google · Vein Specialists October 26, 2026 · Center for Vein Restoration October 24, 2026",
-    qual: "Different dates, so this is not a same-day pairing." },
-  { key: "field", tab: "Field data", left: "No data", right: "Mobile failed · desktop passed", small: true,
-    tool: "Chrome UX Report · real-user data, latest 28 days, this URL · read October 26, 2026",
-    qual: "CrUX field data is unavailable for this preview. That is not a measurement of how much traffic it has. For centerforvein.com: mobile LCP 2.8s · INP 110ms · CLS 0; desktop LCP 1.2s · INP 57ms · CLS 0.01." },
+  { key: "ai", tab: "AI rubric", left: "94", right: "97", leftN: 94, rightN: 97, band: "inflowmd",
+    label: "InflowMD auditor · AI readiness · Oct 26 / Oct 24" },
+  { key: "findability", tab: "Findability", left: "100", right: "94", leftN: 100, rightN: 94, band: "inflowmd",
+    label: "InflowMD auditor · findability · Oct 26 / Oct 24" },
+  { key: "field", tab: "Field data", left: "No data", right: "Mobile failed · desktop passed",
+    leftN: null, rightN: null, band: "none",
+    label: "Chrome UX Report · field data · Oct 26" },
 ];
 
 export const scorecard = {
@@ -381,7 +388,7 @@ export const order = {
     label: "Signs first",
     source: "vein-specialists.vercel.app/eveinscreening/",
     href: links.magnantScreening,
-    shot: "magnantScreening" as const,
+    shot: "magnantQuestions" as const,
     caption:
       "The screening opens on what the patient can see on their own legs. Contact details come later, if the patient chooses to continue.",
   },
