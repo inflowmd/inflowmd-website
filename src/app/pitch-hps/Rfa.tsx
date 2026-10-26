@@ -5,35 +5,31 @@ import styles from "./deck.module.css";
 import { rfa } from "./content";
 
 /**
- * The practice site's own RFA (endovenous ablation) explainer, ported into a
- * presentation wrapper for this review deck.
+ * The practice site's own RFA (endovenous ablation) explainer.
  *
  * SOURCE — vein-specialists @ eec6a944f368ad392e72d9b213efa32bfa23e90f:
- *   src/components/content/VeinFixExplainer.tsx  (geometry, renderer, SVG)
+ *   src/components/content/VeinFixExplainer.tsx  (geometry, renderer, SVG, drivers)
  *   src/data/explainers.ts  (VEIN_FIX_COPY)
  * The path geometry, the renderer's progress mapping, the particle loop, the
  * valve and bulge construction and the three poses are COPIED, not reworked.
  * Treatment mechanics are unchanged: reflux → catheter and seal → the treated
- * vein fades while healthy flow remains.
+ * vein fades while healthy flow remains. This is the full explainer, not the
+ * decorative RfaDivider.
  *
- * WHAT THE WRAPPER CHANGES, and only this: the original is driven by page
- * scroll on desktop and by three chips on phones. Here it is driven by
- * explicit controls, because a deck scene must not move on its own.
- *   · Play advances progress 0→3 once and then STOPS. It never loops.
- *   · Pause freezes everything in place — the progression clock, the tween
- *     clock and the particle loop all stop on the same frame, because the
- *     rAF loop itself is cancelled rather than being fed a zero delta.
- *   · Replay returns to the start and plays once.
- *   · The three step buttons tween to that step's settled pose.
- *   · Leaving the viewport pauses it, and it does NOT resume on return.
- *   · Under reduced motion nothing moves at all: the step buttons snap to
- *     each pose and Play/Pause is not offered. All three steps' text is in
- *     the document at every moment either way, so no required content is
- *     ever behind an animation.
+ * IT IS DRIVEN THE WAY THE PRACTICE SITE DRIVES IT, verified against that
+ * source and against the running site:
+ *   · From 900px up, the section is a tall runway with a sticky stage, and
+ *     scroll position maps to progress 0..3 — the same formula, the same
+ *     progress bar. Nothing plays by itself; the reader's scroll is the clock.
+ *   · Below 900px there is no runway. Three step chips tween the stage to each
+ *     settled pose, exactly as the source does on phones.
+ *   · The particle loop runs only while the stage is on screen.
+ *   · Under reduced motion nothing moves: each step renders its settled pose.
  *
- * The illustration is aria-hidden, exactly as in the source: the step text
- * carries the meaning. The clinical copy is pending physician review and is
- * not presented as approved.
+ * ADDED FOR THIS PRESENTATION, and not automatic on the client site: a Replay
+ * control, and on phones only — where the client site has no scroll driver — a
+ * Play control that runs the same progression once and stops. Neither exists on
+ * the practice site, and neither starts on its own.
  */
 
 const VIEW_W = 500;
@@ -44,8 +40,10 @@ const SICK =
 const NS = "http://www.w3.org/2000/svg";
 /** The pose each step settles on: reflux, sealed (tip at the junction), result. */
 const POSE = [0.5, 1.97, 3];
-/** One full pass, in seconds. */
+/** The phone-only Play control's single pass, in seconds. */
 const PLAY_SECONDS = 9;
+/** The scroll runway, as the source sizes it. */
+const WIDE = "(min-width: 900px)";
 
 const QUERY = "(prefers-reduced-motion: reduce)";
 function subscribe(cb: () => void) {
@@ -62,14 +60,17 @@ export default function Rfa() {
   const reduced = useSyncExternalStore(subscribe, snap, serverSnap);
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [wide, setWide] = useState(false);
+  const section = useRef<HTMLDivElement | null>(null);
   const stage = useRef<HTMLDivElement | null>(null);
+  const bar = useRef<HTMLSpanElement | null>(null);
   const svg = useRef<SVGSVGElement | null>(null);
   const api = useRef<Api | null>(null);
   const stepRef = useRef(0);
 
   useEffect(() => {
-    const root = svg.current, st = stage.current;
-    if (!root || !st) return;
+    const root = svg.current, st = stage.current, sec = section.current;
+    if (!root || !st || !sec) return;
     const $ = <T extends Element>(id: string) => root.querySelector(`[data-v="${id}"]`) as unknown as T;
     const r = {
       deep: $<SVGPathElement>("deep"), sick: $<SVGPathElement>("sick"), seal: $<SVGPathElement>("seal"),
@@ -152,7 +153,7 @@ export default function Rfa() {
       st.dataset.step = `${s}`;
       if (s !== stepRef.current) { stepRef.current = s; setStep(s); }
     };
-    // particles (and the step's static pose under reduced motion, with dt = 0)
+    // particles (and each step's static pose under reduced motion, with dt = 0)
     const place = (now: number, dt: number) => {
       const t2 = Math.min(1, Math.max(0, P - 1)), t3 = Math.min(1, Math.max(0, P - 2));
       const dSpeed = 0.07 + t3 * 0.08, sSpeed = 0.06 * (1 - t2);
@@ -174,18 +175,35 @@ export default function Rfa() {
       });
     };
 
-    /* One clock for everything. `mode` decides what the frame advances, and
-       when it goes idle the loop is cancelled, so the particles stop on the
-       same frame as the progression — a paused stage is genuinely still. */
+    const mq = window.matchMedia(WIDE);
+    setWide(mq.matches);
+
+    /* ── the practice site's desktop driver: scroll position → 0..3 ── */
+    const headerH = () => document.querySelector("header")?.getBoundingClientRect().height ?? 72;
+    let scrollFrame = 0;
+    const fromScroll = () => {
+      scrollFrame = 0;
+      if (!mq.matches) return;
+      const rect = sec.getBoundingClientRect();
+      const h = headerH();
+      const total = rect.height - (window.innerHeight - h);
+      const pr = total > 0 ? Math.min(1, Math.max(0, (h - rect.top) / total)) : 1;
+      if (bar.current) bar.current.style.transform = `scaleX(${pr})`;
+      const next = pr * 3;
+      render(reduced ? POSE[stepOf(next)] : next);
+      if (reduced) place(0, 0);
+    };
+    const onScroll = () => { if (!scrollFrame) scrollFrame = requestAnimationFrame(fromScroll); };
+
+    /* ── the phone driver, and the presentation's own Play ── */
     let mode: "idle" | "play" | "tween" = "idle";
     let loop = 0, last = 0, visible = false;
     let from = 0, to = 0, t0 = 0, ms = 0;
 
-    const stop = () => {
+    const stopDriver = (freeze = false) => {
       mode = "idle";
-      cancelAnimationFrame(loop);
-      loop = 0;
       setPlaying(false);
+      if (freeze) { cancelAnimationFrame(loop); loop = 0; }
     };
     const frame = (now: number) => {
       loop = 0;
@@ -193,73 +211,90 @@ export default function Rfa() {
       last = now;
       if (mode === "play") {
         const nextP = P + dt * (3 / PLAY_SECONDS);
-        if (nextP >= 3) { render(3); place(now, dt); stop(); return; }
-        render(nextP);
+        if (nextP >= 3) { render(3); stopDriver(); } else render(nextP);
       } else if (mode === "tween") {
         const k = Math.min(1, (now - t0) / ms), e = 0.5 - Math.cos(Math.PI * k) / 2;
         render(from + (to - from) * e);
-        if (k >= 1) { place(now, dt); stop(); return; }
+        if (k >= 1) stopDriver();
       }
       place(now, dt);
-      if (visible && mode !== "idle") loop = requestAnimationFrame(frame);
+      /* The particle loop keeps running while the stage is on screen, as it
+         does on the practice site — the scroll driver needs it even when no
+         transition is in flight. */
+      if (visible && !reduced) loop = requestAnimationFrame(frame);
     };
     const start = () => {
-      if (loop || !visible) return;
+      if (loop || !visible || reduced) return;
       last = performance.now();
       loop = requestAnimationFrame(frame);
     };
 
     api.current = {
       play: () => {
-        if (reduced) return;
+        if (reduced || mq.matches) return;
         if (P >= 2.995) render(0);
-        mode = "play";
-        setPlaying(true);
-        start();
+        mode = "play"; setPlaying(true); start();
       },
-      pause: stop,
+      pause: () => stopDriver(true),
       toStep: (n: number) => {
         stepRef.current = n;
         setStep(n);
+        if (mq.matches) {
+          /* On desktop the scroll IS the driver, so a step control moves the
+             scroll to that pose rather than animating against it. */
+          const h = headerH();
+          const total = sec.getBoundingClientRect().height - (window.innerHeight - h);
+          const target = sec.offsetTop - h + total * (POSE[n] / 3);
+          window.scrollTo({ top: Math.max(0, target), behavior: reduced ? "auto" : "smooth" });
+          return;
+        }
         if (reduced) { render(POSE[n]); place(0, 0); return; }
         from = P; to = POSE[n];
         t0 = performance.now();
         ms = Math.min(1600, 500 + Math.abs(to - from) * 500);
-        mode = "tween";
-        setPlaying(true);
-        start();
+        mode = "tween"; setPlaying(true); start();
       },
       replay: () => {
+        if (mq.matches) { api.current?.toStep(0); return; }
         render(0);
         stepRef.current = 0;
         setStep(0);
         if (reduced) { render(POSE[0]); place(0, 0); return; }
-        mode = "play";
-        setPlaying(true);
-        start();
+        mode = "play"; setPlaying(true); start();
       },
     };
 
-    /* Off screen it pauses, and it stays paused when it comes back: a scene
-       the reader has scrolled away from must not be running, and must not
-       start itself again. */
+    /* the particle loop runs only while the stage is on screen */
     const io = new IntersectionObserver((es) => {
       visible = es.some((e) => e.isIntersecting);
-      if (!visible) stop();
+      if (!visible) stopDriver(true);
+      else start();
     }, { threshold: 0.15 });
     io.observe(st);
 
-    render(reduced ? POSE[0] : 0);
+    const onWide = () => {
+      setWide(mq.matches);
+      stopDriver(true);
+      if (mq.matches) fromScroll();
+      else { render(POSE[stepRef.current]); place(0, 0); }
+      start();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    mq.addEventListener("change", onWide);
+
+    if (mq.matches) fromScroll();
+    else render(reduced ? POSE[0] : 0);
     place(0, 0);
 
     return () => {
-      io.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      mq.removeEventListener("change", onWide);
+      cancelAnimationFrame(scrollFrame);
       cancelAnimationFrame(loop);
+      io.disconnect();
       api.current = null;
-      /* The effect rebuilds when the reduced-motion preference changes. The
-         old loop is cancelled here, so the control must stop claiming to be
-         playing: without this, turning reduced motion on mid-playback left a
-         Pause button over a frozen stage. */
       setPlaying(false);
     };
   }, [reduced]);
@@ -270,32 +305,29 @@ export default function Rfa() {
   }, [playing]);
 
   return (
-    <div className={styles.rfa}>
-      <div className={styles.tablet}>
-        <div className={styles.tabletScreen}>
-          <div className={styles.rfaGrid}>
-            <div className={styles.rfaCopy}>
-              <p className={styles.rfaMicro}>{rfa.micro}</p>
-              <h3 className={styles.rfaHead}>{rfa.heading}</h3>
-              {/* All three steps are always present. The active one is marked,
-                  and nothing required is hidden behind the animation. */}
-              <ol className={styles.rfaSteps}>
+    <div ref={section} className={styles.rfaScroll}>
+      <div className={styles.rfaSticky}>
+        <div className={styles.tablet}>
+          <div className={styles.tabletScreen}>
+            <div className={styles.vfCopy}>
+              <p className={styles.stepIndex}>STEP {step + 1} / 3</p>
+              <p className={`${styles.stepLine} ${styles.stepLive}`}>{rfa.steps[step].title}</p>
+              {/* With reduced motion on, all three read at once instead. */}
+              <div className={styles.stepStatic}>
                 {rfa.steps.map((s, i) => (
-                  <li key={s.title} className={styles.rfaStep} data-state={step === i ? "on" : i < step ? "done" : "off"}>
-                    <span aria-hidden="true" className={styles.rfaStepNum}>{i + 1}</span>
-                    <h4 className={styles.rfaStepTitle}>{s.title}</h4>
-                    <p className={styles.rfaStepBody}>{s.body}</p>
-                  </li>
+                  <p key={s.title} className={styles.stepLine} data-on={step === i ? "true" : "false"}>
+                    {i + 1} · {s.title}
+                  </p>
                 ))}
-              </ol>
+              </div>
             </div>
 
-            <div ref={stage} className={styles.rfaStage} data-step={step}>
-              <p aria-hidden="true" className={styles.rfaHeart}>{rfa.heart}</p>
+            <div ref={stage} className={styles.vfStage} data-step={step}>
+              <p aria-hidden="true" className={styles.vfHeart}>{rfa.heart}</p>
               <svg
                 ref={svg} aria-hidden="true" focusable="false"
                 viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} preserveAspectRatio="xMidYMid meet"
-                className={styles.rfaSvg}
+                className={styles.vfSvg}
               >
                 <defs>
                   <linearGradient id="vf-healthy" x1="0" y1="1" x2="0" y2="0">
@@ -345,7 +377,7 @@ export default function Rfa() {
               </svg>
               {rfa.labels.map((l) => (
                 <p
-                  key={l.title} aria-hidden="true" className={styles.rfaLabel}
+                  key={l.title} aria-hidden="true" className={styles.vfLabel}
                   data-on={step === l.step ? "true" : "false"}
                   style={l.side === "l" ? { left: `${l.x}%`, top: `${l.y}%` } : { right: `${l.x}%`, top: `${l.y}%` }}
                 >
@@ -353,38 +385,48 @@ export default function Rfa() {
                   <small>{l.small}</small>
                 </p>
               ))}
-              <p aria-hidden="true" className={styles.rfaStatus}>
+              <p aria-hidden="true" className={styles.vfStatus}>
                 <i data-step={step} />
                 {rfa.status[step]}
               </p>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className={styles.rfaControls}>
-        {!reduced && (
-          <>
-            <button type="button" className={styles.btn} onClick={onPlayPause}>
+        {/* the source's own desktop progress bar */}
+        {wide && !reduced && (
+          <span aria-hidden="true" className={styles.rfaBar}>
+            <span ref={bar} style={{ transform: "scaleX(0)" }} />
+          </span>
+        )}
+
+        <p className={styles.useLine}>{rfa.use}</p>
+
+        <div className={styles.rfaControls}>
+          {!wide && !reduced && (
+            <button type="button" className={styles.ghostLight} onClick={onPlayPause}>
               {playing ? "Pause" : "Play"}
             </button>
-            <button type="button" className={styles.btn} aria-label="Replay animation" onClick={() => api.current?.replay()}>
+          )}
+          {!reduced && (
+            <button type="button" className={styles.ghostLight} aria-label="Replay animation"
+              onClick={() => api.current?.replay()}>
               Replay
             </button>
-          </>
-        )}
-        <span className={styles.rfaStepGroup} role="group" aria-label="Show a step of the animation">
-          {rfa.steps.map((s, i) => (
-            <button
-              key={s.title} type="button" className={styles.btnStep}
-              aria-pressed={step === i} aria-label={`Show step ${i + 1}: ${s.title}`}
-              onClick={() => api.current?.toStep(i)}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </span>
-        <span className={styles.rfaLive} aria-live="polite">{rfa.status[step]}</span>
+          )}
+          <span className={styles.rfaStepGroup} role="group" aria-label="Show a step of the animation">
+            {rfa.steps.map((s, i) => (
+              <button
+                key={s.title} type="button" className={styles.btnStep}
+                aria-pressed={step === i} aria-label={`Show step ${i + 1}: ${s.title}`}
+                onClick={() => api.current?.toStep(i)}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </span>
+          <span className={styles.rfaLive} aria-live="polite">{rfa.status[step]}</span>
+        </div>
       </div>
     </div>
   );
