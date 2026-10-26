@@ -56,7 +56,7 @@ const serverSnap = () => false;
 
 type Api = { play: () => void; pause: () => void; toStep: (n: number) => void; replay: () => void };
 
-export default function Rfa() {
+export default function Rfa({ head }: { head?: React.ReactNode }) {
   const reduced = useSyncExternalStore(subscribe, snap, serverSnap);
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -307,6 +307,7 @@ export default function Rfa() {
   return (
     <div ref={section} className={styles.rfaScroll}>
       <div className={styles.rfaSticky}>
+        {head}
         <div className={styles.tablet}>
           <div className={styles.tabletScreen}>
             <div className={styles.vfCopy}>

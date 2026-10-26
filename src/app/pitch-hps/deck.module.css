@@ -118,8 +118,12 @@
 }
 
 /* ---------- scene shell ---------- */
-.scene { border-bottom: 1px solid var(--faint); padding: 56px 0 62px; scroll-margin-top: 84px; }
-@media (max-width: 767px) { .scene { scroll-margin-top: 124px; } }
+/* scroll-margin matches the toolbar Deck.tsx measures, so Next lands flush
+   instead of leaving a strip of the previous scene beneath the bar. The
+   fallbacks are only for the frame before the measurement lands. */
+.scene { border-bottom: 1px solid var(--faint); padding: 56px 0 62px;
+  scroll-margin-top: var(--hps-header, 69px); }
+@media (max-width: 767px) { .scene { scroll-margin-top: var(--hps-header, 108px); } }
 @media (min-width: 1024px) {
   /* Each scene owns a screen. `min-height`, not `height`, so a tall scene
      grows instead of clipping. */
@@ -144,6 +148,12 @@
   border-left: 2px solid var(--faint); padding-left: 12px; max-width: 64ch; }
 .grid2 { display: grid; gap: 34px; margin-top: 32px; }
 @media (min-width: 960px) { .grid2 { grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; } }
+/* The heading now lives in the left column, so that column starts at the top
+   instead of floating in the middle of the phone's height. */
+.screeningGrid { margin-top: 0; }
+@media (min-width: 960px) { .screeningGrid { align-items: start; } }
+.screeningGrid .h2 { margin-top: 10px; }
+.screeningGrid .lede { margin-top: 14px; }
 .hero { display: grid; gap: 34px; }
 @media (min-width: 1024px) { .hero { grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; } }
 .srcLine { margin: 20px 0 0; font-size: 13.5px; line-height: 1.7; }
@@ -196,14 +206,25 @@
 @media (max-width: 767px) {
   /* the header wraps to 108px here, so the stage clears that instead */
   .deck { --stick: 118px; }
-  .deck .leg { height: 128px; }
+  /* The pinned feedback panel was eating the viewport, so the first sign
+     choices fell below the fold. It keeps the legs and the count — the whole
+     point of pinning it — at a tighter scale. */
+  .deck .leg { height: 96px; }
+  .deck .phStage { gap: 5px; padding-bottom: 7px; }
+  .deck .phHead { font-size: 17px; }
+  .deck .phLede { font-size: 11.5px; }
+  .deck .legFig figcaption { margin-top: 2px; font-size: 9px; }
+  .deck .readout { padding: 7px 0; }
+  .deck .readout strong { font-size: 12.5px; }
+  .deck .readout span { font-size: 11px; }
+  .deck .phoneScreen { padding: 13px 12px 14px; gap: 7px; }
 }
 @media (max-width: 899px) {
   /* Below the practice site's own 900px gate there is no scroll runway, and a
      16:10 screen cannot hold a portrait mechanism at this width. The screen
      becomes taller: the step line sits above the diagram and the mechanism
      keeps the whole lower frame at full size. Nothing clinical crops. */
-  .deck .tablet { width: 100%; padding: 9px; border-radius: 16px; }
+  .deck .tablet { width: 100%; max-width: none; padding: 9px; border-radius: 16px; }
   .deck .tabletScreen { aspect-ratio: 4/5; grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr); padding: 14px 14px 10px; gap: 8px; }
   .deck .vfCopy { max-width: 100%; justify-self: start; align-content: start; }
@@ -394,11 +415,28 @@
 .heroPhoneScreen img { position: absolute; inset: 0; display: block; width: 100%; height: 100%;
   object-fit: cover; object-position: top center; }
 
+/* ---------- scene 3 — the practice page, its own device ----------
+   The opening's monitor is sized from the height that frame has left. Sharing
+   that class here shrank this monitor to whatever the opening's budget allowed
+   and left it hard against the left edge while its caption centred across the
+   page. This scene gets its own sizing, and the monitor and caption are one
+   centred unit. */
+.practiceUnit { display: grid; justify-items: center; gap: 10px; margin-top: 20px; width: 100%; }
+.practiceMonitor { width: min(900px, 92%, calc((100vh - 430px) * 1.6)); display: flex;
+  flex-direction: column; align-items: center; }
+.practiceUnit .deviceCap { margin: 0; max-width: min(640px, 92%); }
+/* the heading block gives the device its room back */
+.scenePractice { padding: clamp(36px, 5vh, 52px) 0 clamp(40px, 6vh, 56px); }
+.scenePractice .h2 { margin-top: 8px; }
+.scenePractice .lede { margin-top: 12px; }
+.scenePractice .srcLine { margin-top: 14px; }
+
 /* ---------- scene 4 — the near-black treatment stage ---------- */
 .sceneStage { background: var(--stage-ink); color: var(--on-stage); border-bottom-color: #22262c;
   padding: 0; display: block; min-height: 0; }
-.stageHead { padding: clamp(46px, 7vh, 86px) 0 0; display: grid; justify-items: center; gap: 10px;
-  text-align: center; }
+.stageHead { display: grid; justify-items: center; gap: 8px; text-align: center;
+  padding: 0 20px; }
+@media (max-width: 899px) { .stageHead { padding: clamp(30px, 5vh, 54px) 20px 0; } }
 .sceneStage .kicker { color: var(--on-stage-3); }
 .sceneStage .h2 { color: var(--on-stage); }
 .accentDot { color: var(--lime); }
@@ -415,10 +453,10 @@
 @media (min-width: 900px) { .rfaScroll { height: 320vh; } }
 .rfaSticky { display: grid; justify-items: center; gap: 14px; padding: 22px 20px 26px; }
 @media (min-width: 900px) {
-  .rfaSticky { position: sticky; top: 69px; height: calc(100vh - 69px); align-content: center;
-    padding: 0 20px; }
+  .rfaSticky { position: sticky; top: var(--hps-header, 69px);
+    height: calc(100vh - var(--hps-header, 69px)); align-content: center; padding: 0 20px; gap: 12px; }
 }
-.tablet { width: min(100%, 810px, calc((100vh - 430px) * 1.6)); border-radius: 18px; padding: 13px;
+.tablet { width: min(100%, 810px, calc((100vh - 321px) * 1.6)); border-radius: 18px; padding: 13px;
   background: linear-gradient(165deg, #2c3139, #171a1f); border: 1px solid #3a4049;
   box-shadow: 0 50px 80px -50px rgba(0, 0, 0, .9); }
 .tabletScreen { border-radius: 8px; overflow: hidden; position: relative;
@@ -519,7 +557,9 @@
 /* ---------- scene 7 — the order ---------- */
 .compare { display: grid; gap: 26px; margin-top: 30px; }
 @media (min-width: 900px) { .compare { grid-template-columns: 1fr 1fr; gap: 36px; align-items: start; } }
-.side { border: 1px solid var(--faint); border-radius: 18px; padding: 20px; background: var(--tint); }
+.side { border: 1px solid var(--faint); border-radius: 18px; padding: 20px; background: var(--tint);
+  display: grid; grid-template-rows: auto auto 1fr auto; height: 100%; }
+.compare { align-items: stretch; }
 .sideLabel { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
   color: var(--accent); }
 .sideSrc { margin: 6px 0 0; font-size: 11.5px; color: var(--sub); word-break: break-word; }
@@ -528,6 +568,20 @@
   background: linear-gradient(165deg, #e9eff6, #cfdbe7); border: 1px solid #c3d1df; }
 .phoneShotScreen { border-radius: 21px; overflow: hidden; background: #0b1b34; display: block; }
 .phoneShotScreen img { display: block; width: 100%; height: auto; }
+
+/* The scorecard's thumbnail clamp was shrinking these real captures to ~56px
+   of visible screen. They get their own device here: one consistent phone
+   proportion for both, so the two cards' screenshots share a baseline even
+   though the two source captures are different heights. The capture is
+   anchored to its top, where the step-1 fields and the screening entry are. */
+.orderShot { width: min(240px, 62%); margin: 18px auto 0; border-radius: 26px; padding: 7px;
+  background: linear-gradient(165deg, #e9eff6, #cfdbe7); border: 1px solid #c3d1df;
+  box-shadow: 0 24px 44px -30px rgba(11, 20, 36, .5); }
+.orderShotScreen { border-radius: 20px; overflow: hidden; background: var(--ink); display: block;
+  position: relative; width: 100%; aspect-ratio: 390 / 844; }
+.orderShotScreen img { position: absolute; inset: 0; display: block; width: 100%; height: 100%;
+  object-fit: cover; object-position: top center; }
+@media (max-width: 860px) { .orderShot { width: min(230px, 66%); } }
 
 /* ---------- lists ---------- */
 .cards { display: grid; gap: 12px; margin: 30px 0 0; padding: 0; list-style: none; }
@@ -547,6 +601,22 @@
 .drawerBody ul { margin: 8px 0 0; padding-left: 18px; }
 .chev { margin-left: auto; transition: transform .2s ease; }
 .drawer[open] .chev { transform: rotate(180deg); }
+
+/* ---------- scene 9 — the close ----------
+   It reserved a whole screen for four short lines. It keeps generous air
+   without the empty half-screen, and its actions are real 44px controls
+   rather than 16px text links. */
+.sceneClose { min-height: calc(100vh - var(--hps-header, 69px) - var(--hps-foot, 128px));
+  padding: clamp(48px, 7vh, 80px) 0 clamp(52px, 8vh, 88px); }
+@media (min-width: 1024px) {
+  .sceneClose { display: grid; align-content: center;
+    min-height: calc(100vh - var(--hps-header, 69px) - var(--hps-foot, 128px)); }
+}
+.actionRow { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; }
+.deck .actionRow a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px;
+  border-radius: 999px; border: 1px solid #c9d6e2; font-size: 13.5px; font-weight: 500;
+  color: var(--ink); text-decoration: none; }
+.deck .actionRow a:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ---------- footer ---------- */
 .foot { margin-top: auto; border-top: 1px solid var(--faint); padding: 26px 0 34px; }

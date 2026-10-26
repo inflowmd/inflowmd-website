@@ -76,6 +76,29 @@ export default function Deck({ ids, labels }: { ids: string[]; labels: string[] 
     [ids, reduced],
   );
 
+  /* The sticky toolbar's real height, published as a custom property so the
+     scenes' scroll-margin matches it exactly. Hard-coded offsets of 84/124
+     were 15-16px taller than the toolbar actually measures, so every Next
+     left a strip of the previous scene showing beneath it. */
+  useEffect(() => {
+    const bar = document.querySelector("header");
+    const deck = document.getElementById("hps-deck");
+    const foot = document.querySelector("footer");
+    if (!bar || !deck) return;
+    const apply = () => {
+      deck.style.setProperty("--hps-header", `${Math.round(bar.getBoundingClientRect().height)}px`);
+      /* The closing scene sizes itself against this so that it plus the footer
+         exactly fill the screen below the toolbar: the last scene can still be
+         scrolled flush, without reserving an empty half-screen to do it. */
+      if (foot) deck.style.setProperty("--hps-foot", `${Math.round(foot.getBoundingClientRect().height)}px`);
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(bar);
+    if (foot) ro.observe(foot);
+    return () => ro.disconnect();
+  }, []);
+
   /* Opt-in reveal + which scene is on screen. One observer, no scroll handler. */
   useEffect(() => {
     const root = document.getElementById("hps-deck");
