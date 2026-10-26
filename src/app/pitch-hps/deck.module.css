@@ -237,16 +237,36 @@
 .deviceCap { margin: 10px auto 0; max-width: 72ch; font-size: 11.5px; line-height: 1.5; color: var(--sub);
   text-align: center; }
 
-/* ---------- scene 2 — thought fragments ---------- */
-.thoughts { display: flex; flex-direction: column; gap: 16px; margin: 30px 0 0; padding: 0; list-style: none; }
-.thought { font-size: clamp(18px, 2.6vw, 34px); font-weight: 300; font-style: italic; line-height: 1.26;
-  letter-spacing: -.02em; color: var(--ink); max-width: 34ch; }
-.thought:nth-child(even) { color: var(--sub); }
-.legArt { display: grid; place-items: center; }
-.legArt img { display: block; width: 100%; max-width: 230px; height: auto; border-radius: 18px;
-  aspect-ratio: 700 / 1000; object-fit: cover; }
-.legCap { margin: 12px 0 0; font-size: 12px; line-height: 1.6; color: var(--sub); text-align: center;
-  max-width: 230px; margin-inline: auto; }
+/* ---------- scene 2 — the quote rail and the clip ----------
+   Each quote sits in its own band with a top hairline and a left marker. One
+   is hot at a time; the rest are muted but fully present, so the rail reads
+   the same whether or not it is cycling. */
+.sceneSymptom { padding: clamp(44px, 6vh, 72px) 0 clamp(48px, 7vh, 80px); }
+@media (min-width: 1024px) { .sceneSymptom { min-height: 0; display: block; } }
+.symptomGrid { display: grid; gap: clamp(22px, 3vw, 46px); margin-top: 26px; align-items: start; }
+@media (min-width: 900px) { .symptomGrid { grid-template-columns: minmax(0, 1fr) minmax(250px, 340px); } }
+
+.quoteRail { min-width: 0; }
+.quotes { list-style: none; margin: 0; padding: 0; }
+.quote { position: relative; border-top: 1px solid var(--faint); padding: clamp(13px, 1.7vh, 20px) 0
+  clamp(13px, 1.7vh, 20px) 18px; }
+.quote::before { content: ""; position: absolute; left: 0; top: -1px; bottom: 0; width: 3px;
+  background: var(--faint); transition: background-color .45s ease; }
+.quote[data-hot="true"]::before { background: var(--vf-green); }
+.quoteText { margin: 0; font-size: clamp(16px, 1.9vw, 23px); font-weight: 500; line-height: 1.32;
+  letter-spacing: -.02em; color: var(--sub); transition: color .45s ease; }
+.quote[data-hot="true"] .quoteText { color: var(--ink); }
+.quoteTag { margin: 7px 0 0; font-size: 10.5px; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--sub); opacity: 0; transition: opacity .45s ease; }
+.quote[data-hot="true"] .quoteTag { opacity: 1; color: var(--accent); }
+.quoteKicker { margin: 22px 0 0; font-size: clamp(14px, 1.3vw, 16px); line-height: 1.6;
+  color: var(--sub); max-width: 52ch; }
+
+/* the clip sits top-flush in its card, so it lines up with the rail's first band */
+.clipCard { margin: 0; display: grid; gap: 11px; }
+.clip { display: block; width: 100%; height: auto; border-radius: 18px; background: var(--ink);
+  object-fit: cover; }
+.clipCap { font-size: 12px; line-height: 1.55; color: var(--sub); }
 
 /* ---------- scene 4 — the ported RFA explainer ---------- */
 .rfa { margin-top: 32px; }
@@ -695,6 +715,47 @@
   color: var(--accent); }
 .card p { margin: 7px 0 0; font-size: 14px; line-height: 1.6; color: var(--sub); }
 
+/* ---------- scene 8 — how a pilot works ----------
+   Pills, never circles: the label sets the width, so BEFORE / LAUNCH / AFTER
+   always fit. They sit on one connecting rail. */
+.scenePilot { padding: clamp(44px, 6vh, 72px) 0 clamp(52px, 8vh, 88px); }
+@media (min-width: 1024px) { .scenePilot { min-height: 0; display: block; } }
+.rail { position: relative; list-style: none; margin: 30px 0 0; padding: 0; display: grid; gap: 22px; }
+@media (min-width: 800px) { .rail { grid-template-columns: repeat(3, 1fr); gap: clamp(18px, 2.4vw, 34px); } }
+.railStep { position: relative; display: grid; gap: 10px; justify-items: start; padding-top: 20px; }
+/* the connecting rail runs behind the pills */
+.railStep::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  background: var(--faint); }
+.railStep:first-child::before { border-radius: 2px 0 0 2px; }
+.pill { display: inline-flex; align-items: center; min-height: 30px; padding: 0 14px;
+  border-radius: 999px; background: var(--ink); color: var(--ground); font-size: 11px;
+  font-weight: 600; letter-spacing: .14em; white-space: nowrap; }
+.railBody { margin: 0; font-size: 14px; line-height: 1.6; color: var(--sub); max-width: 40ch; }
+
+.qCards { list-style: none; margin: 30px 0 0; padding: 0; display: grid; gap: 12px; }
+@media (min-width: 800px) { .qCards { grid-template-columns: repeat(3, 1fr); } }
+.qCard { border: 1px solid var(--faint); border-radius: 16px; background: var(--tint);
+  padding: 18px 20px; display: grid; gap: 7px; align-content: start; }
+.qCardQ { margin: 0; font-size: clamp(15px, 1.5vw, 18px); font-weight: 600; line-height: 1.3;
+  letter-spacing: -.02em; color: var(--ink); }
+.qCardA { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sub); }
+
+/* ---------- the Google SEO state toggle ---------- */
+.launchToggle { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px;
+  border: 1px solid var(--faint); background: var(--ground); justify-self: center; }
+.launchBtn { min-height: 38px; padding: 0 16px; border-radius: 999px; border: 0; background: none;
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--sub); cursor: pointer; }
+.launchBtn[aria-pressed="true"] { background: var(--ink); color: var(--ground); }
+.launchBtn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.stateTag { margin: 0; font-size: 10px; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--sub); border: 1px solid var(--faint);
+  border-radius: 999px; padding: 3px 9px; }
+.stateTag[data-expected="true"] { border-style: dashed; border-color: #8aa98f; color: #2f6b45; }
+.launchNote { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--sub); text-align: center;
+  max-width: 60ch; }
+/* the ring animates between the two states; under reduced motion it just changes */
+.gaugeRing { transition: stroke-dashoffset .8s cubic-bezier(.22,.61,.36,1), stroke .5s ease; }
+
 /* ---------- disclosure ---------- */
 .drawer { margin-top: 22px; border: 1px solid var(--faint); border-radius: 14px; background: var(--tint); }
 .drawer summary { cursor: pointer; list-style: none; padding: 14px 18px; min-height: 44px; display: flex;
@@ -747,6 +808,8 @@
      document at every moment, so nothing required is behind this. */
   .deck .vfLabel { transform: none !important; }
   .deck .mark { transition: none !important; }
+  .deck .gaugeRing { transition: none !important; }
+  .deck .quote::before, .deck .quoteText, .deck .quoteTag { transition: none !important; }
   .deck .vfCopy .stepLive { display: none; }
   .deck .vfCopy .stepStatic { display: grid; }
   .deck .chev { transform: none !important; }

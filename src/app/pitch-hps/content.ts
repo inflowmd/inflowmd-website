@@ -46,20 +46,14 @@ export type Scene = {
 export const scenes: readonly Scene[] = [
   {
     id: "open", label: "Open",
-    title: "Websites that", titleAccent: "teach.",
+    title: "Websites that", titleAccent: "teach vein disease.",
     body: "A patient-journey concept for HPS.",
   },
   {
     id: "symptom", label: "Symptom",
     kicker: "Where it starts",
     title: "A symptom.", titleAccent: "A question.",
-    body: "Someone notices something in their own legs and goes looking for an answer.",
-  },
-  {
-    id: "practice", label: "Practice",
-    kicker: "The practice",
-    title: "A practice, presented", titleAccent: "properly.",
-    body: "A real pre-launch build, running today.",
+    body: "Someone notices something in their own legs — and goes looking for an answer.",
   },
   {
     id: "treatment", label: "Treatment",
@@ -91,24 +85,28 @@ export const scenes: readonly Scene[] = [
   {
     id: "pilot", label: "Pilot",
     kicker: "Proving it",
-    title: "Pilot it.", titleAccent: "Measure it.",
-    body: "Baseline, then an agreed journey, then measurement.",
-  },
-  {
-    id: "build", label: "Build",
-    kicker: "Next",
-    title: "Let's build it", titleAccent: "together.",
-    body: "Walk the demo, or outline a pilot.",
+    title: "How a pilot", titleAccent: "works.",
+    body: "Count before. Launch the journey. Count after.",
   },
 ];
 
 /** Scene 2 — the fragments a patient arrives with. */
-export const concerns = [
-  "My legs ache by the end of the day.",
-  "One ankle swells and the other does not.",
-  "A vein has changed and I do not know if it matters.",
-  "Standing all day leaves my legs heavy.",
+export type Quote = { text: string; tag: string };
+/** The rail cycles one quote "hot" at a time; the tag names what it points to. */
+export const concerns: readonly Quote[] = [
+  { text: "My legs ache by the end of the day.", tag: "Aching · heaviness" },
+  { text: "One ankle swells and the other does not.", tag: "Swelling · one side" },
+  { text: "A vein has changed and I do not know if it matters.", tag: "Visible change" },
+  { text: "Standing all day leaves my legs heavy.", tag: "Occupational heaviness" },
 ];
+export const symptomKicker =
+  "Someone notices something in their own legs — and goes looking for an answer.";
+export const symptomVideo = {
+  src: "/pitch-hps/symptom-legs.mp4",
+  poster: "symptom-legs-poster",
+  caption: "It starts with a feeling in the legs.",
+  alt: "A woman sitting on the edge of a bed, resting a hand on her lower leg.",
+};
 
 /**
  * Real captures, pre-optimized. Each `ratio` is the capture's own pixel ratio
@@ -279,6 +277,8 @@ export type Metric = {
   /** the concise on-slide label: tool, category, date */
   label: string;
   hrefL?: string; hrefR?: string;
+  /** only the Google SEO row has an at-launch state */
+  launch?: { left: string; leftN: number; note: string };
 };
 export const metrics: readonly Metric[] = [
   { key: "mobile", tab: "Mobile", left: "86", right: "59", leftN: 86, rightN: 59, band: "psi",
@@ -288,6 +288,13 @@ export const metrics: readonly Metric[] = [
     label: "Google PageSpeed · desktop · Oct 26",
     hrefL: links.psiMagnantDesktop, hrefR: links.psiCvrDesktop },
   { key: "seo", tab: "Google SEO", left: "69", right: "92", leftN: 69, rightN: 92, band: "psi",
+    /* The one Google SEO check this preview fails today is indexing. Verified
+       against the October 26 report: nine SEO audits pass and only "Page is
+       blocked from indexing" fails, from x-robots-tag in /robots.txt. The
+       at-launch figure is therefore what is EXPECTED once indexing is on, and
+       is labelled expected — never guaranteed. */
+    launch: { left: "100", leftN: 100,
+      note: "Indexing turns on at launch — the one Google SEO check it fails today." },
     label: "Google PageSpeed · SEO · Oct 26",
     hrefL: links.psiMagnantMobile, hrefR: links.psiCvrMobile },
   { key: "ai", tab: "AI rubric", left: "94", right: "97", leftN: 94, rightN: 97, band: "inflowmd",
@@ -399,6 +406,23 @@ export const order = {
 } as const;
 
 /* ───────────────────────── scene 8 — the pilot ───────────────────────── */
+/** The three markers on the pilot rail. Pills, so the label always fits. */
+export const pilotStages = [
+  { pill: "BEFORE", body: "Count what happens today: visits, screening starts, requests that reach the office." },
+  { pill: "LAUNCH", body: "Put the agreed journey live — education, screening, and a request the office receives." },
+  { pill: "AFTER", body: "Count the same things again over the same length of time." },
+];
+
+/** What the pilot is actually asking. */
+export const pilotQuestions = [
+  { q: "Do patients read it?", a: "Whether people reach the explanations and stay with them." },
+  { q: "Do they finish the screening?", a: "How many begin it, and how many reach a result." },
+  { q: "Do requests reach the office?", a: "Whether a request made online actually arrives." },
+];
+
+export const pilotFoot = "No targets until the baseline exists. Then they're set together.";
+
+/** Kept for the pilot outline disclosure, which now closes the deck. */
 export const pilot = [
   { label: "Education engagement", body: "Whether patients reach and read the explanations." },
   { label: "Screening starts and completions", body: "How many begin the screening, and how many finish it." },
