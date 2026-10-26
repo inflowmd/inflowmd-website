@@ -121,6 +121,14 @@ export const shots = {
     base: "magnant-desktop", widths: [720, 1440], ratio: "2880 / 1800",
     alt: "Vein Specialists pre-launch homepage on a desktop screen: a heading reading “Expert Vein Care for Leg Pain, Swelling and Varicose Veins” above the practice navigation.",
   },
+  cvrHome: {
+    base: "cvr-home", widths: [360, 720], ratio: "780 / 1688",
+    alt: "The Center for Vein Restoration homepage as it renders on a phone.",
+  },
+  magnantHome: {
+    base: "magnant-home", widths: [360, 720], ratio: "780 / 1688",
+    alt: "The Vein Specialists pre-launch homepage as it renders on a phone.",
+  },
   magnantScreening: {
     base: "magnant-screening", widths: [360, 720], ratio: "780 / 1688",
     alt: "Vein Specialists pre-launch online vein screening entry screen on a phone, opening with questions about what the patient can see on their legs.",
@@ -132,7 +140,8 @@ export const shots = {
 } as const;
 
 export const captions = {
-  magnantDesktop: "Pre-launch build · Vein Specialists · captured October 26, 2026 at 1440 CSS px",
+  magnantDesktop: "Pre-launch build · Vein Specialists · desktop captured October 26, 2026 at 1440 CSS px; phone captured October 24, 2026 at 390 CSS px",
+  magnantHome: "Pre-launch build · Vein Specialists · captured October 24, 2026 at 390 CSS px",
   magnantScreening: "Pre-launch build · Vein Specialists · captured October 24, 2026 at 390 CSS px",
   cvrStep1: "centerforvein.com self-assessment · captured October 24, 2026 at 390 CSS px",
 };
@@ -166,12 +175,15 @@ export const rfa = {
   ],
   status: ["Reflux: blood pooling", "Sealing the faulty vein", "Healthy flow restored"],
   heart: "Toward the heart ↑",
+  use: "On the website. In the exam room.",
   labels: [
     { step: 0, title: "Valves leak", small: "Blood falls backward ↓", x: 7, y: 44, side: "l" },
     { step: 0, title: "Healthy vein", small: "Valves closed, flow ↑", x: 8, y: 30, side: "r" },
     { step: 1, title: "Catheter seals", small: "the faulty vein", x: 7, y: 62, side: "l" },
     { step: 2, title: "Rerouted", small: "Healthy flow home ↑", x: 8, y: 56, side: "r" },
   ],
+  driver:
+    "Scrolling drives it from 900px up, exactly as the practice site does: the stage pins and the scroll position maps to the same 0\u20133 progression. On phones the three step controls move it, as they do there. The Replay control, and the Play control on phones, are added for this review \u2014 the practice site has neither, and neither starts on its own.",
   provenance:
     "The animation and its geometry are the practice site’s own endovenous-ablation explainer, ported from vein-specialists at commit eec6a94 with the mechanism unchanged. The step copy is adapted from that explainer — faithfully shortened, with its closing sentence about returning to normal activity omitted. It is pending physician review and is not presented as approved.",
 } as const;
@@ -246,6 +258,40 @@ export const screener = {
  * A measured low score is shown as measured: the pre-launch preview's SEO 69
  * is reported with the reason Lighthouse gives for it.
  */
+/**
+ * The same measurements, as a selector rather than a six-row grid. Every
+ * measured value the report carried is still here and still reachable: each
+ * metric is a tab carrying its own tool, date and report link, and the
+ * unfavourable ones are shown exactly as measured.
+ */
+export type Metric = {
+  key: string; tab: string;
+  left: string; right: string; small?: boolean;
+  tool: string; qual?: string;
+  hrefL?: string; hrefR?: string;
+};
+export const metrics: readonly Metric[] = [
+  { key: "mobile", tab: "Mobile", left: "86", right: "59",
+    tool: "Google PageSpeed Insights · Lighthouse 13.5.0 · emulated Moto G Power, Slow 4G · October 26, 2026, 00:38 UTC · one lab run each",
+    hrefL: links.psiMagnantMobile, hrefR: links.psiCvrMobile },
+  { key: "desktop", tab: "Desktop", left: "100", right: "80",
+    tool: "Google PageSpeed Insights · Lighthouse 13.5.0 · emulated desktop, custom throttling · October 26, 2026, 00:38 UTC · one lab run each",
+    hrefL: links.psiMagnantDesktop, hrefR: links.psiCvrDesktop },
+  { key: "seo", tab: "Google SEO", left: "69", right: "92",
+    tool: "Google PageSpeed Insights · Lighthouse SEO · same score on both devices · October 26, 2026, 00:38 UTC",
+    qual: "69 is the measured score. Lighthouse reports the page as blocked from indexing: this pre-launch preview is deliberately set noindex, and that is what the check penalises. It is not a live-indexed SEO comparison.",
+    hrefL: links.psiMagnantMobile, hrefR: links.psiCvrMobile },
+  { key: "ai", tab: "AI rubric", left: "94", right: "97",
+    tool: "InflowMD rubric — not Google · Vein Specialists October 26, 2026 · Center for Vein Restoration October 24, 2026",
+    qual: "Different dates, so this is not a same-day pairing. The rubric checks crawlable structure, machine-readable practice details and whether patient questions are answered on the page. It does not measure AI citations, recommendation frequency or search rankings. Its 11 checks all resolved, which is not the same as all passing: the AI-crawler check did not pass." },
+  { key: "findability", tab: "Findability", left: "100", right: "94",
+    tool: "InflowMD rubric — not Google · Vein Specialists October 26, 2026 · Center for Vein Restoration October 24, 2026",
+    qual: "Different dates, so this is not a same-day pairing." },
+  { key: "field", tab: "Field data", left: "No data", right: "Mobile failed · desktop passed", small: true,
+    tool: "Chrome UX Report · real-user data, latest 28 days, this URL · read October 26, 2026",
+    qual: "CrUX field data is unavailable for this preview. That is not a measurement of how much traffic it has. For centerforvein.com: mobile LCP 2.8s · INP 110ms · CLS 0; desktop LCP 1.2s · INP 57ms · CLS 0.01." },
+];
+
 export const scorecard = {
   head: "Homepage against homepage",
   matched:
