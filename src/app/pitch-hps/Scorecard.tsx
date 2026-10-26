@@ -32,18 +32,21 @@ function bandColor(v: number) {
   return v >= 90 ? "#0c8f4e" : v >= 50 ? "#a86300" : "#c0392b";
 }
 
-function Gauge({ value, band, swapping, srLabel }: {
+function Gauge({ value, band, swapping, srLabel, expected = false }: {
   value: number; band: "psi" | "inflowmd" | "none"; swapping: boolean; srLabel: string;
+  expected?: boolean;
 }) {
   const R = 52, C = 2 * Math.PI * R;
   const color = bandColor(value);
   return (
-    <div className={styles.gauge} data-band={band} data-swapping={swapping ? "true" : "false"}>
+    <div className={styles.gauge} data-band={band} data-expected={expected ? "true" : "false"}
+      data-swapping={swapping ? "true" : "false"}>
       <svg viewBox="0 0 128 128" role="img" aria-label={srLabel} className={styles.gaugeSvg}>
         <circle cx="64" cy="64" r={R} fill="none" strokeWidth="11" stroke={color} strokeOpacity=".18" />
         <circle
           cx="64" cy="64" r={R} fill="none" strokeWidth="11" stroke={color} strokeLinecap="round"
           strokeDasharray={C} strokeDashoffset={C * (1 - value / 100)} transform="rotate(-90 64 64)"
+          className={styles.gaugeRing}
         />
         <text x="64" y="64" className={styles.gaugeNum} fill={color}>{value}</text>
       </svg>
@@ -54,14 +57,22 @@ function Gauge({ value, band, swapping, srLabel }: {
 export default function Scorecard() {
   const reduced = useSyncExternalStore(subscribe, snap, serverSnap);
   const [key, setKey] = useState(metrics[0].key);
+  /* The Google SEO row can be shown as measured today, or as expected once
+     indexing is on at launch. Verified against the October 26 report: nine SEO
+     audits pass and only "Page is blocked from indexing" fails. The at-launch
+     figure is EXPECTED, never guaranteed, and the right-hand column stays the
+     measured 92 in both states. */
+  const [atLaunch, setAtLaunch] = useState(false);
   const [swapping, setSwapping] = useState(false);
   const timer = useRef<number | undefined>(undefined);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const m = metrics.find((x) => x.key === key) ?? metrics[0];
+  const launched = Boolean(m.launch) && atLaunch;
 
   const select = (next: string) => {
     if (next === key) return;
+    setAtLaunch(false);
     if (reduced) { setKey(next); return; }
     setSwapping(true);
     window.clearTimeout(timer.current);
@@ -78,8 +89,9 @@ export default function Scorecard() {
   };
 
   const side = (which: "l" | "r") => {
-    const value = which === "l" ? m.left : m.right;
-    const num = which === "l" ? m.leftN : m.rightN;
+    const value = which === "l" && launched ? m.launch!.left : which === "l" ? m.left : m.right;
+    const num = which === "l" && launched ? m.launch!.leftN : which === "l" ? m.leftN : m.rightN;
+    const expected = which === "l" && launched;
     const href = which === "l" ? m.hrefL : m.hrefR;
     const meta = which === "l" ? scorecard.left : scorecard.right;
     const shot = which === "l" ? shots.magnantHome : shots.cvrHome;
@@ -95,13 +107,18 @@ export default function Scorecard() {
           {num === null ? (
             <p className={styles.valText} data-swapping={swapping ? "true" : "false"}>{value}</p>
           ) : (
-            <Gauge value={num} band={m.band} swapping={swapping}
-              srLabel={`${meta.name}: ${m.tab} ${num} out of 100, ${tool}.`} />
+            <Gauge value={num} band={m.band} swapping={swapping} expected={expected}
+              srLabel={`${meta.name}: ${m.tab} ${num} out of 100, ${tool}${expected ? ", expected at launch" : ""}.`} />
           )}
           <p className={styles.siteName}>
             {meta.name}
             {which === "l" && <span className={styles.prelaunch}>pre-launch</span>}
           </p>
+          {m.band === "psi" && m.key === "seo" && (
+            <p className={styles.stateTag} data-expected={expected ? "true" : "false"}>
+              {expected ? "EXPECTED AT LAUNCH" : "MEASURED · OCT 26"}
+            </p>
+          )}
           {href && (
             <p className={styles.siteSub}>
               <a href={href} target="_blank" rel="noopener noreferrer">Open the report</a>
@@ -130,6 +147,20 @@ export default function Scorecard() {
         ))}
       </div>
 
+      {m.launch && (
+        <div className={styles.launchToggle} role="group" aria-label="Google SEO: which state to show">
+          {[["Pre-launch", false], ["At launch", true]].map(([label, on]) => (
+            <button
+              key={String(label)} type="button" className={styles.launchBtn}
+              aria-pressed={atLaunch === on}
+              onClick={() => setAtLaunch(Boolean(on))}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className={styles.pair}>
         {side("l")}
         <p className={styles.vs} aria-hidden="true">vs</p>
@@ -138,6 +169,7 @@ export default function Scorecard() {
 
       <div className={styles.boardFoot} aria-live="polite">
         <p className={styles.toolLine} data-swapping={swapping ? "true" : "false"}>{m.label}</p>
+        {launched && <p className={styles.launchNote}>{m.launch!.note}</p>}
       </div>
     </div>
   );

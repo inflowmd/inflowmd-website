@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import styles from "./deck.module.css";
 import Shot from "./Shot";
-import { captions, shots } from "./content";
+import { shots } from "./content";
 
 /**
  * The opening subject: the practice site, shown in the device it was captured on.
@@ -46,9 +46,9 @@ const HERO_BAND = `${(851 / 900) * 100}%`;
 export default function HeroStage() {
   const reduced = useSyncExternalStore(subscribe, snap, serverSnap);
   const [armedState, setArmed] = useState(false);
-  /* reduced motion withdraws the video outright; no element, so no bytes */
+  /* reduced motion withdraws the video outright; no element, so no bytes, and
+     the capture underneath is the poster frame */
   const armed = armedState && !reduced;
-  const [playing, setPlaying] = useState(false);
   const box = useRef<HTMLDivElement | null>(null);
   const vid = useRef<HTMLVideoElement | null>(null);
 
@@ -72,26 +72,25 @@ export default function HeroStage() {
     return () => { cancelled = true; window.removeEventListener("load", schedule); };
   }, [reduced]);
 
-  /* A scene the reader has scrolled away from must not keep running. */
+  /* The hero plays, and keeps playing. Browsers suspend muted autoplay when a
+     tab is hidden or the element is re-attached, so playback is re-requested
+     when the page becomes visible again rather than silently stopping. */
   useEffect(() => {
-    const el = box.current;
-    if (!el || !armed) return;
-    const io = new IntersectionObserver((es) => {
-      const v = vid.current;
-      if (!v) return;
-      if (es.some((e) => e.isIntersecting)) { if (!v.paused) setPlaying(true); }
-      else if (!v.paused) { v.pause(); setPlaying(false); }
-    }, { threshold: 0.25 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [armed]);
-
-  const toggle = () => {
+    if (!armed) return;
     const v = vid.current;
     if (!v) return;
-    if (v.paused) { void v.play().then(() => setPlaying(true)).catch(() => setPlaying(false)); }
-    else { v.pause(); setPlaying(false); }
-  };
+    const resume = () => {
+      if (document.visibilityState !== "visible") return;
+      if (v.paused) void v.play().catch(() => {});
+    };
+    resume();
+    document.addEventListener("visibilitychange", resume);
+    window.addEventListener("pageshow", resume);
+    return () => {
+      document.removeEventListener("visibilitychange", resume);
+      window.removeEventListener("pageshow", resume);
+    };
+  }, [armed]);
 
   return (
     <div className={styles.heroStage}>
@@ -109,8 +108,7 @@ export default function HeroStage() {
                     style={{ height: HERO_BAND }}
                     aria-hidden="true" tabIndex={-1}
                     autoPlay muted loop playsInline preload="none"
-                    onPlay={() => setPlaying(true)}
-                    onPause={() => setPlaying(false)}
+                    onPause={() => { const v = vid.current; if (v && document.visibilityState === "visible") void v.play().catch(() => {}); }}
                   >
                     <source src="/pitch-hps/magnant-hero-720.mp4" type="video/mp4" />
                   </video>
@@ -131,16 +129,6 @@ export default function HeroStage() {
           <div className={styles.monitorStand} />
           <div className={styles.monitorFoot} />
         </div>
-        {armed && (
-          <div className={styles.heroCtrl}>
-            <button type="button" className={styles.ghostLight} onClick={toggle}>
-              {playing ? "Pause hero" : "Play hero"}
-            </button>
-            <span className={styles.heroNote}>
-              The practice site’s own hero clip, played as that site plays it.
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Phone: the practice site's own mobile composition, whole and uncropped.
@@ -156,7 +144,6 @@ export default function HeroStage() {
         </div>
       </div>
 
-      <p className={styles.deviceCap}>{captions.magnantDesktop}</p>
     </div>
   );
 }

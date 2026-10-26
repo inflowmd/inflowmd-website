@@ -4,11 +4,12 @@ import Deck from "./Deck";
 import Shot from "./Shot";
 import Rfa from "./Rfa";
 import HeroStage from "./HeroStage";
+import QuoteRail from "./QuoteRail";
 import Scorecard from "./Scorecard";
 import ScreeningDemo from "./ScreeningDemo";
 import {
-  captions, concerns, footer, links, meta as pageMeta, order, pilot, pilotNote,
-  rfa, scenes, shots,
+  captions, footer, links, meta as pageMeta, order, pilot, pilotNote,
+  pilotFoot, pilotQuestions, pilotStages, rfa, scenes, shots, symptomVideo,
 } from "./content";
 
 /**
@@ -103,62 +104,27 @@ export default function PitchHpsPage() {
           </div>
         </section>
 
-        {/* 2 — the fragments, entering one after another. */}
-        <section id="symptom" className={styles.scene} aria-labelledby="symptom-h">
+        {/* 2 — the quote rail beside the clip. */}
+        <section id="symptom" className={`${styles.scene} ${styles.sceneSymptom}`} aria-labelledby="symptom-h">
           <div className={styles.wrap}>
             <p className={styles.kicker}>{s.symptom.kicker}</p>
             <h2 id="symptom-h" className={styles.h2}>
               {s.symptom.title} <span className={styles.accent}>{s.symptom.titleAccent}</span>
             </h2>
-            <div className={styles.hero}>
-              <div>
-                <ul className={styles.thoughts}>
-                  {concerns.map((c, i) => (
-                    <li key={c} className={styles.thought} data-fade data-delay={String((i % 4) + 1)}>
-                      “{c}”
-                    </li>
-                  ))}
-                </ul>
-                <p className={styles.lede}>{s.symptom.body}</p>
-              </div>
-              <div className={styles.legArt} data-fade data-delay="2">
-                <div>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/cvi/stage-2-spider.webp"
-                    alt="A lower leg with fine visible surface veins."
-                    width={700} height={1000} loading="lazy"
-                  />
-                  <p className={styles.legCap}>Fine visible veins.</p>
-                </div>
-              </div>
+            <div className={styles.symptomGrid}>
+              <QuoteRail />
+              <figure className={styles.clipCard}>
+                <video
+                  className={styles.clip}
+                  aria-label={symptomVideo.alt}
+                  autoPlay muted loop playsInline preload="metadata"
+                  poster={`/pitch-hps/${symptomVideo.poster}-960.webp`}
+                >
+                  <source src={symptomVideo.src} type="video/mp4" />
+                </video>
+                <figcaption className={styles.clipCap}>{symptomVideo.caption}</figcaption>
+              </figure>
             </div>
-          </div>
-        </section>
-
-        {/* 3 — a desktop capture, in a desktop. */}
-        <section id="practice" className={`${styles.scene} ${styles.scenePractice}`} aria-labelledby="practice-h">
-          <div className={styles.wrap}>
-            <p className={styles.kicker}>{s.practice.kicker}</p>
-            <h2 id="practice-h" className={styles.h2}>
-              {s.practice.title} <span className={styles.accent}>{s.practice.titleAccent}</span>
-            </h2>
-            <p className={styles.lede}>{s.practice.body}</p>
-            {/* Its own device sizing: the opening's height-derived clamp was
-                shrinking this monitor and leaving it adrift of its caption. */}
-            <div className={styles.practiceUnit} data-fade>
-              <div className={styles.practiceMonitor}>
-                <div className={styles.monitorFrame}>
-                  <div className={styles.monitorScreen}>
-                    <Shot {...shots.magnantDesktop} sizes="(min-width: 1024px) 900px, 92vw" />
-                  </div>
-                </div>
-                <div className={styles.monitorStand} />
-                <div className={styles.monitorFoot} />
-              </div>
-              <p className={styles.deviceCap}>{captions.magnantDesktop}</p>
-            </div>
-            <p className={styles.srcLine}><Src href={links.magnantDemo}>Open the pre-launch build</Src></p>
           </div>
         </section>
 
@@ -249,45 +215,45 @@ export default function PitchHpsPage() {
           </div>
         </section>
 
-        {/* 8 — the pilot. */}
-        <section id="pilot" className={styles.scene} aria-labelledby="pilot-h">
+        {/* 8 — how a pilot works, and the close. */}
+        <section id="pilot" className={`${styles.scene} ${styles.scenePilot}`} aria-labelledby="pilot-h">
           <div className={styles.wrap}>
             <p className={styles.kicker}>{s.pilot.kicker}</p>
             <h2 id="pilot-h" className={styles.h2}>
               {s.pilot.title} <span className={styles.accent}>{s.pilot.titleAccent}</span>
             </h2>
             <p className={styles.lede}>{s.pilot.body}</p>
-            <ul className={`${styles.cards} ${styles.cards2}`}>
-              {pilot.map((p, i) => (
-                <li key={p.label} className={styles.card} data-fade data-delay={String((i % 4) + 1)}>
-                  <span className={styles.cardLabel}>{p.label}</span>
-                  <p>{p.body}</p>
+
+            <ol className={styles.rail}>
+              {pilotStages.map((st) => (
+                <li key={st.pill} className={styles.railStep}>
+                  <span className={styles.pill}>{st.pill}</span>
+                  <p className={styles.railBody}>{st.body}</p>
+                </li>
+              ))}
+            </ol>
+
+            <ul className={styles.qCards}>
+              {pilotQuestions.map((x) => (
+                <li key={x.q} className={styles.qCard} data-fade>
+                  <p className={styles.qCardQ}>{x.q}</p>
+                  <p className={styles.qCardA}>{x.a}</p>
                 </li>
               ))}
             </ul>
-            <p className={styles.note}>{pilotNote}</p>
-          </div>
-        </section>
 
-        {/* 9 — the close. */}
-        <section id="build" className={`${styles.scene} ${styles.sceneClose}`} aria-labelledby="build-h">
-          <div className={styles.wrap}>
-            <p className={styles.kicker}>{s.build.kicker}</p>
-            <h2 id="build-h" className={styles.h2}>
-              {s.build.title} <span className={styles.accent}>{s.build.titleAccent}</span>
-            </h2>
-            <p className={styles.lede}>{s.build.body}</p>
+            <p className={styles.note}>{pilotFoot}</p>
+
             <p className={styles.actionRow}>
               <Src href={links.magnantDemo}>Open the pre-launch build</Src>
-              <a href="#treatment">Back to the treatment animation</a>
-              <a href="#screening">Back to the screening demo</a>
             </p>
             <Drawer summary="Pilot outline">
-              <ul>{pilot.map((p) => <li key={p.label}><strong>{p.label}</strong> — {p.body}</li>)}</ul>
+              <ul>{pilot.map((x) => <li key={x.label}><strong>{x.label}</strong> — {x.body}</li>)}</ul>
               <p>{pilotNote}</p>
             </Drawer>
           </div>
         </section>
+
       </main>
 
       <footer className={styles.foot}>
