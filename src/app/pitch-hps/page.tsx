@@ -3,6 +3,8 @@ import styles from "./deck.module.css";
 import Deck from "./Deck";
 import Shot from "./Shot";
 import Rfa from "./Rfa";
+import HeroStage from "./HeroStage";
+import Scorecard from "./Scorecard";
 import Screener from "./Screener";
 import {
   captions, concerns, footer, links, meta as pageMeta, order, pilot, pilotNote,
@@ -69,24 +71,6 @@ function Src({ href, children }: { href: string; children: React.ReactNode }) {
   return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>;
 }
 
-/** One scorecard cell. A missing measurement says so and is not styled as a score. */
-function Cell({
-  col, data,
-}: {
-  col: string;
-  data: { value: string; when: string; href?: string; tone: "amber" | "green" | "none"; flag?: string; note?: string };
-}) {
-  return (
-    <div className={styles.cell} data-col={col}>
-      <p className={styles.cellVal} data-tone={data.tone}>{data.value}</p>
-      <p className={styles.cellWhen}>{data.when}</p>
-      {data.flag && <span className={styles.cellFlag}>{data.flag}</span>}
-      {data.note && <p className={styles.cellNote}>{data.note}</p>}
-      {data.href && <p className={styles.cellNote}><Src href={data.href}>Open the report</Src></p>}
-    </div>
-  );
-}
-
 export default function PitchHpsPage() {
   const s = Object.fromEntries(scenes.map((x) => [x.id, x])) as Record<string, (typeof scenes)[number]>;
   const ids = scenes.map((x) => x.id);
@@ -103,13 +87,19 @@ export default function PitchHpsPage() {
       </header>
 
       <main>
-        {/* 1 — one statement, nothing else. */}
-        <section id="open" className={styles.scene} aria-labelledby="open-h">
-          <div className={styles.wrap}>
-            <h1 id="open-h" className={styles.h1} data-fade>
-              {s.open.title} <span className={styles.accent}>{s.open.titleAccent}</span>
+        {/* 1 — one statement, then one dominant subject: the practice site
+            itself, in the device it was captured on, with its own hero
+            running the way that site runs it. */}
+        <section id="open" className={`${styles.scene} ${styles.sceneOpen}`} aria-labelledby="open-h">
+          <div className={`${styles.wrap} ${styles.openHead}`}>
+            <p className={styles.kicker} data-fade>InflowMD · HPS</p>
+            <h1 id="open-h" className={styles.h1} data-fade data-delay="1">
+              {s.open.title} {s.open.titleAccent}
             </h1>
-            <p className={styles.lede} data-fade data-delay="2">{s.open.body}</p>
+            <p className={styles.openSub} data-fade data-delay="2">{s.open.body}</p>
+          </div>
+          <div className={`${styles.wrap} ${styles.openStage}`} data-fade data-delay="3">
+            <HeroStage />
           </div>
         </section>
 
@@ -169,26 +159,26 @@ export default function PitchHpsPage() {
         </section>
 
         {/* 4 — the real explainer, on a landscape tablet. */}
-        <section id="treatment" className={styles.scene} aria-labelledby="treatment-h">
-          <div className={styles.wrap}>
+        <section id="treatment" className={`${styles.scene} ${styles.sceneStage}`} aria-labelledby="treatment-h">
+          <div className={`${styles.wrap} ${styles.stageHead}`}>
             <p className={styles.kicker}>{s.treatment.kicker}</p>
             <h2 id="treatment-h" className={styles.h2}>
-              {s.treatment.title} <span className={styles.accent}>{s.treatment.titleAccent}</span>
+              Show how it works<span className={styles.accentDot}>.</span>
             </h2>
-            <p className={styles.lede}>{s.treatment.body}</p>
-            <Rfa />
-            <Drawer summary="Where this animation comes from">
+          </div>
+          <Rfa />
+          <div className={`${styles.wrap} ${styles.stageFoot}`}>
+            <Drawer summary="How it works, and where it comes from">
+              {rfa.steps.map((x) => (
+                <p key={x.title}><strong>{x.title}</strong> {x.body}</p>
+              ))}
+              <p>{rfa.driver}</p>
               <p>{rfa.provenance}</p>
               <p>
                 Source: <Src href={links.magnantAblation}>the practice site’s endovenous-ablation page</Src>,
                 components/content/VeinFixExplainer.tsx and data/explainers.ts at commit eec6a94.
               </p>
             </Drawer>
-            <p className={styles.beat}>{s.treatment.beat}</p>
-            <p className={styles.lede}>{s.treatment.beatBody}</p>
-            <p className={styles.srcLine}>
-              <Src href={links.magnantAblation}>Open the explainer on the practice site</Src>
-            </p>
           </div>
         </section>
 
@@ -232,33 +222,12 @@ export default function PitchHpsPage() {
             <h2 id="scorecard-h" className={styles.h2}>
               {s.scorecard.title} <span className={styles.accent}>{s.scorecard.titleAccent}</span>
             </h2>
-            <p className={styles.lede}>{s.scorecard.body}</p>
             {/* The minimum provenance sits beside the numbers, not only in the
                 drawer: what was measured, with what, when, and that each is a
                 single run. */}
             <p className={styles.matched}>{scorecard.matched}</p>
-            <div className={styles.board}>
-              <div className={styles.boardHead}>
-                <span className={styles.boardCol}>{scorecard.head}</span>
-                <span className={styles.boardCol}>
-                  {scorecard.left.name}<span>{scorecard.left.sub}</span>
-                </span>
-                <span className={styles.boardCol}>
-                  {scorecard.right.name}<span>{scorecard.right.sub}</span>
-                </span>
-              </div>
-              {scorecard.rows.map((row) => (
-                <div key={row.metric} className={styles.boardRow} data-fade>
-                  <div className={styles.boardMetric}>
-                    {row.metric}<span>{row.tool}</span>
-                  </div>
-                  <Cell col={scorecard.left.name} data={row.left} />
-                  <Cell col={scorecard.right.name} data={row.right} />
-                </div>
-              ))}
-            </div>
+            <Scorecard />
             <p className={styles.note}>{scorecard.prelaunch}</p>
-            <p className={styles.note}>{scorecard.psiDetail.banding}</p>
             <Drawer summary="Exact measurement evidence, configuration and limits">
               <p><strong>Tool</strong> — {scorecard.psiDetail.tool}</p>
               <p><strong>When</strong> — {scorecard.psiDetail.when}</p>
