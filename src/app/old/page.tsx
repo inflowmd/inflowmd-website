@@ -5,7 +5,7 @@ import HomeClient from "../HomeClient";
 // nofollow here, an X-Robots-Tag header in next.config.ts, and left out of
 // the sitemap and the nav.
 export const metadata: Metadata = {
-  title: "InflowMD | Previous homepage",
+  title: { absolute: "InflowMD | Previous homepage" },
   robots: {
     index: false,
     follow: false,
