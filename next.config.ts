@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // Previous homepage, kept for reference only: never indexed or followed.
+        source: "/old",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
         // Private audit page — must not be edge-cached.
         source: "/prevosti",
         headers: [

@@ -12,8 +12,8 @@ const solutionLinks = [
 ];
 
 const companyLinks = [
-  { label: "How It Works", href: "/#process" },
-  { label: "Results", href: "/#results" },
+  { label: "How It Works", href: "/#services" },
+  { label: "Results", href: "/#audit" },
   { label: "Growth Plans", href: "/pricing" },
   { label: "Free Audit", href: "/get-started" },
 ];

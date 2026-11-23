@@ -110,13 +110,13 @@ export default function Navbar() {
           </div>
 
           <a
-            href="/#process"
+            href="/#services"
             className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
           >
             How It Works
           </a>
           <a
-            href="/#results"
+            href="/#audit"
             className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
           >
             Results
@@ -210,14 +210,14 @@ export default function Navbar() {
               </AnimatePresence>
 
               <a
-                href="/#process"
+                href="/#services"
                 onClick={() => setMobileOpen(false)}
                 className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
               >
                 How It Works
               </a>
               <a
-                href="/#results"
+                href="/#audit"
                 onClick={() => setMobileOpen(false)}
                 className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
               >
