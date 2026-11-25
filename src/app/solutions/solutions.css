@@ -285,22 +285,22 @@
 .isol .btn-w{background:#fff;color:#0B0D12}
 .isol .cbox .link{color:#fff}
 .isol .rcol{width:100%;max-width:440px;justify-self:center;display:grid;gap:18px}
-.isol .ring{position:relative;width:100%}
-.isol .ring svg{display:block;width:100%;height:auto;overflow:visible}
+.isol .pring{position:relative;width:100%}
+.isol .pring svg{display:block;width:100%;height:auto;overflow:visible}
 .isol .rg-base{fill:none;stroke:rgba(255,255,255,.1);stroke-width:1}
 .isol .rg-draw{fill:none;stroke:#fff;stroke-width:1.5;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 2.6s var(--ease),opacity .9s var(--ease)}
-.isol .ring.in .rg-draw{stroke-dashoffset:0}
-.isol .ring.live .rg-draw{opacity:0}
+.isol .pring.in .rg-draw{stroke-dashoffset:0}
+.isol .pring.live .rg-draw{opacity:0}
 .isol .rg-q{fill:none;stroke-width:2;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;opacity:0;transition:stroke-dashoffset 1.4s var(--ease),opacity .9s var(--ease),stroke-width .9s var(--ease)}
-.isol .ring.live .rg-q.seen{stroke-dashoffset:0;opacity:.6}
-.isol .ring.live .rg-q.on{stroke-dashoffset:0;opacity:1;stroke-width:3}
-.isol .ring.live.full .rg-q{stroke-dashoffset:0;opacity:1;stroke-width:3}
+.isol .pring.live .rg-q.seen{stroke-dashoffset:0;opacity:.6}
+.isol .pring.live .rg-q.on{stroke-dashoffset:0;opacity:1;stroke-width:3}
+.isol .pring.live.full .rg-q{stroke-dashoffset:0;opacity:1;stroke-width:3}
 .isol .rg-glow{fill:none;stroke:url(#rgAll);stroke-width:18;opacity:0;transition:opacity 1.6s var(--ease)}
-.isol .ring.full .rg-glow{opacity:.12}
+.isol .pring.full .rg-glow{opacity:.12}
 .isol .rg-dot{fill:#0B0D12;stroke:var(--c);stroke-width:2;transition:fill .8s var(--ease),r .8s var(--ease)}
 .isol .rg-halo{fill:var(--c);opacity:0;transition:opacity .8s var(--ease),r .8s var(--ease)}
-.isol .ring:not(.live) .rg-node[data-n="0"] .rg-halo{opacity:.22}
-.isol .ring.live .rg-node.on .rg-halo{opacity:.25}
+.isol .pring:not(.live) .rg-node[data-n="0"] .rg-halo{opacity:.22}
+.isol .pring.live .rg-node.on .rg-halo{opacity:.25}
 .isol .rg-t tspan{fill:var(--c);font-weight:600}
 .isol .rg-t{font:500 14px var(--font);fill:#fff;letter-spacing:-.01em;transition:opacity .8s var(--ease)}
 .isol .rg-s{font:500 12.5px var(--font);fill:var(--sc,rgba(255,255,255,.5));transition:fill .6s var(--ease)}
@@ -308,16 +308,16 @@
 .isol .rg-ctr{transition:opacity .45s var(--ease),filter .45s var(--ease)}
 .isol .rg-ctr.swap{opacity:0;filter:blur(6px)}
 .isol .rg-node{opacity:0;transition:opacity 1s var(--ease)}
-.isol .ring.in .rg-node{opacity:1}
-.isol .ring.in .rg-node:nth-of-type(2){transition-delay:.5s}
-.isol .ring.in .rg-node:nth-of-type(3){transition-delay:1s}
-.isol .ring.in .rg-node:nth-of-type(4){transition-delay:1.5s}
-.isol .ring.live .rg-node{transition-delay:0s!important}
-.isol .ring.live .rg-node .rg-t{opacity:.45}
-.isol .ring.live .rg-node.seen .rg-t{opacity:.75}
-.isol .ring.live .rg-node.on .rg-t,.isol .ring.full .rg-node .rg-t{opacity:1}
-.isol .ring.live .rg-node.on .rg-dot,.isol .ring.full .rg-node .rg-dot,.isol .ring.live .rg-node.seen .rg-dot{fill:var(--c);r:7px}
-.isol .ring.live .rg-node.on .rg-halo{r:16px}
+.isol .pring.in .rg-node{opacity:1}
+.isol .pring.in .rg-node:nth-of-type(2){transition-delay:.5s}
+.isol .pring.in .rg-node:nth-of-type(3){transition-delay:1s}
+.isol .pring.in .rg-node:nth-of-type(4){transition-delay:1.5s}
+.isol .pring.live .rg-node{transition-delay:0s!important}
+.isol .pring.live .rg-node .rg-t{opacity:.45}
+.isol .pring.live .rg-node.seen .rg-t{opacity:.75}
+.isol .pring.live .rg-node.on .rg-t,.isol .pring.full .rg-node .rg-t{opacity:1}
+.isol .pring.live .rg-node.on .rg-dot,.isol .pring.full .rg-node .rg-dot,.isol .pring.live .rg-node.seen .rg-dot{fill:var(--c);r:7px}
+.isol .pring.live .rg-node.on .rg-halo{r:16px}
 .isol .rg-hit{position:absolute;z-index:2;transform:translate(-50%,-50%);width:28%;height:15%;min-width:64px;min-height:44px;border:0;border-radius:16px;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .isol .rg-hit:focus-visible{outline:1.5px solid rgba(255,255,255,.6);outline-offset:2px}
 .isol .rg-hit.ctr{width:54%;height:22%;border-radius:999px}
