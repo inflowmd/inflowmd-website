@@ -1,38 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-
-const serviceLinks = [
-  { label: "SEO & AI Visibility", href: "/services/seo" },
-  { label: "Website Design", href: "/services/web-design" },
-  { label: "Google Ads", href: "/services/google-ads" },
-  { label: "Local Presence", href: "/services/local-presence" },
-  { label: "Reputation Management", href: "/services/reputation-management" },
-  { label: "Reporting & Analytics", href: "/services/reporting" },
-];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [servicesOpen, setServicesOpen] = useState(false);
-  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const openServices = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    setServicesOpen(true);
-  };
-  const closeServices = () => {
-    closeTimer.current = setTimeout(() => setServicesOpen(false), 150);
-  };
 
   return (
     <LazyMotion features={domAnimation} strict>
@@ -63,52 +43,12 @@ export default function Navbar() {
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8">
-          {/* Services Dropdown */}
-          <div
-            className="relative"
-            onMouseEnter={openServices}
-            onMouseLeave={closeServices}
+          <a
+            href="/solutions"
+            className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
           >
-            <button className="text-gray-300 hover:text-white transition-colors text-sm font-medium flex items-center gap-1">
-              Solutions
-              <svg
-                className={`w-3.5 h-3.5 transition-transform ${servicesOpen ? "rotate-180" : ""}`}
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-
-            <AnimatePresence>
-              {servicesOpen && (
-                <m.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-[#111128]/95 backdrop-blur-md border border-white/10 rounded-xl shadow-xl overflow-hidden"
-                >
-                  <div className="py-2">
-                    {serviceLinks.map((link) => (
-                      <a
-                        key={link.href}
-                        href={link.href}
-                        className="block px-5 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
-                      >
-                        {link.label}
-                      </a>
-                    ))}
-                  </div>
-                </m.div>
-              )}
-            </AnimatePresence>
-          </div>
-
+            Solutions
+          </a>
           <a
             href="/#services"
             className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
@@ -167,48 +107,13 @@ export default function Navbar() {
             className="md:hidden bg-[#111128] border-t border-white/10 overflow-hidden"
           >
             <div className="px-6 py-4 flex flex-col gap-4">
-              {/* Services accordion */}
-              <button
-                onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
-                className="text-gray-300 hover:text-white transition-colors text-sm font-medium text-left flex items-center justify-between"
+              <a
+                href="/solutions"
+                onClick={() => setMobileOpen(false)}
+                className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
               >
                 Solutions
-                <svg
-                  className={`w-3.5 h-3.5 transition-transform ${mobileServicesOpen ? "rotate-180" : ""}`}
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-              <AnimatePresence>
-                {mobileServicesOpen && (
-                  <m.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="pl-4 flex flex-col gap-3 pb-1">
-                      {serviceLinks.map((link) => (
-                        <a
-                          key={link.href}
-                          href={link.href}
-                          onClick={() => setMobileOpen(false)}
-                          className="text-gray-400 hover:text-white transition-colors text-sm"
-                        >
-                          {link.label}
-                        </a>
-                      ))}
-                    </div>
-                  </m.div>
-                )}
-              </AnimatePresence>
-
+              </a>
               <a
                 href="/#services"
                 onClick={() => setMobileOpen(false)}
